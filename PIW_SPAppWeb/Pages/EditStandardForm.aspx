@@ -262,6 +262,7 @@
                     <div class="col-md-offset-2">
                         <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary" OnClick="btnSave_Click" />
                         <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary" />
+                        <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" />
                     </div>
                 </div>
             <%--</form>--%>
