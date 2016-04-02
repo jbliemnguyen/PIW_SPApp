@@ -1,0 +1,3 @@
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPApp\bin\Debug\PIW_SPApp.pdb
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPApp\obj\Debug\PIW_SPApp.dll
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPApp\obj\Debug\PIW_SPApp.pdb

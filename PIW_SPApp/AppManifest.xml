@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--Created:cb85b80c-f585-40ff-8bfc-12ff4d0e34a9-->
+<App xmlns="http://schemas.microsoft.com/sharepoint/2012/app/manifest"
+     Name="PIW_SPApp"
+     ProductID="{c2499c36-6df7-495d-b4c1-e2f2b802bdef}"
+     Version="1.0.0.0"
+     SharePointMinVersion="15.0.0.0"
+>
+  <Properties>
+    <Title>PIW_SPApp</Title>
+    <!--DEV-->
+    <StartPage>https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>
+    <!--<StartPage>~appWebUrl/Pages/Default.aspx?{StandardTokens}&amp;RemoteAppUrl=https://dev.spapps.ferc.gov/PIW_SPAppWeb</StartPage>-->
+    <!--<StartPage>~appWebUrl/Pages/Default.aspx?{StandardTokens}&amp;RemoteAppUrl={RemoteAppUrl}</StartPage>-->
+    
+    
+    
+    
+    <!--Test-->
+    <!--<StartPage>https://test.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>
+    <UninstallingEventEndpoint>~remoteAppUrl/Services/AppEventReceiver.svc</UninstallingEventEndpoint>
+    <InstalledEventEndpoint>~remoteAppUrl/Services/AppEventReceiver.svc</InstalledEventEndpoint>
+    <UpgradedEventEndpoint>~remoteAppUrl/Services/AppEventReceiver.svc</UpgradedEventEndpoint>-->
+  </Properties>
+
+  <AppPrincipal>
+    <!--DEV-->
+    <RemoteWebApplication ClientId="fa894505-c3c7-4195-b173-71e90aa289d2" />
+    
+    <!--<RemoteWebApplication ClientId="7cc9aa34-aa0e-46da-9685-25e68f860b13" />--><!--TEST-->
+  </AppPrincipal>
+  <AppPermissionRequests AllowAppOnlyPolicy="true">
+    <AppPermissionRequest Scope="http://sharepoint/content/sitecollection" Right="FullControl" />
+  </AppPermissionRequests>
+</App>

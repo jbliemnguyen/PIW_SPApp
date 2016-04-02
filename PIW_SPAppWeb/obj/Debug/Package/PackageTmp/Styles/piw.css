@@ -1,0 +1,45 @@
+﻿.radio.radiobuttonlist input[type="radio"],
+.checkbox.checkboxlist input[type="checkbox"]
+{
+	margin-left: 0;
+}
+
+.radio.radiobuttonlist label,
+.checkbox.checkboxlist label
+{
+	margin-bottom: 4px;
+	margin-left: 0;
+}
+
+/*fieldset legend
+{
+	border: 0;
+	font-size: inherit;
+	font-weight: 700;
+	margin-bottom: 0;
+}*/
+
+fieldset .radio,
+fieldset .checkbox
+{
+	margin-top: 4px;
+}
+
+.glyphicon-spin {
+    -webkit-animation: spin 1000ms infinite linear;
+    animation: spin 1000ms infinite linear;
+}
+
+body {
+}
+
+/*override form.less from bootstrap*/ 
+.radio input[type="radio"],
+.radio-inline input[type="radio"],
+.checkbox input[type="checkbox"],
+.checkbox-inline input[type="checkbox"] {
+  position: absolute;
+  margin-left: 0px;
+  margin-top: 4px \9;
+}
+

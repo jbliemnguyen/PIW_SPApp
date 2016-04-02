@@ -1,0 +1,191 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Main.master.cs" Inherits="PIW_SPAppWeb.Pages.Main" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <link href="../Styles/peoplepickercontrol.css" rel="stylesheet" />
+    <link href="../Content/bootstrap.css" rel="stylesheet" />
+    <link href="../Styles/offcanvas.css" rel="stylesheet" />
+    <link href="../Styles/piw.css" rel="stylesheet" />
+    <link href="../Styles/jquery-ui.css" rel="stylesheet" />
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body>
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">PIW</a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Home</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <form class="navbar-form navbar-right">
+                    <div class="form-group">
+                        <input type="text" placeholder="Search Docket Number" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-success">Search</button>
+                </form>
+            </div>
+            <!-- /.nav-collapse -->
+
+        </div>
+        <!-- /.container -->
+    </nav>
+    <!-- /.navbar -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-xs-5 col-sm-3 col-md-2 sidebar-offcanvas" id="sidebar">
+                <div class="list-group">
+                    <a href="EditStandardForm.aspx" class="list-group-item" id="EditStandardFormURL">New Standard Form</a>
+                    <a href="EditAgendaForm.aspx" class="list-group-item" id="EditAgendaFormURL">New Agenda Form</a>
+                    <a href="EditDirectPublicationForm.aspx" class="list-group-item" id="EditDirectPublicationFormURL">New Direct Publication Form</a>
+                </div>
+            </div>
+            <!--/.sidebar-offcanvas-->
+
+
+            <div class="col-xs-7 col-sm-9 col-md-10">
+                <asp:ContentPlaceHolder ID="MainContentPlaceHolder" runat="server">
+                </asp:ContentPlaceHolder>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="../Scripts/jquery-1.9.1.js"></script>
+    <script src="../Scripts/jquery-ui-1.11.4.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="../Scripts/bootstrap.js"></script>
+    <script src="../Scripts/json2.min.js" type="text/javascript"></script>
+    <script src="../Scripts/jquery.validate.js"></script>
+    <script src="../Scripts/peoplepickercontrol.js?rev=5" type="text/javascript"></script>
+    <script type="text/javascript">
+        // variable used for cross site CSOM calls
+        var context;
+        // peoplePicker variable needs to be globally scoped as the generated html contains JS that will call into functions of this class
+        var peoplePicker;
+        
+
+        //Build the URLs for the links above
+        var remoteAppUrl;
+        var hostWebURL;
+        var link;
+        var qs;
+        $(document).ready(function () {
+            qs = "?" + document.URL.split("?")[1];
+            var spAppWebUrl = decodeURIComponent(
+                getQueryStringParameter("SPAppWebUrl")
+            );
+
+            var spHostUrl = decodeURIComponent(
+                getQueryStringParameter("SPHostUrl")
+            );
+
+            var SPLanguage = decodeURIComponent(
+                getQueryStringParameter("SPLanguage")
+            );
+
+            var SPProductNumber = decodeURIComponent(
+                getQueryStringParameter("SPProductNumber")
+            );
+
+            var SPClientTag = decodeURIComponent(
+                getQueryStringParameter("SPClientTag")
+            );
+
+            //append the sharepoint current context info into the URL
+            $("#sidebar a").each(function () {
+                //append the hostURL and appWebURL to the link
+                $(this).prop("href", $(this).prop("href") + "?SPHostUrl=" + spHostUrl + "&SPLanguage=" + SPLanguage + "&SPClientTag=" + SPClientTag + "&SPProductNumber=" + SPProductNumber + "&SPAppWebUrl=" + spAppWebUrl);
+            });
+            
+
+            //Call to method in each page to do further client side programming
+            //NOTE: each page must have this method in Main Content Place Holder
+
+            jQueryValidationMasterPage();
+            PageClient(spHostUrl, spAppWebUrl, SPLanguage);
+
+        });
+
+        function getQueryStringParameter(paramToRetrieve) {
+            var params =
+                document.URL.split("?")[1].split("&");
+            var strParams = "";
+            for (var i = 0; i < params.length; i = i + 1) {
+                var singleParam = params[i].split("=");
+                if (singleParam[0] == paramToRetrieve)
+                    return singleParam[1];
+            }
+        }
+
+        //this method is called from each editform.aspx page to initiate the peoplepicker control
+        function getPeoplePickerInstance(context, spanControl, inputControl, searchDivControl, hiddenControl, webMethodName,variableName, spLanguage) {
+            var newPicker;
+
+            //Make a people picker control
+            //1. context = SharePoint Client Context object
+            //2. $('#spanAdministrators') = SPAN that will 'host' the people picker control
+            //3. $('#inputAdministrators') = INPUT that will be used to capture user input
+            //4. $('#divAdministratorsSearch') = DIV that will show the 'dropdown' of the people picker
+            //5. $('#hdnAdministrators') = INPUT hidden control that will host a JSON string of the resolved users
+            newPicker = new CAMControl.PeoplePicker(context, spanControl, inputControl, searchDivControl, hiddenControl, webMethodName);
+            // required to pass the variable name here!
+            newPicker.InstanceName = variableName;
+            // Pass current language, if not set defaults to en-US. Use the SPLanguage query string param or provide a string like "nl-BE"
+            // Do not set the Language property if you do not have foreseen javascript resource file for your language
+            newPicker.Language = spLanguage;
+            // optionally show more/less entries in the people picker dropdown, 4 is the default
+            newPicker.MaxEntriesShown = 5;
+            // Can duplicate entries be selected (default = false)
+            newPicker.AllowDuplicates = false;
+            // Show the user loginname
+            newPicker.ShowLoginName = true;
+            // Show the user title
+            newPicker.ShowTitle = true;
+            // Set principal type to determine what is shown (default = 1, only users are resolved).
+            // See http://msdn.microsoft.com/en-us/library/office/microsoft.sharepoint.client.utilities.principaltype.aspx for more details
+            // Set ShowLoginName and ShowTitle to false if you're resolving groups
+            newPicker.PrincipalType = 1;
+            // start user resolving as of 2 entered characters (= default)
+            newPicker.MinimalCharactersBeforeSearching = 2;
+
+            // Hookup everything
+            newPicker.Initialize();
+
+            return newPicker;
+        }
+
+        function jQueryValidationMasterPage()
+        {
+            $("#mainForm").validate({
+                rules: {
+                    // no quoting necessary
+                    ctl00$MainContentPlaceHolder$tbDocketNumber: "required",
+                    
+                }
+            });
+
+
+            //docket number 
+        }
+
+        
+    </script>
+</body>
+</html>

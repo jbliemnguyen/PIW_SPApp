@@ -1,0 +1,8 @@
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\PIW_SPAppWeb.dll.config
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\PIW_SPAppWeb.dll
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\PIW_SPAppWeb.pdb
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.IdentityModel.dll
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.IdentityModel.Extensions.dll
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Debug\PIW_SPAppWeb.dll
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Debug\PIW_SPAppWeb.pdb
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Debug\PIW_SPAppWeb.csprojResolveAssemblyReference.cache

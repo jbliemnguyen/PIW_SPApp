@@ -1,0 +1,74 @@
+Dev 2: fdc1s-sp23wfed2
+Issuer ID: e6fe8243-740f-40e5-bd88-93385473ca01
+Password: SharePoint03
+Location: E:\Certs\S2S\S2SDev.pfx
+
+
+Slide URL: https://sp.ferc.gov/spteam/Production%20Support%20Document/SharePoint%20Apps%20Dev.ppt
+
+Step by Step:
+
+Step 1: Create certificate
+Step 2 : Run Windows PowerShell cmdlets to set up trusted security token service
+Step 3 : Create a Simple “High Trust” Provider Hosted App using Visual Studio 2012
+Step 4 : Adding certificates to the Trusted Root Certification Authorities store for a local computer (https://technet.microsoft.com/en-us/library/cc754841.aspx) if the certificate is generated from different computer
+
+--------------------------------------------
+Get-SPTrustedSecurityTokenIssuer
+
+$issuerID = [System.Guid]::NewGuid() -- e6fe8243-740f-40e5-bd88-93385473ca01
+$publicCertPath = "E:\Certs\S2S\S2SDevRev2.cer" 
+$certificate = Get-PfxCertificate $publicCertPath 
+$web = Get-SPWeb "https://fdc1s-sp23wfed2.ferc.gov/piw" 
+$realm = Get-SPAuthenticationRealm -ServiceContext $web.Site 
+$fullAppIdentifier = $issuerId + '@' + $realm 
+New-SPTrustedSecurityTokenIssuer -Name "Provider Hosted High Trust App" -Certificate $certificate -RegisteredIssuerName $fullAppIdentifier -IsTrustBroker 
+iisreset 
+
+
+-------------------------------------------------
+Register ClientID
+generate clientID: https://fdc1s-sp23wfed2.ferc.gov/piw/_layouts/15/appregnew.aspx
+
+ # set intialization values for new app principal
+  
+$appDisplayName = "PIW"
+  
+$clientID = "fa894505-c3c7-4195-b173-71e90aa289d2" 
+  
+$targetSiteUrl = "https://fdc1s-sp23wfed2.ferc.gov/piw"
+  
+$targetSite = Get-SPSite $targetSiteUrl
+  
+$realm = Get-SPAuthenticationRealm -ServiceContext $targetSite
+  
+$fullAppPrincipalIdentifier = $clientID + '@' + $realm
+  
+Write-Host "Registering new app principal"
+  
+$registeredAppPrincipal = Register-SPAppPrincipal -NameIdentifier $fullAppPrincipalIdentifier -Site $targetSite.RootWeb -DisplayName $AppDisplayName
+  
+$registeredAppPrincipal | select * | Format-List
+  
+$registeredAppPrincipal | select * | Format-List | Out-File -FilePath "Output.txt"
+  
+Write-Host "Registration Completed"
+
+
+
+- Adding certificates to the Trusted Root Certification Authorities store for a local computer (https://technet.microsoft.com/en-us/library/cc754841.aspx) if the certificate is generated from different computer
+
+- See more at: http://www.sharepointpals.com/post/Step-by-Step-approach-to-create-a-Provider-Hosted-Application-in-SharePoint-2013#sthash.LYvuFRmb.dpuf
+
+http://blogs.msdn.com/b/shariq/archive/2013/05/07/how-to-set-up-high-trust-apps-for-sharepoint-2013-amp-troubleshooting-tips.aspx
+
+
+-----------------------------------------------------------------------------
+The app identifier has been successfully created. 
+
+
+App Id:    a8d171e3-8609-4f5e-abe8-0823067e06b9  
+App Secret:    prkd6Yl5lTnyWH3CsxfITHeflYiIVMG9tejjxqoyERE=  
+Title:    PIW_SPApp  
+App Domain:    dev.spapps.ferc.gov  
+Redirect URI:     
