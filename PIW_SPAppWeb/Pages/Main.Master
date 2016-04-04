@@ -173,10 +173,30 @@
 
         function jQueryValidationMasterPage()
         {
+            $.validator.addMethod("dropDownSelected", function (value, element) {
+                return value != "Please Select";
+            }, 'Please select value');
+
+            $.validator.addMethod("requiredWhenNonDocketed", function (value, element) {
+                if ($("#cbIsNonDocket").is(':checked')) {
+                    if (!value) {
+                        return false;//empty string --> not valid
+                    } else {
+                        return true;
+                    }
+                } else {
+                    return true;//no need to validate
+                }
+            }, 'This field is required when Non-Docketed is selected');
+
             $("#mainForm").validate({
                 rules: {
                     // no quoting necessary
                     ctl00$MainContentPlaceHolder$tbDocketNumber: "required",
+                    ctl00$MainContentPlaceHolder$tbDescription: "required",
+                    ctl00$MainContentPlaceHolder$ddDocumentCategory: { dropDownSelected: true },
+                    ctl00$MainContentPlaceHolder$ddProgramOfficeWorkflowInitiator: { dropDownSelected: true },
+                    ctl00$MainContentPlaceHolder$tbAlternateIdentifier: { requiredWhenNonDocketed: true },
                     
                 }
             });

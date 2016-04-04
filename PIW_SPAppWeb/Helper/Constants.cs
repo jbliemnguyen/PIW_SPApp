@@ -103,6 +103,13 @@ namespace PIW_SPAppWeb
         public static string PIWDocuments_EPSPassed_Option_False = "False";
         public static string PIWDocuments_EPSPassed_Option_Pending = "Pending";
 
+        //ErrorLog list
+        public static string ErrorLogListName = "ErrorLog";
+        public static string col_ErrorLog_PIWListItem = "PIWListItem";
+        public static string col_ErrorLog_User = "User";
+        public static string col_ErrorLog_ErrorMessage = "ErrorMessage";
+        public static string col_ErrorLog_ErrorPageName = "ErrorPageName";
+
 
 
         //FormStatus
@@ -259,7 +266,7 @@ namespace PIW_SPAppWeb
         //public static string col_ErrorLog_DocumentType = "DocumentType";
         //public static string col_ErrorLog_Office = "Office";
         //public static string col_ErrorLog_DocumentTitle = "DocumentTitle";
-        //public static string col_ErrorLog_UserName = "UserName";
+        //public static string col_ErrorLog_User = "UserName";
         //public static string col_ErrorLog_ErrorMessage = "ErrorMessage";
         //public static string col_ErrorLog_ErrorPageName = "ErrorPageName";
 

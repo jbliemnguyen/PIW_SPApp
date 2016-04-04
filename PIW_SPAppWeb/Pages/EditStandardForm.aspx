@@ -119,14 +119,15 @@
             <%--<form id="mainForm1">--%>
                 <%--Main panel--%>
                 <div class="form-group">
-                    <asp:Label ID="lbDocketNumber" runat="server" Text="Docket Number" CssClass="col-md-2 control-label" AssociatedControlID="tbDocketNumber"></asp:Label>
+                    <asp:Label ID="lbDocketNumber" runat="server" Text="Docket Number<span class='accentText'> *</span>" CssClass="col-md-2 control-label" AssociatedControlID="tbDocketNumber"></asp:Label>
+                    
                     <div class="col-md-6">
                         <asp:TextBox ID="tbDocketNumber" runat="server" CssClass="form-control" TextMode="MultiLine" ClientIDMode="Static"></asp:TextBox>
                         <asp:Label ID="lbDocketValidationError" runat="server" ForeColor="Red" Visible="false"></asp:Label>
                     </div>
                     <div class="col-md-2">
-                        <asp:CheckBox ID="cbIsNonDocket" runat="server" Text="Non-Docketed" AutoPostBack="true"
-                            ToolTip="Alternate Identifier Required" CssClass="checkbox" />
+                        <asp:CheckBox ID="cbIsNonDocket" runat="server" Text="Non-Docketed" 
+                            ToolTip="Alternate Identifier Required" CssClass="checkbox" ClientIDMode="Static" />
                     </div>
                     <div class="col-md-2">
                         <asp:CheckBox ID="cbIsCNF" runat="server" Text="CNF" AutoPostBack="true" ToolTip="Alternate Identifier Required" CssClass="checkbox" />
@@ -145,7 +146,7 @@
                 </div>
 
                 <div class="form-group">
-                    <asp:Label ID="lbDescription" runat="server" Text="Description" AssociatedControlID="tbDescription" CssClass="col-md-2 control-label"></asp:Label>
+                    <asp:Label ID="lbDescription" runat="server" Text="Description<span class='accentText'> *</span>" AssociatedControlID="tbDescription" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-6">
                         <asp:TextBox ID="tbDescription" runat="server" TextMode="MultiLine" Rows="4" CssClass="form-control"></asp:TextBox>
                     </div>
@@ -160,9 +161,26 @@
                         <asp:CheckBox ID="cbFederalRegister" runat="server" CssClass="checkbox" Text="Federal Register" />
                     </div>
                 </div>
+            
+            <div class="form-group">
+                    <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
+                    <div class="col-md-3">
+                        <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server">
+                            <asp:ListItem>Please Select</asp:ListItem>
+                            <asp:ListItem>Delegated Errata</asp:ListItem>
+                            <asp:ListItem>Delegated Letter</asp:ListItem>
+                            <asp:ListItem>Delegated Notice</asp:ListItem>
+                            <asp:ListItem>Delegated Order</asp:ListItem>
+                            <asp:ListItem>Errata</asp:ListItem>
+                            <asp:ListItem>OALJ</asp:ListItem>
+                            <asp:ListItem>Notice Errata</asp:ListItem>
+                            <asp:ListItem>Notice</asp:ListItem>
+                        </asp:DropDownList>
+                    </div>
+                </div>
 
                 <div class="form-group">
-                    <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
+                    <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)<span class='accentText'> *</span>" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-3">
                         <asp:DropDownList ID="ddProgramOfficeWorkflowInitiator" CssClass="form-control" runat="server">
                             <asp:ListItem>Please Select</asp:ListItem>
@@ -261,7 +279,7 @@
                 <div class="form-group">
                     <div class="col-md-offset-2">
                         <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary" OnClick="btnSave_Click" />
-                        <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary" />
+                        <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary" OnClick="btnSubmit_Click" />
                         <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" />
                     </div>
                 </div>

@@ -235,5 +235,11 @@ namespace PIW_SPAppWeb.Pages
         {
 
         }
+
+        protected void btnSubmit_Click(object sender, EventArgs e)
+        {
+            Exception exc = new Exception("Test exception");
+            helper.LogError(Context,exc,listItemID,"test.aspx");
+        }  
         }
 }

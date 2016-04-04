@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Caching;
+using System.Web.UI;
 using System.Web.UI.WebControls;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.UserProfiles;
@@ -46,7 +47,7 @@ namespace PIW_SPAppWeb.Helper
                         }
 
                     }
-                    
+
                     //Add the new object to cache
                     cache.Insert(listName, internalColumnList, null, DateTime.Now.AddHours(10), System.Web.Caching.Cache.NoSlidingExpiration);
                     return internalColumnList;
@@ -62,7 +63,7 @@ namespace PIW_SPAppWeb.Helper
             this.listItemID = listItemID;
         }
 
-        #region SP List connection
+        #region PIW List
         //when item first created, it should have IsActive set to false
         //this flag will turn to true after it is first Saved/Submitted
         //We have to create ListItem first to accommodate Upload multiple documents right away
@@ -101,6 +102,7 @@ namespace PIW_SPAppWeb.Helper
 
         #endregion
 
+        #region PIW Documents
         public void CreatePIWDocumentsSubFolder(ClientContext clientContext, string folderName)
         {
             try
@@ -123,23 +125,23 @@ namespace PIW_SPAppWeb.Helper
 
 
 
-        public void UploadDocumentContentStream(ClientContext ctx, Stream fileStream, string libraryName, string subFolder, string fileName, string securityLevel)
+        public void UploadDocumentContentStream(ClientContext clientContext, Stream fileStream, string libraryName, string subFolder, string fileName, string securityLevel)
         {
 
-            //Dictionary<string, string> internalNameList = PopulateInternalNameList(ctx, Constants.PIWDocuments_DocumentLibraryName);
-            var internalNameList = getInternalColumnNames(ctx, Constants.PIWDocuments_DocumentLibraryName);
+            //Dictionary<string, string> internalNameList = PopulateInternalNameList(clientContext, Constants.PIWDocuments_DocumentLibraryName);
+            var internalNameList = getInternalColumnNames(clientContext, Constants.PIWDocuments_DocumentLibraryName);
 
 
 
 
-            ctx.Load(ctx.Web, web => web.Url);
-            ctx.ExecuteQuery();
+            clientContext.Load(clientContext.Web, web => web.Url);
+            clientContext.ExecuteQuery();
 
-            string uploadSubFolderURL = string.Format("{0}/{1}/{2}", ctx.Web.Url, libraryName, subFolder);
+            string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, libraryName, subFolder);
 
 
-            Folder uploadSubFolder = ctx.Web.GetFolderByServerRelativeUrl(uploadSubFolderURL);
-            ctx.ExecuteQuery();//file not found exception if the folder is not exist, let it crash because it is totally wrong somewhere
+            Folder uploadSubFolder = clientContext.Web.GetFolderByServerRelativeUrl(uploadSubFolderURL);
+            clientContext.ExecuteQuery();//file not found exception if the folder is not exist, let it crash because it is totally wrong somewhere
 
             FileCreationInformation flciNewFile = new FileCreationInformation
             {
@@ -149,40 +151,37 @@ namespace PIW_SPAppWeb.Helper
             };
 
             Microsoft.SharePoint.Client.File uploadFile = uploadSubFolder.Files.Add(flciNewFile);
-            ctx.Load(uploadFile);
+            clientContext.Load(uploadFile);
 
             uploadFile.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_SecurityLevel]] = securityLevel;
             uploadFile.ListItemAllFields.Update();
 
-            ctx.ExecuteQuery();
+            clientContext.ExecuteQuery();
 
         }
 
 
 
-        #region PIW Documents
-
-
-        private FileCollection getAllDocuments(ClientContext ctx, string uploadSubFolderURL,bool includeListItemAllFields)
+        private FileCollection getAllDocuments(ClientContext ctx, string uploadSubFolderURL, bool includeListItemAllFields)
         {
-            
-            
+
+
 
             Folder folder = ctx.Web.GetFolderByServerRelativeUrl(uploadSubFolderURL);
 
             FileCollection files = folder.Files;
             ctx.Load(files);
-            ctx.Load(files,includes => includes.Include(i => i.ListItemAllFields.Id));
+            ctx.Load(files, includes => includes.Include(i => i.ListItemAllFields.Id));
 
 
 
             if (includeListItemAllFields)
-            { 
-            ctx.Load(files, includes => includes.Include(i => i.ListItemAllFields));
-                }
-            
-            
-            //ctx.Load(files, includes => includes.Include(
+            {
+                ctx.Load(files, includes => includes.Include(i => i.ListItemAllFields));
+            }
+
+
+            //clientContext.Load(files, includes => includes.Include(
             //    i => i.ListItemAllFields,
             //    i => i.ListItemAllFields["ID"],
             //    i => i.ListItemAllFields[internalColumnNames[Constants.PIWDocuments_colName_SecurityLevel]],
@@ -256,7 +255,7 @@ namespace PIW_SPAppWeb.Helper
             }
         }
 
-        public void RemoveDocument(ClientContext clientContext,string subFolder,string libraryName,string Id)
+        public void RemoveDocument(ClientContext clientContext, string subFolder, string libraryName, string Id)
         {
             clientContext.Load(clientContext.Web, web => web.Url);
             clientContext.ExecuteQuery();
@@ -275,6 +274,60 @@ namespace PIW_SPAppWeb.Helper
 
 
         }
+        #endregion
+
+        #region Utilities
+
+        public void LogError(HttpContext httpContext, Exception exc, string listItemID, string pageName)
+        {
+            //This is expected exception after Page.Redirect --> ignore it??? TEst it
+            if (exc is System.Threading.ThreadAbortException)
+            {
+                return;
+            }
+
+            //create new log error - this should have its own clientContext
+            var spContext = SharePointContextProvider.Current.GetSharePointContext(httpContext);
+            using (var clientContext = spContext.CreateUserClientContextForSPHost())
+            {
+                List errorLogList = clientContext.Web.Lists.GetByTitle(Constants.ErrorLogListName);
+                var errorLogInternalNameList = getInternalColumnNames(clientContext, Constants.ErrorLogListName);
+
+                ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
+                ListItem newItem = errorLogList.AddItem(itemCreateInfo);
+
+                newItem[errorLogInternalNameList[Constants.col_ErrorLog_ErrorPageName]] = pageName;
+
+                //set current user name
+                clientContext.Load(clientContext.Web.CurrentUser);
+                clientContext.ExecuteQuery();
+                newItem[errorLogInternalNameList[Constants.col_ErrorLog_User]] = clientContext.Web.CurrentUser;
+
+                if (exc.InnerException != null)
+                {
+                    newItem[errorLogInternalNameList[Constants.col_ErrorLog_ErrorMessage]] = exc.Message + " - Inner Exception: " + exc.InnerException.Message;
+                }
+                else
+                {
+                    newItem[errorLogInternalNameList[Constants.col_ErrorLog_ErrorMessage]] = exc.Message;
+                }
+                
+                newItem.Update();
+                clientContext.ExecuteQuery();//we need to create item first before set lookup field.
+
+
+                if (!string.IsNullOrEmpty(listItemID))
+                {
+                    //get piwListItem reference
+                    FieldLookupValue lv = new FieldLookupValue {LookupId = int.Parse(listItemID)};
+                    newItem[errorLogInternalNameList[Constants.col_ErrorLog_PIWListItem]] = lv;
+                    newItem.Update();
+                    clientContext.ExecuteQuery();
+                }
+
+            }
+        }
+
         #endregion
     }
 
