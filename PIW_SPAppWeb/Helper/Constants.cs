@@ -22,8 +22,10 @@ namespace PIW_SPAppWeb
         public static string PIWListName = "PIWList";
 
         public static string PIWList_colName_AccessionNumber = "Accession Number";
-        public static string PIWList_colName_AlternativeID = "Alternative ID";
-        public static string PIWList_colName_OwnerOffice = "Owner Office";
+        public static string PIWList_colName_AlternateIdentifier = "Alternate Identifier";
+        public static string PIWList_colName_WorkflowInitiator = "Workflow Initiator";
+        public static string PIWList_colName_ProgramOfficeWFInitator = "Program Office (Workflow Initiator)";
+        public static string PIWList_colName_ProgramOfficeDocumentOwner = "Program Office (Document Owner)";
         public static string PIWList_colName_ByPassDocketValidation = "ByPass Docket Validation";
         public static string PIWList_colName_Comment = "Comment";
         public static string PIWList_colName_Description = "Description";
@@ -39,14 +41,14 @@ namespace PIW_SPAppWeb
         public static string PIWList_colName_LegalResourcesAndReviewGroupNote = "Legal Resources And Review Group Note";
         public static string PIWList_colName_FormStatus = "Form Status";
         public static string PIWList_colName_FormType = "Form Type";
-        public static string PIWList_colName_WorkflowInitiator = "Workflow Initiator";
-        public static string PIWList_colName_InitiatorOffice = "Initiator Office";
+        
         public static string PIWList_colName_InstructionForOSEC = "Instruction For OSEC";
+        public static string PIWList_colName_DocumentCategory = "Document Category";
         public static string PIWList_colName_IsActive = "Is Active";
         public static string PIWList_colName_IsCNF = "Is CNF";
         public static string PIWList_colName_IsNonDocket = "Is NonDocket";
         public static string PIWList_colName_IsRequireOSECVerification = "Is Require OSEC Verification";
-        public static string PIWList_colName_NotificationReceiver = "Notification Receiver";
+        public static string PIWList_colName_NotificationRecipient = "Notification Recipient";
         public static string PIWList_colName_OSECVerification_Action = "OSEC Verification Action";
         public static string PIWList_colName_OSECVerificationComment = "OSEC Verification Comment";
         public static string PIWList_colName_PrePublicationReviewAction = "PrePublication Review Action";
@@ -64,16 +66,16 @@ namespace PIW_SPAppWeb
 
 
 
-        public static string PIWList_FormStatus_Pending = "Pending";
-        public static string PIWList_FormStatus_Rejected = "Rejected";
-        public static string PIWList_FormStatus_Recalled = "Recalled";
-        public static string PIWList_FormStatus_Submitted = "Submitted";
-        public static string PIWList_FormStatus_OSECVerification = "OSEC Verification";
-        public static string PIWList_FormStatus_SecretaryReview = "Secretary Review";
-        public static string PIWList_FormStatus_PrePublication = "PrePublication";
-        public static string PIWList_FormStatus_ReadyForPublishing = "Ready For Publishing";
-        public static string PIWList_FormStatus_PublishInitiated = "Publish Initiated";
-        public static string PIWList_FormStatus_Edited = "Edited";
+        public const string PIWList_FormStatus_Pending = "Pending";
+        public const string PIWList_FormStatus_Rejected = "Rejected";
+        public const string PIWList_FormStatus_Recalled = "Recalled";
+        public const string PIWList_FormStatus_Submitted = "Submitted";
+        public const string PIWList_FormStatus_OSECVerification = "OSEC Verification";
+        public const string PIWList_FormStatus_SecretaryReview = "Secretary Review";
+        public const string PIWList_FormStatus_PrePublication = "PrePublication";
+        public const string PIWList_FormStatus_ReadyForPublishing = "Ready For Publishing";
+        public const string PIWList_FormStatus_PublishInitiated = "Publish Initiated";
+        public const string PIWList_FormStatus_Edited = "Edited";
         //public static string PIWList_FormStatus_Pending = "Pending";
         //public static string PIWList_FormStatus_Pending = "Pending";
         //public static string PIWList_FormStatus_Pending = "Pending";

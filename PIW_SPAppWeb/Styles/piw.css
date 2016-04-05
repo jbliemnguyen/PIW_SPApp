@@ -44,7 +44,7 @@ body {
 }
 
 /*jquery validation error*/
-.error {
+label.error {
     color: red;
     font-size: 0.8em;
 }

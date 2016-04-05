@@ -43,3 +43,14 @@ body {
   margin-top: 4px \9;
 }
 
+/*jquery validation error*/
+label.error {
+    color: red;
+    font-size: 0.8em;
+}
+
+/*used for accent textarea (*)*/
+.accentText {
+    color:#393
+}
+

@@ -173,11 +173,33 @@
 
         function jQueryValidationMasterPage()
         {
+            $.validator.addMethod("uploadedDocumentRequired", function (value, element) {
+                $("#lbUploadedDocuments").next("div")
+            }, 'Please upload at least 1 document');
+
+            $.validator.addMethod("requiredWhenNonDocketed", function (value, element) {
+                if ($("#cbIsNonDocket").is(':checked') || $("#cbIsCNF").is(':checked')) {
+                    if (!value) {
+                        return false;//empty string --> not valid
+                    } else {
+                        return true;
+                    }
+                } else {
+                    return true;//no need to validate
+                }
+            }, 'This field is required in Non-Docketed or CNF');
+
+
+
+
             $("#mainForm").validate({
                 rules: {
                     // no quoting necessary
                     ctl00$MainContentPlaceHolder$tbDocketNumber: "required",
-                    
+                    ctl00$MainContentPlaceHolder$tbDescription: "required",
+                    ctl00$MainContentPlaceHolder$ddDocumentCategory: "required",
+                    ctl00$MainContentPlaceHolder$ddProgramOfficeWorkflowInitiator: "required",
+                    ctl00$MainContentPlaceHolder$tbAlternateIdentifier: { requiredWhenNonDocketed: true },
                 }
             });
 

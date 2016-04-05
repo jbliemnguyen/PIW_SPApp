@@ -80,7 +80,7 @@
                     <asp:Timer ID="Timer1" runat="server" Interval="15000" OnTick="Timer1_Tick" Enabled="false">
                     </asp:Timer>
                     <div class="form-group">
-                        <asp:Label ID="lbUploadedDocuments" runat="server" Text="Uploaded Documents" AssociatedControlID="rpDocumentList" CssClass="col-md-2 control-label"></asp:Label>
+                        <asp:Label ID="lbUploadedDocuments" runat="server" Text="Uploaded Documents" AssociatedControlID="rpDocumentList" ClientIDMode="Static" CssClass="col-md-2 control-label"></asp:Label>
                         <div class="col-md-9">
                             <asp:Repeater ID="rpDocumentList" runat="server" OnItemCommand="rpDocumentList_ItemCommand">
                                 <HeaderTemplate>
@@ -108,97 +108,97 @@
                                     </ol>
                                 </FooterTemplate>
                             </asp:Repeater>
-
                             <br />
-
+                            <asp:Label ID="lbRequiredUploadedDocumentError" runat="server" ForeColor="Red" Visible="false">Please upload at least 1 public document</asp:Label>
                         </div>
                     </div>
                 </ContentTemplate>
             </asp:UpdatePanel>
 
             <%--<form id="mainForm1">--%>
-                <%--Main panel--%>
-                <div class="form-group">
-                    <asp:Label ID="lbDocketNumber" runat="server" Text="Docket Number<span class='accentText'> *</span>" CssClass="col-md-2 control-label" AssociatedControlID="tbDocketNumber"></asp:Label>
-                    
-                    <div class="col-md-6">
-                        <asp:TextBox ID="tbDocketNumber" runat="server" CssClass="form-control" TextMode="MultiLine" ClientIDMode="Static"></asp:TextBox>
-                        <asp:Label ID="lbDocketValidationError" runat="server" ForeColor="Red" Visible="false"></asp:Label>
-                    </div>
-                    <div class="col-md-2">
-                        <asp:CheckBox ID="cbIsNonDocket" runat="server" Text="Non-Docketed" 
-                            ToolTip="Alternate Identifier Required" CssClass="checkbox" ClientIDMode="Static" />
-                    </div>
-                    <div class="col-md-2">
-                        <asp:CheckBox ID="cbIsCNF" runat="server" Text="CNF" AutoPostBack="true" ToolTip="Alternate Identifier Required" CssClass="checkbox" />
-                    </div>
-                    <div class="col-md-2">
-                        <asp:CheckBox ID="cbDocketValidationByPass" runat="server" Text="ByPass Docket Validation" AutoPostBack="false" ToolTip="Check here to bypass docket validation" Visible="false" CssClass="checkbox" />
-                    </div>
-
-                </div>
-
-                <div class="form-group">
-                    <asp:Label ID="lbAlternateIdentifier" runat="server" Text="Alternate Identifier" AssociatedControlID="tbAlternateIdentifier" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-6">
-                        <asp:TextBox ID="tbAlternateIdentifier" runat="server" CssClass="form-control" MaxLength="255" ToolTip="Additional Information To Further Identify A Workflow Item" TextMode="MultiLine" placeholder="Additional Information To Further Identify A Workflow Item"></asp:TextBox>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <asp:Label ID="lbDescription" runat="server" Text="Description<span class='accentText'> *</span>" AssociatedControlID="tbDescription" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-6">
-                        <asp:TextBox ID="tbDescription" runat="server" TextMode="MultiLine" Rows="4" CssClass="form-control"></asp:TextBox>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <asp:Label ID="lbInstructionForOSEC" runat="server" Text="Instructions for OSEC" AssociatedControlID="tbInstruction" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-6">
-                        <asp:TextBox ID="tbInstruction" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" MaxLength="255"></asp:TextBox>
-                    </div>
-                    <div class="col-md-2">
-                        <asp:CheckBox ID="cbFederalRegister" runat="server" CssClass="checkbox" Text="Federal Register" />
-                    </div>
-                </div>
-            
+            <%--Main panel--%>
             <div class="form-group">
-                    <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-3">
-                        <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server">
-                            <asp:ListItem>Please Select</asp:ListItem>
-                            <asp:ListItem>Delegated Errata</asp:ListItem>
-                            <asp:ListItem>Delegated Letter</asp:ListItem>
-                            <asp:ListItem>Delegated Notice</asp:ListItem>
-                            <asp:ListItem>Delegated Order</asp:ListItem>
-                            <asp:ListItem>Errata</asp:ListItem>
-                            <asp:ListItem>OALJ</asp:ListItem>
-                            <asp:ListItem>Notice Errata</asp:ListItem>
-                            <asp:ListItem>Notice</asp:ListItem>
-                        </asp:DropDownList>
-                    </div>
+                <asp:Label ID="lbDocketNumber" runat="server" Text="Docket Number<span class='accentText'> *</span>" CssClass="col-md-2 control-label" AssociatedControlID="tbDocketNumber"></asp:Label>
+
+                <div class="col-md-6">
+                    <asp:TextBox ID="tbDocketNumber" runat="server" CssClass="form-control" TextMode="MultiLine" ClientIDMode="Static"></asp:TextBox>
+                    <asp:Label ID="lbDocketValidationError" runat="server" ForeColor="Red" Visible="false"></asp:Label>
+                </div>
+                <div class="col-md-2">
+                    <asp:CheckBox ID="cbIsNonDocket" runat="server" Text="Non-Docketed"
+                        ToolTip="Alternate Identifier Required" CssClass="checkbox" ClientIDMode="Static" />
+                </div>
+                <div class="col-md-2">
+                    <asp:CheckBox ID="cbIsCNF" runat="server" Text="CNF" ToolTip="Alternate Identifier Required" ClientIDMode="Static" CssClass="checkbox" />
+                </div>
+                <div class="col-md-2">
+                    <asp:CheckBox ID="cbDocketValidationByPass" runat="server" Text="ByPass Docket Validation" AutoPostBack="false" ToolTip="Check here to bypass docket validation" Visible="false" CssClass="checkbox" />
                 </div>
 
-                <div class="form-group">
-                    <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)<span class='accentText'> *</span>" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-3">
-                        <asp:DropDownList ID="ddProgramOfficeWorkflowInitiator" CssClass="form-control" runat="server">
-                            <asp:ListItem>Please Select</asp:ListItem>
-                            <asp:ListItem>OAL</asp:ListItem>
-                            <asp:ListItem>OALJ</asp:ListItem>
-                            <asp:ListItem>OE</asp:ListItem>
-                            <asp:ListItem>OEA</asp:ListItem>
-                            <asp:ListItem>OED</asp:ListItem>
-                            <asp:ListItem>OEMR</asp:ListItem>
-                            <asp:ListItem>OEP</asp:ListItem>
-                            <asp:ListItem>OEPI</asp:ListItem>
-                            <asp:ListItem>OER</asp:ListItem>
-                            <asp:ListItem>OGC</asp:ListItem>
-                            <asp:ListItem>OSEC</asp:ListItem>
-                        </asp:DropDownList>
-                    </div>
-                    <asp:Label ID="lbWorkflowInitiator" runat="server" Text="Workflow Initiator" AssociatedControlID="inputWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-4">
+            </div>
+
+            <div class="form-group">
+                <asp:Label ID="lbAlternateIdentifier" runat="server" Text="Alternate Identifier" AssociatedControlID="tbAlternateIdentifier" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-6">
+                    <asp:TextBox ID="tbAlternateIdentifier" runat="server" CssClass="form-control" MaxLength="255" TextMode="MultiLine" placeholder="Additional Information To Further Identify A Workflow Item"></asp:TextBox>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <asp:Label ID="lbDescription" runat="server" Text="Description<span class='accentText'> *</span>" AssociatedControlID="tbDescription" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-6">
+                    <asp:TextBox ID="tbDescription" runat="server" TextMode="MultiLine" Rows="4" CssClass="form-control"></asp:TextBox>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <asp:Label ID="lbInstructionForOSEC" runat="server" Text="Instructions for OSEC" AssociatedControlID="tbInstruction" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-6">
+                    <asp:TextBox ID="tbInstruction" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" MaxLength="255"></asp:TextBox>
+                </div>
+                <div class="col-md-2">
+                    <asp:CheckBox ID="cbFederalRegister" runat="server" CssClass="checkbox" Text="Federal Register" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-3">
+                    <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server">
+                        <asp:ListItem Value="">Please Select</asp:ListItem>
+                        <asp:ListItem>Delegated Errata</asp:ListItem>
+                        <asp:ListItem>Delegated Letter</asp:ListItem>
+                        <asp:ListItem>Delegated Notice</asp:ListItem>
+                        <asp:ListItem>Delegated Order</asp:ListItem>
+                        <asp:ListItem>Errata</asp:ListItem>
+                        <asp:ListItem>OALJ</asp:ListItem>
+                        <asp:ListItem>Notice Errata</asp:ListItem>
+                        <asp:ListItem>Notice</asp:ListItem>
+                    </asp:DropDownList>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)<span class='accentText'> *</span>" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-3">
+                    <asp:DropDownList ID="ddProgramOfficeWorkflowInitiator" CssClass="form-control" runat="server">
+                        <asp:ListItem Value="">Please Select</asp:ListItem>
+                        <asp:ListItem>OAL</asp:ListItem>
+                        <asp:ListItem>OALJ</asp:ListItem>
+                        <asp:ListItem>OE</asp:ListItem>
+                        <asp:ListItem>OEA</asp:ListItem>
+                        <asp:ListItem>OED</asp:ListItem>
+                        <asp:ListItem>OEMR</asp:ListItem>
+                        <asp:ListItem>OEP</asp:ListItem>
+                        <asp:ListItem>OEPI</asp:ListItem>
+                        <asp:ListItem>OER</asp:ListItem>
+                        <asp:ListItem>OGC</asp:ListItem>
+                        <asp:ListItem>OSEC</asp:ListItem>
+                    </asp:DropDownList>
+                </div>
+                <asp:Label ID="lbWorkflowInitiator" runat="server" Text="Workflow Initiator" AssociatedControlID="inputWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-4">
+                    
                         <div>
                             <div id="divWorkflowInitiator" class="cam-peoplepicker-userlookup">
                                 <span id="spanWorkflowInitiator"></span>
@@ -207,84 +207,85 @@
                             <div id="divWorkflowInitiatorSearch" class="cam-peoplepicker-usersearch"></div>
                             <asp:HiddenField ID="hdnWorkflowInitiator" ClientIDMode="Static" runat="server" />
                         </div>
-                    </div>
+                    
                 </div>
+            </div>
 
 
-                <div class="form-group">
-                    <asp:Label ID="lbProgramOfficeDocumentOwner" runat="server" Text="Program Office (Document Owner)" AssociatedControlID="ddProgramOfficeDocumentOwner" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-3">
-                        <asp:DropDownList ID="ddProgramOfficeDocumentOwner" CssClass="form-control" runat="server">
-                            <asp:ListItem>Please Select</asp:ListItem>
-                            <asp:ListItem>OAL</asp:ListItem>
-                            <asp:ListItem>OALJ</asp:ListItem>
-                            <asp:ListItem>OE</asp:ListItem>
-                            <asp:ListItem>OEA</asp:ListItem>
-                            <asp:ListItem>OED</asp:ListItem>
-                            <asp:ListItem>OEMR</asp:ListItem>
-                            <asp:ListItem>OEP</asp:ListItem>
-                            <asp:ListItem>OEPI</asp:ListItem>
-                            <asp:ListItem>OER</asp:ListItem>
-                            <asp:ListItem>OGC</asp:ListItem>
-                            <asp:ListItem>OSEC</asp:ListItem>
-                        </asp:DropDownList>
-                    </div>
-                    <asp:Label ID="lbDocumentOwner" runat="server" Text="Document Owner" CssClass="col-md-2 control-label" AssociatedControlID="inputDocumentOwner"></asp:Label>
-                    <div class="col-md-4">
-                        <div>
-                            <div id="divDocumentOwner" class="cam-peoplepicker-userlookup">
-                                <span id="spanDocumentOwner"></span>
-                                <asp:TextBox ID="inputDocumentOwner" ClientIDMode="Static" runat="server" CssClass="cam-peoplepicker-edit" Width="100%"></asp:TextBox>
-                            </div>
-                            <div id="divDocumentOwnerSearch" class="cam-peoplepicker-usersearch"></div>
-                            <asp:HiddenField ID="hdnDocumentOwner" ClientIDMode="Static" runat="server" />
+            <div class="form-group">
+                <asp:Label ID="lbProgramOfficeDocumentOwner" runat="server" Text="Program Office (Document Owner)" AssociatedControlID="ddProgramOfficeDocumentOwner" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-3">
+                    <asp:DropDownList ID="ddProgramOfficeDocumentOwner" CssClass="form-control" runat="server">
+                        <asp:ListItem>Please Select</asp:ListItem>
+                        <asp:ListItem>OAL</asp:ListItem>
+                        <asp:ListItem>OALJ</asp:ListItem>
+                        <asp:ListItem>OE</asp:ListItem>
+                        <asp:ListItem>OEA</asp:ListItem>
+                        <asp:ListItem>OED</asp:ListItem>
+                        <asp:ListItem>OEMR</asp:ListItem>
+                        <asp:ListItem>OEP</asp:ListItem>
+                        <asp:ListItem>OEPI</asp:ListItem>
+                        <asp:ListItem>OER</asp:ListItem>
+                        <asp:ListItem>OGC</asp:ListItem>
+                        <asp:ListItem>OSEC</asp:ListItem>
+                    </asp:DropDownList>
+                </div>
+                <asp:Label ID="lbDocumentOwner" runat="server" Text="Document Owner" CssClass="col-md-2 control-label" AssociatedControlID="inputDocumentOwner"></asp:Label>
+                <div class="col-md-4">
+                    <div>
+                        <div id="divDocumentOwner" class="cam-peoplepicker-userlookup">
+                            <span id="spanDocumentOwner"></span>
+                            <asp:TextBox ID="inputDocumentOwner" ClientIDMode="Static" runat="server" CssClass="cam-peoplepicker-edit" Width="100%"></asp:TextBox>
                         </div>
+                        <div id="divDocumentOwnerSearch" class="cam-peoplepicker-usersearch"></div>
+                        <asp:HiddenField ID="hdnDocumentOwner" ClientIDMode="Static" runat="server" />
                     </div>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <asp:Label ID="lbNotificationRecipient" runat="server" Text="Notification Recipient" AssociatedControlID="inputNotificationRecipient" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-5">
-                        <div>
-                            <div id="divNotificationRecipient" class="cam-peoplepicker-userlookup">
-                                <span id="spanNotificationRecipient"></span>
-                                <asp:TextBox ID="inputNotificationRecipient" ClientIDMode="Static" runat="server" CssClass="cam-peoplepicker-edit" Width="100%"></asp:TextBox>
-                            </div>
-                            <div id="divNotificationRecipientSearch" class="cam-peoplepicker-usersearch"></div>
-                            <asp:HiddenField ID="hdnNotificationRecipient" ClientIDMode="Static" runat="server" />
+            <div class="form-group">
+                <asp:Label ID="lbNotificationRecipient" runat="server" Text="Notification Recipient" AssociatedControlID="inputNotificationRecipient" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-5">
+                    <div>
+                        <div id="divNotificationRecipient" class="cam-peoplepicker-userlookup">
+                            <span id="spanNotificationRecipient"></span>
+                            <asp:TextBox ID="inputNotificationRecipient" ClientIDMode="Static" runat="server" CssClass="cam-peoplepicker-edit" Width="100%"></asp:TextBox>
                         </div>
+                        <div id="divNotificationRecipientSearch" class="cam-peoplepicker-usersearch"></div>
+                        <asp:HiddenField ID="hdnNotificationRecipient" ClientIDMode="Static" runat="server" />
                     </div>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <asp:Label ID="lbDueDate" runat="server" Text="Due Date" AssociatedControlID="tbDueDate" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-sm-3">
-                        <asp:TextBox ID="tbDueDate" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
-                    </div>
+            <div class="form-group">
+                <asp:Label ID="lbDueDate" runat="server" Text="Due Date" AssociatedControlID="tbDueDate" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-sm-3">
+                    <asp:TextBox ID="tbDueDate" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-5">
-                        <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
-                    </div>
-                    <div class="col-md-5">
-                        <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
-                    </div>
+            <div class="form-group">
+                <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-5">
+                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
                 </div>
-
-                <%--End of Main Panel--%>
-
-                <%--Button pannel--%>
-                <div class="form-group">
-                    <div class="col-md-offset-2">
-                        <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary" OnClick="btnSave_Click" />
-                        <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary" OnClick="btnSubmit_Click" />
-                        <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" />
-                    </div>
+                <div class="col-md-5">
+                    <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
                 </div>
+            </div>
+
+            <%--End of Main Panel--%>
+
+            <%--Button pannel--%>
+            <div class="form-group">
+                <div class="col-md-offset-2">
+                    <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary" OnClick="btnSave_Click" />
+                    <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary" OnClick="btnSubmit_Click" />
+                    <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" />
+                </div>
+            </div>
             <%--</form>--%>
-    <%--End of Button pannel--%>
+            <%--End of Button pannel--%>
         </fieldset>
     </form>
 </asp:Content>

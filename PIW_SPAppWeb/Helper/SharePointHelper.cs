@@ -67,7 +67,7 @@ namespace PIW_SPAppWeb.Helper
         //when item first created, it should have IsActive set to false
         //this flag will turn to true after it is first Saved/Submitted
         //We have to create ListItem first to accommodate Upload multiple documents right away
-        public ListItem createNewPIWListItem(ClientContext context, string formStatus, string previousFormStatus, string formType)
+        public ListItem createNewPIWListItem(ClientContext context, string formType)
         {
             List piwList = context.Web.Lists.GetByTitle(Constants.PIWListName);
             var internalNameList = getInternalColumnNames(context, Constants.PIWListName);
@@ -75,13 +75,13 @@ namespace PIW_SPAppWeb.Helper
             ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
             ListItem newItem = piwList.AddItem(itemCreateInfo);
 
-            newItem[internalNameList[Constants.PIWList_colName_FormStatus]] = formStatus;
+            //newItem[internalNameList[Constants.PIWList_colName_FormStatus]] = formStatus;
 
 
-            if (!string.IsNullOrEmpty(previousFormStatus))
-            {
-                newItem[internalNameList[Constants.PIWList_colName_PreviousFormStatus]] = previousFormStatus;
-            }
+            //if (!string.IsNullOrEmpty(previousFormStatus))
+            //{
+            //    newItem[internalNameList[Constants.PIWList_colName_PreviousFormStatus]] = previousFormStatus;
+            //}
 
 
             User user = context.Web.CurrentUser;
@@ -98,6 +98,39 @@ namespace PIW_SPAppWeb.Helper
 
 
             return newItem;
+        }
+
+        public ListItem GetPiwListItemById(ClientContext clientContext,string id,bool ignoreIsActive)
+        {
+            var piwInternalNameList = getInternalColumnNames(clientContext, Constants.PIWListName);
+            Web site = clientContext.Web;
+            List piwList = site.Lists.GetByTitle(Constants.PIWListName);
+
+            ListItem listItem = piwList.GetItemById(int.Parse(id));
+            clientContext.Load(listItem);
+            clientContext.ExecuteQuery();
+
+            //****************************************************************
+
+            if (!ignoreIsActive)
+            {
+                //If form is deleted, user won't be able to open
+                if (!bool.Parse(listItem[piwInternalNameList[Constants.PIWList_colName_IsActive]].ToString()))
+                {
+                    //isActive = false, then check status, if status is Pending, it is OK to return item,
+                    //otherwise, the item is deleted, throw exception
+
+                    if (
+                        !listItem[piwInternalNameList[Constants.PIWList_colName_FormStatus]].ToString()
+                            .Equals(Constants.PIWList_FormStatus_Pending))
+                    {
+                        throw new ApplicationException("Workflow not exists");
+                    }
+                }
+            }
+
+            return listItem;
+                
         }
 
         #endregion
