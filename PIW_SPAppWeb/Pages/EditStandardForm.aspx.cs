@@ -46,8 +46,8 @@ namespace PIW_SPAppWeb.Pages
         }
         #endregion
         //variable        
-        private string listItemID;
-        private bool isEditForm;
+        private string _listItemId;
+        private bool _isEditForm;
         private enumAction action;
         private bool isMail;
 
@@ -57,7 +57,7 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                listItemID = this.Page.Request.QueryString["ID"];
+                _listItemId = this.Page.Request.QueryString["ID"];
 
                 //Set CitationError to invisible
                 //Validation errors may be visible from previous step, need to turn off
@@ -66,44 +66,24 @@ namespace PIW_SPAppWeb.Pages
                 //lbOSECVerificationError.Visible = false;
                 lbUploadedDocumentError.Visible = false;
 
-                listItemID = this.Page.Request.QueryString["ID"];
+                _listItemId = this.Page.Request.QueryString["ID"];
 
-                if (string.IsNullOrEmpty(listItemID))
-                {
-                    helper = new SharePointHelper();
-                }
-                else
-                {
-                    helper = new SharePointHelper(listItemID);
-                    //if there is ID value in URL --> Edit Form
-                    isEditForm = true;
-                }
-
+                helper = new SharePointHelper();
+                _isEditForm = (!string.IsNullOrEmpty(_listItemId));
 
                 if (!Page.IsPostBack)
                 {
-                    if (isEditForm)
+                    if (_isEditForm)
                     {
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
                             //TODO: recome comment when working with edit form
-                            var spContext = SharePointContextProvider.Current.GetSharePointContext(Context);
-
-                            //no need - removed
-                            //using (var clientContext = spContext.CreateUserClientContextForSPHost())
-                            //{
-                            //    //Fill initiator people picker field
-                            //    clientContext.Load(clientContext.Web, web => web.Title, user => user.CurrentUser);
-                            //    clientContext.ExecuteQuery();
-                            //    PeoplePickerHelper.FillPeoplePickerValue(hdnWorkflowInitiator, clientContext.Web.CurrentUser);
-
-                            //}
 
                             PopulateDocumentList(clientContext);
                             //PopulateHistoryList();
-                            ListItem listItem = helper.GetPiwListItemById(clientContext, listItemID, false);
+                            ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
                             PopulateFormStatus(clientContext, listItem);
-                            //displayListItem(listItem);
+                            DisplayListItemInForm(clientContext,listItem);
                             ////display form visiblility based on form status
                             //FormControlsVisiblitilyBasedOnState(PreviousFormStatus, FormStatus, listItem);
                             ////above method get formStatus from list, store it in viewstate                       
@@ -118,28 +98,27 @@ namespace PIW_SPAppWeb.Pages
                     {
                         //if it is new form
                         //Create new PIWListITem
-                        //assign formStatus and previous form status to Pending
+                        //create document libraries
                         //Then redirect to EditForm
                         //By doing it, we can attach multiple document to new piwList item under its folder ID
 
-                        var spContext = SharePointContextProvider.Current.GetSharePointContext(Context);
-                        using (var clientContext = spContext.CreateUserClientContextForSPHost())
+                        using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
                             ListItem newItem = helper.createNewPIWListItem(clientContext, Constants.PIWList_FormType_StandardForm);
-                            listItemID = newItem.Id.ToString();
+                            _listItemId = newItem.Id.ToString();
 
-                            //Create subfolder in piwdocuments
-                            helper.CreatePIWDocumentsSubFolder(clientContext, listItemID);
+                            //Create subfolder in piwdocuments and mailing list
+                            helper.CreatePIWDocumentsSubFolder(clientContext, _listItemId);
                         }
 
                         //forward to Edit
-                        Response.Redirect(Request.Url.ToString() + "&ID=" + listItemID);
+                        Response.Redirect(Request.Url + "&ID=" + _listItemId);
                     }
                 }
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, listItemID, Page.Request.Url.OriginalString);
+                helper.LogError(Context, exc, _listItemId, Page.Request.Url.OriginalString);
                 throw exc;
             }
         }
@@ -155,6 +134,155 @@ namespace PIW_SPAppWeb.Pages
             if (listItem[internalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] != null)
             {
                 PreviousFormStatus = listItem[internalColumnNames[Constants.PIWList_colName_PreviousFormStatus]].ToString();
+            }
+        }
+
+        private void DisplayListItemInForm(ClientContext clientContext, ListItem listItem)
+        {
+            if (listItem != null)
+            {
+                var piwListInteralColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+
+
+                //Main Panel
+                //Docket
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]] != null)
+                {
+                    tbDocketNumber.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
+                }
+
+                //Is Non-Docketed
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_IsNonDocket]] != null)
+                {
+                    cbIsNonDocket.Checked = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_IsNonDocket]].ToString());
+                }
+
+                //Is CNF
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_IsCNF]] != null)
+                {
+                    cbIsNonDocket.Checked = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_IsCNF]].ToString());
+                }
+
+                //Alternate Identifier
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_AlternateIdentifier]] != null)
+                {
+                    tbAlternateIdentifier.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_AlternateIdentifier]].ToString();
+                }
+
+                //Description
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_Description]] != null)
+                {
+                    tbDescription.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_Description]].ToString();
+                }
+
+                //Instruction for OSEC
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_InstructionForOSEC]] != null)
+                {
+                    tbInstruction.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_InstructionForOSEC]].ToString();
+                }
+
+
+                //Federal Register
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_FederalRegister]] != null)
+                {
+                    cbFederalRegister.Checked = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_FederalRegister]].ToString());
+                }
+
+                //Document Category
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentCategory]] != null)
+                {
+                    if (string.IsNullOrEmpty(listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentCategory]].ToString()))
+                    {
+                        ddDocumentCategory.SelectedIndex = 0;
+                    }
+                    else
+                    {
+                        ddDocumentCategory.SelectedValue = listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentCategory]].ToString();
+                    }
+                }
+
+                //Program Office (Workflow Initiator)
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] != null)
+                {
+                    if (string.IsNullOrEmpty(listItem[piwListInteralColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]].ToString()))
+                    {
+                        ddProgramOfficeWorkflowInitiator.SelectedIndex = 0;
+                    }
+                    else
+                    {
+                        ddProgramOfficeWorkflowInitiator.SelectedValue = listItem[piwListInteralColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]].ToString();
+                    }
+                }
+
+
+
+                //Workflow Initiator - one value
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_WorkflowInitiator]] != null)
+                {
+                    FieldUserValue fuv = (FieldUserValue)listItem[piwListInteralColumnNames[Constants.PIWList_colName_WorkflowInitiator]];
+                    User user = clientContext.Web.EnsureUser(fuv.LookupValue);
+                    clientContext.Load(user);
+                    clientContext.ExecuteQuery();
+                    PeoplePickerHelper.FillPeoplePickerValue(hdnWorkflowInitiator,user);
+                }
+                
+                //Program Office (Document Owner)
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] != null)
+                {
+                    if (string.IsNullOrEmpty(listItem[piwListInteralColumnNames[Constants.PIWList_colName_ProgramOfficeDocumentOwner]].ToString()))
+                    {
+                        ddProgramOfficeDocumentOwner.SelectedIndex = 0;
+                    }
+                    else
+                    {
+                        ddProgramOfficeDocumentOwner.SelectedValue = listItem[piwListInteralColumnNames[Constants.PIWList_colName_ProgramOfficeDocumentOwner]].ToString();
+                    }
+                }
+
+
+                //Document Owner
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentOwner]] != null)
+                {
+                    FieldUserValue[] fuv = (FieldUserValue[])listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentOwner]];
+                    User[] users = new User[fuv.Length];
+                    for (int i=0;i<users.Length;i++)
+                    {
+                        User user = clientContext.Web.EnsureUser(fuv[i].LookupValue);
+                        clientContext.Load(user);
+                        clientContext.ExecuteQuery();
+                        users[i] = user;
+
+                    }
+                    PeoplePickerHelper.FillPeoplePickerValue(hdnDocumentOwner, users);
+                }
+
+                //Notification Recipient
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_NotificationRecipient]] != null)
+                {
+                    FieldUserValue[] fuv = (FieldUserValue[])listItem[piwListInteralColumnNames[Constants.PIWList_colName_NotificationRecipient]];
+                    User[] users = new User[fuv.Length];
+                    for (int i = 0; i < users.Length; i++)
+                    {
+                        User user = clientContext.Web.EnsureUser(fuv[i].LookupValue);
+                        clientContext.Load(user);
+                        clientContext.ExecuteQuery();
+                        users[i] = user;
+                    }
+                    PeoplePickerHelper.FillPeoplePickerValue(hdnNotificationRecipient, users);
+                }
+
+                //Due Date
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DueDate]] != null)
+                {
+                    tbDueDate.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_DueDate]].ToString();
+                }
+
+                //Comment
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]] != null)
+                {
+                    lbCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]].ToString();
+                }
+
             }
         }
 
@@ -177,7 +305,7 @@ namespace PIW_SPAppWeb.Pages
                         using (var fileStream = fileUpload.PostedFile.InputStream)
                         {
                             helper.UploadDocumentContentStream(clientContext, fileStream,
-                                Constants.PIWDocuments_DocumentLibraryName, listItemID, fileUpload.FileName,
+                                Constants.PIWDocuments_DocumentLibraryName, _listItemId, fileUpload.FileName,
                                 ddlSecurityControl.SelectedValue);
                             PopulateDocumentList(clientContext);
                             //clear validation error
@@ -190,7 +318,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception ex)
             {
-                helper.LogError(Context, ex, listItemID, string.Empty);
+                helper.LogError(Context, ex, _listItemId, string.Empty);
                 lbUploadedDocumentError.Text = ex.Message.ToString();
                 lbUploadedDocumentError.Visible = true;
             }
@@ -205,7 +333,7 @@ namespace PIW_SPAppWeb.Pages
         {
             string returnedURL = string.Empty;
             List<string> result = new List<string>();
-            System.Data.DataTable table = helper.getAllDocumentsTable(clientContext, listItemID, Constants.PIWDocuments_DocumentLibraryName);
+            System.Data.DataTable table = helper.getAllDocumentsTable(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName);
 
             rpDocumentList.DataSource = table;
             rpDocumentList.DataBind();
@@ -222,7 +350,7 @@ namespace PIW_SPAppWeb.Pages
 
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
-                            helper.RemoveDocument(clientContext, listItemID, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
+                            helper.RemoveDocument(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
                             PopulateDocumentList(clientContext);
                         }
 
@@ -231,7 +359,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, listItemID, string.Empty);
+                helper.LogError(Context, exc, _listItemId, string.Empty);
                 throw exc;
             }
         }
@@ -261,7 +389,7 @@ namespace PIW_SPAppWeb.Pages
                 if (ValidFormData())
                 {
                     bool isNewlyGeneratedCitationNumber = false;
-                    ListItem listItem = helper.GetPiwListItemById(clientContext, listItemID, false);
+                    ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
 
                     //TODO: check if anyone change the form
                     if (!UpdateFormDataToList(clientContext, listItem, ref isNewlyGeneratedCitationNumber))
@@ -341,6 +469,51 @@ namespace PIW_SPAppWeb.Pages
         {
             var internalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
 
+            //each update has its own Execute query. If we set the field of the list item, then execute the ExecuteQuery to populate data
+            //without calling the listitem.update, then the changes is lost 
+            //We need to prrepare all the necessary data before update all fields without calling any ExecuteQuery in middle of it
+
+            //Populate data
+            //Populate document owner
+            FieldUserValue[] documentOwners = null;
+            if (!string.IsNullOrEmpty(hdnDocumentOwner.Value))
+            {
+                List<PeoplePickerUser> users = PeoplePickerHelper.GetValuesFromPeoplePicker(hdnDocumentOwner);
+
+                documentOwners = new FieldUserValue[users.Count];
+                for (var i = 0; i < users.Count; i++)
+                {
+                    var newUser = clientContext.Web.EnsureUser(users[i].Login);//ensure user so usr can be added to site if they are not --> receive email
+                    clientContext.Load(newUser);
+                    clientContext.ExecuteQuery();
+                    documentOwners[i] = new FieldUserValue { LookupId = newUser.Id };
+                }
+            }
+
+            //Populate notification recipient 
+            FieldUserValue[] notificationRecipients = null;
+            if (!string.IsNullOrEmpty(hdnNotificationRecipient.Value))
+            {
+                List<PeoplePickerUser> users = PeoplePickerHelper.GetValuesFromPeoplePicker(hdnNotificationRecipient);
+
+                notificationRecipients = new FieldUserValue[users.Count];
+                for (var i = 0; i < users.Count; i++)
+                {
+                    var newUser = clientContext.Web.EnsureUser(users[i].Login);//ensure user so usr can be added to site if they are not --> receive email
+                    clientContext.Load(newUser);
+                    clientContext.ExecuteQuery();
+                    notificationRecipients[i] = new FieldUserValue { LookupId = newUser.Id };
+                }
+            }
+
+            //Populate current user title
+            clientContext.Load(clientContext.Web.CurrentUser, user => user.Title);
+            clientContext.ExecuteQuery();
+
+            //Save Data
+
+
+
             //Save IsActive
             listItem[internalColumnNames[Constants.PIWList_colName_IsActive]] = true;
 
@@ -358,7 +531,6 @@ namespace PIW_SPAppWeb.Pages
 
             //Description
             listItem[internalColumnNames[Constants.PIWList_colName_Description]] = tbDescription.Text.Trim();
-
 
 
             //alternate identifier
@@ -393,12 +565,6 @@ namespace PIW_SPAppWeb.Pages
 
 
             //Workflow initiator -  - No need to save becuase this is field is not editable - it is first set when form is created
-            //User user = clientContext.Web.EnsureUser();
-            //clientContext.Load((user));
-            //clientContext.ExecuteQuery();
-            //listItem[internalColumnNames[Constants.PIWList_colName_WorkflowInitiator]] = user;
-
-
 
             //program office(document owner)
             //program office(wokflow initiator)
@@ -412,44 +578,10 @@ namespace PIW_SPAppWeb.Pages
             }
 
             //document owner
-            if (!string.IsNullOrEmpty(hdnDocumentOwner.Value))
-            {
-                List<PeoplePickerUser> users = PeoplePickerHelper.GetValuesFromPeoplePicker(hdnDocumentOwner);
-
-                var userArr = new FieldUserValue[users.Count];
-                for (var i = 0; i < users.Count; i++)
-                {
-                    var newUser = clientContext.Web.EnsureUser(users[i].Login);//ensure user so usr can be added to site if they are not --> receive email
-                    clientContext.Load(newUser);
-                    clientContext.ExecuteQuery();
-                    userArr[i] = new FieldUserValue { LookupId = newUser.Id };
-                }
-                listItem[internalColumnNames[Constants.PIWList_colName_DocumentOwner]] = userArr;
-            }
-            else
-            {
-                listItem[internalColumnNames[Constants.PIWList_colName_DocumentOwner]] = null;
-            }
+            listItem[internalColumnNames[Constants.PIWList_colName_DocumentOwner]] = documentOwners;
 
             //notification recipient
-            if (!string.IsNullOrEmpty(hdnNotificationRecipient.Value))
-            {
-                List<PeoplePickerUser> users = PeoplePickerHelper.GetValuesFromPeoplePicker(hdnNotificationRecipient);
-
-                var userArr = new FieldUserValue[users.Count];
-                for (var i = 0; i < users.Count; i++)
-                {
-                    var newUser = clientContext.Web.EnsureUser(users[i].Login);//ensure user so usr can be added to site if they are not --> receive email
-                    clientContext.Load(newUser);
-                    clientContext.ExecuteQuery();
-                    userArr[i] = new FieldUserValue { LookupId = newUser.Id };
-                }
-                listItem[internalColumnNames[Constants.PIWList_colName_NotificationRecipient]] = userArr;
-            }
-            else
-            {
-                listItem[internalColumnNames[Constants.PIWList_colName_NotificationRecipient]] = null;
-            }
+            listItem[internalColumnNames[Constants.PIWList_colName_NotificationRecipient]] = notificationRecipients;
 
             //due date
             listItem[internalColumnNames[Constants.PIWList_colName_DueDate]] = tbDueDate.Text;
@@ -457,8 +589,6 @@ namespace PIW_SPAppWeb.Pages
             //comment
             if (!string.IsNullOrEmpty(tbComment.Text))
             {
-                clientContext.Load(clientContext.Web.CurrentUser, user => user.Title);
-                clientContext.ExecuteQuery();
                 if (listItem[internalColumnNames[Constants.PIWList_colName_Comment]] == null)
                 {
                     listItem[internalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}", clientContext.Web.CurrentUser.Title,
@@ -467,10 +597,10 @@ namespace PIW_SPAppWeb.Pages
                 else
                 {
                     //append
-                    listItem[internalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0}<br>{1} ({2}): {3}", listItem[internalColumnNames[Constants.PIWList_colName_Comment]].ToString()
-                        , clientContext.Web.CurrentUser.Title,DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text);
+                    listItem[internalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}<br>{3}",
+                        clientContext.Web.CurrentUser.Title, DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text, listItem[internalColumnNames[Constants.PIWList_colName_Comment]].ToString());
                 }
-                
+
             }
 
             //execute query

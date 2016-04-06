@@ -245,7 +245,7 @@
 
             <div class="form-group">
                 <asp:Label ID="lbNotificationRecipient" runat="server" Text="Notification Recipient" AssociatedControlID="inputNotificationRecipient" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-5">
+                <div class="col-md-3">
                     <div>
                         <div id="divNotificationRecipient" class="cam-peoplepicker-userlookup">
                             <span id="spanNotificationRecipient"></span>
@@ -266,9 +266,10 @@
 
             <div class="form-group">
                 <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-5">
+                <div class="col-md-3">
                     <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
                 </div>
+                <div class="col-md-1"></div>
                 <div class="col-md-5">
                     <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
                 </div>

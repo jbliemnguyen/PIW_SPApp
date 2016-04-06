@@ -15,53 +15,6 @@ namespace PIW_SPAppWeb.Helper
 {
     public class SharePointHelper
     {
-        //variable        
-        public string listItemID;
-
-        public Dictionary<string, string> getInternalColumnNames(ClientContext clientContext, string listName)
-        {
-            {
-                //HttpRuntime httpRT = new HttpRuntime();
-                Cache cache = HttpRuntime.Cache;
-
-                if (cache[listName] != null)
-                {
-                    return (Dictionary<string, string>)cache[listName];
-                }
-                else
-                {
-                    //Query the new list from SharePoint
-                    var internalColumnList = new Dictionary<string, string>();
-                    List list = clientContext.Web.Lists.GetByTitle(listName);
-
-                    FieldCollection fields = list.Fields;
-
-                    clientContext.Load(fields);
-                    clientContext.ExecuteQuery();
-
-                    foreach (var field in fields)
-                    {
-                        if (!internalColumnList.ContainsKey(field.Title))
-                        {
-                            internalColumnList.Add(field.Title, field.InternalName);
-                        }
-
-                    }
-
-                    //Add the new object to cache
-                    cache.Insert(listName, internalColumnList, null, DateTime.Now.AddHours(10), System.Web.Caching.Cache.NoSlidingExpiration);
-                    return internalColumnList;
-                }
-            }
-
-        }
-
-        public SharePointHelper() { }
-
-        public SharePointHelper(string listItemID)
-        {
-            this.listItemID = listItemID;
-        }
 
         #region PIW List
         //when item first created, it should have IsActive set to false
@@ -74,19 +27,16 @@ namespace PIW_SPAppWeb.Helper
 
             ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
             ListItem newItem = piwList.AddItem(itemCreateInfo);
-
-            //newItem[internalNameList[Constants.PIWList_colName_FormStatus]] = formStatus;
-
-
-            //if (!string.IsNullOrEmpty(previousFormStatus))
-            //{
-            //    newItem[internalNameList[Constants.PIWList_colName_PreviousFormStatus]] = previousFormStatus;
-            //}
-
-
+            
+            
             User user = context.Web.CurrentUser;
-            context.Load((user));
+            context.Load(context.Web.CurrentUser);
             context.ExecuteQuery();
+            //User user = context.Web.EnsureUser(context.Web.CurrentUser.LoginName);
+            //context.Load(user);
+            //context.ExecuteQuery();
+            
+            //set initiator
             newItem[internalNameList[Constants.PIWList_colName_WorkflowInitiator]] = user;
 
             //set FormType
@@ -94,9 +44,7 @@ namespace PIW_SPAppWeb.Helper
 
             newItem.Update();
             context.ExecuteQuery();
-
-
-
+            
             return newItem;
         }
 
@@ -310,6 +258,44 @@ namespace PIW_SPAppWeb.Helper
         #endregion
 
         #region Utilities
+
+        public Dictionary<string, string> getInternalColumnNames(ClientContext clientContext, string listName)
+        {
+            {
+                //HttpRuntime httpRT = new HttpRuntime();
+                Cache cache = HttpRuntime.Cache;
+
+                if (cache[listName] != null)
+                {
+                    return (Dictionary<string, string>)cache[listName];
+                }
+                else
+                {
+                    //Query the new list from SharePoint
+                    var internalColumnList = new Dictionary<string, string>();
+                    List list = clientContext.Web.Lists.GetByTitle(listName);
+
+                    FieldCollection fields = list.Fields;
+
+                    clientContext.Load(fields);
+                    clientContext.ExecuteQuery();
+
+                    foreach (var field in fields)
+                    {
+                        if (!internalColumnList.ContainsKey(field.Title))
+                        {
+                            internalColumnList.Add(field.Title, field.InternalName);
+                        }
+
+                    }
+
+                    //Add the new object to cache
+                    cache.Insert(listName, internalColumnList, null, DateTime.Now.AddHours(10), System.Web.Caching.Cache.NoSlidingExpiration);
+                    return internalColumnList;
+                }
+            }
+
+        }
 
         public void LogError(HttpContext httpContext, Exception exc, string listItemID, string pageName)
         {
