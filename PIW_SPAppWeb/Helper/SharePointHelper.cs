@@ -27,16 +27,12 @@ namespace PIW_SPAppWeb.Helper
 
             ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
             ListItem newItem = piwList.AddItem(itemCreateInfo);
-            
-            
+
+
             User user = context.Web.CurrentUser;
             context.Load(context.Web.CurrentUser);
             context.ExecuteQuery();
-            //User user = context.Web.EnsureUser(context.Web.CurrentUser.LoginName);
-            //context.Load(user);
-            //context.ExecuteQuery();
             
-            //set initiator
             newItem[internalNameList[Constants.PIWList_colName_WorkflowInitiator]] = user;
 
             //set FormType

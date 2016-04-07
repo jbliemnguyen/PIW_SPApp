@@ -83,7 +83,7 @@ namespace PIW_SPAppWeb.Pages
                             //PopulateHistoryList();
                             ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
                             PopulateFormStatus(clientContext, listItem);
-                            DisplayListItemInForm(clientContext,listItem);
+                            DisplayListItemInForm(clientContext, listItem);
                             ////display form visiblility based on form status
                             //FormControlsVisiblitilyBasedOnState(PreviousFormStatus, FormStatus, listItem);
                             ////above method get formStatus from list, store it in viewstate                       
@@ -160,7 +160,7 @@ namespace PIW_SPAppWeb.Pages
                 //Is CNF
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_IsCNF]] != null)
                 {
-                    cbIsNonDocket.Checked = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_IsCNF]].ToString());
+                    cbIsCNF.Checked = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_IsCNF]].ToString());
                 }
 
                 //Alternate Identifier
@@ -219,13 +219,24 @@ namespace PIW_SPAppWeb.Pages
                 //Workflow Initiator - one value
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_WorkflowInitiator]] != null)
                 {
-                    FieldUserValue fuv = (FieldUserValue)listItem[piwListInteralColumnNames[Constants.PIWList_colName_WorkflowInitiator]];
-                    User user = clientContext.Web.EnsureUser(fuv.LookupValue);
-                    clientContext.Load(user);
+                    FieldUserValue fuv =
+                        (FieldUserValue)
+                            listItem[piwListInteralColumnNames[Constants.PIWList_colName_WorkflowInitiator]];
+                    User initiator = clientContext.Web.GetUserById(fuv.LookupId);
+                    clientContext.Load(initiator);
                     clientContext.ExecuteQuery();
-                    PeoplePickerHelper.FillPeoplePickerValue(hdnWorkflowInitiator,user);
+                    PeoplePickerHelper.FillPeoplePickerValue(hdnWorkflowInitiator, initiator);
                 }
-                
+                else
+                {
+                    //this is the new form, use current user value to set the people picker
+                    //we cannot set the default value, the ensure user fails when get people field from list
+                    User initiator = clientContext.Web.CurrentUser;
+                    clientContext.Load(initiator);
+                    clientContext.ExecuteQuery();
+                    PeoplePickerHelper.FillPeoplePickerValue(hdnWorkflowInitiator, initiator);
+                }
+
                 //Program Office (Document Owner)
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] != null)
                 {
@@ -245,9 +256,9 @@ namespace PIW_SPAppWeb.Pages
                 {
                     FieldUserValue[] fuv = (FieldUserValue[])listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentOwner]];
                     User[] users = new User[fuv.Length];
-                    for (int i=0;i<users.Length;i++)
+                    for (int i = 0; i < users.Length; i++)
                     {
-                        User user = clientContext.Web.EnsureUser(fuv[i].LookupValue);
+                        User user = clientContext.Web.GetUserById(fuv[i].LookupId);
                         clientContext.Load(user);
                         clientContext.ExecuteQuery();
                         users[i] = user;
@@ -263,7 +274,7 @@ namespace PIW_SPAppWeb.Pages
                     User[] users = new User[fuv.Length];
                     for (int i = 0; i < users.Length; i++)
                     {
-                        User user = clientContext.Web.EnsureUser(fuv[i].LookupValue);
+                        User user = clientContext.Web.GetUserById(fuv[i].LookupId);
                         clientContext.Load(user);
                         clientContext.ExecuteQuery();
                         users[i] = user;
@@ -274,7 +285,7 @@ namespace PIW_SPAppWeb.Pages
                 //Due Date
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DueDate]] != null)
                 {
-                    tbDueDate.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_DueDate]].ToString();
+                    tbDueDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_DueDate]].ToString()).ToShortDateString();
                 }
 
                 //Comment
@@ -384,20 +395,29 @@ namespace PIW_SPAppWeb.Pages
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
-            using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+            try
             {
-                if (ValidFormData())
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
-                    bool isNewlyGeneratedCitationNumber = false;
-                    ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
-
-                    //TODO: check if anyone change the form
-                    if (!UpdateFormDataToList(clientContext, listItem, ref isNewlyGeneratedCitationNumber))
+                    if (ValidFormData())
                     {
-                        return;
+                        bool isNewlyGeneratedCitationNumber = false;
+                        ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
+
+                        //TODO: check if anyone change the form
+                        if (!UpdateFormDataToList(clientContext, listItem, ref isNewlyGeneratedCitationNumber))
+                        {
+                            return;
+                        }
                     }
                 }
             }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw exc;
+            }
+
 
         }
 
@@ -474,6 +494,7 @@ namespace PIW_SPAppWeb.Pages
             //We need to prrepare all the necessary data before update all fields without calling any ExecuteQuery in middle of it
 
             //Populate data
+
             //Populate document owner
             FieldUserValue[] documentOwners = null;
             if (!string.IsNullOrEmpty(hdnDocumentOwner.Value))
@@ -564,7 +585,8 @@ namespace PIW_SPAppWeb.Pages
 
 
 
-            //Workflow initiator -  - No need to save becuase this is field is not editable - it is first set when form is created
+            //Workflow initiator - set by default to current login value when form is created
+
 
             //program office(document owner)
             //program office(wokflow initiator)

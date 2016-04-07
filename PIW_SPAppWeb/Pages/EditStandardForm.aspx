@@ -18,7 +18,26 @@
             registerPeoplePicker(spHostUrl, spAppWebUrl, SPLanguage);
 
             //register date picker
-            $("#tbDueDate").datepicker();
+            $("#tbDueDate").datepicker({ minDate: 0 });
+            //prevent user edit duedate and set value to past date
+            $("#tbDueDate").keydown(function (event) { event.preventDefault(); });
+
+            //disabled Docket Number textbox is IsNonDocket ischecked
+            if ($("#cbIsNonDocket").is(':checked')) {
+                $("#tbDocketNumber").prop("readonly", "readonly");
+            }
+
+            //event for Non-Docketed checkbox
+            $("#cbIsNonDocket").change(function () {
+                if (this.checked) {
+                    //disable docket number
+                    $("#tbDocketNumber").prop("readonly", "readonly");
+                    $("#tbDocketNumber").prop("value", "Non-Docket");//can combined with above, but this way is clearer
+                } else {
+                    $("#tbDocketNumber").removeProp("readonly");
+                    $("#tbDocketNumber").prop("value", "");//can combined with above, but this way is clearer
+                }
+            });
         }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
@@ -198,16 +217,16 @@
                 </div>
                 <asp:Label ID="lbWorkflowInitiator" runat="server" Text="Workflow Initiator" AssociatedControlID="inputWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-4">
-                    
-                        <div>
-                            <div id="divWorkflowInitiator" class="cam-peoplepicker-userlookup">
-                                <span id="spanWorkflowInitiator"></span>
-                                <asp:TextBox ID="inputWorkflowInitiator" ClientIDMode="Static" runat="server" CssClass="cam-peoplepicker-edit" Width="100%"></asp:TextBox>
-                            </div>
-                            <div id="divWorkflowInitiatorSearch" class="cam-peoplepicker-usersearch"></div>
-                            <asp:HiddenField ID="hdnWorkflowInitiator" ClientIDMode="Static" runat="server" />
+
+                    <div>
+                        <div id="divWorkflowInitiator" class="cam-peoplepicker-userlookup">
+                            <span id="spanWorkflowInitiator"></span>
+                            <asp:TextBox ID="inputWorkflowInitiator" ClientIDMode="Static" runat="server" CssClass="cam-peoplepicker-edit" Width="100%"></asp:TextBox>
                         </div>
-                    
+                        <div id="divWorkflowInitiatorSearch" class="cam-peoplepicker-usersearch"></div>
+                        <asp:HiddenField ID="hdnWorkflowInitiator" ClientIDMode="Static" runat="server" />
+                    </div>
+
                 </div>
             </div>
 
@@ -259,7 +278,7 @@
 
             <div class="form-group">
                 <asp:Label ID="lbDueDate" runat="server" Text="Due Date" AssociatedControlID="tbDueDate" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-sm-3">
+                <div class="col-md-3">
                     <asp:TextBox ID="tbDueDate" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
                 </div>
             </div>
@@ -278,15 +297,72 @@
             <%--End of Main Panel--%>
 
             <%--Button pannel--%>
-            <div class="form-group">
-                <div class="col-md-offset-2">
-                    <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary" OnClick="btnSave_Click" />
-                    <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary" OnClick="btnSubmit_Click" />
-                    <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" />
-                </div>
-            </div>
+
             <%--</form>--%>
             <%--End of Button pannel--%>
         </fieldset>
+        <asp:Panel runat="server" ID="panelOSECVerification">
+            <fieldset>
+                <legend>OSEC Verification</legend>
+                <div class="form-group">
+                    <asp:Label ID="lbOSECVerAction" runat="server" Text="Action" AssociatedControlID="lbOSECVerificationAction" CssClass="col-md-2 control-label"></asp:Label>
+                    <asp:Label ID="lbOSECVerificationAction" runat="server" CssClass="col-md-3 control-label"></asp:Label>
+                    <asp:Label ID="lbOSECVerificationComment" runat="server" Text="OSEC Verification Comment" AssociatedControlID="tbOSECVerificationComment" CssClass="col-md-2 control-label"></asp:Label>
+                    <div class="col-md-4">
+                        <asp:TextBox ID="tbOSECVerificationComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
+                    </div>
+                </div>
+            </fieldset>
+        </asp:Panel>
+        <asp:Panel runat="server" ID="panelPrePublication">
+            <fieldset>
+                <legend>Pre-Publication Review</legend>
+                <div class="form-group">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2">
+                        <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary" />
+                    </div>
+                    <div class="col-md-2">
+                        <asp:TextBox ID="tbCitationNumber" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
+                    </div>
+                    <div class="col-md-2">
+                        <asp:DropDownList ID="ddAvailableCitationNumbers" CssClass="form-control" runat="server" Visible="true">
+                            <asp:ListItem>-- Available Citation # --</asp:ListItem>
+                        </asp:DropDownList>
+                    </div>
+
+                    <div class="col-md-2">
+                        <asp:CheckBox ID="cbOverrideCitationNumber" runat="server" Text="Override" CssClass="checkbox" ClientIDMode="Static" />
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-4">
+                        <asp:Button ID="btnAcceptCitationNumber" runat="server" Text="Accept Citation Number" CssClass="btn-sm btn-primary" />
+                        <asp:Button ID="btnRemoveCitationNumber" runat="server" Text="Remove Citation Number" CssClass="btn-sm btn-primary" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <asp:Label ID="lbPrePubRevAction" runat="server" Text="Action" AssociatedControlID="lbPrePublicationReviewAction" CssClass="col-md-2 control-label"></asp:Label>
+                    <asp:Label ID="lbPrePublicationReviewAction" runat="server" CssClass="col-md-3 control-label"></asp:Label>
+                    <asp:Label ID="lbPrePublicationComment" runat="server" Text="Pre-Publication Review Comment" AssociatedControlID="tbPrePublicationComment" CssClass="col-md-2 control-label"></asp:Label>
+                    <div class="col-md-4">
+                        <asp:TextBox ID="tbPrePublicationComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
+                    </div>
+                </div>
+            </fieldset>
+        </asp:Panel>
+
+        <div class="form-group">
+            <div class="col-md-offset-2">
+                <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary" OnClick="btnSave_Click" />
+                <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary" OnClick="btnSubmit_Click" />
+                <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary" />
+                <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary" />
+                <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" />
+            </div>
+        </div>
     </form>
 </asp:Content>

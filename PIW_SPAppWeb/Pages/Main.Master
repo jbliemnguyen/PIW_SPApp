@@ -119,6 +119,7 @@
             //NOTE: each page must have this method in Main Content Place Holder
 
             jQueryValidationMasterPage();
+
             PageClient(spHostUrl, spAppWebUrl, SPLanguage);
 
         });
@@ -199,6 +200,7 @@
                     ctl00$MainContentPlaceHolder$tbDescription: "required",
                     ctl00$MainContentPlaceHolder$ddDocumentCategory: "required",
                     ctl00$MainContentPlaceHolder$ddProgramOfficeWorkflowInitiator: "required",
+                    ctl00$MainContentPlaceHolder$tbDueDate: "required",
                     ctl00$MainContentPlaceHolder$tbAlternateIdentifier: { requiredWhenNonDocketed: true },
                 }
             });
