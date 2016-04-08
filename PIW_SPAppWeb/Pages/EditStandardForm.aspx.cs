@@ -52,7 +52,7 @@ namespace PIW_SPAppWeb.Pages
         private bool isMail;
 
         //fuction
-        SharePointHelper helper = null;
+        static SharePointHelper helper = null;
         protected void Page_Load(object sender, EventArgs e)
         {
             try
@@ -445,28 +445,38 @@ namespace PIW_SPAppWeb.Pages
             }
 
             //Check docket validation
-            //string errorMessage = string.Empty;
-            //helper.CheckDocketNumber(tbDocket.Text.Trim(), ref errorMessage, cbIsCNF.Checked, cbDocketValidationByPass.Checked);
+            string errorMessage = string.Empty;
+            helper.CheckDocketNumber(tbDocketNumber.Text.Trim(), ref errorMessage, cbIsCNF.Checked, cbDocketValidationByPass.Checked);
 
-            ////check error message to see if all dockets are valid
-            //if (string.IsNullOrEmpty(errorMessage))//dockets are valid
-            //{
-            //    isValid = isValid & true;
-            //    lbDocketValidationError.Visible = false;
-            //}
-            //else
-            //{
-            //    isValid = isValid & false;
-            //    lbDocketValidationError.Text = errorMessage;
-            //    lbDocketValidationError.Visible = true;
-            //    //display ByPass Docket Validation Check
-            //    if (lbDocketValidationError.Text.Equals(SPListSetting.ATMSRemotingServiceConnectionError))
-            //    {
-            //        cbDocketValidationByPass.Visible = true;
-            //    }
-            //}
+            //check error message to see if all dockets are valid
+            if (string.IsNullOrEmpty(errorMessage))//dockets are valid
+            {
+                isValid = isValid & true;
+                lbDocketValidationServerSideError.Visible = false;
+            }
+            else
+            {
+                isValid = isValid & false;
+                lbDocketValidationServerSideError.Text = errorMessage;
+                lbDocketValidationServerSideError.Visible = true;
+                //display ByPass Docket Validation Check
+                if (lbDocketValidationServerSideError.Text.Equals(Constants.ATMSRemotingServiceConnectionError))
+                {
+                    cbDocketValidationByPass.Visible = true;
+                }
+            }
 
             return isValid;
+        }
+
+        [WebMethod]
+        public static string ValidateDocketNumber(string docketNumber, bool isCNF, bool docketValidationByPass)
+        //public static string ValidateDocketNumber(string docketNumber)
+        {
+            //string errorMessage = docketNumber;
+            string errorMessage = string.Empty;
+            helper.CheckDocketNumber(docketNumber.Trim(), ref errorMessage, isCNF, docketValidationByPass);
+            return errorMessage;
         }
 
         private bool UpdateFormDataToList(ClientContext clientContext, ListItem listItem, ref bool isNewlyGeneratedCitationNumber)

@@ -4,6 +4,7 @@
     <NameOfLastUsedPublishProfile>DEV_PIW_SPAppWeb</NameOfLastUsedPublishProfile>
     <ProfileToSelectInPublishDialog>
     </ProfileToSelectInPublishDialog>
+    <ProjectView>ProjectFiles</ProjectView>
   </PropertyGroup>
   <ProjectExtensions>
     <VisualStudio>

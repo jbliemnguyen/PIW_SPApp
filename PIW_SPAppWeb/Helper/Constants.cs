@@ -131,6 +131,9 @@ namespace PIW_SPAppWeb
 
         public static string CacheKey_PIWListInternalColumnName = "CacheKey_PIWListInternalColumnName";
         public static string CacheKey_PIWDocumentsInternalColumnName = "CacheKey_PIWDocumentsInternalColumnName";
+
+        //ATMS Validation error
+        public static string ATMSRemotingServiceConnectionError = "Cannot connect to ATMS to validate docket.";
     }
 
     public enum enumAction

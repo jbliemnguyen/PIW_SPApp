@@ -20,7 +20,7 @@
             //register date picker
             $("#tbDueDate").datepicker({ minDate: 0 });
             //prevent user edit duedate and set value to past date
-            $("#tbDueDate").keydown(function (event) { event.preventDefault(); });
+            $("#tbDueDate").keydown(function(event) { event.preventDefault(); });
 
             //disabled Docket Number textbox is IsNonDocket ischecked
             if ($("#cbIsNonDocket").is(':checked')) {
@@ -28,41 +28,76 @@
             }
 
             //event for Non-Docketed checkbox
-            $("#cbIsNonDocket").change(function () {
+            $("#cbIsNonDocket").change(function() {
                 if (this.checked) {
                     //disable docket number
                     $("#tbDocketNumber").prop("readonly", "readonly");
-                    $("#tbDocketNumber").prop("value", "Non-Docket");//can combined with above, but this way is clearer
+                    $("#tbDocketNumber").prop("value", "Non-Docket"); //can combined with above, but this way is clearer
                 } else {
                     $("#tbDocketNumber").removeProp("readonly");
-                    $("#tbDocketNumber").prop("value", "");//can combined with above, but this way is clearer
+                    $("#tbDocketNumber").prop("value", ""); //can combined with above, but this way is clearer
                 }
+            });
+
+            //validate docket number when blur event
+            $("#tbDocketNumber").blur(function() {
+                var docketNumber = $("#tbDocketNumber").val();
+                var isCNF = $("#cbIsCNF").is(':checked');
+                var DocketValidationByPass = $("#cbDocketValidationByPass").is(':checked');
+                var postdata = '{docketNumber: "' + docketNumber + '",isCNF:' + isCNF + ',docketValidationByPass:' + DocketValidationByPass + ' }';
+                var errorMessage;
+
+                $.ajax({
+                    type: "POST",
+                    url: "EditStandardForm.aspx/ValidateDocketNumber",
+                    data: postdata,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        if (response.d) {//Not valid docket-display error and hide icon
+                            $("#spanDocketValidationClientSideError").text(response.d);
+                            $("#spanDocketValidationClientSideError").removeClass("invisible");
+                            $("#plyiconDocketValid").addClass("invisible");
+
+                        } else {//return empty string --> docket is good --> clear and hide error message and display good icon
+                            $("#spanDocketValidationClientSideError").text("");
+                            $("#spanDocketValidationClientSideError").addClass("invisible");
+                            $("#plyiconDocketValid").removeClass("invisible");
+                            //need to hide the error from client side too-scenerio: user have server-side error, he change it and tab out--> display good icon 
+                            //but the server side error is not hide until click again.
+                            $("#lbDocketValidationServerSideError").addClass("invisible");
+                        }
+                    },
+                    failure: function(response) {
+                        alert(response.d); 
+                    }
+                });
             });
         }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
-            //Build absolute path to the layouts root with the spHostUrl
-            var layoutsRoot = spHostUrl + '/_layouts/15/';
+                //Build absolute path to the layouts root with the spHostUrl
+                var layoutsRoot = spHostUrl + '/_layouts/15/';
 
-            //load all appropriate scripts for the page to function
-            $.getScript(layoutsRoot + 'SP.Runtime.js',
-                function () {
-                    $.getScript(layoutsRoot + 'SP.js',
-                        function () {
-                            //load scripts for cross site calls (needed to use the people picker control in an IFrame)
-                            $.getScript(layoutsRoot + 'SP.RequestExecutor.js', function () {
-                                context = new SP.ClientContext(appWebUrl);
-                                var factory = new SP.ProxyWebRequestExecutorFactory(appWebUrl);
-                                context.set_webRequestExecutorFactory(factory);
+                //load all appropriate scripts for the page to function
+                $.getScript(layoutsRoot + 'SP.Runtime.js',
+                    function () {
+                        $.getScript(layoutsRoot + 'SP.js',
+                            function () {
+                                //load scripts for cross site calls (needed to use the people picker control in an IFrame)
+                                $.getScript(layoutsRoot + 'SP.RequestExecutor.js', function () {
+                                    context = new SP.ClientContext(appWebUrl);
+                                    var factory = new SP.ProxyWebRequestExecutorFactory(appWebUrl);
+                                    context.set_webRequestExecutorFactory(factory);
 
-                                workflowInitiator = getPeoplePickerInstance(context, $('#spanWorkflowInitiator'), $('#inputWorkflowInitiator'), $('#divWorkflowInitiatorSearch'), $('#hdnWorkflowInitiator'), 'EditStandardForm.aspx/GetPeoplePickerData', 'workflowInitiator', spLanguage);
-                                documentOwner = getPeoplePickerInstance(context, $('#spanDocumentOwner'), $('#inputDocumentOwner'), $('#divDocumentOwnerSearch'), $('#hdnDocumentOwner'), 'EditStandardForm.aspx/GetPeoplePickerData', 'documentOwner', spLanguage);
-                                notificationRecipient = getPeoplePickerInstance(context, $('#spanNotificationRecipient'), $('#inputNotificationRecipient'), $('#divNotificationRecipientSearch'), $('#hdnNotificationRecipient'), 'EditStandardForm.aspx/GetPeoplePickerData', 'notificationRecipient', spLanguage);
+                                    workflowInitiator = getPeoplePickerInstance(context, $('#spanWorkflowInitiator'), $('#inputWorkflowInitiator'), $('#divWorkflowInitiatorSearch'), $('#hdnWorkflowInitiator'), 'EditStandardForm.aspx/GetPeoplePickerData', 'workflowInitiator', spLanguage);
+                                    documentOwner = getPeoplePickerInstance(context, $('#spanDocumentOwner'), $('#inputDocumentOwner'), $('#divDocumentOwnerSearch'), $('#hdnDocumentOwner'), 'EditStandardForm.aspx/GetPeoplePickerData', 'documentOwner', spLanguage);
+                                    notificationRecipient = getPeoplePickerInstance(context, $('#spanNotificationRecipient'), $('#inputNotificationRecipient'), $('#divNotificationRecipientSearch'), $('#hdnNotificationRecipient'), 'EditStandardForm.aspx/GetPeoplePickerData', 'notificationRecipient', spLanguage);
+                                });
+
                             });
-
-                        });
-                });
-        }
+                    });
+            }
     </script>
     <form id="mainForm" runat="server" class="form-horizontal">
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
@@ -141,7 +176,9 @@
 
                 <div class="col-md-6">
                     <asp:TextBox ID="tbDocketNumber" runat="server" CssClass="form-control" TextMode="MultiLine" ClientIDMode="Static"></asp:TextBox>
-                    <asp:Label ID="lbDocketValidationError" runat="server" ForeColor="Red" Visible="false"></asp:Label>
+                    <span id="plyiconDocketValid" class='glyphicon glyphicon-ok invisible' style='color: green'></span>
+                    <asp:Label ID="lbDocketValidationServerSideError" runat="server" ForeColor="Red" Visible="false" ClientIDMode="Static"></asp:Label>
+                    <span id="spanDocketValidationClientSideError" style="color: red;" class="invisible"></span>
                 </div>
                 <div class="col-md-2">
                     <asp:CheckBox ID="cbIsNonDocket" runat="server" Text="Non-Docketed"
@@ -151,7 +188,7 @@
                     <asp:CheckBox ID="cbIsCNF" runat="server" Text="CNF" ToolTip="Alternate Identifier Required" ClientIDMode="Static" CssClass="checkbox" />
                 </div>
                 <div class="col-md-2">
-                    <asp:CheckBox ID="cbDocketValidationByPass" runat="server" Text="ByPass Docket Validation" AutoPostBack="false" ToolTip="Check here to bypass docket validation" Visible="false" CssClass="checkbox" />
+                    <asp:CheckBox ID="cbDocketValidationByPass" runat="server" Text="ByPass Docket Validation" ClientIDMode="Static" AutoPostBack="false" ToolTip="Check here to bypass docket validation" Visible="false" CssClass="checkbox" />
                 </div>
 
             </div>
@@ -335,7 +372,7 @@
                         <asp:CheckBox ID="cbOverrideCitationNumber" runat="server" Text="Override" CssClass="checkbox" ClientIDMode="Static" />
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <div class="col-md-2"></div>
                     <div class="col-md-4">

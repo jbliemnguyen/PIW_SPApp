@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Channels;
 using System.Web;
 using System.Web.Caching;
 using System.Web.UI;
@@ -10,6 +12,8 @@ using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.UserProfiles;
 using File = Microsoft.SharePoint.Client.File;
 using ListItem = Microsoft.SharePoint.Client.ListItem;
+using FERC.FOL.ATMS.Remote.Interfaces;
+//using FERC.FOL.ATMS.Structure;
 
 namespace PIW_SPAppWeb.Helper
 {
@@ -254,6 +258,99 @@ namespace PIW_SPAppWeb.Helper
         #endregion
 
         #region Utilities
+
+        /// <summary>
+        /// check if a docket is existing in P8 
+        /// result is set back it its corresponding docket inside the dictionary parameter
+        /// </summary>
+        public void CheckDocketNumber(string strdocket, ref string errorMessage, bool isCNF, bool isByPass)
+        {
+            //this will temporary remove the docket number validation
+            if (isByPass)
+            {
+                return;
+            }
+
+            if (isCNF)
+            {
+                return;
+            }
+
+            if (strdocket.Equals("non-docket", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            string[] dockets = strdocket.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            Dictionary<string, bool> docketDictionary = new Dictionary<string, bool>();
+
+            try
+            {
+                var m_RemoteObject = getWorkSetRemoteObject();
+                foreach (string fullDocket in dockets)
+                {
+                    string docketFullTrimmed = fullDocket.Trim();
+                    bool validDocket = true;
+                    //Add docket to dictionary
+                    if (!docketDictionary.ContainsKey(docketFullTrimmed))
+                    {
+                        //FullDocket: ER14-543-000 or EL02-60-007
+                        int docketLength = docketFullTrimmed.LastIndexOf("-");
+
+                        if (docketLength < 0)//invalid
+                        {
+                            validDocket = false;
+                        }
+                        else
+                        {
+                            string docket = docketFullTrimmed.Substring(0, docketLength);
+                            string subdocket = docketFullTrimmed.Substring(docketLength + 1, docketFullTrimmed.Length - docket.Length - 1);
+                            validDocket = DocketExist(docket, subdocket, m_RemoteObject);
+                        }
+
+                        if (!validDocket)
+                        {
+                            if (string.IsNullOrEmpty(errorMessage))//first invalid docket
+                            {
+                                errorMessage = "invalid Docket: " + fullDocket;
+                            }
+                            else
+                            {
+                                errorMessage = errorMessage + ", " + docketFullTrimmed;
+                            }
+                        }
+
+                        docketDictionary.Add(docketFullTrimmed, false);//add docket to dictionary to avoid check again if user put them twice                        
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                //LogError(Context,exc, string.Empty, "ATMS Connection");
+                errorMessage = Constants.ATMSRemotingServiceConnectionError;
+            }
+        }
+
+        public IWorkSetOps getWorkSetRemoteObject()
+        {
+            string configPath = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
+            IChannel[] myIChannelArray = ChannelServices.RegisteredChannels;
+            if (myIChannelArray.Length == 0)
+                System.Runtime.Remoting.RemotingConfiguration.Configure(configPath, true);
+
+            IWorkSetOps m_RemoteObject = (IWorkSetOps)
+                             Activator.GetObject(typeof(IWorkSetOps),
+                                                 ConfigurationManager.AppSettings["atmsRemoteURL"] + "/WorkSetOps");
+
+            return m_RemoteObject;
+        }
+
+        public bool DocketExist(string docket, string subdocket, IWorkSetOps m_RemoteObject)
+        {
+            var atmsDocket = m_RemoteObject.GetWorkSetsByLabel(docket, subdocket, false, true);
+            return (atmsDocket.Count > 0);
+        }
 
         public Dictionary<string, string> getInternalColumnNames(ClientContext clientContext, string listName)
         {

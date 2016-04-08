@@ -54,3 +54,7 @@ label.error {
     color:#393
 }
 
+.invisible {
+    display: none;
+}
+
