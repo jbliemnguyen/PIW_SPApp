@@ -107,12 +107,20 @@ namespace PIW_SPAppWeb
 
         //ErrorLog list
         public static string ErrorLogListName = "ErrorLog";
-        public static string col_ErrorLog_PIWListItem = "PIWListItem";
-        public static string col_ErrorLog_User = "User";
-        public static string col_ErrorLog_ErrorMessage = "ErrorMessage";
-        public static string col_ErrorLog_ErrorPageName = "ErrorPageName";
+        public static string ErrorLog_colName_PIWListItem = "PIWListItem";
+        public static string ErrorLog_colName_User = "User";
+        public static string ErrorLog_colName_ErrorMessage = "ErrorMessage";
+        public static string ErrorLog_colName_ErrorPageName = "ErrorPageName";
 
-
+        //PIWListHistory list
+        public static string PIWListHistory_ListName = "PIWListHistory";
+        public static string PIWListHistory_colName_Title = "Title";
+        public static string PIWListHistory_colName_PIWList = "PIW List Item";
+        public static string PIWListHistory_colName_User = "User";
+        public static string PIWListHistory_colName_Action = "Action";
+        public static string PIWListHistory_colName_FormStatus = "Form Status";
+        public static string PIWListHistory_colName_Created = "Created";
+        public static string PIWListHistory_colName_CreatedBy = "Created By";
 
         //FormStatus
         public static string formStatusViewStateKey = "FormStatusKey";
@@ -237,13 +245,13 @@ namespace PIW_SPAppWeb
 
         //PIWListHistory list
         //public static string PIWListHistoryListName = "PIWListHistory";
-        //public static string col_PIWListHistory_Title = "Title";
-        //public static string col_PIWListHistory_PIWList = "PIWList";
-        //public static string col_PIWListHistory_User = "User";
-        //public static string col_PIWListHistory_Action = "Action";
-        //public static string col_PIWListHistory_FormStatus = "FormStatus";
-        //public static string col_PIWListHistory_Created = "Created";
-        //public static string col_PIWListHistory_CreatedBy = "Created By";
+        //public static string PIWListHistory_colName_Title = "Title";
+        //public static string PIWListHistory_colName_PIWList = "PIWList";
+        //public static string PIWListHistory_colName_User = "User";
+        //public static string PIWListHistory_colName_Action = "Action";
+        //public static string PIWListHistory_colName_FormStatus = "FormStatus";
+        //public static string PIWListHistory_colName_Created = "Created";
+        //public static string PIWListHistory_colName_CreatedBy = "Created By";
 
         
 
@@ -271,9 +279,9 @@ namespace PIW_SPAppWeb
         //public static string col_ErrorLog_DocumentType = "DocumentType";
         //public static string col_ErrorLog_Office = "Office";
         //public static string col_ErrorLog_DocumentTitle = "DocumentTitle";
-        //public static string col_ErrorLog_User = "UserName";
-        //public static string col_ErrorLog_ErrorMessage = "ErrorMessage";
-        //public static string col_ErrorLog_ErrorPageName = "ErrorPageName";
+        //public static string ErrorLog_colName_User = "UserName";
+        //public static string ErrorLog_colName_ErrorMessage = "ErrorMessage";
+        //public static string ErrorLog_colName_ErrorPageName = "ErrorPageName";
 
         #endregion
         ////FormStatus
