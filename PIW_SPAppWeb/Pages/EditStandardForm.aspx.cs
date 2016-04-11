@@ -85,7 +85,7 @@ namespace PIW_SPAppWeb.Pages
                             PopulateFormStatus(clientContext, listItem);
                             DisplayListItemInForm(clientContext, listItem);
                             ////display form visiblility based on form status
-                            //FormControlsVisiblitilyBasedOnState(PreviousFormStatus, FormStatus, listItem);
+                            ControlsVisiblitilyBasedOnStatus(PreviousFormStatus,FormStatus);
                             ////above method get formStatus from list, store it in viewstate                       
                             //if (FormStatus == enumFormStatus.ReadyForPublishing)
                             //{
@@ -425,6 +425,29 @@ namespace PIW_SPAppWeb.Pages
         {
             //Exception exc = new Exception("Test exception");
             //helper.LogError(Context, exc, listItemID, "test.aspx");
+            try
+            {
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    if (ValidFormData())
+                    {
+                        //bool isNewlyGeneratedCitationNumber = false;
+                        //ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
+
+                        ////TODO: check if anyone change the form
+                        //if (!UpdateFormDataToList(clientContext, listItem, ref isNewlyGeneratedCitationNumber))
+                        //{
+                        //    return;
+                        //}
+                        helper.CreatePIWListHistory(clientContext,_listItemId,"Submit","Submited");
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw exc;
+            }
         }
 
         private bool ValidFormData()
@@ -471,7 +494,6 @@ namespace PIW_SPAppWeb.Pages
 
         [WebMethod]
         public static string ValidateDocketNumber(string docketNumber, bool isCNF, bool docketValidationByPass)
-        //public static string ValidateDocketNumber(string docketNumber)
         {
             //string errorMessage = docketNumber;
             string errorMessage = string.Empty;
@@ -640,5 +662,48 @@ namespace PIW_SPAppWeb.Pages
             clientContext.ExecuteQuery();
             return true;
         }
+
+        public void ControlsVisiblitilyBasedOnStatus(string previousFormStatus, string formStatus)
+        {
+            //bool isRequireOSECVerification = isRequiredOSECVerificationSteps();
+            //SPUser checkoutUser = null;
+            switch (formStatus)
+            {
+                case Constants.PIWList_FormStatus_Pending:
+                case Constants.PIWList_FormStatus_Recalled:
+                case Constants.PIWList_FormStatus_Rejected:
+                    EnableMainPanel(true);
+                    break;
+                case Constants.PIWList_FormStatus_Submitted:
+                    EnableMainPanel(false);
+                    break;
+                default:
+                    EnableMainPanel(false);
+                    break;
+            }
+        }
+
+        private void EnableMainPanel(bool enabled)
+        {
+            tbDocketNumber.Enabled = enabled;
+            cbIsCNF.Enabled = enabled;
+            cbIsNonDocket.Enabled = enabled;
+            tbAlternateIdentifier.Enabled = enabled;
+            tbDescription.Enabled = enabled;
+            tbInstruction.Enabled = enabled;
+            cbFederalRegister.Enabled = enabled;
+            ddDocumentCategory.Enabled = enabled;
+            ddProgramOfficeWorkflowInitiator.Enabled = enabled;
+            //initiator
+            panelWorkflowInitiator.Enabled = enabled;
+            //inputWorkflowInitiator.Enabled = enabled;
+            ddProgramOfficeDocumentOwner.Enabled = enabled;
+            //document owner
+            //notification receiver
+            tbDueDate.Enabled = enabled;
+            tbComment.Enabled = enabled;
+        }
+
+        
     }
 }

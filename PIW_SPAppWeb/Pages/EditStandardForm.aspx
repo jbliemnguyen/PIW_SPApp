@@ -20,7 +20,7 @@
             //register date picker
             $("#tbDueDate").datepicker({ minDate: 0 });
             //prevent user edit duedate and set value to past date
-            $("#tbDueDate").keydown(function(event) { event.preventDefault(); });
+            $("#tbDueDate").keydown(function (event) { event.preventDefault(); });
 
             //disabled Docket Number textbox is IsNonDocket ischecked
             if ($("#cbIsNonDocket").is(':checked')) {
@@ -28,7 +28,7 @@
             }
 
             //event for Non-Docketed checkbox
-            $("#cbIsNonDocket").change(function() {
+            $("#cbIsNonDocket").change(function () {
                 if (this.checked) {
                     //disable docket number
                     $("#tbDocketNumber").prop("readonly", "readonly");
@@ -40,11 +40,11 @@
             });
 
             //validate docket number when blur event
-            $("#tbDocketNumber").blur(function() {
+            $("#tbDocketNumber").blur(function () {
                 var docketNumber = $("#tbDocketNumber").val();
                 var isCNF = $("#cbIsCNF").is(':checked');
-                var DocketValidationByPass = $("#cbDocketValidationByPass").is(':checked');
-                var postdata = '{docketNumber: "' + docketNumber + '",isCNF:' + isCNF + ',docketValidationByPass:' + DocketValidationByPass + ' }';
+                var docketValidationByPass = $("#cbDocketValidationByPass").is(':checked');
+                var postdata = '{docketNumber: "' + docketNumber + '",isCNF:' + isCNF + ',docketValidationByPass:' + docketValidationByPass + ' }';
                 var errorMessage;
 
                 $.ajax({
@@ -68,36 +68,48 @@
                             $("#lbDocketValidationServerSideError").addClass("invisible");
                         }
                     },
-                    failure: function(response) {
-                        alert(response.d); 
+                    failure: function (response) {
+                        alert(response.d);
                     }
                 });
             });
+
+            //disable people picker
+            disablePeoplePickers();
         }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
-                //Build absolute path to the layouts root with the spHostUrl
-                var layoutsRoot = spHostUrl + '/_layouts/15/';
+            //Build absolute path to the layouts root with the spHostUrl
+            var layoutsRoot = spHostUrl + '/_layouts/15/';
 
-                //load all appropriate scripts for the page to function
-                $.getScript(layoutsRoot + 'SP.Runtime.js',
-                    function () {
-                        $.getScript(layoutsRoot + 'SP.js',
-                            function () {
-                                //load scripts for cross site calls (needed to use the people picker control in an IFrame)
-                                $.getScript(layoutsRoot + 'SP.RequestExecutor.js', function () {
-                                    context = new SP.ClientContext(appWebUrl);
-                                    var factory = new SP.ProxyWebRequestExecutorFactory(appWebUrl);
-                                    context.set_webRequestExecutorFactory(factory);
+            //load all appropriate scripts for the page to function
+            $.getScript(layoutsRoot + 'SP.Runtime.js',
+                function () {
+                    $.getScript(layoutsRoot + 'SP.js',
+                        function () {
+                            //load scripts for cross site calls (needed to use the people picker control in an IFrame)
+                            $.getScript(layoutsRoot + 'SP.RequestExecutor.js', function () {
+                                context = new SP.ClientContext(appWebUrl);
+                                var factory = new SP.ProxyWebRequestExecutorFactory(appWebUrl);
+                                context.set_webRequestExecutorFactory(factory);
 
-                                    workflowInitiator = getPeoplePickerInstance(context, $('#spanWorkflowInitiator'), $('#inputWorkflowInitiator'), $('#divWorkflowInitiatorSearch'), $('#hdnWorkflowInitiator'), 'EditStandardForm.aspx/GetPeoplePickerData', 'workflowInitiator', spLanguage);
-                                    documentOwner = getPeoplePickerInstance(context, $('#spanDocumentOwner'), $('#inputDocumentOwner'), $('#divDocumentOwnerSearch'), $('#hdnDocumentOwner'), 'EditStandardForm.aspx/GetPeoplePickerData', 'documentOwner', spLanguage);
-                                    notificationRecipient = getPeoplePickerInstance(context, $('#spanNotificationRecipient'), $('#inputNotificationRecipient'), $('#divNotificationRecipientSearch'), $('#hdnNotificationRecipient'), 'EditStandardForm.aspx/GetPeoplePickerData', 'notificationRecipient', spLanguage);
-                                });
-
+                                workflowInitiator = getPeoplePickerInstance(context, $('#spanWorkflowInitiator'), $('#inputWorkflowInitiator'), $('#divWorkflowInitiatorSearch'), $('#hdnWorkflowInitiator'), 'EditStandardForm.aspx/GetPeoplePickerData', 'workflowInitiator', spLanguage);
+                                documentOwner = getPeoplePickerInstance(context, $('#spanDocumentOwner'), $('#inputDocumentOwner'), $('#divDocumentOwnerSearch'), $('#hdnDocumentOwner'), 'EditStandardForm.aspx/GetPeoplePickerData', 'documentOwner', spLanguage);
+                                notificationRecipient = getPeoplePickerInstance(context, $('#spanNotificationRecipient'), $('#inputNotificationRecipient'), $('#divNotificationRecipientSearch'), $('#hdnNotificationRecipient'), 'EditStandardForm.aspx/GetPeoplePickerData', 'notificationRecipient', spLanguage);
                             });
-                    });
+
+                        });
+                });
+        }
+
+        function disablePeoplePickers() {
+            //people picker textbox is disabled from server side, but the href link to remove user 
+            //must be disable from client side
+            //check if textbox is disabled, if yes, then disable the link
+            if ($("#inputWorkflowInitiator").prop("disabled")) {
+                alert("disalbe");
             }
+        }
     </script>
     <form id="mainForm" runat="server" class="form-horizontal">
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
@@ -254,16 +266,16 @@
                 </div>
                 <asp:Label ID="lbWorkflowInitiator" runat="server" Text="Workflow Initiator" AssociatedControlID="inputWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-4">
-
-                    <div>
-                        <div id="divWorkflowInitiator" class="cam-peoplepicker-userlookup">
-                            <span id="spanWorkflowInitiator"></span>
-                            <asp:TextBox ID="inputWorkflowInitiator" ClientIDMode="Static" runat="server" CssClass="cam-peoplepicker-edit" Width="100%"></asp:TextBox>
+                    <asp:Panel runat="server" ID="panelWorkflowInitiator">
+                        <div>
+                            <div id="divWorkflowInitiator" class="cam-peoplepicker-userlookup">
+                                <span id="spanWorkflowInitiator"></span>
+                                <asp:TextBox ID="inputWorkflowInitiator" ClientIDMode="Static" runat="server" CssClass="cam-peoplepicker-edit" Width="100%"></asp:TextBox>
+                            </div>
+                            <div id="divWorkflowInitiatorSearch" class="cam-peoplepicker-usersearch"></div>
+                            <asp:HiddenField ID="hdnWorkflowInitiator" ClientIDMode="Static" runat="server" />
                         </div>
-                        <div id="divWorkflowInitiatorSearch" class="cam-peoplepicker-usersearch"></div>
-                        <asp:HiddenField ID="hdnWorkflowInitiator" ClientIDMode="Static" runat="server" />
-                    </div>
-
+                    </asp:Panel>
                 </div>
             </div>
 

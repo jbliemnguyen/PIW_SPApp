@@ -257,6 +257,38 @@ namespace PIW_SPAppWeb.Helper
         }
         #endregion
 
+#region PIWListHistory
+
+        public void CreatePIWListHistory(ClientContext clientContext,string listItemID,string action,string FormStatus)
+        {
+            List piwlisthistory = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
+            var piwlistHistoryInternalNameList = getInternalColumnNames(clientContext, Constants.PIWListHistory_ListName);
+
+            ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
+            ListItem newItem = piwlisthistory.AddItem(itemCreateInfo);
+
+            clientContext.Load(clientContext.Web.CurrentUser);
+            clientContext.ExecuteQuery();
+            newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_User]] = clientContext.Web.CurrentUser;
+
+            newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_Action]] = action;
+            newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_FormStatus]] = FormStatus;
+
+            newItem.Update();
+            clientContext.ExecuteQuery();//we need to create item first before set lookup field.
+
+            if (!string.IsNullOrEmpty(listItemID))
+            {
+                //get piwListItem reference
+                FieldLookupValue lv = new FieldLookupValue { LookupId = int.Parse(listItemID) };
+                newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_PIWList]] = lv;
+                newItem.Update();
+                clientContext.ExecuteQuery();
+            }
+
+        }
+#endregion
+
         #region Utilities
 
         /// <summary>
@@ -399,8 +431,7 @@ namespace PIW_SPAppWeb.Helper
             }
 
             //create new log error - this should have its own clientContext
-            var spContext = SharePointContextProvider.Current.GetSharePointContext(httpContext);
-            using (var clientContext = spContext.CreateUserClientContextForSPHost())
+            using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(httpContext).CreateUserClientContextForSPHost())
             {
                 List errorLogList = clientContext.Web.Lists.GetByTitle(Constants.ErrorLogListName);
                 var errorLogInternalNameList = getInternalColumnNames(clientContext, Constants.ErrorLogListName);
@@ -408,20 +439,20 @@ namespace PIW_SPAppWeb.Helper
                 ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
                 ListItem newItem = errorLogList.AddItem(itemCreateInfo);
 
-                newItem[errorLogInternalNameList[Constants.col_ErrorLog_ErrorPageName]] = pageName;
-
                 //set current user name
                 clientContext.Load(clientContext.Web.CurrentUser);
                 clientContext.ExecuteQuery();
-                newItem[errorLogInternalNameList[Constants.col_ErrorLog_User]] = clientContext.Web.CurrentUser;
+                newItem[errorLogInternalNameList[Constants.ErrorLog_colName_User]] = clientContext.Web.CurrentUser;
+
+                newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorPageName]] = pageName;
 
                 if (exc.InnerException != null)
                 {
-                    newItem[errorLogInternalNameList[Constants.col_ErrorLog_ErrorMessage]] = exc.Message + " - Inner Exception: " + exc.InnerException.Message;
+                    newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorMessage]] = exc.Message + " - Inner Exception: " + exc.InnerException.Message;
                 }
                 else
                 {
-                    newItem[errorLogInternalNameList[Constants.col_ErrorLog_ErrorMessage]] = exc.Message;
+                    newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorMessage]] = exc.Message;
                 }
                 
                 newItem.Update();
@@ -432,7 +463,7 @@ namespace PIW_SPAppWeb.Helper
                 {
                     //get piwListItem reference
                     FieldLookupValue lv = new FieldLookupValue {LookupId = int.Parse(listItemID)};
-                    newItem[errorLogInternalNameList[Constants.col_ErrorLog_PIWListItem]] = lv;
+                    newItem[errorLogInternalNameList[Constants.ErrorLog_colName_PIWListItem]] = lv;
                     newItem.Update();
                     clientContext.ExecuteQuery();
                 }
