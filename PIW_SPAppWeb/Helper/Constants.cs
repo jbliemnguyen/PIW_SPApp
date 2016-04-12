@@ -70,12 +70,15 @@ namespace PIW_SPAppWeb
         public const string PIWList_FormStatus_Rejected = "Rejected";
         public const string PIWList_FormStatus_Recalled = "Recalled";
         public const string PIWList_FormStatus_Submitted = "Submitted";
+        public const string PIWList_FormStatus_Edited = "Edited";
         public const string PIWList_FormStatus_OSECVerification = "OSEC Verification";
         public const string PIWList_FormStatus_SecretaryReview = "Secretary Review";
-        public const string PIWList_FormStatus_PrePublication = "PrePublication Review";
+        public const string PIWList_FormStatus_PrePublication = "PrePublication";
         public const string PIWList_FormStatus_ReadyForPublishing = "Ready For Publishing";
         public const string PIWList_FormStatus_PublishInitiated = "Publish Initiated";
-        public const string PIWList_FormStatus_Edited = "Edited";
+        public const string PIWList_FormStatus_PublishedToeLibrary = "Published To eLibrary";
+        public const string PIWList_FormStatus_ReOpen = "ReOpen";
+        
         //public const string PIWList_FormStatus_Pending = "Pending";
         //public const string PIWList_FormStatus_Pending = "Pending";
         //public const string PIWList_FormStatus_Pending = "Pending";
@@ -122,7 +125,22 @@ namespace PIW_SPAppWeb
         public const string PIWListHistory_colName_Created = "Created";
         public const string PIWListHistory_colName_CreatedBy = "Created By";
 
-        //FormStatus
+        //group name
+        public const string Grp_PIWUsers = "PIWUsers";
+        public const string Grp_OSECGroupName = "PIWOSEC";
+        public const string Grp_SecretaryReviewGroupName = "PIWSecReview";
+        public const string Grp_PIWDirectPublication = "PIWDirectPublication";
+        public const string Grp_PIWDirectPublicationSubmitOnly = "PIWDirectPublicationSubmitOnly";
+        public const string Grp_PIWAdmin = "PIWAdmin";
+        public const string Grp_PIWSystemAdmin = "PIWSystemAdmin";
+        public const string Grp_PIWAgendaNonManagement = "PIWAgendaNonManagement";
+        //public const string Grp_PrintRequisitionSubmitter = "PrintRequisitionSubmitter";
+        public const string Grp_CopyCenter = "CopyCenter";
+        public const string Grp_PIWOSECFERCReports = "PIWOSECFERCReports";
+        
+        
+        
+        //FormStatus Key
         public const string formStatusViewStateKey = "FormStatusKey";
 
         //Previous Form Status
@@ -308,7 +326,7 @@ namespace PIW_SPAppWeb
         //public const string Grp_PIWAdmin = "PIWAdmin";
         //public const string Grp_PIWAgendaNonManagement = "PIWAgendaNonManagement";
         //public const string Grp_PrintRequisitionSubmitter = "PrintRequisitionSubmitter";
-        //public const string Grp_PrintRequisitionApproval = "PrintRequisitionApproval";
+        //public const string Grp_CopyCenter = "PrintRequisitionApproval";
         //public const string Grp_PIWOSECFERCReports = "PIWOSECFERCReports";
 
         ////role

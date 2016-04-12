@@ -85,7 +85,7 @@ namespace PIW_SPAppWeb.Pages
                             PopulateFormStatus(clientContext, listItem);
                             DisplayListItemInForm(clientContext, listItem);
                             ////display form visiblility based on form status
-                            ControlsVisiblitilyBasedOnStatus(PreviousFormStatus,FormStatus);
+                            ControlsVisiblitilyBasedOnStatus(clientContext,PreviousFormStatus, FormStatus);
                             ////above method get formStatus from list, store it in viewstate                       
                             //if (FormStatus == enumFormStatus.ReadyForPublishing)
                             //{
@@ -439,7 +439,7 @@ namespace PIW_SPAppWeb.Pages
                         //{
                         //    return;
                         //}
-                        helper.CreatePIWListHistory(clientContext,_listItemId,"Submit","Submited");
+                        helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
                     }
                 }
             }
@@ -663,19 +663,109 @@ namespace PIW_SPAppWeb.Pages
             return true;
         }
 
-        public void ControlsVisiblitilyBasedOnStatus(string previousFormStatus, string formStatus)
+        public void ControlsVisiblitilyBasedOnStatus(ClientContext clientContext,string previousFormStatus, string formStatus)
         {
             //bool isRequireOSECVerification = isRequiredOSECVerificationSteps();
             //SPUser checkoutUser = null;
+            var currentUser = clientContext.Web.CurrentUser;
+            clientContext.Load(currentUser);
+            clientContext.ExecuteQuery();
+
             switch (formStatus)
             {
                 case Constants.PIWList_FormStatus_Pending:
                 case Constants.PIWList_FormStatus_Recalled:
                 case Constants.PIWList_FormStatus_Rejected:
+                    //submit section    
                     EnableMainPanel(true);
+                    fieldsetMessage.Visible = false;
+                    if (formStatus.Equals(Constants.PIWList_FormStatus_Recalled) ||
+                        formStatus.Equals(Constants.PIWList_FormStatus_Rejected))
+                    {
+                        fieldsetRecallOrOSECRejectComment.Visible = true;
+                    }
+                    else
+                    {
+                        fieldsetRecallOrOSECRejectComment.Visible = false;
+                    }
+
+                    
+                    //OSEC section
+                    fieldsetOSECVerification.Visible = false;
+                    fieldsetPrePublication.Visible = false;
+
+                    //buttons
+                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_PIWUsers) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_OSECGroupName) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_SecretaryReviewGroupName);
+
+                    btnSubmit.Visible = btnSave.Visible;
+
+                    fieldsetRecall.Visible = false;
+
+                    btnEdit.Visible = false;
+
+                    btnAccept.Visible = false;
+
+                    btnReject.Visible = false;
+
+                    btnOSECTakeOwnership.Visible = false;
+
+                    btnPublish.Visible = false;
+
+                    //delete button has the same visibility as Save button
+                    btnDelete.Visible = btnSave.Visible;
+
                     break;
                 case Constants.PIWList_FormStatus_Submitted:
+                    //submit section   
                     EnableMainPanel(false);
+                    fieldsetMessage.Visible = false;
+                    fieldsetRecallOrOSECRejectComment.Visible = false;
+                    
+                    //OSEC section
+                    fieldsetOSECVerification.Visible = false;
+                    fieldsetPrePublication.Visible = false;
+
+                    //Button
+                    btnSave.Visible = false;
+
+                    btnSubmit.Visible = btnSave.Visible;
+
+                    fieldsetRecall.Visible = true;
+
+                    btnEdit.Visible = false;
+
+                    btnAccept.Visible = false;
+
+                    btnReject.Visible = false;
+
+                    btnOSECTakeOwnership.Visible = true;
+
+                    btnPublish.Visible = false;
+
+                    //delete button has the same visibility as Save button
+                    btnDelete.Visible = btnSave.Visible;
+
+                    break;
+                case Constants.PIWList_FormStatus_Edited:
+                    throw new Exception("Not Implemented");
+                    break;
+                case Constants.PIWList_FormStatus_OSECVerification:
+                    throw new Exception("Not Implemented");
+                    break;
+                case Constants.PIWList_FormStatus_PrePublication:
+                    throw new Exception("Not Implemented");
+                    break;
+                case Constants.PIWList_FormStatus_ReadyForPublishing:
+                    throw new Exception("Not Implemented");
+                    break;
+                case Constants.PIWList_FormStatus_PublishInitiated:
+                    throw new Exception("Not Implemented");
+                    break;
+                case Constants.PIWList_FormStatus_PublishedToeLibrary:
+                    throw new Exception("Not Implemented");
+                    break;
+                case Constants.PIWList_FormStatus_ReOpen:
+                    throw new Exception("Not Implemented");
                     break;
                 default:
                     EnableMainPanel(false);
@@ -685,6 +775,7 @@ namespace PIW_SPAppWeb.Pages
 
         private void EnableMainPanel(bool enabled)
         {
+            EnableFileUploadComponent(enabled);
             tbDocketNumber.Enabled = enabled;
             cbIsCNF.Enabled = enabled;
             cbIsNonDocket.Enabled = enabled;
@@ -695,15 +786,31 @@ namespace PIW_SPAppWeb.Pages
             ddDocumentCategory.Enabled = enabled;
             ddProgramOfficeWorkflowInitiator.Enabled = enabled;
             //initiator
-            panelWorkflowInitiator.Enabled = enabled;
-            //inputWorkflowInitiator.Enabled = enabled;
+            inputWorkflowInitiator.Enabled = enabled;
+
             ddProgramOfficeDocumentOwner.Enabled = enabled;
             //document owner
+            inputDocumentOwner.Enabled = enabled;
+
             //notification receiver
+            inputNotificationRecipient.Enabled = enabled;
+
             tbDueDate.Enabled = enabled;
             tbComment.Enabled = enabled;
         }
+        private void EnableFileUploadComponent(bool enabled)
+        {
+            //disable/enable fileupload            
+            fieldsetUpload.Visible = enabled;
+            //disable/enable the Remove button
+            //the link always be enable so user can open document
+            foreach (RepeaterItem row in rpDocumentList.Items)
+            {
+                var btnRemoveDocument = (LinkButton)row.FindControl("btnRemoveDocument");
+                btnRemoveDocument.Enabled = enabled;
+            }
+        }
 
-        
+
     }
 }

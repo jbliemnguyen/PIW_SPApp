@@ -36,7 +36,7 @@ namespace PIW_SPAppWeb.Helper
             User user = context.Web.CurrentUser;
             context.Load(context.Web.CurrentUser);
             context.ExecuteQuery();
-            
+
             newItem[internalNameList[Constants.PIWList_colName_WorkflowInitiator]] = user;
 
             //set FormType
@@ -44,11 +44,11 @@ namespace PIW_SPAppWeb.Helper
 
             newItem.Update();
             context.ExecuteQuery();
-            
+
             return newItem;
         }
 
-        public ListItem GetPiwListItemById(ClientContext clientContext,string id,bool ignoreIsActive)
+        public ListItem GetPiwListItemById(ClientContext clientContext, string id, bool ignoreIsActive)
         {
             var piwInternalNameList = getInternalColumnNames(clientContext, Constants.PIWListName);
             Web site = clientContext.Web;
@@ -78,7 +78,7 @@ namespace PIW_SPAppWeb.Helper
             }
 
             return listItem;
-                
+
         }
 
         #endregion
@@ -257,9 +257,9 @@ namespace PIW_SPAppWeb.Helper
         }
         #endregion
 
-#region PIWListHistory
+        #region PIWListHistory
 
-        public void CreatePIWListHistory(ClientContext clientContext,string listItemID,string action,string FormStatus)
+        public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus)
         {
             List piwlisthistory = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
             var piwlistHistoryInternalNameList = getInternalColumnNames(clientContext, Constants.PIWListHistory_ListName);
@@ -287,7 +287,7 @@ namespace PIW_SPAppWeb.Helper
             }
 
         }
-#endregion
+        #endregion
 
         #region Utilities
 
@@ -454,7 +454,7 @@ namespace PIW_SPAppWeb.Helper
                 {
                     newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorMessage]] = exc.Message;
                 }
-                
+
                 newItem.Update();
                 clientContext.ExecuteQuery();//we need to create item first before set lookup field.
 
@@ -462,7 +462,7 @@ namespace PIW_SPAppWeb.Helper
                 if (!string.IsNullOrEmpty(listItemID))
                 {
                     //get piwListItem reference
-                    FieldLookupValue lv = new FieldLookupValue {LookupId = int.Parse(listItemID)};
+                    FieldLookupValue lv = new FieldLookupValue { LookupId = int.Parse(listItemID) };
                     newItem[errorLogInternalNameList[Constants.ErrorLog_colName_PIWListItem]] = lv;
                     newItem.Update();
                     clientContext.ExecuteQuery();
@@ -471,8 +471,25 @@ namespace PIW_SPAppWeb.Helper
             }
         }
 
+        //public bool isCurrentUserMemberOf(ClientContext clientContext,string groupName)
+        //{
+
+        //}
         #endregion
+
+        #region Extension method
+
+        public bool IsUserMemberOfGroup(ClientContext clientContext,User user, string groupName)
+        {
+            //Load group
+            clientContext.Load(user.Groups);
+            clientContext.ExecuteQuery();
+            return user.Groups.Cast<Group>()
+              .Any(g => g.Title == groupName);
+        }
+
     }
-
-
+        #endregion
 }
+
+

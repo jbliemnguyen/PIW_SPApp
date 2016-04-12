@@ -74,8 +74,7 @@
                 });
             });
 
-            //disable people picker
-            disablePeoplePickers();
+
         }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
@@ -96,6 +95,11 @@
                                 workflowInitiator = getPeoplePickerInstance(context, $('#spanWorkflowInitiator'), $('#inputWorkflowInitiator'), $('#divWorkflowInitiatorSearch'), $('#hdnWorkflowInitiator'), 'EditStandardForm.aspx/GetPeoplePickerData', 'workflowInitiator', spLanguage);
                                 documentOwner = getPeoplePickerInstance(context, $('#spanDocumentOwner'), $('#inputDocumentOwner'), $('#divDocumentOwnerSearch'), $('#hdnDocumentOwner'), 'EditStandardForm.aspx/GetPeoplePickerData', 'documentOwner', spLanguage);
                                 notificationRecipient = getPeoplePickerInstance(context, $('#spanNotificationRecipient'), $('#inputNotificationRecipient'), $('#divNotificationRecipientSearch'), $('#hdnNotificationRecipient'), 'EditStandardForm.aspx/GetPeoplePickerData', 'notificationRecipient', spLanguage);
+
+
+                                //we need to disable people picker here becuase this call is slow and asynchronous
+                                //we can only disable people picker after it is loaded
+                                disablePeoplePickers();
                             });
 
                         });
@@ -103,12 +107,22 @@
         }
 
         function disablePeoplePickers() {
-            //people picker textbox is disabled from server side, but the href link to remove user 
+            //people picker textbox (where user type the name) is disabled from server side, but the href link to remove user 
             //must be disable from client side
             //check if textbox is disabled, if yes, then disable the link
             if ($("#inputWorkflowInitiator").prop("disabled")) {
-                alert("disalbe");
+                $("#inputWorkflowInitiator").parent().find("a").remove();
             }
+
+            if ($("#inputDocumentOwner").prop("disabled")) {
+                $("#inputDocumentOwner").parent().find("a").remove();
+            }
+
+            if ($("#inputNotificationRecipient").prop("disabled")) {
+                $("#inputNotificationRecipient").parent().find("a").remove();
+            }
+
+
         }
     </script>
     <form id="mainForm" runat="server" class="form-horizontal">
@@ -116,31 +130,38 @@
 
         <fieldset>
             <legend>Standard Form</legend>
-            <div class="form-group">
+            <fieldset runat="server" id="fieldsetMessage" visible="false">
+                <div class="form-group">
+                    <asp:Label ID="lbMessage" runat="server" AssociatedControlID="fileUpload" CssClass="col-md-6 control-label error"></asp:Label>
+                </div>
+            </fieldset>
+            <fieldset runat="server" id="fieldsetUpload">
+                <div class="form-group">
 
-                <asp:Label ID="lbFileName" runat="server" Text="File Name" AssociatedControlID="fileUpload" CssClass="col-md-2 control-label"></asp:Label>
+                    <asp:Label ID="lbFileName" runat="server" Text="File Name" AssociatedControlID="fileUpload" CssClass="col-md-2 control-label"></asp:Label>
 
-                <div class="col-md-7">
-                    <asp:FileUpload ID="fileUpload" runat="server" Width="100%" placeholder="Click here to browse the file" />
+                    <div class="col-md-7">
+                        <asp:FileUpload ID="fileUpload" runat="server" Width="100%" placeholder="Click here to browse the file" />
+                    </div>
+                    <div class="col-md-3">
+                        <asp:Label ID="lbUploadedDocumentError" runat="server" ForeColor="Red" Visible="false"></asp:Label>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <asp:Label ID="lbUploadedDocumentError" runat="server" ForeColor="Red" Visible="false"></asp:Label>
+                <div class="form-group">
+                    <asp:Label ID="lbSecurityLevel" runat="server" Text="Security Level" AssociatedControlID="ddlSecurityControl" CssClass="col-md-2 control-label"></asp:Label>
+                    <div class="col-md-2">
+                        <asp:DropDownList ID="ddlSecurityControl" CssClass="form-control" runat="server">
+                            <asp:ListItem>Public</asp:ListItem>
+                            <asp:ListItem>CEII</asp:ListItem>
+                            <asp:ListItem>Priviledged</asp:ListItem>
+                        </asp:DropDownList>
+                    </div>
+                    <div class="col-md-2">
+                        <asp:Button ID="btnUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary cancel" OnClick="btnUpload_Click" />
+                        <%--Note: "cancel" in CssClass is to bypass the jquery validation when user upload file--%>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <asp:Label ID="lbSecurityLevel" runat="server" Text="Security Level" AssociatedControlID="ddlSecurityControl" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-2">
-                    <asp:DropDownList ID="ddlSecurityControl" CssClass="form-control" runat="server">
-                        <asp:ListItem>Public</asp:ListItem>
-                        <asp:ListItem>CEII</asp:ListItem>
-                        <asp:ListItem>Priviledged</asp:ListItem>
-                    </asp:DropDownList>
-                </div>
-                <div class="col-md-2">
-                    <asp:Button ID="btnUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary cancel" OnClick="btnUpload_Click" />
-                    <%--Note: "cancel" in CssClass is to bypass the jquery validation when user upload file--%>
-                </div>
-            </div>
+            </fieldset>
             <asp:UpdatePanel ID="UpdatePanel1" runat="server">
                 <ContentTemplate>
                     <asp:Timer ID="Timer1" runat="server" Interval="15000" OnTick="Timer1_Tick" Enabled="false">
@@ -266,16 +287,15 @@
                 </div>
                 <asp:Label ID="lbWorkflowInitiator" runat="server" Text="Workflow Initiator" AssociatedControlID="inputWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-4">
-                    <asp:Panel runat="server" ID="panelWorkflowInitiator">
-                        <div>
-                            <div id="divWorkflowInitiator" class="cam-peoplepicker-userlookup">
-                                <span id="spanWorkflowInitiator"></span>
-                                <asp:TextBox ID="inputWorkflowInitiator" ClientIDMode="Static" runat="server" CssClass="cam-peoplepicker-edit" Width="100%"></asp:TextBox>
-                            </div>
-                            <div id="divWorkflowInitiatorSearch" class="cam-peoplepicker-usersearch"></div>
-                            <asp:HiddenField ID="hdnWorkflowInitiator" ClientIDMode="Static" runat="server" />
+                    <div>
+                        <div id="divWorkflowInitiator" class="cam-peoplepicker-userlookup">
+                            <span id="spanWorkflowInitiator"></span>
+                            <asp:TextBox ID="inputWorkflowInitiator" ClientIDMode="Static" runat="server" CssClass="cam-peoplepicker-edit" Width="100%"></asp:TextBox>
                         </div>
-                    </asp:Panel>
+                        <div id="divWorkflowInitiatorSearch" class="cam-peoplepicker-usersearch"></div>
+                        <asp:HiddenField ID="hdnWorkflowInitiator" ClientIDMode="Static" runat="server" />
+                    </div>
+
                 </div>
             </div>
 
@@ -342,6 +362,28 @@
                     <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
                 </div>
             </div>
+            <fieldset runat="server" id="fieldsetRecallOrOSECRejectComment" visible="true">
+                <div class="form-group">
+                    <asp:Label ID="lbRecallOrOSECRejectComment" runat="server" Text="Recall/Reject Comment" AssociatedControlID="lbRecallOrOSECRejectCommentValue" CssClass="col-md-2 control-label"></asp:Label>
+                    <div class="col-md-6">
+                        <asp:Label runat="server" ID="lbRecallOrOSECRejectCommentValue"></asp:Label>
+                    </div>
+                </div>
+            </fieldset>
+            <fieldset runat="server" id="fieldsetRecall" visible="true">
+                <div class="form-group">
+                    <asp:Label ID="lbRecallComment" runat="server" Text="Recall Comment" AssociatedControlID="tbRecallComment" CssClass="col-md-2 control-label"></asp:Label>
+                    <div class="col-md-6">
+                        <asp:TextBox ID="tbRecallComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2">
+                        <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" />
+                    </div>
+                </div>
+            </fieldset>
 
             <%--End of Main Panel--%>
 
@@ -350,68 +392,77 @@
             <%--</form>--%>
             <%--End of Button pannel--%>
         </fieldset>
-        <asp:Panel runat="server" ID="panelOSECVerification">
-            <fieldset>
-                <legend>OSEC Verification</legend>
-                <div class="form-group">
-                    <asp:Label ID="lbOSECVerAction" runat="server" Text="Action" AssociatedControlID="lbOSECVerificationAction" CssClass="col-md-2 control-label"></asp:Label>
-                    <asp:Label ID="lbOSECVerificationAction" runat="server" CssClass="col-md-3 control-label"></asp:Label>
-                    <asp:Label ID="lbOSECVerificationComment" runat="server" Text="OSEC Verification Comment" AssociatedControlID="tbOSECVerificationComment" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-4">
-                        <asp:TextBox ID="tbOSECVerificationComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
-                    </div>
-                </div>
-            </fieldset>
-        </asp:Panel>
-        <asp:Panel runat="server" ID="panelPrePublication">
-            <fieldset>
-                <legend>Pre-Publication Review</legend>
-                <div class="form-group">
-                    <div class="col-md-2"></div>
-                    <div class="col-md-2">
-                        <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary" />
-                    </div>
-                    <div class="col-md-2">
-                        <asp:TextBox ID="tbCitationNumber" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
-                    </div>
-                    <div class="col-md-2">
-                        <asp:DropDownList ID="ddAvailableCitationNumbers" CssClass="form-control" runat="server" Visible="true">
-                            <asp:ListItem>-- Available Citation # --</asp:ListItem>
-                        </asp:DropDownList>
-                    </div>
 
-                    <div class="col-md-2">
-                        <asp:CheckBox ID="cbOverrideCitationNumber" runat="server" Text="Override" CssClass="checkbox" ClientIDMode="Static" />
-                    </div>
+        <fieldset runat="server" id="fieldsetOSECVerification" visible="false">
+            <legend>OSEC Verification</legend>
+            <div class="form-group">
+                <asp:Label ID="lbOSECVerAction" runat="server" Text="Action" AssociatedControlID="lbOSECVerificationAction" CssClass="col-md-2 control-label"></asp:Label>
+                <asp:Label ID="lbOSECVerificationAction" runat="server" CssClass="col-md-3 control-label"></asp:Label>
+                <asp:Label ID="lbOSECVerificationComment" runat="server" Text="OSEC Verification Comment" AssociatedControlID="tbOSECVerificationComment" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-4">
+                    <asp:TextBox ID="tbOSECVerificationComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
+                </div>
+            </div>
+        </fieldset>
+
+
+        <fieldset runat="server" id="fieldsetPrePublication" visible="false">
+            <legend>Pre-Publication Review</legend>
+            <div class="form-group">
+                <div class="col-md-2"></div>
+                <div class="col-md-2">
+                    <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary" />
+                </div>
+                <div class="col-md-2">
+                    <asp:TextBox ID="tbCitationNumber" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
+                </div>
+                <div class="col-md-2">
+                    <asp:DropDownList ID="ddAvailableCitationNumbers" CssClass="form-control" runat="server" Visible="true">
+                        <asp:ListItem>-- Available Citation # --</asp:ListItem>
+                    </asp:DropDownList>
                 </div>
 
-                <div class="form-group">
-                    <div class="col-md-2"></div>
-                    <div class="col-md-4">
-                        <asp:Button ID="btnAcceptCitationNumber" runat="server" Text="Accept Citation Number" CssClass="btn-sm btn-primary" />
-                        <asp:Button ID="btnRemoveCitationNumber" runat="server" Text="Remove Citation Number" CssClass="btn-sm btn-primary" />
-                    </div>
+                <div class="col-md-2">
+                    <asp:CheckBox ID="cbOverrideCitationNumber" runat="server" Text="Override" CssClass="checkbox" ClientIDMode="Static" />
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <asp:Label ID="lbPrePubRevAction" runat="server" Text="Action" AssociatedControlID="lbPrePublicationReviewAction" CssClass="col-md-2 control-label"></asp:Label>
-                    <asp:Label ID="lbPrePublicationReviewAction" runat="server" CssClass="col-md-3 control-label"></asp:Label>
-                    <asp:Label ID="lbPrePublicationComment" runat="server" Text="Pre-Publication Review Comment" AssociatedControlID="tbPrePublicationComment" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-4">
-                        <asp:TextBox ID="tbPrePublicationComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
-                    </div>
+            <div class="form-group">
+                <div class="col-md-2"></div>
+                <div class="col-md-4">
+                    <asp:Button ID="btnAcceptCitationNumber" runat="server" Text="Accept Citation Number" CssClass="btn-sm btn-primary" />
+                    <asp:Button ID="btnRemoveCitationNumber" runat="server" Text="Remove Citation Number" CssClass="btn-sm btn-primary" />
                 </div>
-            </fieldset>
-        </asp:Panel>
+            </div>
+
+            <div class="form-group">
+                <asp:Label ID="lbPrePubRevAction" runat="server" Text="Action" AssociatedControlID="lbPrePublicationReviewAction" CssClass="col-md-2 control-label"></asp:Label>
+                <asp:Label ID="lbPrePublicationReviewAction" runat="server" CssClass="col-md-3 control-label"></asp:Label>
+                <asp:Label ID="lbPrePublicationComment" runat="server" Text="Pre-Publication Review Comment" AssociatedControlID="tbPrePublicationComment" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-4">
+                    <asp:TextBox ID="tbPrePublicationComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
+                </div>
+            </div>
+        </fieldset>
+
 
         <div class="form-group">
-            <div class="col-md-offset-2">
+            <div class="col-md-2"></div>
+            <div class="col-md-6">
                 <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary" OnClick="btnSave_Click" />
                 <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary" OnClick="btnSubmit_Click" />
+                <asp:Button ID="btnOSECTakeOwnership" runat="server" Text="OSEC Take Ownership" CssClass="btn-sm btn-primary" />
+                <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn-sm btn-primary" />
                 <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary" />
                 <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary" />
-                <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" />
+                <asp:Button ID="btnPublish" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary" />
+                <asp:Button ID="btnPublishConfirm" runat="server" Text="Publish" Style="visibility: hidden; display: none;" />
+                <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary" />
+                <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" />
+
             </div>
+
+
         </div>
     </form>
 </asp:Content>

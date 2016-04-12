@@ -31,6 +31,33 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.ScriptManager ScriptManager1;
         
         /// <summary>
+        /// fieldsetMessage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetMessage;
+        
+        /// <summary>
+        /// lbMessage control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbMessage;
+        
+        /// <summary>
+        /// fieldsetUpload control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetUpload;
+        
+        /// <summary>
         /// lbFileName control.
         /// </summary>
         /// <remarks>
@@ -292,15 +319,6 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Label lbWorkflowInitiator;
         
         /// <summary>
-        /// panelWorkflowInitiator control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel panelWorkflowInitiator;
-        
-        /// <summary>
         /// inputWorkflowInitiator control.
         /// </summary>
         /// <remarks>
@@ -436,13 +454,76 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Label lbCommentValue;
         
         /// <summary>
-        /// panelOSECVerification control.
+        /// fieldsetRecallOrOSECRejectComment control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel panelOSECVerification;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetRecallOrOSECRejectComment;
+        
+        /// <summary>
+        /// lbRecallOrOSECRejectComment control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbRecallOrOSECRejectComment;
+        
+        /// <summary>
+        /// lbRecallOrOSECRejectCommentValue control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbRecallOrOSECRejectCommentValue;
+        
+        /// <summary>
+        /// fieldsetRecall control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetRecall;
+        
+        /// <summary>
+        /// lbRecallComment control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbRecallComment;
+        
+        /// <summary>
+        /// tbRecallComment control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox tbRecallComment;
+        
+        /// <summary>
+        /// btnRecall control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnRecall;
+        
+        /// <summary>
+        /// fieldsetOSECVerification control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetOSECVerification;
         
         /// <summary>
         /// lbOSECVerAction control.
@@ -481,13 +562,13 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.TextBox tbOSECVerificationComment;
         
         /// <summary>
-        /// panelPrePublication control.
+        /// fieldsetPrePublication control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel panelPrePublication;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetPrePublication;
         
         /// <summary>
         /// btnGenerateCitationNumber control.
@@ -598,6 +679,24 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Button btnSubmit;
         
         /// <summary>
+        /// btnOSECTakeOwnership control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnOSECTakeOwnership;
+        
+        /// <summary>
+        /// btnEdit control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnEdit;
+        
+        /// <summary>
         /// btnAccept control.
         /// </summary>
         /// <remarks>
@@ -616,12 +715,39 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Button btnReject;
         
         /// <summary>
-        /// btnRecall control.
+        /// btnPublish control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnRecall;
+        protected global::System.Web.UI.WebControls.Button btnPublish;
+        
+        /// <summary>
+        /// btnPublishConfirm control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnPublishConfirm;
+        
+        /// <summary>
+        /// btnDelete control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnDelete;
+        
+        /// <summary>
+        /// btnDeleteConfirm control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnDeleteConfirm;
     }
 }
