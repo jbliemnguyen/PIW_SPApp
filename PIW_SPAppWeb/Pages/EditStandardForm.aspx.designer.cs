@@ -454,31 +454,31 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Label lbCommentValue;
         
         /// <summary>
-        /// fieldsetRecallOrOSECRejectComment control.
+        /// fieldsetOSECRejectComment control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetRecallOrOSECRejectComment;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetOSECRejectComment;
         
         /// <summary>
-        /// lbRecallOrOSECRejectComment control.
+        /// lbOSECRejectComment control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbRecallOrOSECRejectComment;
+        protected global::System.Web.UI.WebControls.Label lbOSECRejectComment;
         
         /// <summary>
-        /// lbRecallOrOSECRejectCommentValue control.
+        /// lbOSECRejectCommentValue control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbRecallOrOSECRejectCommentValue;
+        protected global::System.Web.UI.WebControls.Label lbOSECRejectCommentValue;
         
         /// <summary>
         /// fieldsetRecall control.

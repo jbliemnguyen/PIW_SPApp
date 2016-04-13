@@ -58,3 +58,9 @@ label.error {
     display: none;
 }
 
+input[disabled] {
+     cursor: not-allowed;
+    box-shadow: none;
+    opacity: .65;
+ }
+

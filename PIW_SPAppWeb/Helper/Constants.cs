@@ -57,11 +57,11 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_PublishedDate = "Published Date";
         public const string PIWList_colName_PublishedError = "Published Error";
         public const string PIWList_colName_PublishedBy = "Published By";
-        public const string PIWList_colName_RecallComment = "Recall Comment";
         public const string PIWList_colName_SecReviewAction = "Sec Review Action";
         public const string PIWList_colName_SecReviewComment = "Sec Review Comment";
         public const string PIWList_colName_CitationNumber = "Citation Number";
-
+        public const string PIWList_colName_RecallComment = "Recall Comment";
+        public const string PIWList_colName_OSECRejectedComment = "OSEC Reject Comment";
         
 
 
@@ -78,19 +78,21 @@ namespace PIW_SPAppWeb
         public const string PIWList_FormStatus_PublishInitiated = "Publish Initiated";
         public const string PIWList_FormStatus_PublishedToeLibrary = "Published To eLibrary";
         public const string PIWList_FormStatus_ReOpen = "ReOpen";
+
+
+        public const string PIWList_DocCat_DelegatedErrata = "Delegated Errata";
+        public const string PIWList_DocCat_DelegatedLetter = "Delegated Letter";
+        public const string PIWList_DocCat_DelegatedNotice = "Delegated Notice";
+        public const string PIWList_DocCat_DelegatedOrder = "Delegated Order";
+        public const string PIWList_DocCat_Errata = "Errata";
+        public const string PIWList_DocCat_OALJ = "OALJ";
+        public const string PIWList_DocCat_NoticeErrata = "Notice Errata";
+        public const string PIWList_DocCat_Notice = "Notice";
         
-        //public const string PIWList_FormStatus_Pending = "Pending";
-        //public const string PIWList_FormStatus_Pending = "Pending";
-        //public const string PIWList_FormStatus_Pending = "Pending";
-        //public const string PIWList_FormStatus_Pending = "Pending";
-        //public const string PIWList_FormStatus_Pending = "Pending";
-        //public const string PIWList_FormStatus_Pending = "Pending";
-        //public const string PIWList_FormStatus_Pending = "Pending";
-        //public const string PIWList_FormStatus_Pending = "Pending";
-        //public const string PIWList_FormStatus_Pending = "Pending";
-        //public const string PIWList_FormStatus_Pending = "Pending";
-        //public const string PIWList_FormStatus_Pending = "Pending";
-        //public const string PIWList_FormStatus_Pending = "Pending"; 
+
+
+
+
 
 
         public const string PIWList_FormType_StandardForm = "Standard Form";
@@ -115,7 +117,7 @@ namespace PIW_SPAppWeb
         public const string ErrorLog_colName_ErrorMessage = "ErrorMessage";
         public const string ErrorLog_colName_ErrorPageName = "ErrorPageName";
 
-        //PIWListHistory list
+        //PIWListHistory listreje
         public const string PIWListHistory_ListName = "PIWListHistory";
         public const string PIWListHistory_colName_Title = "Title";
         public const string PIWListHistory_colName_PIWList = "PIW List Item";

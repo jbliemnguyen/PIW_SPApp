@@ -85,7 +85,7 @@ namespace PIW_SPAppWeb.Pages
                             PopulateFormStatus(clientContext, listItem);
                             DisplayListItemInForm(clientContext, listItem);
                             ////display form visiblility based on form status
-                            ControlsVisiblitilyBasedOnStatus(clientContext,PreviousFormStatus, FormStatus);
+                            ControlsVisiblitilyBasedOnStatus(clientContext,PreviousFormStatus, FormStatus,listItem);
                             ////above method get formStatus from list, store it in viewstate                       
                             //if (FormStatus == enumFormStatus.ReadyForPublishing)
                             //{
@@ -292,6 +292,18 @@ namespace PIW_SPAppWeb.Pages
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]] != null)
                 {
                     lbCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]].ToString();
+                }
+
+                //OSEC Reject Comment
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_OSECRejectedComment]] != null)
+                {
+                    lbOSECRejectCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_OSECRejectedComment]].ToString();
+                }
+
+                //Recall Comment
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_RecallComment]] != null)
+                {
+                    tbRecallComment.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_RecallComment]].ToString();
                 }
 
             }
@@ -663,12 +675,19 @@ namespace PIW_SPAppWeb.Pages
             return true;
         }
 
-        public void ControlsVisiblitilyBasedOnStatus(ClientContext clientContext,string previousFormStatus, string formStatus)
+        public void ControlsVisiblitilyBasedOnStatus(ClientContext clientContext,string previousFormStatus, string formStatus,ListItem listItem)
         {
-            //bool isRequireOSECVerification = isRequiredOSECVerificationSteps();
+            var piwlistInternalColumnName = helper.getInternalColumnNames(clientContext,Constants.PIWListName);
+            var documentCategory = string.Empty;
+            if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_DocumentCategory]] != null)
+            {
+                documentCategory = listItem[piwlistInternalColumnName[Constants.PIWList_colName_DocumentCategory]].ToString();
+            }
+            bool isRequireOSECVerification = isRequiredOSECVerificationStep(documentCategory);
             //SPUser checkoutUser = null;
             var currentUser = clientContext.Web.CurrentUser;
             clientContext.Load(currentUser);
+            
             clientContext.ExecuteQuery();
 
             switch (formStatus)
@@ -679,14 +698,22 @@ namespace PIW_SPAppWeb.Pages
                     //submit section    
                     EnableMainPanel(true);
                     fieldsetMessage.Visible = false;
-                    if (formStatus.Equals(Constants.PIWList_FormStatus_Recalled) ||
-                        formStatus.Equals(Constants.PIWList_FormStatus_Rejected))
+                    if (formStatus.Equals(Constants.PIWList_FormStatus_Recalled))
                     {
-                        fieldsetRecallOrOSECRejectComment.Visible = true;
+                        fieldsetOSECRejectComment.Visible = false;
+                        fieldsetRecall.Visible = true;
+                        btnRecall.Visible = false;
+                        tbRecallComment.Enabled = false;//prevent user from update the recall comment
                     }
-                    else
+                    else if (formStatus.Equals(Constants.PIWList_FormStatus_Rejected))
                     {
-                        fieldsetRecallOrOSECRejectComment.Visible = false;
+                        fieldsetOSECRejectComment.Visible = true;
+                        fieldsetRecall.Visible = false;
+                    }
+                    else//pending
+                    {
+                        fieldsetOSECRejectComment.Visible = false;
+                        fieldsetRecall.Visible = false;
                     }
 
                     
@@ -698,8 +725,6 @@ namespace PIW_SPAppWeb.Pages
                     btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_PIWUsers) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_OSECGroupName) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_SecretaryReviewGroupName);
 
                     btnSubmit.Visible = btnSave.Visible;
-
-                    fieldsetRecall.Visible = false;
 
                     btnEdit.Visible = false;
 
@@ -719,7 +744,8 @@ namespace PIW_SPAppWeb.Pages
                     //submit section   
                     EnableMainPanel(false);
                     fieldsetMessage.Visible = false;
-                    fieldsetRecallOrOSECRejectComment.Visible = false;
+                    fieldsetOSECRejectComment.Visible = false;
+                    fieldsetRecall.Visible = true;
                     
                     //OSEC section
                     fieldsetOSECVerification.Visible = false;
@@ -729,8 +755,6 @@ namespace PIW_SPAppWeb.Pages
                     btnSave.Visible = false;
 
                     btnSubmit.Visible = btnSave.Visible;
-
-                    fieldsetRecall.Visible = true;
 
                     btnEdit.Visible = false;
 
@@ -747,19 +771,192 @@ namespace PIW_SPAppWeb.Pages
 
                     break;
                 case Constants.PIWList_FormStatus_Edited:
-                    throw new Exception("Not Implemented");
+                    //submitter
+                    EnableMainPanel(true);
+                    fieldsetMessage.Visible = false;
+                    fieldsetOSECRejectComment.Visible = false;
+                    fieldsetRecall.Visible = false;
+
+                    //OSEC section
+                    if (previousFormStatus.Equals(Constants.PIWList_FormStatus_OSECVerification))
+                    {
+                        fieldsetOSECVerification.Visible = true;
+                        tbOSECVerificationComment.Enabled = false;
+                    }
+                    else if (previousFormStatus.Equals(Constants.PIWList_FormStatus_PrePublication) || 
+                        previousFormStatus.Equals(Constants.PIWList_FormStatus_ReadyForPublishing))
+                    {
+                        fieldsetPrePublication.Visible = true;
+                        EnablePrePublicationControls(false);
+                    }
+
+                    //Button
+                    btnSave.Visible = true;
+
+                    btnSubmit.Visible = btnSave.Visible;
+
+                    btnEdit.Visible = false;
+
+                    btnAccept.Visible = false;
+
+                    btnReject.Visible = false;
+
+                    btnOSECTakeOwnership.Visible = true;
+
+                    btnPublish.Visible = false;
+
+                    //delete button has the same visibility as Save button
+                    btnDelete.Visible = btnSave.Visible;
+
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
-                    throw new Exception("Not Implemented");
+                    //submitter
+                    EnableMainPanel(false);
+                    fieldsetMessage.Visible = false;
+                    fieldsetOSECRejectComment.Visible = false;
+                    fieldsetRecall.Visible = false;
+                    
+                    //OSEC section
+                    //osec verification
+                    fieldsetOSECVerification.Visible = true;
+                    tbOSECVerificationComment.Enabled = true;
+                    
+                    //prepublication
+                    fieldsetPrePublication.Visible = false;
+
+                    //Button
+                    btnSave.Visible = false;
+
+                    btnSubmit.Visible = btnSave.Visible;
+
+                    btnEdit.Visible = true;
+
+                    btnAccept.Visible = true;
+
+                    btnReject.Visible = true;
+
+                    btnOSECTakeOwnership.Visible = false;
+
+                    btnPublish.Visible = false;
+
+                    //delete button has the same visibility as Save button
+                    btnDelete.Visible = btnSave.Visible;
+
                     break;
                 case Constants.PIWList_FormStatus_PrePublication:
-                    throw new Exception("Not Implemented");
+                    //submitter
+                    EnableMainPanel(false);
+                    fieldsetMessage.Visible = false;
+                    fieldsetOSECRejectComment.Visible = false;
+                    fieldsetRecall.Visible = false;
+
+                    //OSEC section
+                    //OSEC verification
+                    if (isRequireOSECVerification)
+                    {
+                        fieldsetOSECVerification.Visible = true;
+                        tbOSECVerificationComment.Enabled = false;
+                    }
+                    
+                    //PrePublication
+                    fieldsetPrePublication.Visible = true;
+                    EnablePrePublicationControls(true);
+
+                    //button
+                    btnSave.Visible = false;
+
+                    btnSubmit.Visible = btnSave.Visible;
+
+                    btnEdit.Visible = true;
+
+                    btnAccept.Visible = true;
+
+                    btnReject.Visible = true;
+
+                    btnOSECTakeOwnership.Visible = false;
+
+                    btnPublish.Visible = false;
+
+                    //delete button has the same visibility as Save button
+                    btnDelete.Visible = btnSave.Visible;
+
                     break;
                 case Constants.PIWList_FormStatus_ReadyForPublishing:
-                    throw new Exception("Not Implemented");
+                    //submitter
+                    EnableMainPanel(false);
+                    fieldsetMessage.Visible = false;
+                    fieldsetOSECRejectComment.Visible = false;
+                    fieldsetRecall.Visible = false;
+
+                    //OSEC section
+                    //OSEC verification
+                    if (isRequireOSECVerification)
+                    {
+                        fieldsetOSECVerification.Visible = true;
+                        tbOSECVerificationComment.Enabled = false;
+                    }
+
+                    //PrePublication
+                    fieldsetPrePublication.Visible = true;
+                    EnablePrePublicationControls(false);
+
+                    //button
+                    btnSave.Visible = false;
+
+                    btnSubmit.Visible = btnSave.Visible;
+
+                    btnEdit.Visible = true;
+
+                    btnAccept.Visible = false;
+
+                    btnReject.Visible = false;
+
+                    btnOSECTakeOwnership.Visible = false;
+
+                    btnPublish.Visible = true;
+
+                    //delete button has the same visibility as Save button
+                    btnDelete.Visible = btnSave.Visible;
+
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
-                    throw new Exception("Not Implemented");
+                    //submitter
+                    EnableMainPanel(false);
+                    fieldsetMessage.Visible = false;
+                    fieldsetOSECRejectComment.Visible = false;
+                    fieldsetRecall.Visible = false;
+
+                    //OSEC section
+                    //OSEC verification
+                    if (isRequireOSECVerification)
+                    {
+                        fieldsetOSECVerification.Visible = true;
+                        tbOSECVerificationComment.Enabled = false;
+                    }
+
+                    //PrePublication
+                    fieldsetPrePublication.Visible = true;
+                    EnablePrePublicationControls(false);
+
+                    //button
+                    btnSave.Visible = false;
+
+                    btnSubmit.Visible = btnSave.Visible;
+
+                    btnEdit.Visible = false;
+
+                    btnAccept.Visible = false;
+
+                    btnReject.Visible = false;
+
+                    btnOSECTakeOwnership.Visible = false;
+
+                    btnPublish.Visible = false;
+
+                    //delete button has the same visibility as Save button
+                    btnDelete.Visible = btnSave.Visible;
+
+                    break;
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
                     throw new Exception("Not Implemented");
@@ -768,9 +965,20 @@ namespace PIW_SPAppWeb.Pages
                     throw new Exception("Not Implemented");
                     break;
                 default:
-                    EnableMainPanel(false);
+                    throw new Exception("UnRecognized Form Status: " + formStatus);
                     break;
             }
+        }
+
+        private void EnablePrePublicationControls(bool enabled)
+        {
+            btnGenerateCitationNumber.Enabled = enabled;
+            tbCitationNumber.Enabled = enabled;
+            ddAvailableCitationNumbers.Enabled = enabled;
+            cbOverrideCitationNumber.Enabled = enabled;
+            btnAcceptCitationNumber.Enabled = enabled;
+            btnRemoveCitationNumber.Enabled = enabled;
+            tbPrePublicationComment.Enabled = enabled;
         }
 
         private void EnableMainPanel(bool enabled)
@@ -809,6 +1017,12 @@ namespace PIW_SPAppWeb.Pages
                 var btnRemoveDocument = (LinkButton)row.FindControl("btnRemoveDocument");
                 btnRemoveDocument.Enabled = enabled;
             }
+        }
+
+        private bool isRequiredOSECVerificationStep(string documentCategory)
+        {
+            return (documentCategory.Equals(Constants.PIWList_DocCat_Notice) ||
+                     documentCategory.Equals(Constants.PIWList_DocCat_NoticeErrata));
         }
 
 

@@ -362,11 +362,11 @@
                     <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
                 </div>
             </div>
-            <fieldset runat="server" id="fieldsetRecallOrOSECRejectComment" visible="true">
+            <fieldset runat="server" id="fieldsetOSECRejectComment" visible="true">
                 <div class="form-group">
-                    <asp:Label ID="lbRecallOrOSECRejectComment" runat="server" Text="Recall/Reject Comment" AssociatedControlID="lbRecallOrOSECRejectCommentValue" CssClass="col-md-2 control-label"></asp:Label>
+                    <asp:Label ID="lbOSECRejectComment" runat="server" Text="OSEC Reject Comment" AssociatedControlID="lbOSECRejectCommentValue" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-6">
-                        <asp:Label runat="server" ID="lbRecallOrOSECRejectCommentValue"></asp:Label>
+                        <asp:Label runat="server" ID="lbOSECRejectCommentValue"></asp:Label>
                     </div>
                 </div>
             </fieldset>
@@ -408,10 +408,11 @@
 
         <fieldset runat="server" id="fieldsetPrePublication" visible="false">
             <legend>Pre-Publication Review</legend>
+            
             <div class="form-group">
                 <div class="col-md-2"></div>
                 <div class="col-md-2">
-                    <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary" />
+                    <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary active" />
                 </div>
                 <div class="col-md-2">
                     <asp:TextBox ID="tbCitationNumber" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
@@ -421,18 +422,19 @@
                         <asp:ListItem>-- Available Citation # --</asp:ListItem>
                     </asp:DropDownList>
                 </div>
-
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <asp:CheckBox ID="cbOverrideCitationNumber" runat="server" Text="Override" CssClass="checkbox" ClientIDMode="Static" />
                 </div>
             </div>
-
             <div class="form-group">
                 <div class="col-md-2"></div>
+                
+                
                 <div class="col-md-4">
-                    <asp:Button ID="btnAcceptCitationNumber" runat="server" Text="Accept Citation Number" CssClass="btn-sm btn-primary" />
-                    <asp:Button ID="btnRemoveCitationNumber" runat="server" Text="Remove Citation Number" CssClass="btn-sm btn-primary" />
+                    <asp:Button ID="btnAcceptCitationNumber" runat="server" Text="Accept Citation Number" CssClass="btn-sm btn-primary active" />
+                    <asp:Button ID="btnRemoveCitationNumber" runat="server" Text="Remove Citation Number" CssClass="btn-sm btn-primary active" />
                 </div>
+
             </div>
 
             <div class="form-group">
@@ -449,15 +451,15 @@
         <div class="form-group">
             <div class="col-md-2"></div>
             <div class="col-md-6">
-                <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary" OnClick="btnSave_Click" />
-                <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary" OnClick="btnSubmit_Click" />
-                <asp:Button ID="btnOSECTakeOwnership" runat="server" Text="OSEC Take Ownership" CssClass="btn-sm btn-primary" />
-                <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn-sm btn-primary" />
-                <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary" />
-                <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary" />
-                <asp:Button ID="btnPublish" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary" />
+                <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary active" OnClick="btnSave_Click" />
+                <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary active" OnClick="btnSubmit_Click" />
+                <asp:Button ID="btnOSECTakeOwnership" runat="server" Text="OSEC Take Ownership" CssClass="btn-sm btn-primary active" />
+                <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" />
+                <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" />
+                <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" />
+                <asp:Button ID="btnPublish" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" />
                 <asp:Button ID="btnPublishConfirm" runat="server" Text="Publish" Style="visibility: hidden; display: none;" />
-                <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary" />
+                <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" />
                 <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" />
 
             </div>
