@@ -141,36 +141,18 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-
-
         private FileCollection getAllDocuments(ClientContext ctx, string uploadSubFolderURL, bool includeListItemAllFields)
         {
-
-
-
             Folder folder = ctx.Web.GetFolderByServerRelativeUrl(uploadSubFolderURL);
 
             FileCollection files = folder.Files;
             ctx.Load(files);
             ctx.Load(files, includes => includes.Include(i => i.ListItemAllFields.Id));
 
-
-
             if (includeListItemAllFields)
             {
                 ctx.Load(files, includes => includes.Include(i => i.ListItemAllFields));
             }
-
-
-            //clientContext.Load(files, includes => includes.Include(
-            //    i => i.ListItemAllFields,
-            //    i => i.ListItemAllFields["ID"],
-            //    i => i.ListItemAllFields[internalColumnNames[Constants.PIWDocuments_colName_SecurityLevel]],
-            //    i => i.ListItemAllFields[internalColumnNames[Constants.PIWDocuments_colName_EPSPassed]],
-            //    i => i.ListItemAllFields[internalColumnNames[Constants.PIWDocuments_colName_EPSError]]
-            //    ));
-
-
 
             ctx.ExecuteQuery();//file not found exception if the folder is not exist, let it crash because it is totally wrong somewhere
             return files;
@@ -195,11 +177,7 @@ namespace PIW_SPAppWeb.Helper
 
             string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, libraryName, subFoder);
 
-
             var documentList = getAllDocuments(clientContext, uploadSubFolderURL, true);
-
-
-
 
             foreach (File file in documentList)
             {
@@ -471,14 +449,6 @@ namespace PIW_SPAppWeb.Helper
             }
         }
 
-        //public bool isCurrentUserMemberOf(ClientContext clientContext,string groupName)
-        //{
-
-        //}
-        #endregion
-
-        #region Extension method
-
         public bool IsUserMemberOfGroup(ClientContext clientContext,User user, string groupName)
         {
             //Load group
@@ -488,8 +458,36 @@ namespace PIW_SPAppWeb.Helper
               .Any(g => g.Title == groupName);
         }
 
-    }
+        /// <summary>
+        /// Return the first docket number found in input
+        /// If no docket found, return the whole input
+        /// </summary>
+        /// <param name="filename"></param>
+        public string ExtractDocket(string filename)
+        {
+            string pattern = @"^(\w+)-(\d+)-\d\d\d";
+            string docket = string.Empty;
+
+            System.Text.RegularExpressions.Match match = System.Text.RegularExpressions.Regex.Match(filename, pattern);
+            if (match.Success)
+            {
+                docket = match.Value;
+            }
+            else
+            {
+                docket = filename.Substring(0, filename.LastIndexOf("."));
+            }
+
+            return docket;
+        }
         #endregion
+
+        
+
+        
+
+    }
+        
 }
 
 

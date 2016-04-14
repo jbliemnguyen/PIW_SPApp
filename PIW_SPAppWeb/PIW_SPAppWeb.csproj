@@ -199,6 +199,7 @@
     <Content Include="Services\Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helper\CitationNumber.cs" />
     <Compile Include="Helper\Constants.cs" />
     <Compile Include="Helper\SharePointHelper.cs" />
     <Compile Include="Helper\Workflow.cs" />

@@ -127,6 +127,24 @@ namespace PIW_SPAppWeb
         public const string PIWListHistory_colName_Created = "Created";
         public const string PIWListHistory_colName_CreatedBy = "Created By";
 
+        //CitationNumber list
+        public const string CitationNumberListName = "Citation Number";
+        public const string CitationNumberList_colName_PIWList = "PIWList";
+        public const string CitationNumberList_colName_QuarterNumber = "Quarter Number";
+        public const string CitationNumberList_colName_DocumentCategoryNumber = "Document Category Number";
+        public const string CitationNumberList_colName_SequenceNumber = "Sequence Number";
+        public const string CitationNumberList_colName_Title = "Title";
+        public const string CitationNumberList_colName_Status = "Status";
+        public const string CitationNumberList_colName_AssignedDate = "Assigne dDate";
+        public const string CitationNumberList_colName_DeletedDate = "Deleted Date";
+        public const string CitationNumberList_colName_ReAssignedDate = "ReAssigned Date";
+
+        ////Citation Status 
+        public const string CitationNumber_ASSIGNED_Status = "assigned";
+        public const string CitationNumber_DELETED_Status = "deleted";
+        public const string CitationNumber_REASSIGNED_Status = "reassigned";
+
+
         //group name
         public const string Grp_PIWUsers = "PIWUsers";
         public const string Grp_OSECGroupName = "PIWOSEC";
@@ -279,7 +297,7 @@ namespace PIW_SPAppWeb
         //public const string CitationNumberListName = "CitationNumberList";
         //public const string col_CitationNumberList_PIWList = "PIWList";
         //public const string col_CitationNumberList_QuarterNumber = "QuarterNumber";
-        //public const string col_CitationNumberList_DocumentTypeNumber = "DocumentTypeNumber";
+        //public const string col_CitationNumberList_DocumentTypeNumber = "DocumentCategoryNumber";
         //public const string col_CitationNumberList_SequenceNumber = "SequenceNumber";
         //public const string col_CitationNumberList_Title = "Title";
         //public const string col_CitationNumberList_Status = "Status";

@@ -336,6 +336,12 @@ namespace PIW_SPAppWeb.Pages
                         }
                     }
 
+                    if (rpDocumentList.Items.Count == 1)//only extract docket number if first document uploaded
+                    {
+                        tbDocketNumber.Text = helper.ExtractDocket(fileUpload.FileName);    
+                    }
+                    
+
                 }
 
             }
@@ -955,8 +961,6 @@ namespace PIW_SPAppWeb.Pages
 
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
-
-                    break;
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
                     throw new Exception("Not Implemented");
@@ -994,7 +998,7 @@ namespace PIW_SPAppWeb.Pages
             ddDocumentCategory.Enabled = enabled;
             ddProgramOfficeWorkflowInitiator.Enabled = enabled;
             //initiator
-            inputWorkflowInitiator.Enabled = enabled;
+            inputWorkflowInitiator.Enabled = false;//initiator alsways disabled
 
             ddProgramOfficeDocumentOwner.Enabled = enabled;
             //document owner

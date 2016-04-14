@@ -41,37 +41,39 @@
 
             //validate docket number when blur event
             $("#tbDocketNumber").blur(function () {
-                var docketNumber = $("#tbDocketNumber").val();
-                var isCNF = $("#cbIsCNF").is(':checked');
-                var docketValidationByPass = $("#cbDocketValidationByPass").is(':checked');
-                var postdata = '{docketNumber: "' + docketNumber + '",isCNF:' + isCNF + ',docketValidationByPass:' + docketValidationByPass + ' }';
-                var errorMessage;
+                var docketNumber = $.trim($("#tbDocketNumber").val());
+                if (!(!docketNumber)) {//check if docket is not empty, javascript style, cannot eliminiate the !(!)
 
-                $.ajax({
-                    type: "POST",
-                    url: "EditStandardForm.aspx/ValidateDocketNumber",
-                    data: postdata,
-                    contentType: "application/json; charset=utf-8",
-                    dataType: "json",
-                    success: function (response) {
-                        if (response.d) {//Not valid docket-display error and hide icon
-                            $("#spanDocketValidationClientSideError").text(response.d);
-                            $("#spanDocketValidationClientSideError").removeClass("invisible");
-                            $("#plyiconDocketValid").addClass("invisible");
+                    var isCNF = $("#cbIsCNF").is(':checked');
+                    var docketValidationByPass = $("#cbDocketValidationByPass").is(':checked');
+                    var postdata = '{docketNumber: "' + docketNumber + '",isCNF:' + isCNF + ',docketValidationByPass:' + docketValidationByPass + ' }';
 
-                        } else {//return empty string --> docket is good --> clear and hide error message and display good icon
-                            $("#spanDocketValidationClientSideError").text("");
-                            $("#spanDocketValidationClientSideError").addClass("invisible");
-                            $("#plyiconDocketValid").removeClass("invisible");
-                            //need to hide the error from client side too-scenerio: user have server-side error, he change it and tab out--> display good icon 
-                            //but the server side error is not hide until click again.
-                            $("#lbDocketValidationServerSideError").addClass("invisible");
+                    $.ajax({
+                        type: "POST",
+                        url: "EditStandardForm.aspx/ValidateDocketNumber",
+                        data: postdata,
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function(response) {
+                            if (response.d) { //Not valid docket-display error and hide icon
+                                $("#spanDocketValidationClientSideError").text(response.d);
+                                $("#spanDocketValidationClientSideError").removeClass("invisible");
+                                $("#plyiconDocketValid").addClass("invisible");
+
+                            } else { //return empty string --> docket is good --> clear and hide error message and display good icon
+                                $("#spanDocketValidationClientSideError").text("");
+                                $("#spanDocketValidationClientSideError").addClass("invisible");
+                                $("#plyiconDocketValid").removeClass("invisible");
+                                //need to hide the error from client side too-scenerio: user have server-side error, he change it and tab out--> display good icon 
+                                //but the server side error is not hide until click again.
+                                $("#lbDocketValidationServerSideError").addClass("invisible");
+                            }
+                        },
+                        failure: function(response) {
+                            alert(response.d);
                         }
-                    },
-                    failure: function (response) {
-                        alert(response.d);
-                    }
-                });
+                    });
+                }
             });
 
 
