@@ -537,7 +537,7 @@ namespace PIW_SPAppWeb.Pages
 
         private bool SaveMainPanelData(ClientContext clientContext, ListItem listItem)
         {
-            var internalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
 
             //each update has its own Execute query. If we set the field of the list item, then execute the ExecuteQuery to populate data
             //without calling the listitem.update, then the changes is lost 
@@ -583,54 +583,52 @@ namespace PIW_SPAppWeb.Pages
 
             //Save Data
 
-
-
             //Save IsActive
-            listItem[internalColumnNames[Constants.PIWList_colName_IsActive]] = true;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsActive]] = true;
 
             //Save Docket Number
-            listItem[internalColumnNames[Constants.PIWList_colName_DocketNumber]] = tbDocketNumber.Text.Trim();
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]] = tbDocketNumber.Text.Trim();
 
             //IsCNF
-            listItem[internalColumnNames[Constants.PIWList_colName_IsCNF]] = cbIsCNF.Checked;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsCNF]] = cbIsCNF.Checked;
 
             //Non-Docketed
-            listItem[internalColumnNames[Constants.PIWList_colName_IsNonDocket]] = cbIsNonDocket.Checked;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsNonDocket]] = cbIsNonDocket.Checked;
 
             //By Pass Docket Validation
             //listItem[internalColumnNames[Constants.PIWList_colName_ByPassDocketValidation]] = cbby.Checked;
 
             //Description
-            listItem[internalColumnNames[Constants.PIWList_colName_Description]] = tbDescription.Text.Trim();
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_Description]] = tbDescription.Text.Trim();
 
 
             //alternate identifier
-            listItem[internalColumnNames[Constants.PIWList_colName_AlternateIdentifier]] = tbAlternateIdentifier.Text.Trim();
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_AlternateIdentifier]] = tbAlternateIdentifier.Text.Trim();
 
             //instruction for osec
-            listItem[internalColumnNames[Constants.PIWList_colName_InstructionForOSEC]] = tbInstruction.Text.Trim();
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_InstructionForOSEC]] = tbInstruction.Text.Trim();
 
             //Federal register
-            listItem[internalColumnNames[Constants.PIWList_colName_FederalRegister]] = cbFederalRegister.Checked;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FederalRegister]] = cbFederalRegister.Checked;
 
             //document category
             if (ddDocumentCategory.SelectedIndex != 0)
             {
-                listItem[internalColumnNames[Constants.PIWList_colName_DocumentCategory]] = ddDocumentCategory.SelectedValue;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]] = ddDocumentCategory.SelectedValue;
             }
             else
             {
-                listItem[internalColumnNames[Constants.PIWList_colName_DocumentCategory]] = string.Empty;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]] = string.Empty;
             }
 
             //program office(wokflow initiator)
             if (ddProgramOfficeWorkflowInitiator.SelectedIndex != 0)
             {
-                listItem[internalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = ddProgramOfficeWorkflowInitiator.SelectedValue;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = ddProgramOfficeWorkflowInitiator.SelectedValue;
             }
             else
             {
-                listItem[internalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = string.Empty;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = string.Empty;
             }
 
 
@@ -642,35 +640,35 @@ namespace PIW_SPAppWeb.Pages
             //program office(wokflow initiator)
             if (ddProgramOfficeDocumentOwner.SelectedIndex != 0)
             {
-                listItem[internalColumnNames[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] = ddProgramOfficeDocumentOwner.SelectedValue;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] = ddProgramOfficeDocumentOwner.SelectedValue;
             }
             else
             {
-                listItem[internalColumnNames[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] = string.Empty;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] = string.Empty;
             }
 
             //document owner
-            listItem[internalColumnNames[Constants.PIWList_colName_DocumentOwner]] = documentOwners;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentOwner]] = documentOwners;
 
             //notification recipient
-            listItem[internalColumnNames[Constants.PIWList_colName_NotificationRecipient]] = notificationRecipients;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_NotificationRecipient]] = notificationRecipients;
 
             //due date
-            listItem[internalColumnNames[Constants.PIWList_colName_DueDate]] = tbDueDate.Text;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_DueDate]] = tbDueDate.Text;
 
             //comment
             if (!string.IsNullOrEmpty(tbComment.Text))
             {
-                if (listItem[internalColumnNames[Constants.PIWList_colName_Comment]] == null)
+                if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] == null)
                 {
-                    listItem[internalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}", clientContext.Web.CurrentUser.Title,
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}", clientContext.Web.CurrentUser.Title,
                         DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text);
                 }
                 else
                 {
                     //append
-                    listItem[internalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}<br>{3}",
-                        clientContext.Web.CurrentUser.Title, DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text, listItem[internalColumnNames[Constants.PIWList_colName_Comment]].ToString());
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}<br>{3}",
+                        clientContext.Web.CurrentUser.Title, DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text, listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]].ToString());
                 }
 
             }
@@ -680,6 +678,8 @@ namespace PIW_SPAppWeb.Pages
             clientContext.ExecuteQuery();
             return true;
         }
+
+        
 
         public void ControlsVisiblitilyBasedOnStatus(ClientContext clientContext,string previousFormStatus, string formStatus,ListItem listItem)
         {
@@ -1027,6 +1027,99 @@ namespace PIW_SPAppWeb.Pages
         {
             return (documentCategory.Equals(Constants.PIWList_DocCat_Notice) ||
                      documentCategory.Equals(Constants.PIWList_DocCat_NoticeErrata));
+        }
+
+        protected void btnGenerateCitationNumber_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    if (ddDocumentCategory.SelectedIndex > 0)
+                    {
+                        int documentCategoryNumber = helper.getDocumentCategoryNumber(ddDocumentCategory.SelectedValue);
+
+                        CitationNumber citationNumberHelper = new CitationNumber(documentCategoryNumber,DateTime.Now);
+
+                        tbCitationNumber.Text = citationNumberHelper.GetNextCitationNumber(clientContext);
+
+                        var availableCitationNumbers = citationNumberHelper.getAllAvailableCitationNumber(clientContext);
+                        if (availableCitationNumbers.Count > 1)//more than 1, 1 is already displayed in textbox
+                        {
+                            ddAvailableCitationNumbers.Visible = true;
+                            ddAvailableCitationNumbers.Items.Clear();
+                            ddAvailableCitationNumbers.Items.Add("-- Available Citation # --");
+
+                            foreach (string s in availableCitationNumbers)
+                            {
+                                ddAvailableCitationNumbers.Items.Add(s);
+                            }
+                        }
+
+                    }
+                    
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw exc;
+            }
+        }
+
+        protected void btnAcceptCitationNumber_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    if (ddDocumentCategory.SelectedIndex > 0)
+                    {
+                        string errorMessage = string.Empty;
+                        int documentCategoryNumber = helper.getDocumentCategoryNumber(ddDocumentCategory.SelectedValue);
+
+                        CitationNumber citationNumberHelper = new CitationNumber(documentCategoryNumber, DateTime.Now);
+
+                        if (citationNumberHelper.Save(clientContext, _listItemId, tbCitationNumber.Text.Trim(),
+                            ref errorMessage, cbOverrideCitationNumber.Checked))
+                        {
+                            lbCitationNumberError.Visible = false;
+                            lbCitationNumberError.Text = string.Empty;
+                            helper.SetCitationNumberFieldInPIWList(clientContext,_listItemId,tbCitationNumber.Text.Trim());
+                        }
+                        else//display error message
+                        {
+                            lbCitationNumberError.Visible = true;
+                            lbCitationNumberError.Text = errorMessage;
+                        }
+
+                    }
+
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw exc;
+            }
+        }
+
+        protected void btnRemoveCitationNumber_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    //just delete the citation item - instead of settign the status to deleted
+                    helper.deleteAssociatedCitationNumberListItem(clientContext,_listItemId);
+
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw exc;
+            }
         }
 
 

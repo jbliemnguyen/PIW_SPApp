@@ -54,7 +54,7 @@
                         data: postdata,
                         contentType: "application/json; charset=utf-8",
                         dataType: "json",
-                        success: function(response) {
+                        success: function (response) {
                             if (response.d) { //Not valid docket-display error and hide icon
                                 $("#spanDocketValidationClientSideError").text(response.d);
                                 $("#spanDocketValidationClientSideError").removeClass("invisible");
@@ -69,7 +69,7 @@
                                 $("#lbDocketValidationServerSideError").addClass("invisible");
                             }
                         },
-                        failure: function(response) {
+                        failure: function (response) {
                             alert(response.d);
                         }
                     });
@@ -261,8 +261,8 @@
                         <asp:ListItem>Delegated Letter</asp:ListItem>
                         <asp:ListItem>Delegated Notice</asp:ListItem>
                         <asp:ListItem>Delegated Order</asp:ListItem>
-                        <asp:ListItem>Errata</asp:ListItem>
                         <asp:ListItem>OALJ</asp:ListItem>
+                        <asp:ListItem>OALJ Errata</asp:ListItem>
                         <asp:ListItem>Notice Errata</asp:ListItem>
                         <asp:ListItem>Notice</asp:ListItem>
                     </asp:DropDownList>
@@ -408,36 +408,37 @@
         </fieldset>
 
 
+
         <fieldset runat="server" id="fieldsetPrePublication" visible="false">
             <legend>Pre-Publication Review</legend>
-            
-            <div class="form-group">
-                <div class="col-md-2"></div>
-                <div class="col-md-2">
-                    <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary active" />
-                </div>
-                <div class="col-md-2">
-                    <asp:TextBox ID="tbCitationNumber" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
-                </div>
-                <div class="col-md-2">
-                    <asp:DropDownList ID="ddAvailableCitationNumbers" CssClass="form-control" runat="server" Visible="false">
-                        <asp:ListItem>-- Available Citation # --</asp:ListItem>
-                    </asp:DropDownList>
-                </div>
-                <div class="col-md-3">
-                    <asp:CheckBox ID="cbOverrideCitationNumber" runat="server" Text="Override" CssClass="checkbox" ClientIDMode="Static" />
-                </div>
-            </div>
-            <div class="form-group">
-                <div class="col-md-2"></div>
-                
-                
-                <div class="col-md-4">
-                    <asp:Button ID="btnAcceptCitationNumber" runat="server" Text="Accept Citation Number" CssClass="btn-sm btn-primary active" />
-                    <asp:Button ID="btnRemoveCitationNumber" runat="server" Text="Remove Citation Number" CssClass="btn-sm btn-primary active" />
-                </div>
+            <asp:UpdatePanel runat="server">
+                <ContentTemplate>
+                    <div class="form-group">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-2">
+                            <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnGenerateCitationNumber_Click" />
+                        </div>
+                        <div class="col-md-6">
+                            <asp:TextBox ID="tbCitationNumber" ClientIDMode="Static" runat="server" CssClass="form-control" Width="200px"></asp:TextBox>
 
-            </div>
+                            <asp:DropDownList ID="ddAvailableCitationNumbers" CssClass="form-control" runat="server" Visible="false" Width="200px">
+                                <asp:ListItem>-- Available Citation # --</asp:ListItem>
+                            </asp:DropDownList>
+
+                            <asp:CheckBox ID="cbOverrideCitationNumber" runat="server" Text="Override" CssClass="checkbox" ClientIDMode="Static" />
+                            
+                            <asp:Label runat="server" ID="lbCitationNumberError" Visible="false" ForeColor="Red"></asp:Label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-4">
+                            <asp:Button ID="btnAcceptCitationNumber" runat="server" Text="Accept Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnAcceptCitationNumber_Click" />
+                            <asp:Button ID="btnRemoveCitationNumber" runat="server" Text="Remove Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnRemoveCitationNumber_Click" />
+                        </div>
+                    </div>
+                </ContentTemplate>
+            </asp:UpdatePanel>
 
             <div class="form-group">
                 <asp:Label ID="lbPrePubRevAction" runat="server" Text="Action" AssociatedControlID="lbPrePublicationReviewAction" CssClass="col-md-2 control-label"></asp:Label>

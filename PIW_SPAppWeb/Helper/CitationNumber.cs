@@ -58,10 +58,10 @@ namespace PIW_SPAppWeb.Helper
         /// <summary>
         /// This method must be called to set _sequenceNumber value
         /// </summary>
-        public void GetNextCitationNumber(ClientContext clientContext)
+        public string GetNextCitationNumber(ClientContext clientContext)
         {
             var listItemCol = getListItemByQuarterNumberAndDocumentCategory(clientContext,_quarterNumber,_documentCategoryNumber);
-            var CitationNumberInternalColumnNames = helper.getInternalColumnNames(clientContext,Constants.CitationNumberListName);
+            var citationNumberInternalColumnNames = helper.getInternalColumnNames(clientContext,Constants.CitationNumberListName);
             if (listItemCol.Count == 0)
             {
                 _sequenceNumber = 1;
@@ -69,12 +69,14 @@ namespace PIW_SPAppWeb.Helper
             else
             {
                 var listItem = listItemCol[0];
-                if (listItem[CitationNumberInternalColumnNames[Constants.CitationNumberList_colName_SequenceNumber]] != null)
+                if (listItem[citationNumberInternalColumnNames[Constants.CitationNumberList_colName_SequenceNumber]] != null)
                 {
-                    int currentSequence = int.Parse(listItem[CitationNumberInternalColumnNames[Constants.CitationNumberList_colName_SequenceNumber]].ToString());
+                    int currentSequence = int.Parse(listItem[citationNumberInternalColumnNames[Constants.CitationNumberList_colName_SequenceNumber]].ToString());
                     _sequenceNumber = ++currentSequence;
                 }
             }
+
+            return this.ToString();
         }
 
         /// <summary>
@@ -83,39 +85,40 @@ namespace PIW_SPAppWeb.Helper
         /// get highest citation (recommended)
         /// </summary>
         /// <returns></returns>
-        public List<string> getAllAvailableCitationNumber()
+        public List<string> getAllAvailableCitationNumber(ClientContext clientContext)
         {
             List<string> result = new List<string>();
-            SPListItemCollection listItemCol = getListItemByQuarterNumberAndDocumentCategory();
+            var citationNumberInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.CitationNumberListName);
+            var citationListItems = getListItemByQuarterNumberAndDocumentCategory(clientContext,_quarterNumber,_documentCategoryNumber);
 
-            if (listItemCol.Count > 0)
+            if (citationListItems.Count > 0)
             {
-                //Top sequence number (not in list)
-                var listItem = listItemCol[0];
-                if (listItem[SPListSetting.col_CitationNumberList_SequenceNumber] != null)
+                //add top sequence number (not exist in list)
+                var listItem = citationListItems[0];
+                if (listItem[citationNumberInternalColumnNames[Constants.CitationNumberList_colName_SequenceNumber]] != null)
                 {
-                    int currentSequence = int.Parse(listItem[SPListSetting.col_CitationNumberList_SequenceNumber].ToString());
+                    int currentSequence = int.Parse(listItem[citationNumberInternalColumnNames[Constants.CitationNumberList_colName_SequenceNumber]].ToString());
                     _sequenceNumber = ++currentSequence;
                     result.Add(this.ToString());
                 }
 
                 //scan through all citation number, add deleted and skip number 
-                for (int i = 0; i < listItemCol.Count; i++)
+                for (int i = 0; i < citationListItems.Count; i++)
                 {
-                    var item = listItemCol[i];
-                    //Add all existing but not assiged citation number (deleted)
-                    if (item[SPListSetting.col_CitationNumberList_PIWList] == null)
+                    var item = citationListItems[i];
+                    //Add all existing item but not associated to any piwlist (deleted)
+                    if (item[citationNumberInternalColumnNames[Constants.CitationNumberList_colName_PIWList]] == null)
                     {
-                        _sequenceNumber = int.Parse(item[SPListSetting.col_CitationNumberList_SequenceNumber].ToString());
+                        _sequenceNumber = int.Parse(item[citationNumberInternalColumnNames[Constants.CitationNumberList_colName_SequenceNumber]].ToString());
                         result.Add(this.ToString());
                     }
 
 
-                    int currentSequenceNumber = int.Parse(listItemCol[i][SPListSetting.col_CitationNumberList_SequenceNumber].ToString());
+                    int currentSequenceNumber = int.Parse(citationListItems[i][citationNumberInternalColumnNames[Constants.CitationNumberList_colName_SequenceNumber]].ToString());
                     int nextSequenceNumber = -1;
-                    if (i < listItemCol.Count - 1)//check all numbers prior current citation #
+                    if (i < citationListItems.Count - 1)//check all numbers prior current citation #
                     {
-                        nextSequenceNumber = int.Parse(listItemCol[i + 1][SPListSetting.col_CitationNumberList_SequenceNumber].ToString());
+                        nextSequenceNumber = int.Parse(citationListItems[i + 1][citationNumberInternalColumnNames[Constants.CitationNumberList_colName_SequenceNumber]].ToString());
                     }
                     else//last number in collection
                     {
@@ -124,7 +127,7 @@ namespace PIW_SPAppWeb.Helper
 
                     if (currentSequenceNumber > (nextSequenceNumber + 1))
                     {
-                        //Get all cit numbers in the "gap"
+                        //Get all cit numbers in the "gap" - Add all skip citation
                         //for : 6,3,2,1 --> add 4,5,0 in the available cit # list
                         for (int j = currentSequenceNumber - 1; j > nextSequenceNumber; j--)
                         {
@@ -132,7 +135,6 @@ namespace PIW_SPAppWeb.Helper
                             result.Add(this.ToString());
                         }
                     }
-                    //Add all skip citation
                 }
             }
 
@@ -141,25 +143,33 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public bool Save(SPListItem piwListItem, string FullCitationNumber, ref string returnedError, bool isOverride)
+        public bool Save(ClientContext clientContext,string piwListItemID, string FullCitationNumber, ref string returnedError, bool isOverride)
         {
+            if (helper.getCitationNumberListItemFromPIWListID(clientContext, piwListItemID).Count >= 1)
+            {
+                returnedError = "This workflow already has a citation number";
+                return false;
+            }
+
+            
+            var citationNumberInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.CitationNumberListName);
             if (ValidateFormatCitationNumber(FullCitationNumber))
             {
                 int previousQuarterNumber = _quarterNumber;//current quarterNumber number (today)
-                int previousDocumentTypeNumber = _documentCategoryNumber;//current document type saved in piw list item
+                int previousDocumentCategoryNumber = _documentCategoryNumber;//current document type saved in piw list item
                 ParseCitationNumber(FullCitationNumber);//update quarterNumber,documenttype and sequence number with new (user input) full citation number
 
                 if (!isOverride)
                 {
                     //Not check Document Type and Quarter if override is selected
-                    if (!(previousQuarterNumber.Equals(_quarterNumber) && previousDocumentTypeNumber.Equals(_documentCategoryNumber)))
+                    if (!(previousQuarterNumber.Equals(_quarterNumber) && previousDocumentCategoryNumber.Equals(_documentCategoryNumber)))
                     {
                         returnedError = String.Format("Invalid Document Type and/or Quarter Number");
                         return false;
                     }
                 }
 
-                SPListItemCollection citationNumberListItemCollection = getCitationNumberListItemByQuarterNumberAndDocumentTypeAndSequenceNumber();
+                var citationNumberListItemCollection = getListItemByQuarterNumberAndDocumentCategoryAndSequenceNumber(clientContext,_quarterNumber,_documentCategoryNumber,_sequenceNumber);
                 if (citationNumberListItemCollection.Count > 0)//citation number has been created
                 {
                     //and assigned to a Piw list item
@@ -167,16 +177,16 @@ namespace PIW_SPAppWeb.Helper
                     //----> citation number has been taken
                     //(we assume only 1 citation number exist in the system (no duplication) )
                     var citationNumberListItem = citationNumberListItemCollection[0];
-                    if ((citationNumberListItem[SPListSetting.col_CitationNumberList_PIWList] != null) &&
-                        (!string.IsNullOrEmpty(citationNumberListItem[SPListSetting.col_CitationNumberList_PIWList].ToString())) &&
-                        (!citationNumberListItem[SPListSetting.col_CitationNumberList_PIWList].ToString().Equals(piwListItem["ID"].ToString())))
+                    if ((citationNumberListItem[citationNumberInternalColumnNames[Constants.CitationNumberList_colName_PIWList]] != null) &&
+                        (!string.IsNullOrEmpty(citationNumberListItem[citationNumberInternalColumnNames[Constants.CitationNumberList_colName_PIWList]].ToString())) &&
+                        (!citationNumberListItem[citationNumberInternalColumnNames[Constants.CitationNumberList_colName_PIWList]].ToString().Equals(piwListItemID)))
                     {
                         returnedError = "Citation Number has been taken.";
                         return false;
                     }
                     else//assign the (exist) citation number to current PIW List Item
                     {
-                        AssignExistCitationNumberToListItem(piwListItem, citationNumberListItem);
+                        AssignExistCitationNumberToListItem(clientContext,piwListItemID, citationNumberListItem);
                         return true;
                     }
                 }
@@ -184,7 +194,7 @@ namespace PIW_SPAppWeb.Helper
                 //This is brand new citation number
                 //we dont have to check if citation number exist before inserting
                 //if it exist, we never come here (above scenario)
-                InsertCitationNumberListItem(piwListItem);//create new
+                InsertCitationNumberListItem(clientContext,piwListItemID);//create new
                 return true;
             }
             else
@@ -192,11 +202,7 @@ namespace PIW_SPAppWeb.Helper
                 returnedError = "Invalid Number Format and/or Document Type Number";
                 return false;
             }
-
-            //Note: We don't have to check if the specific PIWList item has been assigned
-            //a citation number before. Becuase piwlist item only has one opportunity 
-            //to get citation number, and the citation number is validated against same
-            //document type and quarterNumber, also its format get checked            
+            
         }
 
         /// <summary>
@@ -304,6 +310,7 @@ namespace PIW_SPAppWeb.Helper
                 citationNumberInternalNameList[Constants.CitationNumberList_colName_SequenceNumber],
 
             };
+
             query.ViewXml = string.Format(@"<View>
 	                                            <Query>
 		                                            <Where>
@@ -321,8 +328,8 @@ namespace PIW_SPAppWeb.Helper
 		                                            <OrderBy>
 			                                            <FieldRef Name='{4}' Ascending='False'/>
 		                                            </OrderBy>
-	                                            <Query>
-                                            <View>", args);
+	                                            </Query>
+                                            </View>", args);
 
             var citationListItems = citationNumberList.GetItems(query);
 
@@ -368,8 +375,8 @@ namespace PIW_SPAppWeb.Helper
 				                                            </Eq>
 			                                            </And>
 		                                            </Where>		
-	                                            <Query>
-                                            <View>", args);
+	                                            </Query>
+                                            </View>", args);
 
             var citationListItems = citationNumberList.GetItems(query);
 
@@ -379,6 +386,8 @@ namespace PIW_SPAppWeb.Helper
             return citationListItems;
 
         }
+
+        
 
         private void AssignExistCitationNumberToListItem(ClientContext clientContext, string piwListItemID, ListItem citationNumberListItem)
         {
@@ -420,6 +429,8 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
 
         }
+
+        
 
 
         #endregion

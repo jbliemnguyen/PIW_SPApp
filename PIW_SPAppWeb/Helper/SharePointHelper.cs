@@ -13,6 +13,8 @@ using Microsoft.SharePoint.Client.UserProfiles;
 using File = Microsoft.SharePoint.Client.File;
 using ListItem = Microsoft.SharePoint.Client.ListItem;
 using FERC.FOL.ATMS.Remote.Interfaces;
+using ListItemCollection = Microsoft.SharePoint.Client.ListItemCollection;
+
 //using FERC.FOL.ATMS.Structure;
 
 namespace PIW_SPAppWeb.Helper
@@ -81,6 +83,47 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
+        public void SetCitationNumberFieldInPIWList(ClientContext clientContext, string piwListItemID, string citationNumber)
+        {
+            var piwListinternalName = getInternalColumnNames(clientContext,Constants.PIWListName);
+            ListItem listItem = GetPiwListItemById(clientContext, piwListItemID, false);
+
+            listItem[piwListinternalName[Constants.PIWList_colName_CitationNumber]] = citationNumber;
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
+
+        public void deleteAssociatedCitationNumberListItem(ClientContext clientContext, string piwListItemID)
+        {
+            ListItemCollection citationList = getCitationNumberListItemFromPIWListID(clientContext, piwListItemID);
+            citationList[0].DeleteObject();
+            clientContext.ExecuteQuery();
+        }
+
+        public ListItemCollection getCitationNumberListItemFromPIWListID(ClientContext clientContext, string piwListItemID)
+        {
+            List citationNumberList = clientContext.Web.Lists.GetByTitle(Constants.CitationNumberListName);
+            var citationNumberInternalNameList = getInternalColumnNames(clientContext, Constants.CitationNumberListName);
+            CamlQuery query = new CamlQuery();
+            query.ViewXml = string.Format(@"<View>
+	                                            <Query>
+		                                            <Where>
+			                                            <Eq>
+				                                            <FieldRef Name='{0}' LookupId='TRUE' />
+				                                            <Value Type='Lookup'>{1}</Value>
+			                                            </Eq>			
+		                                            </Where>		
+	                                            </Query>
+                                            </View>", citationNumberInternalNameList[Constants.CitationNumberList_colName_PIWList], piwListItemID);
+
+            var citationListItems = citationNumberList.GetItems(query);
+
+            clientContext.Load(citationListItems);
+            clientContext.ExecuteQuery();
+
+            return citationListItems;
+
+        }
         #endregion
 
         #region PIW Documents
@@ -479,6 +522,33 @@ namespace PIW_SPAppWeb.Helper
             }
 
             return docket;
+        }
+
+        public int getDocumentCategoryNumber(string documentCategory)
+        {
+            int documentCategoryNumber = 0;
+            switch ( documentCategory)
+            {
+                case Constants.PIWList_DocCat_DelegatedErrata:
+                case Constants.PIWList_DocCat_DelegatedLetter:
+                case Constants.PIWList_DocCat_DelegatedNotice:
+                case Constants.PIWList_DocCat_DelegatedOrder:
+                    documentCategoryNumber = 62;
+                    break;
+                case Constants.PIWList_DocCat_OALJ:
+                case Constants.PIWList_DocCat_OALJErrata:
+                    documentCategoryNumber = 63;
+                    break;
+                case Constants.PIWList_DocCat_NoticeErrata:
+                case Constants.PIWList_DocCat_Notice:
+                    documentCategoryNumber = 61;
+                    break;
+                default:
+                    throw new Exception("Unknown document category: " + documentCategory);
+                    break;
+            }
+
+            return documentCategoryNumber;
         }
         #endregion
 

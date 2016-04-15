@@ -84,7 +84,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_DocCat_DelegatedLetter = "Delegated Letter";
         public const string PIWList_DocCat_DelegatedNotice = "Delegated Notice";
         public const string PIWList_DocCat_DelegatedOrder = "Delegated Order";
-        public const string PIWList_DocCat_Errata = "Errata";
+        public const string PIWList_DocCat_OALJErrata = "OALJ Errata";
         public const string PIWList_DocCat_OALJ = "OALJ";
         public const string PIWList_DocCat_NoticeErrata = "Notice Errata";
         public const string PIWList_DocCat_Notice = "Notice";
@@ -135,7 +135,7 @@ namespace PIW_SPAppWeb
         public const string CitationNumberList_colName_SequenceNumber = "Sequence Number";
         public const string CitationNumberList_colName_Title = "Title";
         public const string CitationNumberList_colName_Status = "Status";
-        public const string CitationNumberList_colName_AssignedDate = "Assigne dDate";
+        public const string CitationNumberList_colName_AssignedDate = "Assigned Date";
         public const string CitationNumberList_colName_DeletedDate = "Deleted Date";
         public const string CitationNumberList_colName_ReAssignedDate = "ReAssigned Date";
 
