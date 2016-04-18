@@ -1,8 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<parameters>
-  <setParameter name="IIS Web Application Name" value="Default Web Site/" />
-  <setParameter name="ClientId" value="fa894505-c3c7-4195-b173-71e90aa289d2" />
-  <setParameter name="ClientSigningCertificatePath" value="E:\Certs\S2S\S2SDevRev2.pfx" />
-  <setParameter name="ClientSigningCertificatePassword" value="Sharepoint03" />
-  <setParameter name="IssuerId" value="e6fe8243-740f-40e5-bd88-93385473ca01" />
-</parameters>

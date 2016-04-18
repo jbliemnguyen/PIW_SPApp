@@ -5,6 +5,5 @@ C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.IdentityModel.
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.IdentityModel.Extensions.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Debug\PIW_SPAppWeb.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Debug\PIW_SPAppWeb.pdb
-C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Debug\PIW_SPAppWeb.csprojResolveAssemblyReference.cache
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\FERC.FOL.ATMS.Remote.Interfaces.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\FERC.FOL.ATMS.Structure.dll
