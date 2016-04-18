@@ -39,6 +39,16 @@
                 }
             });
 
+
+            //the option is populated from ajax call (update panel)
+            //--> we need to use event deletegate to register the event
+            //$("#fieldsetPrePublication").on("change", "#ddAvailableCitationNumbers",function() {
+            //    var str = jQuery.trim($(this).val());
+            //    if (str.indexOf("FERC") > 0) {
+            //        $("#tbCitationNumber").attr("value", str);
+            //    }
+            //});
+
             //validate docket number when blur event
             $("#tbDocketNumber").blur(function () {
                 var docketNumber = $.trim($("#tbDocketNumber").val());
@@ -409,7 +419,7 @@
 
 
 
-        <fieldset runat="server" id="fieldsetPrePublication" visible="false">
+        <fieldset runat="server" id="fieldsetPrePublication" visible="false" clientidmode="Static">
             <legend>Pre-Publication Review</legend>
             <asp:UpdatePanel runat="server">
                 <ContentTemplate>
@@ -421,12 +431,12 @@
                         <div class="col-md-6">
                             <asp:TextBox ID="tbCitationNumber" ClientIDMode="Static" runat="server" CssClass="form-control" Width="200px"></asp:TextBox>
 
-                            <asp:DropDownList ID="ddAvailableCitationNumbers" CssClass="form-control" runat="server" Visible="false" Width="200px">
+                            <asp:DropDownList ID="ddAvailableCitationNumbers" CssClass="form-control" runat="server" Visible="false" Width="200px" ClientIDMode="Static" AutoPostBack="True" OnSelectedIndexChanged="ddAvailableCitationNumbers_SelectedIndexChanged">
                                 <asp:ListItem>-- Available Citation # --</asp:ListItem>
                             </asp:DropDownList>
 
                             <asp:CheckBox ID="cbOverrideCitationNumber" runat="server" Text="Override" CssClass="checkbox" ClientIDMode="Static" />
-                            
+
                             <asp:Label runat="server" ID="lbCitationNumberError" Visible="false" ForeColor="Red"></asp:Label>
                         </div>
                     </div>
@@ -438,6 +448,9 @@
                         </div>
                     </div>
                 </ContentTemplate>
+                <Triggers>
+                    <asp:AsyncPostBackTrigger ControlID="ddAvailableCitationNumbers" EventName="SelectedIndexChanged" />
+                </Triggers>
             </asp:UpdatePanel>
 
             <div class="form-group">

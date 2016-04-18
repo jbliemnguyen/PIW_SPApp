@@ -97,7 +97,15 @@ namespace PIW_SPAppWeb.Helper
         {
             ListItemCollection citationList = getCitationNumberListItemFromPIWListID(clientContext, piwListItemID);
             citationList[0].DeleteObject();
+
+            //delete citation number field in piwlist
+            var piwListinternalName = getInternalColumnNames(clientContext, Constants.PIWListName);
+            ListItem listItem = GetPiwListItemById(clientContext, piwListItemID, false);
+
+            listItem[piwListinternalName[Constants.PIWList_colName_CitationNumber]] = string.Empty;
+            listItem.Update();
             clientContext.ExecuteQuery();
+
         }
 
         public ListItemCollection getCitationNumberListItemFromPIWListID(ClientContext clientContext, string piwListItemID)
