@@ -50,7 +50,7 @@ namespace PIW_SPAppJob
         /// </summary>
         /// <param name="request">HttpRequest in which to look for a context token</param>
         /// <returns>The context token string</returns>
-        public const string GetContextTokenFromRequest(HttpRequest request)
+        public static string GetContextTokenFromRequest(HttpRequest request)
         {
             return GetContextTokenFromRequest(new HttpRequestWrapper(request));
         }
@@ -61,7 +61,7 @@ namespace PIW_SPAppJob
         /// </summary>
         /// <param name="request">HttpRequest in which to look for a context token</param>
         /// <returns>The context token string</returns>
-        public const string GetContextTokenFromRequest(HttpRequestBase request)
+        public static string GetContextTokenFromRequest(HttpRequestBase request)
         {
             string[] paramNames = { "AppContext", "AppContextToken", "AccessToken", "SPAppToken" };
             foreach (string paramName in paramNames)
@@ -467,7 +467,7 @@ namespace PIW_SPAppJob
         /// <param name="scope">Space-delimited permissions to request from the SharePoint site in "shorthand" format 
         /// (e.g. "Web.Read Site.Write")</param>
         /// <returns>Url of the SharePoint site's OAuth authorization page</returns>
-        public const string GetAuthorizationUrl(string contextUrl, string scope)
+        public static string GetAuthorizationUrl(string contextUrl, string scope)
         {
             return string.Format(
                 "{0}{1}?IsDlg=1&client_id={2}&scope={3}&response_type=code",
@@ -487,7 +487,7 @@ namespace PIW_SPAppJob
         /// <param name="redirectUri">Uri to which SharePoint should redirect the browser to after consent is 
         /// granted</param>
         /// <returns>Url of the SharePoint site's OAuth authorization page</returns>
-        public const string GetAuthorizationUrl(string contextUrl, string scope, string redirectUri)
+        public static string GetAuthorizationUrl(string contextUrl, string scope, string redirectUri)
         {
             return string.Format(
                 "{0}{1}?IsDlg=1&client_id={2}&scope={3}&response_type=code&redirect_uri={4}",
@@ -504,7 +504,7 @@ namespace PIW_SPAppJob
         /// <param name="contextUrl">Absolute Url of the SharePoint site</param>
         /// <param name="redirectUri">Uri to which SharePoint should redirect the browser to with a context token</param>
         /// <returns>Url of the SharePoint site's context token redirect page</returns>
-        public const string GetAppContextTokenRequestUrl(string contextUrl, string redirectUri)
+        public static string GetAppContextTokenRequestUrl(string contextUrl, string redirectUri)
         {
             return string.Format(
                 "{0}{1}?client_id={2}&redirect_uri={3}",
@@ -522,7 +522,7 @@ namespace PIW_SPAppJob
         /// <param name="targetApplicationUri">Url of the target SharePoint site</param>
         /// <param name="identity">Windows identity of the user on whose behalf to create the access token</param>
         /// <returns>An access token with an audience of the target principal</returns>
-        public const string GetS2SAccessTokenWithWindowsIdentity(
+        public static string GetS2SAccessTokenWithWindowsIdentity(
             Uri targetApplicationUri,
             WindowsIdentity identity)
         {
@@ -560,7 +560,7 @@ namespace PIW_SPAppJob
         /// </summary>
         /// <param name="targetApplicationUri">Url of the target SharePoint site</param>
         /// <returns>String representation of the realm GUID</returns>
-        public const string GetRealmFromTargetUrl(Uri targetApplicationUri)
+        public static string GetRealmFromTargetUrl(Uri targetApplicationUri)
         {
             WebRequest request = WebRequest.Create(targetApplicationUri + "/_vti_bin/client.svc");
             request.Headers.Add("Authorization: Bearer ");
@@ -622,7 +622,7 @@ namespace PIW_SPAppJob
         /// </summary>
         /// <param name="url">The url.</param>
         /// <returns>The url ending with '/' if it is not null or empty.</returns>
-        public const string EnsureTrailingSlash(string url)
+        public static string EnsureTrailingSlash(string url)
         {
             if (!string.IsNullOrEmpty(url) && url[url.Length - 1] != '/')
             {
@@ -867,7 +867,7 @@ namespace PIW_SPAppJob
                 throw new Exception("Metadata document does not contain ACS signing certificate.");
             }
 
-            public const string GetDelegationServiceUrl(string realm)
+            public static string GetDelegationServiceUrl(string realm)
             {
                 JsonMetadataDocument document = GetMetadataDocument(realm);
 
@@ -904,7 +904,7 @@ namespace PIW_SPAppJob
                 return document;
             }
 
-            public const string GetStsUrl(string realm)
+            public static string GetStsUrl(string realm)
             {
                 JsonMetadataDocument document = GetMetadataDocument(realm);
 
