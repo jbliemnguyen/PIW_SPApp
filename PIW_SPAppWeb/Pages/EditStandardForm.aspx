@@ -142,11 +142,9 @@
 
         <fieldset>
             <legend>Standard Form</legend>
-            <fieldset runat="server" id="fieldsetMessage" visible="false">
-                <div class="form-group">
-                    <asp:Label ID="lbMessage" runat="server" AssociatedControlID="fileUpload" CssClass="col-md-6 control-label error"></asp:Label>
-                </div>
-            </fieldset>
+
+            <asp:Label ID="lbMainMessage" runat="server" CssClass="error" Visible="false"></asp:Label>
+
             <fieldset runat="server" id="fieldsetUpload">
                 <div class="form-group">
 

@@ -558,6 +558,25 @@ namespace PIW_SPAppWeb.Helper
 
             return documentCategoryNumber;
         }
+
+        /// <summary>
+        /// Check if form is not saved/changed after it is opened
+        /// for concurrency checking
+        /// </summary>
+        /// <param name="listItem"></param>
+        /// <param name="expectingFormStatus"></param>
+        /// <returns></returns>
+        public bool CheckIfListItemChanged(ClientContext clientContext,ListItem listItem, DateTime viewModifiedDateTime)
+        {
+            var piwListInternalColumnNames = getInternalColumnNames(clientContext,Constants.PIWListName);
+            DateTime currentModifiedDateTime;
+            if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Modified]] != null)
+            {
+                currentModifiedDateTime = DateTime.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_Modified]].ToString());
+                return DateTime.Compare(currentModifiedDateTime, viewModifiedDateTime) != 0;
+            }
+            return false;
+        }
         #endregion
 
         

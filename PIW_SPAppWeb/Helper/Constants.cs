@@ -62,6 +62,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_CitationNumber = "Citation Number";
         public const string PIWList_colName_RecallComment = "Recall Comment";
         public const string PIWList_colName_OSECRejectedComment = "OSEC Reject Comment";
+        public const string PIWList_colName_Modified = "Modified";
         
 
 
@@ -172,8 +173,8 @@ namespace PIW_SPAppWeb
         //Document File name key
         public const string DocumentFileNameKey = "DocumentFileNameKey";
 
-        //ViewModifiedDateTime key
-        public const string ViewModifiedDateTimeKey = "ViewModifiedDateTimeKey";
+        //ModifiedDateTime key
+        public const string ModifiedDateTimeKey = "ModifiedDateTimeKey";
 
         public const string CacheKey_PIWListInternalColumnName = "CacheKey_PIWListInternalColumnName";
         public const string CacheKey_PIWDocumentsInternalColumnName = "CacheKey_PIWDocumentsInternalColumnName";
@@ -192,7 +193,8 @@ namespace PIW_SPAppWeb
         Publish,
         Save,
         Edit,
-        Complete
+        Complete,
+        ReOpen
     }
 }
 
@@ -334,8 +336,8 @@ namespace PIW_SPAppWeb
         ////Document File name key
         //public const string DocumentFileNameKey = "DocumentFileNameKey";
 
-        ////ViewModifiedDateTime key
-        //public const string ViewModifiedDateTimeKey = "ViewModifiedDateTimeKey";
+        ////ModifiedDateTime key
+        //public const string ModifiedDateTimeKey = "ModifiedDateTimeKey";
 
         ////group name
         //public const string Grp_PIWUsers = "PIWUsers";

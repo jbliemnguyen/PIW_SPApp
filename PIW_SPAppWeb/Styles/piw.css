@@ -49,6 +49,11 @@ label.error {
     font-size: 0.8em;
 }
 
+span.error {
+    color: red;
+    font-size: 1.2em;
+}
+
 /*used for accent textarea (*)*/
 .accentText {
     color:#393
