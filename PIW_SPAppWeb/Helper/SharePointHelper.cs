@@ -577,6 +577,25 @@ namespace PIW_SPAppWeb.Helper
             }
             return false;
         }
+
+        private void RedirectToPreviousPage(HttpRequest request,HttpResponse response)
+        {
+            //redirect to previous page
+            string previousPage = request.QueryString["Source"];
+            if (!string.IsNullOrEmpty(previousPage))
+            {
+                response.Redirect(previousPage, false);
+            }
+        }
+
+        private void RefreshPage(HttpRequest request, HttpResponse response)
+        {
+            string PageURL = request.Url.ToString();
+            if (!string.IsNullOrEmpty(PageURL))
+            {
+                response.Redirect(PageURL, false);
+            }
+        }
         #endregion
 
         

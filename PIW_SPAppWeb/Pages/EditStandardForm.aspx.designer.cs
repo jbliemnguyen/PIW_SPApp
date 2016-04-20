@@ -499,6 +499,15 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.TextBox tbRecallComment;
         
         /// <summary>
+        /// lbRecallCommentValidation control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbRecallCommentValidation;
+        
+        /// <summary>
         /// btnRecall control.
         /// </summary>
         /// <remarks>

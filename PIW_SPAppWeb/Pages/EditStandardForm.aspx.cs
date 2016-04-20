@@ -60,7 +60,6 @@ namespace PIW_SPAppWeb.Pages
         //variable        
         private string _listItemId;
         private bool _isEditForm;
-        private enumAction action;
         private bool isMail;
 
         //fuction
@@ -446,7 +445,7 @@ namespace PIW_SPAppWeb.Pages
 
         protected void Timer1_Tick(object sender, EventArgs e)
         {
-            ///TODO: Only refresh in some certain status. Change the time span to 30 seconds 
+            //TODO: Only refresh in some certain status. Change the time span to 30 seconds 
             using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
             {
                 PopulateDocumentList(clientContext);
@@ -466,9 +465,10 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
+                const enumAction action = enumAction.Submit;
                 using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
-                    if (ValidFormData())
+                    if (ValidFormData(action))
                     {
                         ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
 
@@ -477,11 +477,22 @@ namespace PIW_SPAppWeb.Pages
                             return;
                         }
 
+                        //get next form status
+                        PreviousFormStatus = FormStatus;
+                        StandardFormWorkflow wf = new StandardFormWorkflow();
+                        FormStatus = wf.Execute(PreviousFormStatus, FormStatus, action,
+                            isRequiredOSECVerificationStep(ddDocumentCategory.SelectedValue), true);
 
-                        if (!UpdateFormDataToList(clientContext, listItem))
-                        {
-                            return;
-                        }
+
+                        UpdateFormDataToList(clientContext, listItem);
+
+                        //TODO: Change document and list permission
+
+                        //TODO: send email
+
+                        //TODO: Create list history
+
+                        //TODO: Redirect or Refresh page
                     }
                 }
             }
@@ -496,23 +507,38 @@ namespace PIW_SPAppWeb.Pages
 
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
-            //Exception exc = new Exception("Test exception");
-            //helper.LogError(Context, exc, listItemID, "test.aspx");
             try
             {
+                const enumAction action = enumAction.Submit;
                 using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
-                    if (ValidFormData())
+                    if (ValidFormData(action))
                     {
-                        //bool isNewlyGeneratedCitationNumber = false;
-                        //ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
+                        ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
 
-                        ////TODO: check if anyone change the form
-                        //if (!UpdateFormDataToList(clientContext, listItem, ref isNewlyGeneratedCitationNumber))
-                        //{
-                        //    return;
-                        //}
-                        helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
+                        if (CheckIfListItemChanged(clientContext, listItem))
+                        {
+                            return;
+                        }
+
+                        //get next form status
+                        PreviousFormStatus = FormStatus;
+                        StandardFormWorkflow wf = new StandardFormWorkflow();
+                        FormStatus = wf.Execute(PreviousFormStatus, FormStatus, action,
+                            isRequiredOSECVerificationStep(ddDocumentCategory.SelectedValue), true);
+
+                        UpdateFormDataToList(clientContext, listItem);
+
+                        //TODO: Change document and list permission
+
+                        //TODO: send email
+
+                        //TODO: Create list history
+                        //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
+
+                        //TODO: Redirect or Refresh page
+
+
                     }
                 }
             }
@@ -523,14 +549,14 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        private bool ValidFormData()
+        private bool ValidFormData(enumAction action)
         {
             bool isValid = true;
 
             //Check if there is a uploaded document
             if (rpDocumentList.Items.Count < 1)//validation fails
             {
-                isValid = isValid & false;
+                isValid = false;
                 lbRequiredUploadedDocumentError.Visible = true;
             }
             else
@@ -538,6 +564,20 @@ namespace PIW_SPAppWeb.Pages
                 //check if at least 1 public item is 
                 isValid = isValid & true;
                 lbRequiredUploadedDocumentError.Visible = false;
+            }
+
+            if (action == enumAction.Recall)//if recall, recall comment is required
+            {
+                if (string.IsNullOrEmpty(tbRecallComment.Text))
+                {
+                    isValid = false;
+                    lbRecallCommentValidation.Visible = true;
+                }
+                else
+                {
+                    isValid = isValid & true;
+                    lbRecallCommentValidation.Visible = true;
+                }
             }
 
             //Check docket validation
@@ -562,6 +602,8 @@ namespace PIW_SPAppWeb.Pages
                 }
             }
 
+            
+
             return isValid;
         }
 
@@ -574,29 +616,75 @@ namespace PIW_SPAppWeb.Pages
             return errorMessage;
         }
 
-        private bool UpdateFormDataToList(ClientContext clientContext, ListItem listItem)
+        private void UpdateFormDataToList(ClientContext clientContext, ListItem listItem,enumAction action)
         {
-            bool isSuccessSave = true;
-
-            switch (FormStatus)
+            var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            switch (FormStatus)//this is the next status after action is performed
             {
                 case Constants.PIWList_FormStatus_Pending:
-                    //Save Main panel data
-                    isSuccessSave = SaveMainPanelData(clientContext, listItem);
+                    SaveMainPanelAndStatus(clientContext, listItem);
+                    break;
+                case Constants.PIWList_FormStatus_Recalled:
+                    //SaveMainPanelAndStatus(clientContext, listItem);
+                    SaveRecallInfo(clientContext,listItem);
+                    break;
+                case Constants.PIWList_FormStatus_Rejected:    
+                    //SaveMainPanelAndStatus(clientContext, listItem);
+                    if (PreviousFormStatus == Constants.PIWList_FormStatus_OSECVerification)
+                    {
+                        SaveOSECVerificationInfo(clientContext,listItem);
+                    }
+                    else if (PreviousFormStatus == Constants.PIWList_FormStatus_PrePublication)
+                    {
+                        SavePrePublicationInfo(clientContext, listItem);
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}",FormStatus,PreviousFormStatus));
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_Submitted:
+                    SaveMainPanelAndStatus(clientContext, listItem);
+                    break;
+                case Constants.PIWList_FormStatus_OSECVerification:
+                    SaveFormStatus(clientContext,listItem);
+                    break;
+                case Constants.PIWList_FormStatus_PrePublication:
+                    if (PreviousFormStatus == Constants.PIWList_FormStatus_OSECVerification)
+                    {
+                        SaveOSECVerificationInfo(clientContext, listItem);
+                    }
+                    else if (PreviousFormStatus == Constants.PIWList_FormStatus_Submitted)
+                    {
+                        SaveFormStatus(clientContext, listItem);
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_ReadyForPublishing:
+                    SavePrePublicationInfo(clientContext, listItem);
+                    break;
+                case Constants.PIWList_FormStatus_PublishInitiated:
+                    SavePublishingInfo(clientContext, listItem);
                     break;
 
             }
-
-            return isSuccessSave;
         }
 
-        private bool SaveMainPanelData(ClientContext clientContext, ListItem listItem)
+        private void SaveRecallInfo(ClientContext clientContext, ListItem listItem)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void SaveMainPanelAndStatus(ClientContext clientContext, ListItem listItem)
         {
             var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
 
             //each update has its own Execute query. If we set the field of the list item, then execute the ExecuteQuery to populate data
             //without calling the listitem.update, then the changes is lost 
-            //We need to prrepare all the necessary data before update all fields without calling any ExecuteQuery in middle of it
+            //We need to prepare all the necessary data before update all fields without calling any ExecuteQuery in middle of it
 
             //Populate data
 
@@ -728,10 +816,19 @@ namespace PIW_SPAppWeb.Pages
 
             }
 
+            if (!string.IsNullOrEmpty(FormStatus))
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
+            }
+            
+            if (!string.IsNullOrEmpty(PreviousFormStatus))
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;    
+            }
+            
             //execute query
             listItem.Update();
             clientContext.ExecuteQuery();
-            return true;
         }
 
 
@@ -1172,6 +1269,50 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
+        protected void btnRecall_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                const enumAction action = enumAction.Recall;
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    if (ValidFormData(action))
+                    {
+                        var listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
+
+                        if (CheckIfListItemChanged(clientContext, listItem))
+                        {
+                            return;
+                        }
+
+                        //get next form status
+                        PreviousFormStatus = FormStatus;
+                        var wf = new StandardFormWorkflow();
+                        FormStatus = wf.Execute(PreviousFormStatus, FormStatus, action, isRequiredOSECVerificationStep(ddDocumentCategory.SelectedValue), true);
+
+                        UpdateFormDataToList(clientContext, listItem);
+
+
+                        //TODO: Change document and list permission
+
+                        //TODO: send email
+
+                        //TODO: Create list history
+                        //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
+
+                        //TODO: Redirect or Refresh page
+
+
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw exc;
+            }
+        }
+
         protected void btnRemoveCitationNumber_Click(object sender, EventArgs e)
         {
             try
@@ -1257,6 +1398,8 @@ namespace PIW_SPAppWeb.Pages
             }
             return false;
         }
+
+        
 
 
     }

@@ -385,12 +385,13 @@
                     <asp:Label ID="lbRecallComment" runat="server" Text="Recall Comment" AssociatedControlID="tbRecallComment" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-6">
                         <asp:TextBox ID="tbRecallComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
+                        <asp:Label ID="lbRecallCommentValidation" runat="server" ForeColor="Red" Visible="false" Text = "Recall Comment is required" ClientIDMode="Static"></asp:Label>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-md-2"></div>
                     <div class="col-md-2">
-                        <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" />
+                        <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" OnClick="btnRecall_Click" />
                     </div>
                 </div>
             </fieldset>
