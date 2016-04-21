@@ -86,6 +86,22 @@
                 }
             });
 
+            //Confirm of deletion
+            $("#btnDelete").click(function (event) {
+                event.preventDefault();
+                $("#deleteDialogConfirmation").dialog({
+                    buttons: {
+                        "No": function (e) {
+                            $(this).dialog("close");
+
+                        },
+                        "Yes": function (e) {
+                            $("#btnDeleteConfirm").click();
+                        }
+                    }
+                }, { width: 500 });
+            });
+
 
         }
 
@@ -385,7 +401,7 @@
                     <asp:Label ID="lbRecallComment" runat="server" Text="Recall Comment" AssociatedControlID="tbRecallComment" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-6">
                         <asp:TextBox ID="tbRecallComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
-                        <asp:Label ID="lbRecallCommentValidation" runat="server" ForeColor="Red" Visible="false" Text = "Recall Comment is required" ClientIDMode="Static"></asp:Label>
+                        <asp:Label ID="lbRecallCommentValidation" runat="server" ForeColor="Red" Visible="false" Text="Recall Comment is required" ClientIDMode="Static"></asp:Label>
                     </div>
                 </div>
                 <div class="form-group">
@@ -407,10 +423,14 @@
         <fieldset runat="server" id="fieldsetOSECVerification" visible="false">
             <legend>OSEC Verification</legend>
             <div class="form-group">
-                <asp:Label ID="lbOSECVerAction" runat="server" Text="Action" AssociatedControlID="lbOSECVerificationAction" CssClass="col-md-2 control-label"></asp:Label>
-                <asp:Label ID="lbOSECVerificationAction" runat="server" CssClass="col-md-3 control-label"></asp:Label>
-                <asp:Label ID="lbOSECVerificationComment" runat="server" Text="OSEC Verification Comment" AssociatedControlID="tbOSECVerificationComment" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-4">
+                <div class="col-md-2"></div>
+                <div class="col-md-2">
+                    <asp:Label ID="lbOSECVerificationAction" runat="server"></asp:Label>
+                </div>
+            </div>
+            <div class="form-group">
+                <asp:Label ID="lbOSECVerificationComment" runat="server" Text="Comment" AssociatedControlID="tbOSECVerificationComment" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-6">
                     <asp:TextBox ID="tbOSECVerificationComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
                 </div>
             </div>
@@ -453,14 +473,22 @@
             </asp:UpdatePanel>
 
             <div class="form-group">
-                <asp:Label ID="lbPrePubRevAction" runat="server" Text="Action" AssociatedControlID="lbPrePublicationReviewAction" CssClass="col-md-2 control-label"></asp:Label>
-                <asp:Label ID="lbPrePublicationReviewAction" runat="server" CssClass="col-md-3 control-label"></asp:Label>
-                <asp:Label ID="lbPrePublicationComment" runat="server" Text="Pre-Publication Review Comment" AssociatedControlID="tbPrePublicationComment" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-4">
+                <div class="col-md-2"></div>
+                <div class="col-md-2">
+                    <asp:Label ID="lbPrePublicationReviewAction" runat="server" CssClass="control-label"></asp:Label>
+                </div>
+            </div>
+            <div class="form-group">
+                <asp:Label ID="lbPrePublicationComment" runat="server" Text="Comment" AssociatedControlID="tbPrePublicationComment" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-6">
                     <asp:TextBox ID="tbPrePublicationComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
                 </div>
             </div>
         </fieldset>
+
+        <div class="form-group"></div>
+        <%--empty line--%>
+        <div class="form-group"></div>
 
 
         <div class="form-group">
@@ -468,18 +496,19 @@
             <div class="col-md-6">
                 <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary active" OnClick="btnSave_Click" />
                 <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary active" OnClick="btnSubmit_Click" />
-                <asp:Button ID="btnOSECTakeOwnership" runat="server" Text="OSEC Take Ownership" CssClass="btn-sm btn-primary active" />
-                <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" />
-                <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" />
-                <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" />
-                <asp:Button ID="btnPublish" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" />
-                <asp:Button ID="btnPublishConfirm" runat="server" Text="Publish" Style="visibility: hidden; display: none;" />
-                <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" />
-                <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" />
+                <asp:Button ID="btnOSECTakeOwnership" runat="server" Text="OSEC Take Ownership" CssClass="btn-sm btn-primary active" OnClick="btnOSECTakeOwnership_Click" />
+                <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" OnClick="btnEdit_Click" />
+                <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" OnClick="btnAccept_Click" />
+                <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" OnClick="btnReject_Click" />
+                <asp:Button ID="btnPublish" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                <asp:Button ID="btnPublishConfirm" runat="server" Text="Publish" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnInitiatePublication_Click" />
+                <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnDelete_Click" />
 
             </div>
-
-
         </div>
+        <div id="deleteDialogConfirmation" title="Are you sure you wish to delete this workflow item?"></div>
+        <div id="publishDialogConfirmation" title="Are you sure you wish to publish this issuance?"></div>
+
     </form>
 </asp:Content>

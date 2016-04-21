@@ -49,7 +49,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_IsNonDocket = "Is NonDocket";
         public const string PIWList_colName_IsRequireOSECVerification = "Is Require OSEC Verification";
         public const string PIWList_colName_NotificationRecipient = "Notification Recipient";
-        public const string PIWList_colName_OSECVerification_Action = "OSEC Verification Action";
+        public const string PIWList_colName_OSECVerificationAction = "OSEC Verification Action";
         public const string PIWList_colName_OSECVerificationComment = "OSEC Verification Comment";
         public const string PIWList_colName_PrePublicationReviewAction = "PrePublication Review Action";
         public const string PIWList_colName_PrePublicationReviewComment = "PrePublication Review Comment";
@@ -194,7 +194,8 @@ namespace PIW_SPAppWeb
         Save,
         Edit,
         Complete,
-        ReOpen
+        ReOpen,
+        Delete
     }
 }
 
