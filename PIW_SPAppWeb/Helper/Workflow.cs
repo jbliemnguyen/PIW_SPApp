@@ -25,9 +25,13 @@ namespace PIW_SPAppWeb.Helper
                     {
                         nextStatus = currentStatus;
                     }
+                    else if (action == enumAction.Delete)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_Deleted;
+                    }
                     else
                     {
-                        throw new Exception(string.Format("Unknown combination of Action:{0} and Form Status:{1}",action,currentStatus));
+                        throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}",action,currentStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_Edited:
@@ -35,9 +39,13 @@ namespace PIW_SPAppWeb.Helper
                     {
                         nextStatus = previousStatus;
                     }
+                    else if (action == enumAction.Delete)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_Deleted;
+                    }
                     else
                     {
-                        throw new Exception(string.Format("Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
+                        throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_Submitted:
@@ -67,7 +75,7 @@ namespace PIW_SPAppWeb.Helper
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
+                        throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
@@ -94,7 +102,7 @@ namespace PIW_SPAppWeb.Helper
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
+                        throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_PrePublication:
@@ -114,7 +122,7 @@ namespace PIW_SPAppWeb.Helper
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
+                        throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_ReadyForPublishing:
@@ -130,13 +138,17 @@ namespace PIW_SPAppWeb.Helper
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
+                        throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
                     if (action == enumAction.ReOpen)
                     {
                         nextStatus = Constants.PIWList_FormStatus_ReOpen;
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
@@ -145,7 +157,9 @@ namespace PIW_SPAppWeb.Helper
                     //after ReOpen, automatic transfer to PrePublication
                     nextStatus = Constants.PIWList_FormStatus_PrePublication;
                     break;
-                default: throw new Exception("Form Status unknown:" + currentStatus);
+                default:
+                    throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
+                    break;
             }
             return nextStatus;
         }

@@ -9,7 +9,6 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using Microsoft.SharePoint.Client;
 using PIW_SPAppWeb.Helper;
-using File = Microsoft.SharePoint.Client.File;
 using ListItem = Microsoft.SharePoint.Client.ListItem;
 
 namespace PIW_SPAppWeb.Pages
@@ -153,7 +152,8 @@ namespace PIW_SPAppWeb.Pages
 
                         //TODO: Create list history
 
-                        //TODO: Redirect or Refresh page
+                        //Refresh
+                        helper.RefreshPage(Page.Request, Page.Response);
                     }
                 }
             }
@@ -184,7 +184,8 @@ namespace PIW_SPAppWeb.Pages
                         //TODO: Create list history
                         //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
 
-                        //TODO: Redirect or Refresh page
+                        //Redirect
+                        helper.RedirectToPreviousPage(Page.Request, Page.Response);
 
 
                     }
@@ -213,7 +214,8 @@ namespace PIW_SPAppWeb.Pages
                         //TODO: Create list history
                         //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
 
-                        //TODO: Redirect or Refresh page
+                        //Redirect
+                        helper.RedirectToPreviousPage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -239,7 +241,8 @@ namespace PIW_SPAppWeb.Pages
                     //TODO: Create list history
                     //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
 
-                    //TODO: Redirect or Refresh page
+                    //Redirect
+                    helper.RedirectToPreviousPage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -265,7 +268,8 @@ namespace PIW_SPAppWeb.Pages
                     //TODO: Create list history
                     //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
 
-                    //TODO: Redirect or Refresh page
+                    //Refresh
+                    helper.RefreshPage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -275,9 +279,8 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        protected void btnDelete_Click(object sender, EventArgs e)
+        protected void btnDeleteConfirm_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
             try
             {
                 const enumAction action = enumAction.Delete;
@@ -292,7 +295,8 @@ namespace PIW_SPAppWeb.Pages
                     //TODO: Create list history
                     //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
 
-                    //TODO: Redirect or Refresh page
+                    //Redirect
+                    helper.RedirectToPreviousPage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -301,8 +305,6 @@ namespace PIW_SPAppWeb.Pages
                 throw exc;
             }
         }
-
-        
         
         protected void btnRecall_Click(object sender, EventArgs e)
         {
@@ -323,7 +325,8 @@ namespace PIW_SPAppWeb.Pages
                         //TODO: Create list history
                         //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
 
-                        //TODO: Redirect or Refresh page
+                        //Redirect
+                        helper.RedirectToPreviousPage(Page.Request, Page.Response);
 
 
                     }
@@ -352,7 +355,8 @@ namespace PIW_SPAppWeb.Pages
                     //TODO: Create list history
                     //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
 
-                    //TODO: Redirect or Refresh page
+                    //refresh
+                    helper.RefreshPage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -375,7 +379,8 @@ namespace PIW_SPAppWeb.Pages
                     //TODO: Create list history
                     //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
 
-                    //TODO: Redirect or Refresh page
+                    //Redirect or Refresh page
+                    helper.RefreshPage(Page.Request,Page.Response);
                 }
             }
             catch (Exception exc)
@@ -384,11 +389,6 @@ namespace PIW_SPAppWeb.Pages
                 throw exc;
             }
         }
-
-
-
-
-
 
         protected void btnGenerateCitationNumber_Click(object sender, EventArgs e)
         {
@@ -455,8 +455,8 @@ namespace PIW_SPAppWeb.Pages
                             helper.SetCitationNumberFieldInPIWList(clientContext, _listItemId, tbCitationNumber.Text.Trim());
 
                             //controls
-                            tbCitationNumber.Enabled = false;//after accept, citation number cannot be changed
-                            EnableCitationNumberControlsFromCitationTextBox(tbCitationNumber.Enabled);
+                            //after accept, citation number cannot be changed
+                            EnableCitationNumberControls(false,true);
                             lbCitationNumberError.Text = string.Empty;
                             lbCitationNumberError.Visible = false;
                         }
@@ -488,8 +488,8 @@ namespace PIW_SPAppWeb.Pages
 
                     //controls
                     tbCitationNumber.Text = string.Empty;
-                    tbCitationNumber.Enabled = true;
-                    EnableCitationNumberControlsFromCitationTextBox(tbCitationNumber.Enabled);
+                    //after remove, citation canbe changed
+                    EnableCitationNumberControls(true,false);
 
                 }
             }
@@ -669,6 +669,11 @@ namespace PIW_SPAppWeb.Pages
                         throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
                     }
                     break;
+                case Constants.PIWList_FormStatus_Deleted:
+                    //delete item, need to set status and remove citation number if there is assigned one
+                    SaveDeleteInfoAndStatus(clientContext,listItem);
+                    helper.ReleaseCitationNumberForDeletedListItem(clientContext,_listItemId);
+                    break;
                 case Constants.PIWList_FormStatus_OSECVerification:
                     if (PreviousFormStatus == Constants.PIWList_FormStatus_Edited)
                     {
@@ -721,7 +726,7 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_PublishInitiated:
                     if (PreviousFormStatus == Constants.PIWList_FormStatus_ReadyForPublishing)
                     {
-                        SavePublishingInfo(clientContext, listItem);
+                        SavePublishingInfoAndStatus(clientContext, listItem);
                     }
                     else
                     {
@@ -734,7 +739,7 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        private void SavePublishingInfo(ClientContext clientContext, ListItem listItem)
+        private void SavePublishingInfoAndStatus(ClientContext clientContext, ListItem listItem)
         {
             var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
 
@@ -746,6 +751,25 @@ namespace PIW_SPAppWeb.Pages
 
             //publisher
             FieldUserValue publisher = new FieldUserValue { LookupId = clientContext.Web.CurrentUser.Id };
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PublishedBy]] = publisher;
+
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
+
+        private void SaveDeleteInfoAndStatus(ClientContext clientContext, ListItem listItem)
+        {
+            var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+
+            clientContext.Load(clientContext.Web.CurrentUser, user => user.Id);
+            clientContext.ExecuteQuery();
+
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
+            
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsActive]] = false;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_CitationNumber]] = string.Empty;
+
 
             listItem.Update();
             clientContext.ExecuteQuery();
@@ -1451,6 +1475,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         fieldsetPrePublication.Visible = true;
                         EnablePrePublicationControls(false);
+                        EnableCitationNumberControls(false,false);
                     }
 
                     //Button
@@ -1563,6 +1588,7 @@ namespace PIW_SPAppWeb.Pages
                     //PrePublication
                     fieldsetPrePublication.Visible = true;
                     EnablePrePublicationControls(false);
+                    InitiallyEnableCitationNumberControls(clientContext,listItem);
 
                     //button
                     btnSave.Visible = false;
@@ -1586,7 +1612,8 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_PublishInitiated:
                     //submitter
                     EnableMainPanel(false);
-                    lbMainMessage.Visible = false;
+                    lbMainMessage.Visible = true;
+                    lbMainMessage.Text = "Publication has been initiated for this issuance.";
                     fieldsetOSECRejectComment.Visible = false;
                     fieldsetRecall.Visible = false;
 
@@ -1601,6 +1628,7 @@ namespace PIW_SPAppWeb.Pages
                     //PrePublication
                     fieldsetPrePublication.Visible = true;
                     EnablePrePublicationControls(false);
+                    EnableCitationNumberControls(false,false);
 
                     //button
                     btnSave.Visible = false;
@@ -1634,12 +1662,12 @@ namespace PIW_SPAppWeb.Pages
 
         private void EnablePrePublicationControls(bool enabled)
         {
-            btnGenerateCitationNumber.Enabled = enabled;
-            tbCitationNumber.Enabled = enabled;
-            ddAvailableCitationNumbers.Enabled = enabled;
-            cbOverrideCitationNumber.Enabled = enabled;
-            btnAcceptCitationNumber.Enabled = enabled;
-            btnRemoveCitationNumber.Enabled = enabled;
+            //btnGenerateCitationNumber.Enabled = enabled;
+            //tbCitationNumber.Enabled = enabled;
+            //ddAvailableCitationNumbers.Enabled = enabled;
+            //cbOverrideCitationNumber.Enabled = enabled;
+            //btnAcceptCitationNumber.Enabled = enabled;
+            //btnRemoveCitationNumber.Enabled = enabled;
             tbPrePublicationComment.Enabled = enabled;
         }
 
@@ -1686,19 +1714,18 @@ namespace PIW_SPAppWeb.Pages
         /// For example: when textbox is editable,  then the accept button should be clickable to assign the citation number
         /// </summary>
         /// <param name="citationTextBoxEnabled"></param>
-        public void EnableCitationNumberControlsFromCitationTextBox(bool citationTextBoxEnabled)
+        public void EnableCitationNumberControls(bool citationNumberCanBeChanged, bool CitationNumberCanBeRemoved)
         {
             //controls
-            tbCitationNumber.Enabled = false;//after accept, citation number cannot be changed
-            //then other controls will have same enabled property of textbox citation number
-            btnGenerateCitationNumber.Enabled = citationTextBoxEnabled;
-            ddAvailableCitationNumbers.Enabled = citationTextBoxEnabled;
-            cbOverrideCitationNumber.Enabled = citationTextBoxEnabled;
-            tbCitationNumber.Enabled = citationTextBoxEnabled;
-            btnAcceptCitationNumber.Enabled = citationTextBoxEnabled;
+            tbCitationNumber.Enabled = citationNumberCanBeChanged;
+            btnGenerateCitationNumber.Enabled = citationNumberCanBeChanged;
+            ddAvailableCitationNumbers.Enabled = citationNumberCanBeChanged;
+            cbOverrideCitationNumber.Enabled = citationNumberCanBeChanged;
+            tbCitationNumber.Enabled = citationNumberCanBeChanged;
+            btnAcceptCitationNumber.Enabled = citationNumberCanBeChanged;
 
-            //but not the remove citation button
-            btnRemoveCitationNumber.Enabled = !citationTextBoxEnabled;
+            
+            btnRemoveCitationNumber.Enabled = CitationNumberCanBeRemoved;
         }
 
         public void InitiallyEnableCitationNumberControls(ClientContext clientContext, ListItem piwListItem)
@@ -1714,15 +1741,13 @@ namespace PIW_SPAppWeb.Pages
             {
                 //no citation assigned in piwlist
                 //system should allow to generate and assign citation number
-                tbCitationNumber.Enabled = true;
-                EnableCitationNumberControlsFromCitationTextBox(tbCitationNumber.Enabled);
+                EnableCitationNumberControls(true,false);
 
             }
             else
             {
                 //there is citation number assigned to piw list item
-                tbCitationNumber.Enabled = false;
-                EnableCitationNumberControlsFromCitationTextBox(tbCitationNumber.Enabled);
+                EnableCitationNumberControls(false,true);
 
             }
         }

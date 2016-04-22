@@ -145,7 +145,7 @@ namespace PIW_SPAppWeb.Helper
 
         public bool Save(ClientContext clientContext,string piwListItemID, string FullCitationNumber, ref string returnedError, bool isOverride)
         {
-            if (helper.getCitationNumberListItemFromPIWListID(clientContext, piwListItemID).Count >= 1)
+            if (helper.GetCitationNumberListItemFromPiwListId(clientContext, piwListItemID).Count >= 1)
             {
                 returnedError = "This workflow already has a citation number";
                 return false;

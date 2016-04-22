@@ -72,6 +72,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_FormStatus_Recalled = "Recalled";
         public const string PIWList_FormStatus_Submitted = "Submitted";
         public const string PIWList_FormStatus_Edited = "Edited";
+        public const string PIWList_FormStatus_Deleted = "Deleted";
         public const string PIWList_FormStatus_OSECVerification = "OSEC Verification";
         public const string PIWList_FormStatus_SecretaryReview = "Secretary Review";
         public const string PIWList_FormStatus_PrePublication = "PrePublication";

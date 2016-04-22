@@ -39,16 +39,6 @@
                 }
             });
 
-
-            //the option is populated from ajax call (update panel)
-            //--> we need to use event deletegate to register the event
-            //$("#fieldsetPrePublication").on("change", "#ddAvailableCitationNumbers",function() {
-            //    var str = jQuery.trim($(this).val());
-            //    if (str.indexOf("FERC") > 0) {
-            //        $("#tbCitationNumber").attr("value", str);
-            //    }
-            //});
-
             //validate docket number when blur event
             $("#tbDocketNumber").blur(function () {
                 var docketNumber = $.trim($("#tbDocketNumber").val());
@@ -102,7 +92,55 @@
                 }, { width: 500 });
             });
 
+            //Confirm of Publish
+            $("#btnPublish").click(function (event) {
+                event.preventDefault();
 
+                //display warning if due date is future date
+                var modalHeight = 100;
+                var dueDate = new Date($("#tbDueDate").attr('value'));
+                var today = new Date();
+                if (dueDate > today) {
+                    modalHeight = 250;
+                    $("#publishDialogConfirmation").html("<span style='color:green'>Warning: Due Date is a future date</span>");
+                }
+                else {
+                    $("#publishDialogConfirmation").html("");
+                }
+
+                //dialog
+                $("#publishDialogConfirmation").dialog({
+                    buttons: {
+                        "No": function (e) {
+                            $(this).dialog("close");
+
+                        },
+                        "Yes": function (e) {
+                            $("#btnPublishConfirm").click();
+                            $(this).dialog("close");
+                        }
+                    }
+                }, { width: 600, height: modalHeight });
+            });
+
+            //spinner
+            $("#btnPublishConfirm").click(function (event) {
+                var btnPublish = $("#btnPublish");
+                var opt = {
+                    img: '../Scripts/spinner/spinner-large.gif',
+                    position: 'center',
+                    height: 48,
+                    width: 48
+                };
+
+                btnPublish.spinner(opt);
+                //disable Publish and Edit button - avoid use clicking when long-process printing
+                $("#btnPublish").attr("disabled", "disabled");
+                $("#btnEdit").attr("disabled", "disabled");
+                $("#btnAcceptCitationNumber").attr("disabled", "disabled");
+                $("#btnRemoveCitationNumber").attr("disabled", "disabled");
+
+            });
         }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
@@ -462,8 +500,8 @@
                     <div class="form-group">
                         <div class="col-md-2"></div>
                         <div class="col-md-4">
-                            <asp:Button ID="btnAcceptCitationNumber" runat="server" Text="Accept Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnAcceptCitationNumber_Click" />
-                            <asp:Button ID="btnRemoveCitationNumber" runat="server" Text="Remove Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnRemoveCitationNumber_Click" />
+                            <asp:Button ID="btnAcceptCitationNumber" runat="server" Text="Accept Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnAcceptCitationNumber_Click" ClientIDMode="Static"/>
+                            <asp:Button ID="btnRemoveCitationNumber" runat="server" Text="Remove Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnRemoveCitationNumber_Click" ClientIDMode="Static"/>
                         </div>
                     </div>
                 </ContentTemplate>
@@ -497,13 +535,13 @@
                 <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary active" OnClick="btnSave_Click" />
                 <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary active" OnClick="btnSubmit_Click" />
                 <asp:Button ID="btnOSECTakeOwnership" runat="server" Text="OSEC Take Ownership" CssClass="btn-sm btn-primary active" OnClick="btnOSECTakeOwnership_Click" />
-                <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" OnClick="btnEdit_Click" />
+                <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" OnClick="btnEdit_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" OnClick="btnAccept_Click" />
                 <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" OnClick="btnReject_Click" />
                 <asp:Button ID="btnPublish" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnPublishConfirm" runat="server" Text="Publish" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnInitiatePublication_Click" />
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
-                <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnDelete_Click" />
+                <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnDeleteConfirm_Click" />
 
             </div>
         </div>

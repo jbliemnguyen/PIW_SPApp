@@ -95,7 +95,7 @@ namespace PIW_SPAppWeb.Helper
 
         public void deleteAssociatedCitationNumberListItem(ClientContext clientContext, string piwListItemID)
         {
-            ListItemCollection citationList = getCitationNumberListItemFromPIWListID(clientContext, piwListItemID);
+            ListItemCollection citationList = GetCitationNumberListItemFromPiwListId(clientContext, piwListItemID);
             citationList[0].DeleteObject();
 
             //delete citation number field in piwlist
@@ -108,7 +108,22 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public ListItemCollection getCitationNumberListItemFromPIWListID(ClientContext clientContext, string piwListItemID)
+        public void ReleaseCitationNumberForDeletedListItem(ClientContext clientContext, string piwListItemId)
+        {
+            ListItemCollection citationList = GetCitationNumberListItemFromPiwListId(clientContext, piwListItemId);
+            if (citationList.Count > 0)
+            {
+                var citationListInternalCoumnNames = getInternalColumnNames(clientContext, Constants.CitationNumberListName);
+                citationList[0][citationListInternalCoumnNames[Constants.CitationNumberList_colName_Status]] = Constants.CitationNumber_DELETED_Status;
+                citationList[0][citationListInternalCoumnNames[Constants.CitationNumberList_colName_DeletedDate]] = DateTime.Now.ToString();
+                citationList[0][citationListInternalCoumnNames[Constants.CitationNumberList_colName_PIWList]] = string.Empty;
+                
+                citationList[0].Update();
+                clientContext.ExecuteQuery();    
+            }
+        }
+
+        public ListItemCollection GetCitationNumberListItemFromPiwListId(ClientContext clientContext, string piwListItemID)
         {
             List citationNumberList = clientContext.Web.Lists.GetByTitle(Constants.CitationNumberListName);
             var citationNumberInternalNameList = getInternalColumnNames(clientContext, Constants.CitationNumberListName);
@@ -578,17 +593,29 @@ namespace PIW_SPAppWeb.Helper
             return false;
         }
 
-        private void RedirectToPreviousPage(HttpRequest request,HttpResponse response)
+        public void RedirectToPreviousPage(HttpRequest request,HttpResponse response)
         {
             //redirect to previous page
-            string previousPage = request.QueryString["Source"];
-            if (!string.IsNullOrEmpty(previousPage))
+            string sourcePage = request.QueryString["Source"];
+            var args = new string[]
             {
-                response.Redirect(previousPage, false);
+                sourcePage,
+                request.QueryString["SPHostUrl"],
+                request.QueryString["SPLanguage"],
+                request.QueryString["SPClientTag"],
+                request.QueryString["SPProductNumber"],
+                request.QueryString["SPAppWebUrl"]
+            };
+
+            string redirectUrl = string.Format("{0}?SPHostUrl={1}&SPLanguage={2}$SPClientTag={3}&SPProductNumber={4}&SPAppWebUrl={5}",args);
+            
+            if (!string.IsNullOrEmpty(sourcePage))
+            {
+                response.Redirect(redirectUrl, false);
             }
         }
 
-        private void RefreshPage(HttpRequest request, HttpResponse response)
+        public void RefreshPage(HttpRequest request, HttpResponse response)
         {
             string PageURL = request.Url.ToString();
             if (!string.IsNullOrEmpty(PageURL))
