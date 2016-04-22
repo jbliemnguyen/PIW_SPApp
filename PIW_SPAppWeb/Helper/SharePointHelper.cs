@@ -70,11 +70,11 @@ namespace PIW_SPAppWeb.Helper
                     //isActive = false, then check status, if status is Pending, it is OK to return item,
                     //otherwise, the item is deleted, throw exception
 
-                    if (
-                        !listItem[piwInternalNameList[Constants.PIWList_colName_FormStatus]].ToString()
+                    if (!listItem[piwInternalNameList[Constants.PIWList_colName_FormStatus]].ToString()
                             .Equals(Constants.PIWList_FormStatus_Pending))
                     {
-                        throw new ApplicationException("Workflow not exists");
+                        //throw new ApplicationException("Workflow not exists");
+                        return null;
                     }
                 }
             }
@@ -85,7 +85,7 @@ namespace PIW_SPAppWeb.Helper
 
         public void SetCitationNumberFieldInPIWList(ClientContext clientContext, string piwListItemID, string citationNumber)
         {
-            var piwListinternalName = getInternalColumnNames(clientContext,Constants.PIWListName);
+            var piwListinternalName = getInternalColumnNames(clientContext, Constants.PIWListName);
             ListItem listItem = GetPiwListItemById(clientContext, piwListItemID, false);
 
             listItem[piwListinternalName[Constants.PIWList_colName_CitationNumber]] = citationNumber;
@@ -117,9 +117,9 @@ namespace PIW_SPAppWeb.Helper
                 citationList[0][citationListInternalCoumnNames[Constants.CitationNumberList_colName_Status]] = Constants.CitationNumber_DELETED_Status;
                 citationList[0][citationListInternalCoumnNames[Constants.CitationNumberList_colName_DeletedDate]] = DateTime.Now.ToString();
                 citationList[0][citationListInternalCoumnNames[Constants.CitationNumberList_colName_PIWList]] = string.Empty;
-                
+
                 citationList[0].Update();
-                clientContext.ExecuteQuery();    
+                clientContext.ExecuteQuery();
             }
         }
 
@@ -515,7 +515,7 @@ namespace PIW_SPAppWeb.Helper
             }
         }
 
-        public bool IsUserMemberOfGroup(ClientContext clientContext,User user, string groupName)
+        public bool IsUserMemberOfGroup(ClientContext clientContext, User user, string groupName)
         {
             //Load group
             clientContext.Load(user.Groups);
@@ -550,7 +550,7 @@ namespace PIW_SPAppWeb.Helper
         public int getDocumentCategoryNumber(string documentCategory)
         {
             int documentCategoryNumber = 0;
-            switch ( documentCategory)
+            switch (documentCategory)
             {
                 case Constants.PIWList_DocCat_DelegatedErrata:
                 case Constants.PIWList_DocCat_DelegatedLetter:
@@ -581,9 +581,9 @@ namespace PIW_SPAppWeb.Helper
         /// <param name="listItem"></param>
         /// <param name="expectingFormStatus"></param>
         /// <returns></returns>
-        public bool CheckIfListItemChanged(ClientContext clientContext,ListItem listItem, DateTime viewModifiedDateTime)
+        public bool CheckIfListItemChanged(ClientContext clientContext, ListItem listItem, DateTime viewModifiedDateTime)
         {
-            var piwListInternalColumnNames = getInternalColumnNames(clientContext,Constants.PIWListName);
+            var piwListInternalColumnNames = getInternalColumnNames(clientContext, Constants.PIWListName);
             DateTime currentModifiedDateTime;
             if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Modified]] != null)
             {
@@ -593,13 +593,31 @@ namespace PIW_SPAppWeb.Helper
             return false;
         }
 
-        public void RedirectToPreviousPage(HttpRequest request,HttpResponse response)
+        public void RedirectToSourcePage(HttpRequest request, HttpResponse response)
         {
-            //redirect to previous page
+            //redirect to source page
+            //https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/EditStandardForm.aspx?SPHostUrl=https%3a%2f%2ffdc1s-sp23wfed2.ferc.gov%2fpiw&SPLanguage=en-US&SPClientTag=0&SPProductNumber=15.0.4727.1000&SPAppWebUrl=https%3a%2f%2fapp-3f613e5e650fd4.dev.spapps.ferc.gov%2fpiw%2fPIW_SPApp&ID=41&Source=StandardForm.aspx
             string sourcePage = request.QueryString["Source"];
+            RedirectToAPage(request,response,sourcePage);
+
+        }
+
+        /// <summary>
+        /// redirect the page to a specific page
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="response"></param>
+        /// <param name="PageName">PIWList.aspx</param>
+        public void RedirectToAPage(HttpRequest request, HttpResponse response, string PageName)
+        {
+            //https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/EditStandardForm.aspx
+            const string pattern = "/pages/";
+            int length = request.Url.ToString().IndexOf(pattern, StringComparison.CurrentCultureIgnoreCase) + pattern.Length;
+            string newURLPage = request.Url.ToString().Substring(0, length) + PageName;
+
             var args = new string[]
             {
-                sourcePage,
+                newURLPage,
                 request.QueryString["SPHostUrl"],
                 request.QueryString["SPLanguage"],
                 request.QueryString["SPClientTag"],
@@ -607,12 +625,14 @@ namespace PIW_SPAppWeb.Helper
                 request.QueryString["SPAppWebUrl"]
             };
 
-            string redirectUrl = string.Format("{0}?SPHostUrl={1}&SPLanguage={2}$SPClientTag={3}&SPProductNumber={4}&SPAppWebUrl={5}",args);
-            
-            if (!string.IsNullOrEmpty(sourcePage))
+            string redirectUrl = string.Format("{0}?SPHostUrl={1}&SPLanguage={2}$SPClientTag={3}&SPProductNumber={4}&SPAppWebUrl={5}", args);
+
+            if (!string.IsNullOrEmpty(newURLPage))
             {
                 response.Redirect(redirectUrl, false);
             }
+
+
         }
 
         public void RefreshPage(HttpRequest request, HttpResponse response)
@@ -625,12 +645,12 @@ namespace PIW_SPAppWeb.Helper
         }
         #endregion
 
-        
 
-        
+
+
 
     }
-        
+
 }
 
 

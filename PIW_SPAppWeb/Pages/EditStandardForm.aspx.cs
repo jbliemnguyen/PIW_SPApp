@@ -95,15 +95,24 @@ namespace PIW_SPAppWeb.Pages
                             PopulateDocumentList(clientContext);
                             //PopulateHistoryList();
                             ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
-                            PopulateFormStatusAndModifiedDate(clientContext, listItem);
-                            DisplayListItemInForm(clientContext, listItem);
-                            ////display form visiblility based on form status
-                            ControlsVisiblitilyBasedOnStatus(clientContext, PreviousFormStatus, FormStatus, listItem);
-                            ////above method get formStatus from list, store it in viewstate                       
-                            //if (FormStatus == enumFormStatus.ReadyForPublishing)
-                            //{
-                            //    helper.OpenDocument(Page, documentURL);
-                            //}
+                            if (listItem == null)
+                            {
+                                helper.RedirectToAPage(Page.Request, Page.Response, "ItemNotFound.aspx");
+                            }
+                            else
+                            {
+                                PopulateFormStatusAndModifiedDate(clientContext, listItem);
+                                DisplayListItemInForm(clientContext, listItem);
+                                ////display form visiblility based on form status
+                                ControlsVisiblitilyBasedOnStatus(clientContext, PreviousFormStatus, FormStatus, listItem);
+                                ////above method get formStatus from list, store it in viewstate                       
+                                //if (FormStatus == enumFormStatus.ReadyForPublishing)
+                                //{
+                                //    helper.OpenDocument(Page, documentURL);
+                                //}
+                            }
+
+                            
                         }
 
                     }
@@ -153,7 +162,7 @@ namespace PIW_SPAppWeb.Pages
                         //TODO: Create list history
 
                         //Refresh
-                        helper.RefreshPage(Page.Request, Page.Response);
+                        helper.RedirectToSourcePage(Page.Request, Page.Response);
                     }
                 }
             }
@@ -185,7 +194,7 @@ namespace PIW_SPAppWeb.Pages
                         //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
 
                         //Redirect
-                        helper.RedirectToPreviousPage(Page.Request, Page.Response);
+                        helper.RedirectToSourcePage(Page.Request, Page.Response);
 
 
                     }
@@ -215,7 +224,7 @@ namespace PIW_SPAppWeb.Pages
                         //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
 
                         //Redirect
-                        helper.RedirectToPreviousPage(Page.Request, Page.Response);
+                        helper.RedirectToSourcePage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -242,7 +251,7 @@ namespace PIW_SPAppWeb.Pages
                     //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
 
                     //Redirect
-                    helper.RedirectToPreviousPage(Page.Request, Page.Response);
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -296,7 +305,7 @@ namespace PIW_SPAppWeb.Pages
                     //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
 
                     //Redirect
-                    helper.RedirectToPreviousPage(Page.Request, Page.Response);
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -326,7 +335,7 @@ namespace PIW_SPAppWeb.Pages
                         //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
 
                         //Redirect
-                        helper.RedirectToPreviousPage(Page.Request, Page.Response);
+                        helper.RedirectToSourcePage(Page.Request, Page.Response);
 
 
                     }
