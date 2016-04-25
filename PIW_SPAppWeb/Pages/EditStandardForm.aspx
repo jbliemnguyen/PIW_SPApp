@@ -141,6 +141,10 @@
                 $("#btnRemoveCitationNumber").attr("disabled", "disabled");
 
             });
+
+            $(".historyhead").click(function () {
+                $(".historylist").slideToggle(100);
+            });
         }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
@@ -500,8 +504,8 @@
                     <div class="form-group">
                         <div class="col-md-2"></div>
                         <div class="col-md-4">
-                            <asp:Button ID="btnAcceptCitationNumber" runat="server" Text="Accept Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnAcceptCitationNumber_Click" ClientIDMode="Static"/>
-                            <asp:Button ID="btnRemoveCitationNumber" runat="server" Text="Remove Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnRemoveCitationNumber_Click" ClientIDMode="Static"/>
+                            <asp:Button ID="btnAcceptCitationNumber" runat="server" Text="Accept Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnAcceptCitationNumber_Click" ClientIDMode="Static" />
+                            <asp:Button ID="btnRemoveCitationNumber" runat="server" Text="Remove Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnRemoveCitationNumber_Click" ClientIDMode="Static" />
                         </div>
                     </div>
                 </ContentTemplate>
@@ -543,6 +547,54 @@
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnDeleteConfirm_Click" />
 
+            </div>
+        </div>
+        <%--<div class="form-group">
+            <div class="col-md-2"></div>
+            <div class="col-md-8">
+                <div id="historyhead" class="historyhead">
+                    History (Click here to collapse/expand)
+                </div>
+            </div>
+        </div>--%>
+        <div class="form-group">
+            <div class="col-md-2"></div>
+            <div class="col-md-8 historyhead">
+                    History (Click here to collapse/expand)
+            </div>
+            <br/>
+            <div class="col-md-2"></div>
+            <div id="historylist" class="col-md-8 historylist">
+                <asp:Repeater ID="rpHistoryList" runat="server">
+                    <HeaderTemplate>
+                        <table class="table table-bordered table-striped">
+                            <tr style='font-weight: bold'>
+                                <td>Date and Time</td>
+                                <td>User</td>
+                                <td>Action</td>
+                                <td>Post-Action PIW Status</td>
+                            </tr>
+                    </HeaderTemplate>
+                    <ItemTemplate>
+                        <tr>
+                            <td>
+                                <%#DataBinder.Eval(Container.DataItem,"Created")%> 
+                            </td>
+                            <td>
+                                <%#DataBinder.Eval(Container.DataItem,"User")%> 
+                            </td>
+                            <td>
+                                <%#DataBinder.Eval(Container.DataItem,"Action")%> 
+                            </td>
+                            <td>
+                                <%#DataBinder.Eval(Container.DataItem,"FormStatus")%> 
+                            </td>
+                        </tr>
+                    </ItemTemplate>
+                    <FooterTemplate>
+                        </table>
+                    </FooterTemplate>
+                </asp:Repeater>
             </div>
         </div>
         <div id="deleteDialogConfirmation" title="Are you sure you wish to delete this workflow item?"></div>

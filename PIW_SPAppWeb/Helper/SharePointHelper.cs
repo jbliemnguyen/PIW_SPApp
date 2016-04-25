@@ -14,6 +14,7 @@ using File = Microsoft.SharePoint.Client.File;
 using ListItem = Microsoft.SharePoint.Client.ListItem;
 using FERC.FOL.ATMS.Remote.Interfaces;
 using ListItemCollection = Microsoft.SharePoint.Client.ListItemCollection;
+using System.Text;
 
 //using FERC.FOL.ATMS.Structure;
 
@@ -280,8 +281,9 @@ namespace PIW_SPAppWeb.Helper
             }
         }
 
-        public void RemoveDocument(ClientContext clientContext, string subFolder, string libraryName, string Id)
+        public string RemoveDocument(ClientContext clientContext, string subFolder, string libraryName, string Id)
         {
+            string removedFileName = string.Empty;
             clientContext.Load(clientContext.Web, web => web.Url);
             clientContext.ExecuteQuery();
             string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, libraryName, subFolder);
@@ -291,11 +293,13 @@ namespace PIW_SPAppWeb.Helper
             {
                 if (file.ListItemAllFields.Id.ToString().Equals(Id))
                 {
+                    removedFileName = file.Name;
                     file.DeleteObject();
                     clientContext.ExecuteQuery();
                     break;
                 }
             }
+            return removedFileName;
 
 
         }
@@ -331,9 +335,111 @@ namespace PIW_SPAppWeb.Helper
             }
 
         }
+
+        public ListItemCollection getHistoryListByPIWListID(ClientContext clientContext, string piwListItemID)
+        {
+            List historyList = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
+            var historyListInternalNameList = getInternalColumnNames(clientContext, Constants.PIWListHistory_ListName);
+            CamlQuery query = new CamlQuery();
+            query.ViewXml = string.Format(@"<View>
+	                                            <Query>
+		                                            <Where>
+			                                            <Eq>
+				                                            <FieldRef Name='{0}' LookupId='TRUE' />
+				                                            <Value Type='Lookup'>{1}</Value>
+			                                            </Eq>			
+		                                            </Where>		
+	                                            </Query>
+                                            </View>", historyListInternalNameList[Constants.PIWListHistory_colName_PIWList], piwListItemID);
+
+            var historyListItems = historyList.GetItems(query);
+
+            clientContext.Load(historyListItems);
+            clientContext.ExecuteQuery();
+
+            return historyListItems;
+
+
+
+        }
+
+        public System.Data.DataTable getHistoryListTable(ClientContext clientContext, string piwListItemID)
+        {
+            var historyList = getHistoryListByPIWListID(clientContext,piwListItemID);
+            var historyListInternalNameList = getInternalColumnNames(clientContext, Constants.PIWListHistory_ListName);
+            var result = new System.Data.DataTable();
+            result.Columns.Add("Created");
+            result.Columns.Add("User");
+            result.Columns.Add("Action");
+            result.Columns.Add("FormStatus");
+            foreach (ListItem historyItem in historyList)
+            {
+                System.Data.DataRow row = result.NewRow();
+
+                if (historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Created]] != null)
+                {
+                    var createdUTC = DateTime.Parse(historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Created]].ToString());
+                    var created = clientContext.Web.RegionalSettings.TimeZone.UTCToLocalTime(createdUTC);
+                    clientContext.ExecuteQuery();
+                    row["Created"] = created;
+
+                }
+                else
+                {
+                    row["Created"] = string.Empty;
+                }
+
+                row["User"] = historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_User]] != null
+                    ? ((FieldUserValue) historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_User]]).LookupValue: string.Empty;
+
+                row["Action"] = historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Action]] != null
+                    ? historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Action]].ToString(): string.Empty;
+
+                row["FormStatus"] = historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_FormStatus]] != null
+                    ? historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_FormStatus]].ToString(): string.Empty;
+
+                result.Rows.Add(row);
+            }
+
+            
+
+            return result;
+
+
+
+
+
+            //StringBuilder html = new StringBuilder("<table border='1' cellpadding='10'>");
+            //html.Append("<tr style='font-weight:bold'><td>Date and Time</td><td>User</td><td>Action</td><td>Post-Action PIW Status</td></tr>");
+            //foreach (ListItem historyItem in historyList)
+            //{
+            //    html.AppendLine("<tr>");
+
+            //    html.Append("<td>");
+            //    html.Append(historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Created]] != null ? historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Created]].ToString() : string.Empty);
+            //    html.Append("</td>");
+
+            //    html.Append("<td>");
+            //    html.Append(historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_User]] != null ? ((FieldUserValue)historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_User]]).LookupValue : string.Empty);
+            //    html.Append("</td>");
+
+            //    html.Append("<td>");
+            //    html.Append(historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Action]] != null ? historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Action]].ToString() : string.Empty);
+            //    html.Append("</td>");
+
+            //    html.Append("<td>");
+            //    html.Append(historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_FormStatus]] != null ? historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_FormStatus]].ToString() : string.Empty);
+            //    html.Append("</td>");
+
+            //    html.AppendLine("</tr>");
+            //}
+            //html.AppendLine("</table>");
+
+            //return html.ToString();
+        }
         #endregion
 
-        #region Utilities
+        #region Utils
 
         /// <summary>
         /// check if a docket is existing in P8 
@@ -643,6 +749,10 @@ namespace PIW_SPAppWeb.Helper
                 response.Redirect(PageURL, false);
             }
         }
+
+        
+
+        
         #endregion
 
 

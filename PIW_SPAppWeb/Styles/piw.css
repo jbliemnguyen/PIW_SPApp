@@ -69,3 +69,21 @@ input[disabled] {
     opacity: .65;
  }
 
+.historyhead
+{
+	padding: 5px 10px;
+	cursor: pointer;
+	position: relative;
+	/*background-color: #AFE01B;*/
+    background-color: #204d74;
+    color: #fff;
+	margin: 1px;
+}
+
+.historylist
+{
+	padding: 5px 10px 15px;
+	/*/*background-color: #F4F4F8;*/*/
+    
+}
+
