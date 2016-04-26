@@ -143,7 +143,7 @@
     <Content Include="Pages\EditDirectPublicationForm.aspx" />
     <Content Include="Pages\EditStandardForm.aspx" />
     <Content Include="Pages\ItemNotFound.aspx" />
-    <Content Include="Pages\StandardForm.aspx" />
+    <Content Include="Pages\StandardForms.aspx" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\jquery-ui-1.11.4.js" />
@@ -267,12 +267,12 @@
     <Compile Include="Pages\Main.Master.designer.cs">
       <DependentUpon>Main.Master</DependentUpon>
     </Compile>
-    <Compile Include="Pages\StandardForm.aspx.cs">
-      <DependentUpon>StandardForm.aspx</DependentUpon>
+    <Compile Include="Pages\StandardForms.aspx.cs">
+      <DependentUpon>StandardForms.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\StandardForm.aspx.designer.cs">
-      <DependentUpon>StandardForm.aspx</DependentUpon>
+    <Compile Include="Pages\StandardForms.aspx.designer.cs">
+      <DependentUpon>StandardForms.aspx</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\AppEventReceiver.svc.cs">

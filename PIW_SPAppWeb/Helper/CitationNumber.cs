@@ -337,7 +337,6 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
 
             return citationListItems;
-            //query.ViewXml = string.Format("<Where><And><Eq><FieldRef Name='{0}'/><Value Type='Number'>{1}</Value></Eq><Eq><FieldRef Name='{2}'/><Value Type='Number'>{3}</Value></Eq></And></Where><OrderBy><FieldRef Name='{4}' Ascending='False'/></OrderBy>", SPListSetting.col_CitationNumberList_QuarterNumber, quarterNumber, SPListSetting.col_CitationNumberList_DocumentTypeNumber, documentCategoryNumber, SPListSetting.col_CitationNumberList_SequenceNumber);
 
         }
 

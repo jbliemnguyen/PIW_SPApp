@@ -182,6 +182,15 @@ namespace PIW_SPAppWeb
 
         //ATMS Validation error
         public const string ATMSRemotingServiceConnectionError = "Cannot connect to ATMS to validate docket.";
+
+        //page name
+        //this setting store the Page Name, used mainly in code to create URL
+        public const string Page_EditStandardForm = "EditStandardForm.aspx";
+        public const string Page_EditAgendaForm = "EditAgendaForm.aspx";
+        public const string Page_EditDirectPublicationForm = "EditDirectPublicationForm.aspx";
+        public const string Page_StandardForms = "StandardForms.aspx";
+
+        
     }
 
     public enum enumAction

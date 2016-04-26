@@ -55,7 +55,7 @@ namespace PIW_SPAppWeb.Pages
                 ViewState.Add(Constants.ModifiedDateTimeKey, value);
             }
         }
-        
+
         //variable        
         private string _listItemId;
         private bool _isEditForm;
@@ -101,7 +101,7 @@ namespace PIW_SPAppWeb.Pages
                             }
                             else
                             {
-                                PopulateFormStatusAndModifiedDate(clientContext, listItem);
+                                PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
                                 DisplayListItemInForm(clientContext, listItem);
                                 PopulateHistoryList(clientContext);
                                 ////display form visiblility based on form status
@@ -113,7 +113,7 @@ namespace PIW_SPAppWeb.Pages
                                 //}
                             }
 
-                            
+
                         }
 
                     }
@@ -132,6 +132,12 @@ namespace PIW_SPAppWeb.Pages
 
                             //Create subfolder in piwdocuments and mailing list
                             helper.CreatePIWDocumentsSubFolder(clientContext, _listItemId);
+
+                            //history list
+                            //if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
+                            //{
+                            //    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus);
+                            //}
                         }
 
                         //forward to Edit
@@ -154,8 +160,12 @@ namespace PIW_SPAppWeb.Pages
                 {
                     if (ValidFormData(action))
                     {
-                        var listItem = SaveData(clientContext, action);
-                        
+                        ListItem listItem = null;
+                        if (!SaveData(clientContext, action, ref listItem))
+                        {
+                            return;
+                        }
+
                         //TODO: Change document and list permission
 
                         //TODO: send email
@@ -195,14 +205,18 @@ namespace PIW_SPAppWeb.Pages
                 {
                     if (ValidFormData(action))
                     {
-                        var listItem = SaveData(clientContext, action);
+                        ListItem listItem = null;
+                        if (!SaveData(clientContext, action, ref listItem))
+                        {
+                            return;
+                        }
 
                         //TODO: Change document and list permission
 
                         //TODO: send email
 
                         //Create list history
-                        if (helper.getHistoryListByPIWListID(clientContext,_listItemId).Count == 0)
+                        if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
                         {
                             helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus);
                         }
@@ -237,17 +251,21 @@ namespace PIW_SPAppWeb.Pages
                 const enumAction action = enumAction.Accept;
                 using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
-                        var listItem = SaveData(clientContext, action);
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
 
-                        //TODO: Change document and list permission
+                    //TODO: Change document and list permission
 
-                        //TODO: send email
+                    //TODO: send email
 
-                        //Create list history
-                        helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item accepted", FormStatus);
+                    //Create list history
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item accepted", FormStatus);
 
-                        //Redirect
-                        helper.RedirectToSourcePage(Page.Request, Page.Response);
+                    //Redirect
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -264,7 +282,11 @@ namespace PIW_SPAppWeb.Pages
                 const enumAction action = enumAction.Reject;
                 using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
-                    var listItem = SaveData(clientContext, action);
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
 
                     //TODO: Change document and list permission
 
@@ -291,7 +313,11 @@ namespace PIW_SPAppWeb.Pages
                 const enumAction action = enumAction.Publish;
                 using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
-                    var listItem = SaveData(clientContext, action);
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
 
                     //TODO: Change document and list permission
 
@@ -318,7 +344,11 @@ namespace PIW_SPAppWeb.Pages
                 const enumAction action = enumAction.Delete;
                 using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
-                    var listItem = SaveData(clientContext, action);
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
 
                     //TODO: Change document and list permission
 
@@ -337,7 +367,7 @@ namespace PIW_SPAppWeb.Pages
                 throw exc;
             }
         }
-        
+
         protected void btnRecall_Click(object sender, EventArgs e)
         {
             try
@@ -347,7 +377,11 @@ namespace PIW_SPAppWeb.Pages
                 {
                     if (ValidFormData(action))
                     {
-                        var listItem = SaveData(clientContext, action);
+                        ListItem listItem = null;
+                        if (!SaveData(clientContext, action, ref listItem))
+                        {
+                            return;
+                        }
 
 
                         //TODO: Change document and list permission
@@ -378,7 +412,11 @@ namespace PIW_SPAppWeb.Pages
                 const enumAction action = enumAction.OSECTakeOwnerShip;
                 using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
-                    var listItem = SaveData(clientContext, action);
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
 
                     //TODO: Change document and list permission
 
@@ -405,14 +443,18 @@ namespace PIW_SPAppWeb.Pages
                 const enumAction action = enumAction.Edit;
                 using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
-                    var listItem = SaveData(clientContext, action);
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
                     //TODO: Change document and list permission
 
                     //Create list history
                     helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item edited", FormStatus);
 
                     //Redirect or Refresh page
-                    helper.RefreshPage(Page.Request,Page.Response);
+                    helper.RefreshPage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -476,7 +518,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         string errorMessage = string.Empty;
                         int documentCategoryNumber = helper.getDocumentCategoryNumber(ddDocumentCategory.SelectedValue);
-
+                        var piwListinternalName = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
                         CitationNumber citationNumberHelper = new CitationNumber(documentCategoryNumber, DateTime.Now);
 
                         if (citationNumberHelper.Save(clientContext, _listItemId, tbCitationNumber.Text.Trim(),
@@ -484,11 +526,14 @@ namespace PIW_SPAppWeb.Pages
                         {
                             lbCitationNumberError.Visible = false;
                             lbCitationNumberError.Text = string.Empty;
-                            helper.SetCitationNumberFieldInPIWList(clientContext, _listItemId, tbCitationNumber.Text.Trim());
+                            var listItem = helper.SetCitationNumberFieldInPIWList(clientContext, _listItemId, tbCitationNumber.Text.Trim());
+
+                            //need to re-populate the modified date becuase the list item is changed
+                            PopulateFormStatusAndModifiedDateProperties(clientContext,listItem);
 
                             //controls
                             //after accept, citation number cannot be changed
-                            EnableCitationNumberControls(false,true);
+                            EnableCitationNumberControls(false, true);
                             lbCitationNumberError.Text = string.Empty;
                             lbCitationNumberError.Visible = false;
 
@@ -511,7 +556,7 @@ namespace PIW_SPAppWeb.Pages
                 throw exc;
             }
         }
-        
+
         protected void btnRemoveCitationNumber_Click(object sender, EventArgs e)
         {
             try
@@ -519,12 +564,15 @@ namespace PIW_SPAppWeb.Pages
                 using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
                     //just delete the citation item - instead of settign the status to deleted
-                    helper.deleteAssociatedCitationNumberListItem(clientContext, _listItemId);
+                    var listItem = helper.deleteAssociatedCitationNumberListItem(clientContext, _listItemId);
+
+                    //need to re-populate the modified date becuase the list item is changed
+                    PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
 
                     //controls
                     tbCitationNumber.Text = string.Empty;
                     //after remove, citation canbe changed
-                    EnableCitationNumberControls(true,false);
+                    EnableCitationNumberControls(true, false);
 
                     //history list
                     helper.CreatePIWListHistory(clientContext, _listItemId, "Citation number removed", FormStatus);
@@ -583,20 +631,20 @@ namespace PIW_SPAppWeb.Pages
                     {
                         using (var fileStream = fileUpload.PostedFile.InputStream)
                         {
-                            helper.UploadDocumentContentStream(clientContext, fileStream,
+                            string fileName = helper.UploadDocumentContentStream(clientContext, fileStream,
                                 Constants.PIWDocuments_DocumentLibraryName, _listItemId, fileUpload.FileName,
                                 ddlSecurityControl.SelectedValue);
                             PopulateDocumentList(clientContext);
                             //clear validation error
                             lbRequiredUploadedDocumentError.Visible = false;
-                            
+
                             //history list
                             if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
                             {
                                 helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus);
                             }
 
-                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Document file {0} uploaded/associated with Workflow Item",fileUpload.PostedFile.FileName), FormStatus);
+                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Document file {0} uploaded/associated with Workflow Item", fileName), FormStatus);
 
                         }
                     }
@@ -622,13 +670,15 @@ namespace PIW_SPAppWeb.Pages
         #endregion
 
         #region Save Data
-        private ListItem SaveData(ClientContext clientContext, enumAction action)
+        private bool SaveData(ClientContext clientContext, enumAction action,ref ListItem returnedListItem)
         {
             ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
 
             if (CheckIfListItemChanged(clientContext, listItem))
             {
-                return listItem;
+                lbMainMessage.Text = "The form has been changed, please refresh the page";
+                lbMainMessage.Visible = true;
+                return false;
             }
 
             //get next form status
@@ -639,7 +689,9 @@ namespace PIW_SPAppWeb.Pages
             PreviousFormStatus = currentFormStatus;
 
             UpdateFormDataToList(clientContext, listItem, action);
-            return listItem;
+
+            returnedListItem = listItem;
+            return true;
         }
         private void UpdateFormDataToList(ClientContext clientContext, ListItem listItem, enumAction action)
         {
@@ -720,8 +772,8 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Deleted:
                     //delete item, need to set status and remove citation number if there is assigned one
-                    SaveDeleteInfoAndStatus(clientContext,listItem);
-                    helper.ReleaseCitationNumberForDeletedListItem(clientContext,_listItemId);
+                    SaveDeleteInfoAndStatus(clientContext, listItem);
+                    helper.ReleaseCitationNumberForDeletedListItem(clientContext, _listItemId);
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
                     if (PreviousFormStatus == Constants.PIWList_FormStatus_Edited)
@@ -815,7 +867,7 @@ namespace PIW_SPAppWeb.Pages
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
-            
+
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsActive]] = false;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_CitationNumber]] = string.Empty;
 
@@ -871,7 +923,7 @@ namespace PIW_SPAppWeb.Pages
             if (action == enumAction.Reject)
             {
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_OSECRejectedComment]] = tbOSECVerificationComment.Text.Trim();
-                
+
             }
             else
             {
@@ -1167,7 +1219,7 @@ namespace PIW_SPAppWeb.Pages
             helper.CheckDocketNumber(docketNumber.Trim(), ref errorMessage, isCNF, docketValidationByPass);
             return errorMessage;
         }
-        private void PopulateFormStatusAndModifiedDate(ClientContext clientContext, ListItem listItem)
+        private void PopulateFormStatusAndModifiedDateProperties(ClientContext clientContext, ListItem listItem)
         {
             var internalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
             if (listItem[internalColumnNames[Constants.PIWList_colName_FormStatus]] != null)
@@ -1185,11 +1237,7 @@ namespace PIW_SPAppWeb.Pages
             {
                 ModifiedDateTime = listItem[internalColumnNames[Constants.PIWList_colName_Modified]].ToString();
             }
-
-            if (listItem[internalColumnNames[Constants.PIWList_colName_Modified]] != null)
-            {
-                ModifiedDateTime = listItem[internalColumnNames[Constants.PIWList_colName_Modified]].ToString();
-            }
+            
         }
 
         private void DisplayListItemInForm(ClientContext clientContext, ListItem listItem)
@@ -1392,11 +1440,6 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        private void PopulateHistoryList()
-        {
-            throw new NotImplementedException();
-        }
-
         private bool isRequiredOSECVerificationStep(string documentCategory)
         {
             return (documentCategory.Equals(Constants.PIWList_DocCat_Notice) ||
@@ -1407,9 +1450,6 @@ namespace PIW_SPAppWeb.Pages
         {
             if (helper.CheckIfListItemChanged(clientContext, listItem, DateTime.Parse(ModifiedDateTime)))
             {
-                lbMainMessage.Text = "The form has been changed, please refresh the page";
-                lbMainMessage.Visible = true;
-
                 return true;
             }
             return false;
@@ -1530,7 +1570,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         fieldsetPrePublication.Visible = true;
                         EnablePrePublicationControls(false);
-                        EnableCitationNumberControls(false,false);
+                        EnableCitationNumberControls(false, false);
                     }
 
                     //Button
@@ -1643,7 +1683,7 @@ namespace PIW_SPAppWeb.Pages
                     //PrePublication
                     fieldsetPrePublication.Visible = true;
                     EnablePrePublicationControls(false);
-                    InitiallyEnableCitationNumberControls(clientContext,listItem);
+                    InitiallyEnableCitationNumberControls(clientContext, listItem);
 
                     //button
                     btnSave.Visible = false;
@@ -1683,7 +1723,7 @@ namespace PIW_SPAppWeb.Pages
                     //PrePublication
                     fieldsetPrePublication.Visible = true;
                     EnablePrePublicationControls(false);
-                    EnableCitationNumberControls(false,false);
+                    EnableCitationNumberControls(false, false);
 
                     //button
                     btnSave.Visible = false;
@@ -1779,7 +1819,7 @@ namespace PIW_SPAppWeb.Pages
             tbCitationNumber.Enabled = citationNumberCanBeChanged;
             btnAcceptCitationNumber.Enabled = citationNumberCanBeChanged;
 
-            
+
             btnRemoveCitationNumber.Enabled = CitationNumberCanBeRemoved;
         }
 
@@ -1796,13 +1836,13 @@ namespace PIW_SPAppWeb.Pages
             {
                 //no citation assigned in piwlist
                 //system should allow to generate and assign citation number
-                EnableCitationNumberControls(true,false);
+                EnableCitationNumberControls(true, false);
 
             }
             else
             {
                 //there is citation number assigned to piw list item
-                EnableCitationNumberControls(false,true);
+                EnableCitationNumberControls(false, true);
 
             }
         }

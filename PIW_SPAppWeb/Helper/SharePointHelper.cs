@@ -84,7 +84,7 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public void SetCitationNumberFieldInPIWList(ClientContext clientContext, string piwListItemID, string citationNumber)
+        public ListItem SetCitationNumberFieldInPIWList(ClientContext clientContext, string piwListItemID, string citationNumber)
         {
             var piwListinternalName = getInternalColumnNames(clientContext, Constants.PIWListName);
             ListItem listItem = GetPiwListItemById(clientContext, piwListItemID, false);
@@ -92,9 +92,10 @@ namespace PIW_SPAppWeb.Helper
             listItem[piwListinternalName[Constants.PIWList_colName_CitationNumber]] = citationNumber;
             listItem.Update();
             clientContext.ExecuteQuery();
+            return listItem;
         }
 
-        public void deleteAssociatedCitationNumberListItem(ClientContext clientContext, string piwListItemID)
+        public ListItem deleteAssociatedCitationNumberListItem(ClientContext clientContext, string piwListItemID)
         {
             ListItemCollection citationList = GetCitationNumberListItemFromPiwListId(clientContext, piwListItemID);
             citationList[0].DeleteObject();
@@ -106,7 +107,7 @@ namespace PIW_SPAppWeb.Helper
             listItem[piwListinternalName[Constants.PIWList_colName_CitationNumber]] = string.Empty;
             listItem.Update();
             clientContext.ExecuteQuery();
-
+            return listItem;
         }
 
         public void ReleaseCitationNumberForDeletedListItem(ClientContext clientContext, string piwListItemId)
@@ -173,7 +174,7 @@ namespace PIW_SPAppWeb.Helper
 
 
 
-        public void UploadDocumentContentStream(ClientContext clientContext, Stream fileStream, string libraryName, string subFolder, string fileName, string securityLevel)
+        public string UploadDocumentContentStream(ClientContext clientContext, Stream fileStream, string libraryName, string subFolder, string fileName, string securityLevel)
         {
 
             //Dictionary<string, string> internalNameList = PopulateInternalNameList(clientContext, Constants.PIWDocuments_DocumentLibraryName);
@@ -205,6 +206,7 @@ namespace PIW_SPAppWeb.Helper
             uploadFile.ListItemAllFields.Update();
 
             clientContext.ExecuteQuery();
+            return uploadFile.Name;
 
         }
 
@@ -367,6 +369,7 @@ namespace PIW_SPAppWeb.Helper
         {
             var historyList = getHistoryListByPIWListID(clientContext,piwListItemID);
             var historyListInternalNameList = getInternalColumnNames(clientContext, Constants.PIWListHistory_ListName);
+            //TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById(System.TimeZone.CurrentTimeZone.ToLocalTime());
             var result = new System.Data.DataTable();
             result.Columns.Add("Created");
             result.Columns.Add("User");
@@ -379,8 +382,9 @@ namespace PIW_SPAppWeb.Helper
                 if (historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Created]] != null)
                 {
                     var createdUTC = DateTime.Parse(historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Created]].ToString());
-                    var created = clientContext.Web.RegionalSettings.TimeZone.UTCToLocalTime(createdUTC);
-                    clientContext.ExecuteQuery();
+
+
+                    DateTime created = System.TimeZone.CurrentTimeZone.ToLocalTime(createdUTC);
                     row["Created"] = created;
 
                 }
@@ -717,6 +721,24 @@ namespace PIW_SPAppWeb.Helper
         public void RedirectToAPage(HttpRequest request, HttpResponse response, string PageName)
         {
             //https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/EditStandardForm.aspx
+            
+            var newURLPage = GetPageUrl(request, PageName);
+
+            if (!string.IsNullOrEmpty(newURLPage))
+            {
+                response.Redirect(newURLPage, false);
+            }
+        }
+
+
+        /// <summary>
+        /// return full URL of a page, with all sharepont app settings
+        /// </summary>
+        /// <param name="request">HTTPRequest</param>
+        /// <param name="PageName">FileName of Page, ie: EditStandardForm.aspx</param>
+        /// <returns></returns>
+        private string GetPageUrl(HttpRequest request, string PageName)
+        {
             const string pattern = "/pages/";
             int length = request.Url.ToString().IndexOf(pattern, StringComparison.CurrentCultureIgnoreCase) + pattern.Length;
             string newURLPage = request.Url.ToString().Substring(0, length) + PageName;
@@ -731,14 +753,8 @@ namespace PIW_SPAppWeb.Helper
                 request.QueryString["SPAppWebUrl"]
             };
 
-            string redirectUrl = string.Format("{0}?SPHostUrl={1}&SPLanguage={2}$SPClientTag={3}&SPProductNumber={4}&SPAppWebUrl={5}", args);
-
-            if (!string.IsNullOrEmpty(newURLPage))
-            {
-                response.Redirect(redirectUrl, false);
-            }
-
-
+            var fullPageURL = string.Format("{0}?SPHostUrl={1}&SPLanguage={2}$SPClientTag={3}&SPProductNumber={4}&SPAppWebUrl={5}",args);
+            return fullPageURL;
         }
 
         public void RefreshPage(HttpRequest request, HttpResponse response)
@@ -750,8 +766,28 @@ namespace PIW_SPAppWeb.Helper
             }
         }
 
-        
 
+        public string getEditFormURL(string formType,string listItemId,HttpRequest  request )
+        {
+            string result = string.Empty;
+            string PageFileName = string.Empty;
+
+            if (formType == Constants.PIWList_FormType_StandardForm)
+            {
+                PageFileName = Constants.Page_EditStandardForm;
+            }
+            else if (formType == Constants.PIWList_FormType_AgendaForm)
+            {
+                PageFileName = Constants.Page_EditAgendaForm;
+            }
+            else if (formType == Constants.PIWList_FormType_DirectPublicationForm)
+            {
+                PageFileName = Constants.Page_EditDirectPublicationForm;
+            }
+
+            result = String.Format("{0}&ID={1}",GetPageUrl(request, PageFileName),listItemId);
+            return result;
+        }
         
         #endregion
 
