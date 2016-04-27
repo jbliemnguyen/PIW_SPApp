@@ -227,8 +227,9 @@ namespace PIW_SPAppWeb.Helper
             return files;
         }
 
-        public System.Data.DataTable getAllDocumentsTable(ClientContext clientContext, string subFoder, string libraryName)
+        public System.Data.DataTable getAllDocumentsTable(ClientContext clientContext, string subFoder, string libraryName,out StringBuilder DocumentURLs)
         {
+            DocumentURLs = new StringBuilder();
             var result = new System.Data.DataTable();
             result.Columns.Add("ID");
             result.Columns.Add("Name");
@@ -236,9 +237,7 @@ namespace PIW_SPAppWeb.Helper
             result.Columns.Add("Security Level");
             result.Columns.Add("EPS Passed");
             result.Columns.Add("EPS Error");
-
-
-            //Dictionary<string, string> internalNameList = PopulateInternalNameList(clientContext, Constants.PIWDocuments_DocumentLibraryName);
+            
             var internalNameList = getInternalColumnNames(clientContext, Constants.PIWDocuments_DocumentLibraryName);
 
             clientContext.Load(clientContext.Web, web => web.Url);
@@ -247,7 +246,7 @@ namespace PIW_SPAppWeb.Helper
             string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, libraryName, subFoder);
 
             var documentList = getAllDocuments(clientContext, uploadSubFolderURL, true);
-
+            
             foreach (File file in documentList)
             {
                 System.Data.DataRow row = result.NewRow();
@@ -262,8 +261,18 @@ namespace PIW_SPAppWeb.Helper
                     file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_EPSError]];
                 result.Rows.Add(row);
 
+                if (DocumentURLs.Length == 0)
+                {
+                    DocumentURLs.Append(row["URL"].ToString());
+                }
+                else
+                {
+                    DocumentURLs.Append(Constants.DocumentURLsSeparator + row["URL"].ToString());
+                }
+                
             }
 
+            
             return result;
         }
 
@@ -706,6 +715,7 @@ namespace PIW_SPAppWeb.Helper
         public void RedirectToSourcePage(HttpRequest request, HttpResponse response)
         {
             //redirect to source page
+            //Attention: Source page is short name, not the entire URL
             //https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/EditStandardForm.aspx?SPHostUrl=https%3a%2f%2ffdc1s-sp23wfed2.ferc.gov%2fpiw&SPLanguage=en-US&SPClientTag=0&SPProductNumber=15.0.4727.1000&SPAppWebUrl=https%3a%2f%2fapp-3f613e5e650fd4.dev.spapps.ferc.gov%2fpiw%2fPIW_SPApp&ID=41&Source=StandardForm.aspx
             string sourcePage = request.QueryString["Source"];
             RedirectToAPage(request,response,sourcePage);
@@ -722,7 +732,7 @@ namespace PIW_SPAppWeb.Helper
         {
             //https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/EditStandardForm.aspx
             
-            var newURLPage = GetPageUrl(request, PageName);
+            var newURLPage = GetPageUrl(request, PageName,string.Empty);
 
             if (!string.IsNullOrEmpty(newURLPage))
             {
@@ -737,11 +747,18 @@ namespace PIW_SPAppWeb.Helper
         /// <param name="request">HTTPRequest</param>
         /// <param name="PageName">FileName of Page, ie: EditStandardForm.aspx</param>
         /// <returns></returns>
-        private string GetPageUrl(HttpRequest request, string PageName)
+        private string GetPageUrl(HttpRequest request, string PageName,string sourcePage)
         {
+            //if soucepage is provided, use the sourcePage,
+            //otherwise, find the soucePage from the request URL
+            string source = (!string.IsNullOrEmpty(sourcePage)) ? sourcePage : request.QueryString["Source="];
+
+
             const string pattern = "/pages/";
             int length = request.Url.ToString().IndexOf(pattern, StringComparison.CurrentCultureIgnoreCase) + pattern.Length;
             string newURLPage = request.Url.ToString().Substring(0, length) + PageName;
+
+
 
             var args = new string[]
             {
@@ -750,10 +767,11 @@ namespace PIW_SPAppWeb.Helper
                 request.QueryString["SPLanguage"],
                 request.QueryString["SPClientTag"],
                 request.QueryString["SPProductNumber"],
-                request.QueryString["SPAppWebUrl"]
+                request.QueryString["SPAppWebUrl"],
+                source
             };
 
-            var fullPageURL = string.Format("{0}?SPHostUrl={1}&SPLanguage={2}$SPClientTag={3}&SPProductNumber={4}&SPAppWebUrl={5}",args);
+            var fullPageURL = string.Format("{0}?SPHostUrl={1}&SPLanguage={2}$SPClientTag={3}&SPProductNumber={4}&SPAppWebUrl={5}&Source={6}",args);
             return fullPageURL;
         }
 
@@ -767,7 +785,7 @@ namespace PIW_SPAppWeb.Helper
         }
 
 
-        public string getEditFormURL(string formType,string listItemId,HttpRequest  request )
+        public string getEditFormURL(string formType,string listItemId,HttpRequest  request,string sourcePage )
         {
             string result = string.Empty;
             string PageFileName = string.Empty;
@@ -785,7 +803,7 @@ namespace PIW_SPAppWeb.Helper
                 PageFileName = Constants.Page_EditDirectPublicationForm;
             }
 
-            result = String.Format("{0}&ID={1}",GetPageUrl(request, PageFileName),listItemId);
+            result = String.Format("{0}&ID={1}",GetPageUrl(request, PageFileName,sourcePage),listItemId);
             return result;
         }
         

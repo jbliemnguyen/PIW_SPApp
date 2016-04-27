@@ -1,14 +1,12 @@
 ﻿.radio.radiobuttonlist input[type="radio"],
-.checkbox.checkboxlist input[type="checkbox"]
-{
-	margin-left: 0;
+.checkbox.checkboxlist input[type="checkbox"] {
+    margin-left: 0;
 }
 
 .radio.radiobuttonlist label,
-.checkbox.checkboxlist label
-{
-	margin-bottom: 4px;
-	margin-left: 0;
+.checkbox.checkboxlist label {
+    margin-bottom: 4px;
+    margin-left: 0;
 }
 
 /*fieldset legend
@@ -20,9 +18,8 @@
 }*/
 
 fieldset .radio,
-fieldset .checkbox
-{
-	margin-top: 4px;
+fieldset .checkbox {
+    margin-top: 4px;
 }
 
 .glyphicon-spin {
@@ -33,14 +30,14 @@ fieldset .checkbox
 body {
 }
 
-/*override form.less from bootstrap*/ 
+/*override form.less from bootstrap*/
 .radio input[type="radio"],
 .radio-inline input[type="radio"],
 .checkbox input[type="checkbox"],
 .checkbox-inline input[type="checkbox"] {
-  position: absolute;
-  margin-left: 0px;
-  margin-top: 4px \9;
+    position: absolute;
+    margin-left: 0px;
+    margin-top: 4px \9;
 }
 
 /*jquery validation error*/
@@ -56,7 +53,7 @@ span.error {
 
 /*used for accent textarea (*)*/
 .accentText {
-    color:#393
+    color: #393;
 }
 
 .invisible {
@@ -64,26 +61,33 @@ span.error {
 }
 
 input[disabled] {
-     cursor: not-allowed;
+    cursor: not-allowed;
     box-shadow: none;
     opacity: .65;
- }
+}
 
-.historyhead
-{
-	padding: 5px 10px;
-	cursor: pointer;
-	position: relative;
-	/*background-color: #AFE01B;*/
+.historyhead {
+    padding: 5px 10px;
+    cursor: pointer;
+    position: relative;
+    /*background-color: #AFE01B;*/
     background-color: #204d74;
     color: #fff;
-	margin: 1px;
+    margin: 1px;
 }
 
-.historylist
-{
-	padding: 5px 10px 15px;
-	/*/*background-color: #F4F4F8;*/*/
-    
+.historylist {
+    padding: 5px 10px 15px;
+    /*/*background-color: #F4F4F8;*/ */;
 }
 
+.GroupHeaderStyle {
+    border: solid 1px Black;
+    background-color: #337ab7;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.piw-borderless,.piw-borderless tbody tr td, .piw-borderless tbody tr th, .piw-borderless thead tr th, .piw-borderless tbody table {
+    border: none;
+}

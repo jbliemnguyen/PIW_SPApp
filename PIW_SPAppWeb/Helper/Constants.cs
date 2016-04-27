@@ -30,7 +30,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_Comment = "Comment";
         public const string PIWList_colName_Description = "Description";
         public const string PIWList_colName_DocketNumber = "Docket Number";
-        public const string PIWList_colName_DocumentFileName = "Document File Name";
+        public const string PIWList_colName_DocumentURLs = "Document URLs";
         public const string PIWList_colName_DocumentOwner = "Document Owner";
         public const string PIWList_colName_DueDate = "Due Date";
         public const string PIWList_colName_FederalRegister = "Federal Register";
@@ -169,16 +169,19 @@ namespace PIW_SPAppWeb
         public const string previousFormStatusViewStateKey = "PreviousFormStatusKey";
 
         //Document Title key
-        public const string DocumentTitleKey = "DocumentTitleKey";
+        //public const string DocumentTitleKey = "DocumentTitleKey";
 
         //Document File name key
-        public const string DocumentFileNameKey = "DocumentFileNameKey";
+        //public const string DocumentFileNameKey = "DocumentFileNameKey";
 
         //ModifiedDateTime key
         public const string ModifiedDateTimeKey = "ModifiedDateTimeKey";
 
-        public const string CacheKey_PIWListInternalColumnName = "CacheKey_PIWListInternalColumnName";
-        public const string CacheKey_PIWDocumentsInternalColumnName = "CacheKey_PIWDocumentsInternalColumnName";
+        //DocumentURLsFrViewState key
+        public const string DocumentURLsKey = "DocumentURLsKey";
+
+        //document urls seperator
+        public const string DocumentURLsSeparator = "_##_";
 
         //ATMS Validation error
         public const string ATMSRemotingServiceConnectionError = "Cannot connect to ATMS to validate docket.";

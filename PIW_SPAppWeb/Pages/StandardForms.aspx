@@ -12,7 +12,7 @@
     </script>
     Standard Form List
     <form runat="server">
-        <asp:GridView runat="server" ID="standardFormsGridView" AutoGenerateColumns="false" RowStyle-BackColor="#DDDDDD">
+        <asp:GridView runat="server" ID="standardFormsGridView" AutoGenerateColumns="false" CssClass="table-striped table-hover table-condensed piw-borderless" OnRowCreated="standardFormsGridView_RowCreated">
         </asp:GridView>
     </form>
 </asp:Content>

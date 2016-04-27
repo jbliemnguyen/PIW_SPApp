@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Services;
 using System.Web.UI;
@@ -53,6 +54,19 @@ namespace PIW_SPAppWeb.Pages
             set
             {
                 ViewState.Add(Constants.ModifiedDateTimeKey, value);
+            }
+        }
+
+        public string DocumentURLsFrViewState
+        {
+            get
+            {
+                return ViewState[Constants.DocumentURLsKey] != null ? ViewState[Constants.DocumentURLsKey].ToString() : string.Empty;
+                
+            }
+            set
+            {
+                ViewState.Add(Constants.DocumentURLsKey, value);
             }
         }
 
@@ -1109,6 +1123,12 @@ namespace PIW_SPAppWeb.Pages
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
             }
 
+            //Document URLs
+            if (DocumentURLsFrViewState != null)
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentURLs]] = DocumentURLsFrViewState;
+            }
+
             //execute query
             listItem.Update();
             clientContext.ExecuteQuery();
@@ -1123,9 +1143,14 @@ namespace PIW_SPAppWeb.Pages
         /// <returns></returns>
         private void PopulateDocumentList(ClientContext clientContext)
         {
-            System.Data.DataTable table = helper.getAllDocumentsTable(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName);
+            StringBuilder documentURLs;
+            System.Data.DataTable table = helper.getAllDocumentsTable(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName,out documentURLs);
             rpDocumentList.DataSource = table;
             rpDocumentList.DataBind();
+
+            //Save documentURLs to viewstate for later save back into SharePoint in Save Main function
+            DocumentURLsFrViewState = documentURLs.ToString();
+
         }
 
         private void PopulateHistoryList(ClientContext clientContext)
