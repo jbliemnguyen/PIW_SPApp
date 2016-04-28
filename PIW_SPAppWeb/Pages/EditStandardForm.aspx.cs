@@ -665,7 +665,11 @@ namespace PIW_SPAppWeb.Pages
 
                     if (rpDocumentList.Items.Count == 1)//only extract docket number if first document uploaded
                     {
-                        tbDocketNumber.Text = helper.ExtractDocket(fileUpload.FileName);
+                        if (!cbIsNonDocket.Checked)
+                        {
+                            tbDocketNumber.Text = helper.ExtractDocket(fileUpload.FileName);    
+                        }
+                        
                     }
 
 

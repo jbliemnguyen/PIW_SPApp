@@ -9,25 +9,18 @@
   <Properties>
     <Title>PIW_SPApp</Title>
     <!--DEV-->
-    <StartPage>https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>
-    <!--<StartPage>~appWebUrl/Pages/Default.aspx?{StandardTokens}&amp;RemoteAppUrl=https://dev.spapps.ferc.gov/PIW_SPAppWeb</StartPage>-->
-    <!--<StartPage>~appWebUrl/Pages/Default.aspx?{StandardTokens}&amp;RemoteAppUrl={RemoteAppUrl}</StartPage>-->
-    
-    
-    
+    <!--<StartPage>https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>-->
     
     <!--Test-->
-    <!--<StartPage>https://test.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>
-    <UninstallingEventEndpoint>~remoteAppUrl/Services/AppEventReceiver.svc</UninstallingEventEndpoint>
-    <InstalledEventEndpoint>~remoteAppUrl/Services/AppEventReceiver.svc</InstalledEventEndpoint>
-    <UpgradedEventEndpoint>~remoteAppUrl/Services/AppEventReceiver.svc</UpgradedEventEndpoint>-->
+    <StartPage>https://test.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>
   </Properties>
 
   <AppPrincipal>
     <!--DEV-->
-    <RemoteWebApplication ClientId="fa894505-c3c7-4195-b173-71e90aa289d2" />
-    
-    <!--<RemoteWebApplication ClientId="7cc9aa34-aa0e-46da-9685-25e68f860b13" />--><!--TEST-->
+    <!--<RemoteWebApplication ClientId="fa894505-c3c7-4195-b173-71e90aa289d2" />-->
+
+    <!--TEST-->
+    <RemoteWebApplication ClientId="7cc9aa34-aa0e-46da-9685-25e68f860b13" />
   </AppPrincipal>
   <AppPermissionRequests AllowAppOnlyPolicy="true">
     <AppPermissionRequest Scope="http://sharepoint/content/sitecollection" Right="FullControl" />

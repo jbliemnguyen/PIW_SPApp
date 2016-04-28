@@ -718,8 +718,30 @@ namespace PIW_SPAppWeb.Helper
             //Attention: Source page is short name, not the entire URL
             //https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/EditStandardForm.aspx?SPHostUrl=https%3a%2f%2ffdc1s-sp23wfed2.ferc.gov%2fpiw&SPLanguage=en-US&SPClientTag=0&SPProductNumber=15.0.4727.1000&SPAppWebUrl=https%3a%2f%2fapp-3f613e5e650fd4.dev.spapps.ferc.gov%2fpiw%2fPIW_SPApp&ID=41&Source=StandardForm.aspx
             string sourcePage = request.QueryString["Source"];
+            if (string.IsNullOrEmpty(sourcePage))//if source is not provided in url, use the default setting
+            {
+                sourcePage = getDefaultSourcePage(getPageFileName(request));
+            }
+
+
             RedirectToAPage(request,response,sourcePage);
 
+        }
+
+        public string getPageFileName(HttpRequest request)
+        {
+            string filepath = request.FilePath;
+            return getFileNameFromURL(filepath);
+        }
+
+        /// <summary>
+        /// get the file name from the URL: //https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/documentName.docx
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public string getFileNameFromURL(string url)
+        {
+            return url.Substring(url.LastIndexOf("/") + 1);
         }
 
         /// <summary>
@@ -749,11 +771,6 @@ namespace PIW_SPAppWeb.Helper
         /// <returns></returns>
         private string GetPageUrl(HttpRequest request, string PageName,string sourcePage)
         {
-            //if soucepage is provided, use the sourcePage,
-            //otherwise, find the soucePage from the request URL
-            string source = (!string.IsNullOrEmpty(sourcePage)) ? sourcePage : request.QueryString["Source="];
-
-
             const string pattern = "/pages/";
             int length = request.Url.ToString().IndexOf(pattern, StringComparison.CurrentCultureIgnoreCase) + pattern.Length;
             string newURLPage = request.Url.ToString().Substring(0, length) + PageName;
@@ -768,11 +785,35 @@ namespace PIW_SPAppWeb.Helper
                 request.QueryString["SPClientTag"],
                 request.QueryString["SPProductNumber"],
                 request.QueryString["SPAppWebUrl"],
-                source
+                sourcePage
             };
 
-            var fullPageURL = string.Format("{0}?SPHostUrl={1}&SPLanguage={2}$SPClientTag={3}&SPProductNumber={4}&SPAppWebUrl={5}&Source={6}",args);
+            var fullPageURL = string.Format("{0}?SPHostUrl={1}&SPLanguage={2}&SPClientTag={3}&SPProductNumber={4}&SPAppWebUrl={5}&Source={6}",args);
             return fullPageURL;
+        }
+
+        /// <summary>
+        /// return default source page if the source page is not provided
+        /// </summary>
+        /// <param name="pageName"></param>
+        /// <returns></returns>
+        private string getDefaultSourcePage(string pageName)
+        {
+            switch ( pageName)
+            {
+                case Constants.Page_EditStandardForm:
+                    return Constants.Page_StandardForms;
+                    break;
+                case Constants.Page_EditAgendaForm:
+                    return Constants.Page_AgendaForms;
+                    break;
+                case Constants.Page_EditDirectPublicationForm:
+                    return Constants.Page_DirectPublicationForms;
+                    break;
+                default:
+                    return string.Empty;
+                    break;
+            }
         }
 
         public void RefreshPage(HttpRequest request, HttpResponse response)

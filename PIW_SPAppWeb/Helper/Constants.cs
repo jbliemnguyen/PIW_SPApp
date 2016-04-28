@@ -192,6 +192,8 @@ namespace PIW_SPAppWeb
         public const string Page_EditAgendaForm = "EditAgendaForm.aspx";
         public const string Page_EditDirectPublicationForm = "EditDirectPublicationForm.aspx";
         public const string Page_StandardForms = "StandardForms.aspx";
+        public const string Page_AgendaForms = "AgendaForms.aspx";
+        public const string Page_DirectPublicationForms = "DirectPublicationForms.aspx";
 
         
     }
