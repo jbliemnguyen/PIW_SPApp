@@ -8,3 +8,6 @@ C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Release\PIW_SPAppWeb.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Release\PIW_SPAppWeb.pdb
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\FERC.FOL.ATMS.Remote.Interfaces.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\FERC.FOL.ATMS.Structure.dll
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.SharePoint.Client.dll
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.SharePoint.Client.Runtime.dll
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.SharePoint.Client.UserProfiles.dll

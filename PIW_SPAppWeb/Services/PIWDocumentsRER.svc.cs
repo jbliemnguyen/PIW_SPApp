@@ -21,27 +21,23 @@ namespace PIW_SPAppWeb.Services
         {
             SPRemoteEventResult result = new SPRemoteEventResult();
 
-            if (properties.EventType == SPRemoteEventType.ItemUpdating)
-            {
-                //if (ShouldEPSPassedBeUpdated(properties.ItemEventProperties.BeforeProperties,
-                //    properties.ItemEventProperties.AfterProperties))
-                //{
-                using (ClientContext clientContext = TokenHelper.CreateRemoteEventReceiverClientContext(properties))
-                {
-                    if (clientContext != null)
-                    {
-                        if (properties.ItemEventProperties.ListTitle.Equals(
-                                Constants.PIWDocuments_DocumentLibraryName))
-                        {
-                            //User update the document, set the flag for EPSPassed to Pending
-                            result.ChangedItemProperties[Constants.PIWDocuments_colName_EPSPassed] =
-                                Constants.PIWDocuments_EPSPassed_Option_Pending;
-                            result.Status = SPRemoteEventServiceStatus.Continue;
-                        }
-                    }
-                    //}
-                }
-            }
+            //if (properties.EventType == SPRemoteEventType.ItemUpdating)
+            //{
+            //    using (ClientContext clientContext = TokenHelper.CreateRemoteEventReceiverClientContext(properties))
+            //    {
+            //        if (clientContext != null)
+            //        {
+            //            if (properties.ItemEventProperties.ListTitle.Equals(
+            //                    Constants.PIWDocuments_DocumentLibraryName))
+            //            {
+            //                //User update the document, set the flag for EPSPassed to Pending
+            //                result.ChangedItemProperties[Constants.PIWDocuments_colName_EPSPassed] =
+            //                    Constants.PIWDocuments_EPSPassed_Option_Pending;
+            //                result.Status = SPRemoteEventServiceStatus.Continue;
+            //            }
+            //        }
+            //    }
+            //}
 
             return result;
         }
@@ -52,57 +48,87 @@ namespace PIW_SPAppWeb.Services
         /// <param name="properties">Holds information about the remote event.</param>
         public void ProcessOneWayEvent(SPRemoteEventProperties properties)
         {
-            if ((properties.EventType == SPRemoteEventType.ItemAdded) || (properties.EventType == SPRemoteEventType.ItemUpdated))
+            if (properties.EventType == SPRemoteEventType.ItemAdded)
             {
-
-
                 if (properties.ItemEventProperties.ListTitle.Equals(Constants.PIWDocuments_DocumentLibraryName))
                 {
-                    //if (ShouldEPSPassedBeUpdated(properties.ItemEventProperties.BeforeProperties,
-                    //    properties.ItemEventProperties.AfterProperties))
-                    //{
-                    //    //call long method
-                    //    //create delegate 
-                    //    int threadId;
-                    //    AsyncMethodCaller caller = new AsyncMethodCaller(ValidateDocument);
-                    //    IAsyncResult result = caller.BeginInvoke(5000, properties, properties.ItemEventProperties.WebUrl, properties.ItemEventProperties.ListTitle, properties.ItemEventProperties.ListItemId.ToString(), out threadId, null, null);
-                        
-                    //}
+                    var ListTitle = properties.ItemEventProperties.ListTitle;
+                    var ListItemId = properties.ItemEventProperties.ListItemId.ToString();
+                    var valid = ValidateDocument(10000, properties, properties.ItemEventProperties.WebUrl,
+                    properties.ItemEventProperties.ListTitle,
+                    properties.ItemEventProperties.ListItemId.ToString());
+                    if (valid)
+                    {
+                        using (ClientContext clientContext = TokenHelper.CreateRemoteEventReceiverClientContext(properties))
+                        {
+                            if (clientContext != null)
+                            {
+                                List oList =
+                                    clientContext.Web.Lists.GetByTitle(ListTitle);
+
+                                SharePointHelper helper = new SharePointHelper();
+                                var internalColumnName = helper.getInternalColumnNames(clientContext,
+                                    ListTitle);
+
+                                //Update epspassed status to true
+                                ListItem listItem = oList.GetItemById(ListItemId);
+                                clientContext.Load(listItem);
+
+                                listItem[internalColumnName[Constants.PIWDocuments_colName_EPSPassed]] =
+                                    Constants.PIWDocuments_EPSPassed_Option_True;
+                                listItem.Update();
+                                clientContext.ExecuteQuery();
+                            }
+                        }
+                    }
+
                 }
             }
+            //else if (properties.EventType == SPRemoteEventType.ItemUpdated)
+            //{
+                //if (ShouldEPSPassedBeUpdated(properties.ItemEventProperties.BeforeProperties,
+                //    properties.ItemEventProperties.AfterProperties))
+                //{
+                //    var ListTitle = properties.ItemEventProperties.ListTitle;
+                //    var ListItemId = properties.ItemEventProperties.ListItemId.ToString();
+
+                //    var valid = ValidateDocument(10000, properties, properties.ItemEventProperties.WebUrl,
+                //            properties.ItemEventProperties.ListTitle,
+                //            properties.ItemEventProperties.ListItemId.ToString());
+                //    if (valid)
+                //    {
+                //        using (ClientContext clientContext = TokenHelper.CreateRemoteEventReceiverClientContext(properties))
+                //        {
+                //            if (clientContext != null)
+                //            {
+                //                List oList =
+                //                    clientContext.Web.Lists.GetByTitle(ListTitle);
+
+                //                SharePointHelper helper = new SharePointHelper();
+                //                var internalColumnName = helper.getInternalColumnNames(clientContext,
+                //                    ListTitle);
+
+                //                //Update epspassed status to true
+                //                ListItem listItem = oList.GetItemById(ListItemId);
+                //                clientContext.Load(listItem);
+
+                //                listItem[internalColumnName[Constants.PIWDocuments_colName_EPSPassed]] =
+                //                    Constants.PIWDocuments_EPSPassed_Option_True;
+                //                listItem.Update();
+                //                clientContext.ExecuteQuery();
+                //            }
+                //        }
+                //    }
+                //}   
+            //}
         }
 
-        public bool ValidateDocument(int duration, SPRemoteEventProperties properties, string WebUrl, string ListTitle, string ListItemId, out int threadId)
+        public bool ValidateDocument(int duration, SPRemoteEventProperties properties, string WebUrl, string ListTitle, string ListItemId)
         {
             //Long time call
-            Thread.Sleep(duration); //sleep for 10 second
-            threadId = Thread.CurrentThread.ManagedThreadId;
-
-            using (ClientContext clientContext =
-                TokenHelper.CreateRemoteEventReceiverClientContext(properties))
-            //using (ClientContext clientContext = new ClientContext(WebUrl))
-            {
-                if (clientContext != null)
-                {
-                    List oList =
-                        clientContext.Web.Lists.GetByTitle(ListTitle);
-
-                    SharePointHelper helper = new SharePointHelper();
-                    var internalColumnName = helper.getInternalColumnNames(clientContext,
-                        ListTitle);
-
-                    //Update epspassed status to true
-                    ListItem listItem =
-                        oList.GetItemById(ListItemId);
-                    clientContext.Load(listItem);
+            Thread.Sleep(duration); //sleep for duration millisecond
 
 
-                    listItem[internalColumnName[Constants.PIWDocuments_colName_EPSPassed]] =
-                        Constants.PIWDocuments_EPSPassed_Option_True;
-                    listItem.Update();
-                    clientContext.ExecuteQuery();
-                }
-            }
 
             return true;
         }
@@ -124,8 +150,16 @@ namespace PIW_SPAppWeb.Services
             {
                 return true;
             }
-            //// If the value of differ, then field should be updated
-            return (!afterProperties[Constants.PIWDocuments_colName_EPSPassed].ToString().Equals(beforeProperties[Constants.PIWDocuments_colName_EPSPassed].ToString()));
+
+            if (afterProperties[Constants.PIWDocuments_colName_EPSPassed].ToString().Equals(beforeProperties[Constants.PIWDocuments_colName_EPSPassed].ToString()))
+            {
+                //If beforeproperties and afterProperties are the same, it mean the change is comming from item.update, don't do another update
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 

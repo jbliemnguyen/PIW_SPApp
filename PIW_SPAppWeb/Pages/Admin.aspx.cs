@@ -122,6 +122,20 @@ namespace PIW_SPAppWeb
                     clientContext.ExecuteQuery();
                 }
 
+                //register remote event receiver ItemAdded
+                if (!IsRemoteEventRegistered(clientContext, EventReceiverType.ItemAdded,
+                            Constants.PIWDocuments_DocumentLibraryName, Constants.LIBEVTRCVR_NAME))
+                {
+                    srcList.EventReceivers.Add(new EventReceiverDefinitionCreationInformation
+                    {
+                        EventType = EventReceiverType.ItemAdded,
+                        ReceiverName = Constants.LIBEVTRCVR_NAME,
+                        ReceiverUrl = remoteUrl,
+                        SequenceNumber = 10
+                    });
+                    clientContext.ExecuteQuery();
+                }
+
             }
         }
 
