@@ -6,6 +6,7 @@ using System.ServiceModel;
 using System.Web;
 using System.Web.UI;
 using Microsoft.SharePoint.Client;
+using PIW_SPAppWeb.Helper;
 using ListItem = System.Web.UI.WebControls.ListItem;
 
 
@@ -229,6 +230,12 @@ namespace PIW_SPAppWeb
                 //Debug.WriteLine(ex.ToString());
                 //Logger.Logger.LogError(ex.ToString());
             }
+        }
+
+        protected void Unnamed1_Click(object sender, EventArgs e)
+        {
+            EPSPublicationHelper pubHelper = new EPSPublicationHelper();
+            pubHelper.ValidateDocument();
         }
     }
 }

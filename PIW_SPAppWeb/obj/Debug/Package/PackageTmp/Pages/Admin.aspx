@@ -19,8 +19,7 @@
         <asp:Button ID="btnRemoveRER" runat="server" OnClick="btnRemoveRER_Click" Text="Remove Remote Event Receiver for PIW Documents" BorderStyle="Ridge" />
 
         <br />
-        <br />
-        <a href="PeoplePicker.aspx">Test people picker</a>
+        <asp:Button runat="server" Text="Test Doc Validation" OnClick="Unnamed1_Click"/>
     </div>
     </form>
 </body>

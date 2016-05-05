@@ -15,21 +15,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PIW_SPAppJob", "PIW_SPAppJob\PIW_SPAppJob.csproj", "{23C5C941-074B-458E-82B8-8B2FF3688C90}"
 EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 4
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = http://tfs.ferc.gov:8080/tfs/ocio_se_sp_projects_collection
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = PIW_SPApp\\PIW_SPApp.csproj
-		SccProjectName1 = PIW_SPApp
-		SccLocalPath1 = PIW_SPApp
-		SccProjectUniqueName2 = PIW_SPAppWeb\\PIW_SPAppWeb.csproj
-		SccProjectName2 = PIW_SPAppWeb
-		SccLocalPath2 = PIW_SPAppWeb
-		SccProjectUniqueName3 = PIW_SPAppJob\\PIW_SPAppJob.csproj
-		SccProjectName3 = PIW_SPAppJob
-		SccLocalPath3 = PIW_SPAppJob
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
