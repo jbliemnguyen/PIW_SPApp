@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -104,10 +105,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
-                            //TODO: recome comment when working with edit form
-
                             PopulateDocumentList(clientContext);
-                            //PopulateHistoryList();
                             ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
                             if (listItem == null)
                             {
@@ -118,8 +116,9 @@ namespace PIW_SPAppWeb.Pages
                                 PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
                                 DisplayListItemInForm(clientContext, listItem);
                                 PopulateHistoryList(clientContext);
-                                ////display form visiblility based on form status
+                                //display form visiblility based on form status
                                 ControlsVisiblitilyBasedOnStatus(clientContext, PreviousFormStatus, FormStatus, listItem);
+                                
                                 ////above method get formStatus from list, store it in viewstate                       
                                 //if (FormStatus == enumFormStatus.ReadyForPublishing)
                                 //{
@@ -148,10 +147,10 @@ namespace PIW_SPAppWeb.Pages
                             helper.CreatePIWDocumentsSubFolder(clientContext, _listItemId);
 
                             //history list
-                            //if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
-                            //{
-                            //    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus);
-                            //}
+                            if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
+                            {
+                                helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus);
+                            }
                         }
 
                         //forward to Edit
@@ -532,7 +531,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         string errorMessage = string.Empty;
                         int documentCategoryNumber = helper.getDocumentCategoryNumber(ddDocumentCategory.SelectedValue);
-                        var piwListinternalName = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+                        var piwListinternalName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
                         CitationNumber citationNumberHelper = new CitationNumber(documentCategoryNumber, DateTime.Now);
 
                         if (citationNumberHelper.Save(clientContext, _listItemId, tbCitationNumber.Text.Trim(),
@@ -645,24 +644,56 @@ namespace PIW_SPAppWeb.Pages
                     {
                         using (var fileStream = fileUpload.PostedFile.InputStream)
                         {
-                            string fileName = helper.UploadDocumentContentStream(clientContext, fileStream,
-                                Constants.PIWDocuments_DocumentLibraryName, _listItemId, fileUpload.FileName,
-                                ddlSecurityControl.SelectedValue);
-                            PopulateDocumentList(clientContext);
-                            //clear validation error
-                            lbRequiredUploadedDocumentError.Visible = false;
-
-                            //history list
-                            if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
+                            string fileName = fileUpload.FileName;
+                            if (Path.GetExtension(fileName).Equals(".doc", StringComparison.CurrentCultureIgnoreCase))
                             {
-                                helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus);
+                                lbUploadedDocumentError.Text = "Please upload docx file";
+                                lbUploadedDocumentError.Visible = true;
                             }
+                            else
+                            {
+                                lbUploadedDocumentError.Visible = false;
+                                lbUploadedDocumentError.Text = string.Empty;
 
-                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Document file {0} uploaded/associated with Workflow Item", fileName), FormStatus);
+                                //validate the upload file
+                                //copy file
+                                string desctinationURNFolder = string.Format("{0}\\{1}\\{2}", ConfigurationManager.AppSettings["PIWDocuments"], _listItemId, Constants.ValidationFolder);
+                                string fullPathFileName = desctinationURNFolder + "\\" + fileName;
 
+                                helper.CopyFile(fileStream, fileName, desctinationURNFolder);
+
+                                EPSPublicationHelper epsHelper = new EPSPublicationHelper();
+                                var validationResult = epsHelper.ValidateDocument(fullPathFileName, null, string.Empty);
+                                if (validationResult.ErrorList.Count > 0)
+                                {
+                                    //set validation error
+                                    lbUploadedDocumentError.Text = validationResult.ErrorList[0].Description;
+                                    lbUploadedDocumentError.Visible = true;
+                                }
+                                else
+                                {
+                                    helper.UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName, _listItemId, fileName, ddlSecurityControl.SelectedValue);
+                                    PopulateDocumentList(clientContext);
+
+                                    //clear validation error
+                                    lbRequiredUploadedDocumentError.Visible = false;
+                                    lbUploadedDocumentError.Visible = false;
+                                    lbUploadedDocumentError.Text = string.Empty;
+
+                                    //history list
+                                    if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
+                                    {
+                                        helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus);
+                                    }
+
+                                    helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Document file {0} uploaded/associated with Workflow Item", fileName), FormStatus);
+                                }
+                            }
+                            
                         }
                     }
 
+                    //Extract docket numner
                     if (rpDocumentList.Items.Count == 1)//only extract docket number if first document uploaded
                     {
                         if (!cbIsNonDocket.Checked)
@@ -713,7 +744,7 @@ namespace PIW_SPAppWeb.Pages
         }
         private void UpdateFormDataToList(ClientContext clientContext, ListItem listItem, enumAction action)
         {
-            var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
             switch (FormStatus)//this is the next status after action is performed
             {
                 case Constants.PIWList_FormStatus_Pending:
@@ -860,7 +891,7 @@ namespace PIW_SPAppWeb.Pages
 
         private void SavePublishingInfoAndStatus(ClientContext clientContext, ListItem listItem)
         {
-            var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             clientContext.Load(clientContext.Web.CurrentUser, user => user.Id);
             clientContext.ExecuteQuery();
@@ -878,7 +909,7 @@ namespace PIW_SPAppWeb.Pages
 
         private void SaveDeleteInfoAndStatus(ClientContext clientContext, ListItem listItem)
         {
-            var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             clientContext.Load(clientContext.Web.CurrentUser, user => user.Id);
             clientContext.ExecuteQuery();
@@ -896,7 +927,7 @@ namespace PIW_SPAppWeb.Pages
 
         private void SaveFormStatus(ClientContext clientContext, ListItem listItem)
         {
-            var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
@@ -907,7 +938,7 @@ namespace PIW_SPAppWeb.Pages
 
         private void SavePrePublicationInfoAndStatus(ClientContext clientContext, ListItem listItem, enumAction action)
         {
-            var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
@@ -931,7 +962,7 @@ namespace PIW_SPAppWeb.Pages
 
         private void SaveOSECVerificationInfoAndStatus(ClientContext clientContext, ListItem listItem, enumAction action)
         {
-            var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
@@ -955,7 +986,7 @@ namespace PIW_SPAppWeb.Pages
 
         private void SaveRecallInfoAndStatus(ClientContext clientContext, ListItem listItem)
         {
-            var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
@@ -967,7 +998,7 @@ namespace PIW_SPAppWeb.Pages
 
         private void ClearOSECActionsAndCommentsBeforeReSubmit(ClientContext clientContext, ListItem listItem)
         {
-            var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_OSECVerificationAction]] = string.Empty;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_OSECVerificationComment]] = string.Empty;
@@ -981,7 +1012,7 @@ namespace PIW_SPAppWeb.Pages
 
         private void SaveMainPanelAndStatus(ClientContext clientContext, ListItem listItem)
         {
-            var piwListInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             //each update has its own Execute query. If we set the field of the list item, then execute the ExecuteQuery to populate data
             //without calling the listitem.update, then the changes is lost 
@@ -1163,17 +1194,7 @@ namespace PIW_SPAppWeb.Pages
             rpHistoryList.DataSource = table;
             rpHistoryList.DataBind();
         }
-
-
-
-        protected void Timer1_Tick(object sender, EventArgs e)
-        {
-            //TODO: Only refresh in some certain status. Change the time span to 30 seconds 
-            using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
-            {
-                PopulateDocumentList(clientContext);
-            }
-        }
+        
         //This webmethod is called by the csom peoplepicker to retrieve search data
         //In a MVC application you can use a Json Action method
         [WebMethod]
@@ -1250,7 +1271,7 @@ namespace PIW_SPAppWeb.Pages
         }
         private void PopulateFormStatusAndModifiedDateProperties(ClientContext clientContext, ListItem listItem)
         {
-            var internalColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            var internalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
             if (listItem[internalColumnNames[Constants.PIWList_colName_FormStatus]] != null)
             {
                 FormStatus = listItem[internalColumnNames[Constants.PIWList_colName_FormStatus]].ToString();
@@ -1273,7 +1294,7 @@ namespace PIW_SPAppWeb.Pages
         {
             if (listItem != null)
             {
-                var piwListInteralColumnNames = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+                var piwListInteralColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
 
                 //Main Panel
@@ -1488,7 +1509,7 @@ namespace PIW_SPAppWeb.Pages
         #region Visibility
         public void ControlsVisiblitilyBasedOnStatus(ClientContext clientContext, string previousFormStatus, string formStatus, ListItem listItem)
         {
-            var piwlistInternalColumnName = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwlistInternalColumnName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
             var documentCategory = string.Empty;
             if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_DocumentCategory]] != null)
             {
@@ -1786,12 +1807,6 @@ namespace PIW_SPAppWeb.Pages
 
         private void EnablePrePublicationControls(bool enabled)
         {
-            //btnGenerateCitationNumber.Enabled = enabled;
-            //tbCitationNumber.Enabled = enabled;
-            //ddAvailableCitationNumbers.Enabled = enabled;
-            //cbOverrideCitationNumber.Enabled = enabled;
-            //btnAcceptCitationNumber.Enabled = enabled;
-            //btnRemoveCitationNumber.Enabled = enabled;
             tbPrePublicationComment.Enabled = enabled;
         }
 
@@ -1842,19 +1857,17 @@ namespace PIW_SPAppWeb.Pages
         {
             //controls
             tbCitationNumber.Enabled = citationNumberCanBeChanged;
-            btnGenerateCitationNumber.Enabled = citationNumberCanBeChanged;
-            ddAvailableCitationNumbers.Enabled = citationNumberCanBeChanged;
-            cbOverrideCitationNumber.Enabled = citationNumberCanBeChanged;
-            tbCitationNumber.Enabled = citationNumberCanBeChanged;
-            btnAcceptCitationNumber.Enabled = citationNumberCanBeChanged;
-
-
-            btnRemoveCitationNumber.Enabled = CitationNumberCanBeRemoved;
+            ddAvailableCitationNumbers.Visible = citationNumberCanBeChanged;
+            cbOverrideCitationNumber.Visible = citationNumberCanBeChanged;
+            //button
+            btnGenerateCitationNumber.Visible = citationNumberCanBeChanged;
+            btnAcceptCitationNumber.Visible = citationNumberCanBeChanged;
+            btnRemoveCitationNumber.Visible = CitationNumberCanBeRemoved;
         }
 
         public void InitiallyEnableCitationNumberControls(ClientContext clientContext, ListItem piwListItem)
         {
-            var piwListinternalName = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListinternalName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
             string citationNumber = string.Empty;
             if (piwListItem[piwListinternalName[Constants.PIWList_colName_CitationNumber]] != null)
             {

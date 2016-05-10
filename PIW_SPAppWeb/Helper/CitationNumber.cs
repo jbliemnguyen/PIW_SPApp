@@ -61,7 +61,7 @@ namespace PIW_SPAppWeb.Helper
         public string GetNextCitationNumber(ClientContext clientContext)
         {
             var listItemCol = getListItemByQuarterNumberAndDocumentCategory(clientContext,_quarterNumber,_documentCategoryNumber);
-            var citationNumberInternalColumnNames = helper.getInternalColumnNames(clientContext,Constants.CitationNumberListName);
+            var citationNumberInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext,Constants.CitationNumberListName);
             if (listItemCol.Count == 0)
             {
                 _sequenceNumber = 1;
@@ -88,7 +88,7 @@ namespace PIW_SPAppWeb.Helper
         public List<string> getAllAvailableCitationNumber(ClientContext clientContext)
         {
             List<string> result = new List<string>();
-            var citationNumberInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.CitationNumberListName);
+            var citationNumberInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.CitationNumberListName);
             var citationListItems = getListItemByQuarterNumberAndDocumentCategory(clientContext,_quarterNumber,_documentCategoryNumber);
 
             if (citationListItems.Count > 0)
@@ -152,7 +152,7 @@ namespace PIW_SPAppWeb.Helper
             }
 
             
-            var citationNumberInternalColumnNames = helper.getInternalColumnNames(clientContext, Constants.CitationNumberListName);
+            var citationNumberInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.CitationNumberListName);
             if (ValidateFormatCitationNumber(FullCitationNumber))
             {
                 int previousQuarterNumber = _quarterNumber;//current quarterNumber number (today)
@@ -299,7 +299,7 @@ namespace PIW_SPAppWeb.Helper
         public ListItemCollection getListItemByQuarterNumberAndDocumentCategory(ClientContext clientContext, int quarterNumber, int documentCategoryNumber)
         {
             List citationNumberList = clientContext.Web.Lists.GetByTitle(Constants.CitationNumberListName);
-            var citationNumberInternalNameList = helper.getInternalColumnNames(clientContext, Constants.CitationNumberListName);
+            var citationNumberInternalNameList = helper.getInternalColumnNamesFromCache(clientContext, Constants.CitationNumberListName);
             CamlQuery query = new CamlQuery();
             var args = new string[]
             {
@@ -343,7 +343,7 @@ namespace PIW_SPAppWeb.Helper
         public ListItemCollection getListItemByQuarterNumberAndDocumentCategoryAndSequenceNumber(ClientContext clientContext, int quarterNumber, int documentCategoryNumber, int sequenceNumber)
         {
             List citationNumberList = clientContext.Web.Lists.GetByTitle(Constants.CitationNumberListName);
-            var citationNumberInternalNameList = helper.getInternalColumnNames(clientContext, Constants.CitationNumberListName);
+            var citationNumberInternalNameList = helper.getInternalColumnNamesFromCache(clientContext, Constants.CitationNumberListName);
             CamlQuery query = new CamlQuery();
             var args = new string[]
             {
@@ -390,7 +390,7 @@ namespace PIW_SPAppWeb.Helper
 
         private void AssignExistCitationNumberToListItem(ClientContext clientContext, string piwListItemID, ListItem citationNumberListItem)
         {
-            var citationNumberInternalNameList = helper.getInternalColumnNames(clientContext, Constants.CitationNumberListName);
+            var citationNumberInternalNameList = helper.getInternalColumnNamesFromCache(clientContext, Constants.CitationNumberListName);
 
             //piwlist
             FieldLookupValue lv = new FieldLookupValue { LookupId = int.Parse(piwListItemID) };
@@ -407,7 +407,7 @@ namespace PIW_SPAppWeb.Helper
         private void InsertCitationNumberListItem(ClientContext clientContext,string  piwListItemID)
         {
             List citationNumberList = clientContext.Web.Lists.GetByTitle(Constants.CitationNumberListName);
-            var citationNumberInternalNameList = helper.getInternalColumnNames(clientContext, Constants.CitationNumberListName);
+            var citationNumberInternalNameList = helper.getInternalColumnNamesFromCache(clientContext, Constants.CitationNumberListName);
 
             ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
             

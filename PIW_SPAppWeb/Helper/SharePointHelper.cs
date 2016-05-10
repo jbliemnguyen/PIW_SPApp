@@ -30,7 +30,7 @@ namespace PIW_SPAppWeb.Helper
         public ListItem createNewPIWListItem(ClientContext context, string formType)
         {
             List piwList = context.Web.Lists.GetByTitle(Constants.PIWListName);
-            var internalNameList = getInternalColumnNames(context, Constants.PIWListName);
+            var internalNameList = getInternalColumnNamesFromCache(context, Constants.PIWListName);
 
             ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
             ListItem newItem = piwList.AddItem(itemCreateInfo);
@@ -53,7 +53,7 @@ namespace PIW_SPAppWeb.Helper
 
         public ListItem GetPiwListItemById(ClientContext clientContext, string id, bool ignoreIsActive)
         {
-            var piwInternalNameList = getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
             Web site = clientContext.Web;
             List piwList = site.Lists.GetByTitle(Constants.PIWListName);
 
@@ -86,7 +86,7 @@ namespace PIW_SPAppWeb.Helper
 
         public ListItem SetCitationNumberFieldInPIWList(ClientContext clientContext, string piwListItemID, string citationNumber)
         {
-            var piwListinternalName = getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListinternalName = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
             ListItem listItem = GetPiwListItemById(clientContext, piwListItemID, false);
 
             listItem[piwListinternalName[Constants.PIWList_colName_CitationNumber]] = citationNumber;
@@ -101,7 +101,7 @@ namespace PIW_SPAppWeb.Helper
             citationList[0].DeleteObject();
 
             //delete citation number field in piwlist
-            var piwListinternalName = getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListinternalName = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
             ListItem listItem = GetPiwListItemById(clientContext, piwListItemID, false);
 
             listItem[piwListinternalName[Constants.PIWList_colName_CitationNumber]] = string.Empty;
@@ -115,7 +115,7 @@ namespace PIW_SPAppWeb.Helper
             ListItemCollection citationList = GetCitationNumberListItemFromPiwListId(clientContext, piwListItemId);
             if (citationList.Count > 0)
             {
-                var citationListInternalCoumnNames = getInternalColumnNames(clientContext, Constants.CitationNumberListName);
+                var citationListInternalCoumnNames = getInternalColumnNamesFromCache(clientContext, Constants.CitationNumberListName);
                 citationList[0][citationListInternalCoumnNames[Constants.CitationNumberList_colName_Status]] = Constants.CitationNumber_DELETED_Status;
                 citationList[0][citationListInternalCoumnNames[Constants.CitationNumberList_colName_DeletedDate]] = DateTime.Now.ToString();
                 citationList[0][citationListInternalCoumnNames[Constants.CitationNumberList_colName_PIWList]] = string.Empty;
@@ -128,7 +128,7 @@ namespace PIW_SPAppWeb.Helper
         public ListItemCollection GetCitationNumberListItemFromPiwListId(ClientContext clientContext, string piwListItemID)
         {
             List citationNumberList = clientContext.Web.Lists.GetByTitle(Constants.CitationNumberListName);
-            var citationNumberInternalNameList = getInternalColumnNames(clientContext, Constants.CitationNumberListName);
+            var citationNumberInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.CitationNumberListName);
             CamlQuery query = new CamlQuery();
             query.ViewXml = string.Format(@"<View>
 	                                            <Query>
@@ -145,7 +145,6 @@ namespace PIW_SPAppWeb.Helper
 
             clientContext.Load(citationListItems);
             clientContext.ExecuteQuery();
-
             return citationListItems;
 
         }
@@ -176,30 +175,23 @@ namespace PIW_SPAppWeb.Helper
 
         public string UploadDocumentContentStream(ClientContext clientContext, Stream fileStream, string libraryName, string subFolder, string fileName, string securityLevel)
         {
-
-            //Dictionary<string, string> internalNameList = PopulateInternalNameList(clientContext, Constants.PIWDocuments_DocumentLibraryName);
-            var internalNameList = getInternalColumnNames(clientContext, Constants.PIWDocuments_DocumentLibraryName);
-
-
-
+            var internalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWDocuments_DocumentLibraryName);
 
             clientContext.Load(clientContext.Web, web => web.Url);
             clientContext.ExecuteQuery();
 
             string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, libraryName, subFolder);
-
-
             Folder uploadSubFolder = clientContext.Web.GetFolderByServerRelativeUrl(uploadSubFolderURL);
             clientContext.ExecuteQuery();//file not found exception if the folder is not exist, let it crash because it is totally wrong somewhere
-
+            fileStream.Seek(0, SeekOrigin.Begin);
             FileCreationInformation flciNewFile = new FileCreationInformation
             {
                 ContentStream = fileStream,
-                Url = System.IO.Path.GetFileName(fileName),
+                Url = Path.GetFileName(fileName),
                 Overwrite = false
             };
 
-            Microsoft.SharePoint.Client.File uploadFile = uploadSubFolder.Files.Add(flciNewFile);
+            File uploadFile = uploadSubFolder.Files.Add(flciNewFile);
             clientContext.Load(uploadFile);
 
             uploadFile.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_SecurityLevel]] = securityLevel;
@@ -235,10 +227,10 @@ namespace PIW_SPAppWeb.Helper
             result.Columns.Add("Name");
             result.Columns.Add("URL");
             result.Columns.Add("Security Level");
-            result.Columns.Add("EPS Passed");
-            result.Columns.Add("EPS Error");
+            //result.Columns.Add("EPS Passed");
+            //result.Columns.Add("EPS Error");
             
-            var internalNameList = getInternalColumnNames(clientContext, Constants.PIWDocuments_DocumentLibraryName);
+            var internalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWDocuments_DocumentLibraryName);
 
             clientContext.Load(clientContext.Web, web => web.Url);
             clientContext.ExecuteQuery();
@@ -255,10 +247,10 @@ namespace PIW_SPAppWeb.Helper
                 row["URL"] = uploadSubFolderURL + "/" + row["Name"];
                 row["Security Level"] =
                     file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_SecurityLevel]];
-                row["EPS Passed"] =
-                    getEPSPassedIconHTML(file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_EPSPassed]].ToString());
-                row["EPS Error"] =
-                    file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_EPSError]];
+                //row["EPS Passed"] =
+                //    getEPSPassedIconHTML(file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_EPSPassed]].ToString());
+                //row["EPS Error"] =
+                //    file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_EPSError]];
                 result.Rows.Add(row);
 
                 if (DocumentURLs.Length == 0)
@@ -321,7 +313,7 @@ namespace PIW_SPAppWeb.Helper
         public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus)
         {
             List piwlisthistory = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
-            var piwlistHistoryInternalNameList = getInternalColumnNames(clientContext, Constants.PIWListHistory_ListName);
+            var piwlistHistoryInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
 
             ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
             ListItem newItem = piwlisthistory.AddItem(itemCreateInfo);
@@ -350,7 +342,7 @@ namespace PIW_SPAppWeb.Helper
         public ListItemCollection getHistoryListByPIWListID(ClientContext clientContext, string piwListItemID)
         {
             List historyList = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
-            var historyListInternalNameList = getInternalColumnNames(clientContext, Constants.PIWListHistory_ListName);
+            var historyListInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
             CamlQuery query = new CamlQuery();
             query.ViewXml = string.Format(@"<View>
 	                                            <Query>
@@ -377,7 +369,7 @@ namespace PIW_SPAppWeb.Helper
         public System.Data.DataTable getHistoryListTable(ClientContext clientContext, string piwListItemID)
         {
             var historyList = getHistoryListByPIWListID(clientContext,piwListItemID);
-            var historyListInternalNameList = getInternalColumnNames(clientContext, Constants.PIWListHistory_ListName);
+            var historyListInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
             //TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById(System.TimeZone.CurrentTimeZone.ToLocalTime());
             var result = new System.Data.DataTable();
             result.Columns.Add("Created");
@@ -547,7 +539,7 @@ namespace PIW_SPAppWeb.Helper
             return (atmsDocket.Count > 0);
         }
 
-        public Dictionary<string, string> getInternalColumnNames(ClientContext clientContext, string listName)
+        public Dictionary<string, string> getInternalColumnNamesFromCache(ClientContext clientContext, string listName)
         {
             {
                 //HttpRuntime httpRT = new HttpRuntime();
@@ -597,7 +589,7 @@ namespace PIW_SPAppWeb.Helper
             using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(httpContext).CreateUserClientContextForSPHost())
             {
                 List errorLogList = clientContext.Web.Lists.GetByTitle(Constants.ErrorLogListName);
-                var errorLogInternalNameList = getInternalColumnNames(clientContext, Constants.ErrorLogListName);
+                var errorLogInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.ErrorLogListName);
 
                 ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
                 ListItem newItem = errorLogList.AddItem(itemCreateInfo);
@@ -702,7 +694,7 @@ namespace PIW_SPAppWeb.Helper
         /// <returns></returns>
         public bool CheckIfListItemChanged(ClientContext clientContext, ListItem listItem, DateTime viewModifiedDateTime)
         {
-            var piwListInternalColumnNames = getInternalColumnNames(clientContext, Constants.PIWListName);
+            var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
             DateTime currentModifiedDateTime;
             if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Modified]] != null)
             {
@@ -847,14 +839,40 @@ namespace PIW_SPAppWeb.Helper
             result = String.Format("{0}&ID={1}",GetPageUrl(request, PageFileName,sourcePage),listItemId);
             return result;
         }
-        
+
+        public void CopyFile(Stream stream, string fileName, string DestinationURNFolder)
+        {
+            if (!Directory.Exists(DestinationURNFolder))
+            {
+                Directory.CreateDirectory(DestinationURNFolder);
+            }
+            string fileNameFullURN = DestinationURNFolder + "\\" + fileName;
+            using (var fileStream = System.IO.File.Create(fileNameFullURN))
+            {
+                stream.Seek(0, SeekOrigin.Begin);
+                stream.CopyTo(fileStream);
+            }
+
+        }
+        public void CopyFile(ClientContext clientContext, string fileName, string sourceFileURL, string DestinationURNFolder)
+        {
+            if (!Directory.Exists(DestinationURNFolder))
+            {
+                Directory.CreateDirectory(DestinationURNFolder);
+            }
+
+
+            FileInformation fileInfo = File.OpenBinaryDirect(clientContext, sourceFileURL);
+
+            using (var fileStream = System.IO.File.Create(DestinationURNFolder + "\\" + fileName))
+            {
+                fileInfo.Stream.CopyTo(fileStream);
+            }
+
+
+        }
         #endregion
-
-
-
-
-
-    }
+        }
 
 }
 

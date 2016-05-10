@@ -230,45 +230,34 @@
                     </div>
                 </div>
             </fieldset>
-            <asp:UpdatePanel ID="UpdatePanel1" runat="server">
-                <ContentTemplate>
-                    <asp:Timer ID="Timer1" runat="server" Interval="15000" OnTick="Timer1_Tick" Enabled="true">
-                    </asp:Timer>
-                    <div class="form-group">
-                        <asp:Label ID="lbUploadedDocuments" runat="server" Text="Uploaded Documents" AssociatedControlID="rpDocumentList" ClientIDMode="Static" CssClass="col-md-2 control-label"></asp:Label>
-                        <div class="col-md-9">
-                            <asp:Repeater ID="rpDocumentList" runat="server" OnItemCommand="rpDocumentList_ItemCommand">
-                                <HeaderTemplate>
-                                    <ol class="list-group">
-                                </HeaderTemplate>
-                                <ItemTemplate>
-                                    <li class="list-group-item">
-                                        <asp:HyperLink ID="HyperLink1" runat="server" Text='<%#DataBinder.Eval(Container.DataItem,"Name")%>'
-                                            NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"URL")%>'>
-                                        </asp:HyperLink>
-                                        &nbsp;&nbsp;|&nbsp;&nbsp;
+            <div class="form-group">
+                <asp:Label ID="lbUploadedDocuments" runat="server" Text="Uploaded Documents" AssociatedControlID="rpDocumentList" ClientIDMode="Static" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-9">
+                    <asp:Repeater ID="rpDocumentList" runat="server" OnItemCommand="rpDocumentList_ItemCommand">
+                        <HeaderTemplate>
+                            <ol class="list-group">
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <li class="list-group-item">
+                                <asp:HyperLink ID="HyperLink1" runat="server" Text='<%#DataBinder.Eval(Container.DataItem,"Name")%>'
+                                    NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"URL")%>'>
+                                </asp:HyperLink>
+                                &nbsp;&nbsp;|&nbsp;&nbsp;
                             <asp:LinkButton ID="btnRemoveDocument" runat="server" Text="Remove" CommandName="RemoveDocument"
                                 CommandArgument='<%#DataBinder.Eval(Container.DataItem,"ID")%>' />
-                                        &nbsp;&nbsp;|&nbsp;&nbsp;
+                                &nbsp;&nbsp;|&nbsp;&nbsp;
                                         <asp:Label runat="server" ID="lbSecurityLevel" Text='<%#DataBinder.Eval(Container.DataItem,"Security Level")%>'></asp:Label>
-                                        &nbsp;&nbsp;|&nbsp;&nbsp;
-                            <%#DataBinder.Eval(Container.DataItem,"EPS Passed")%>
-                            
-                            
-                            &nbsp;&nbsp;|&nbsp;&nbsp;
-                            <asp:Label runat="server" ID="Label2" Text='<%#DataBinder.Eval(Container.DataItem,"EPS Error")%>'></asp:Label>
-                                    </li>
-                                </ItemTemplate>
-                                <FooterTemplate>
-                                    </ol>
-                                </FooterTemplate>
-                            </asp:Repeater>
-                            <br />
-                            <asp:Label ID="lbRequiredUploadedDocumentError" runat="server" ForeColor="Red" Visible="false">Please upload at least 1 public document</asp:Label>
-                        </div>
-                    </div>
-                </ContentTemplate>
-            </asp:UpdatePanel>
+                            </li>
+                        </ItemTemplate>
+                        <FooterTemplate>
+                            </ol>
+                        </FooterTemplate>
+                    </asp:Repeater>
+                    <br />
+                    <asp:Label ID="lbRequiredUploadedDocumentError" runat="server" ForeColor="Red" Visible="false">Please upload at least one document</asp:Label>
+                </div>
+            </div>
+
 
             <%--<form id="mainForm1">--%>
             <%--Main panel--%>
@@ -560,9 +549,9 @@
         <div class="form-group">
             <div class="col-md-2"></div>
             <div class="col-md-8 historyhead">
-                    History (Click here to collapse/expand)
+                History (Click here to collapse/expand)
             </div>
-            <br/>
+            <br />
             <div class="col-md-2"></div>
             <div id="historylist" class="col-md-8 historylist">
                 <asp:Repeater ID="rpHistoryList" runat="server">

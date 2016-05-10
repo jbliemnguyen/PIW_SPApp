@@ -11,45 +11,37 @@ using FERC.MSOffice;
 using FERC.MSOffice;
 using FERC.MSOfficeAutomation;
 using Microsoft.Office.Interop.Word;
+using Microsoft.SharePoint.Client;
 using Document = FERC.eLibrary.Eps.Common.Document;
+using File = Microsoft.SharePoint.Client.File;
 
 namespace PIW_SPAppWeb.Helper
 {
     public class EPSPublicationHelper
     {
-        public void ValidateDocument()
+        public EpsResult ValidateDocument(string fullPathFileName, int? documentOfficialFlag, string documentAvailability)
         {
-            //testing
-            int documentOfficialFlag = 1;
-            string documentAvailability = "P";
-            //string fileURN1 = @"C:\Users\lnguyen\Desktop\Temp\45\GP04-1-000-PIWTest.docx";
+            if (documentOfficialFlag == null)
+            {
+                documentOfficialFlag = 1;
+            }
+
+            if (string.IsNullOrEmpty(documentAvailability))
+            {
+                documentAvailability = "P";
+            }
+
             //string fileURN1 = @"http://fdc1s-sp23wfed2.ferc.gov/piw/PIW Documents/42/GP04-1-000-PIWTest - Copy (3).docx";
             //string fileURN1 = @"http://fdc1s-sp23wfed2.ferc.gov/piw/PIW Documents/42/GP04-1-000-PIWTest -  Copy.docx";
             //string fileURN1 = @"http://fdc1s-sp23wfed2.ferc.gov/piw/PIW Documents/42/GP04-1-000-PIWTest.docx";
-            string fileURN1 = @"\\fdc1s-sp23wfed2.ferc.gov\piw\PIW Documents\42\GP04-1-000-PIWTest.docx";
-
+            //string fileURN1 = @"\\fdc1s-sp23wfed2.ferc.gov\piw\PIW Documents\42\GP04-1-000-PIWTest.docx";
             
-            string fileURN2 = @"C:\Users\lnguyen\Desktop\Temp\45\FileContainsRevisionMarks.docx";
-            string fileURN3 = @"C:\Users\lnguyen\Desktop\Temp\45\FileContainsRevisionMarks.doc";
+            var publication = PopulatePublication(documentOfficialFlag.Value, documentAvailability, string.Empty, string.Empty, fullPathFileName);
             
-
-            
-            var publication1 = PopulatePublication(documentOfficialFlag, documentAvailability, string.Empty, string.Empty,fileURN1);
-            var publication2 = PopulatePublication(documentOfficialFlag, documentAvailability, string.Empty, string.Empty, fileURN2);
-            var publication3 = PopulatePublication(documentOfficialFlag, documentAvailability, string.Empty, string.Empty, fileURN3);
-            
-            //testing
-
-            
-            var result1 = HasMSWordModifications(publication1);
-            var result2 = HasMSWordModifications(publication2);
-            var result3 = HasMSWordModifications(publication3);
-
-
-
-
-
+            return HasMSWordModifications(publication);
         }
+
+        
 
         Publication PopulatePublication(int documentOfficialFlag, string documentAvailability, string description, string fercCitation, string fileURN)
         {
@@ -140,11 +132,7 @@ namespace PIW_SPAppWeb.Helper
 
                                 int MSWordAutomationCloseTimeout = Convert.ToInt32(ConfigurationManager.AppSettings.Get("MSWordAutomationCloseTimeout"));
                                 if (MSWordAutomationCloseTimeout < 30) MSWordAutomationCloseTimeout = 30;
-
-
-                                // timeout for hung MS Word automation.
-                                int WordAutomationTimeout = Convert.ToInt32(ConfigurationManager.AppSettings.Get("MSWordAutomationTimeout"));
-
+                                
                                 using (MSWord msw = new MSWord())
                                 {
                                     msw.Open(file.FullName, MSWordAutomationOpenTimeout);

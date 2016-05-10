@@ -176,10 +176,6 @@
 
         function jQueryValidationMasterPage()
         {
-            //$.validator.addMethod("uploadedDocumentRequired", function (value, element) {
-            //    $("#lbUploadedDocuments").next("div")
-            //}, 'Please upload at least 1 document');
-
             $.validator.addMethod("requiredWhenNonDocketed", function (value, element) {
                 if ($("#cbIsNonDocket").is(':checked') || $("#cbIsCNF").is(':checked')) {
                     if (!value) {

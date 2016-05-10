@@ -160,19 +160,11 @@ namespace PIW_SPAppWeb
         public const string Grp_CopyCenter = "CopyCenter";
         public const string Grp_PIWOSECFERCReports = "PIWOSECFERCReports";
         
-        
-        
         //FormStatus Key
         public const string formStatusViewStateKey = "FormStatusKey";
 
         //Previous Form Status
         public const string previousFormStatusViewStateKey = "PreviousFormStatusKey";
-
-        //Document Title key
-        //public const string DocumentTitleKey = "DocumentTitleKey";
-
-        //Document File name key
-        //public const string DocumentFileNameKey = "DocumentFileNameKey";
 
         //ModifiedDateTime key
         public const string ModifiedDateTimeKey = "ModifiedDateTimeKey";
@@ -195,7 +187,10 @@ namespace PIW_SPAppWeb
         public const string Page_AgendaForms = "AgendaForms.aspx";
         public const string Page_DirectPublicationForms = "DirectPublicationForms.aspx";
 
-        
+        //misc
+        public const string ValidationFolder = "Validation";
+
+
     }
 
     public enum enumAction

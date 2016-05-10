@@ -234,8 +234,8 @@ namespace PIW_SPAppWeb
 
         protected void Unnamed1_Click(object sender, EventArgs e)
         {
-            EPSPublicationHelper pubHelper = new EPSPublicationHelper();
-            pubHelper.ValidateDocument();
+            //EPSPublicationHelper pubHelper = new EPSPublicationHelper();
+            //pubHelper.ValidateDocument();
         }
     }
 }
