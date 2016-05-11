@@ -22,6 +22,13 @@
             //prevent user edit duedate and set value to past date
             $("#tbDueDate").keydown(function (event) { event.preventDefault(); });
 
+
+            $("#tbLegalResourcesReviewCompletionDate").datepicker();
+            
+
+
+
+
             //disabled Docket Number textbox is IsNonDocket ischecked
             if ($("#cbIsNonDocket").is(':checked')) {
                 $("#tbDocketNumber").prop("readonly", "readonly");
@@ -478,6 +485,10 @@
                         <div class="col-md-2">
                             <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnGenerateCitationNumber_Click" />
                         </div>
+                        
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2"></div>
                         <div class="col-md-6">
                             <asp:TextBox ID="tbCitationNumber" ClientIDMode="Static" runat="server" CssClass="form-control" Width="200px"></asp:TextBox>
 
@@ -516,12 +527,42 @@
                 </div>
             </div>
         </fieldset>
+        
+        <fieldset runat="server" id="fieldsetMailedRoom" visible="false">
+            <legend>Mail Room</legend>
+            <div class="form-group">
+                <asp:Label ID="lbMailedDate" runat="server" Text="Mailed Date" AssociatedControlID="lbMailedDateValue" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-2">
+                    <asp:Label ID="lbMailedDateValue" runat="server"></asp:Label>
+                </div>
+            </div>
+            <div class="form-group">
+                <asp:Label ID="lbMailedRoomNote" runat="server" Text="Note" AssociatedControlID="lbMailedRoomNoteValue" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-2">
+                    <asp:Label ID="lbMailedRoomNoteValue" runat="server"></asp:Label>
+                </div>
+            </div>
+        </fieldset>
+        
+        <fieldset runat="server" id="fieldsetLegalResourcesReview" visible="false">
+            <legend>Legal Resources And Review</legend>
+            <div class="form-group">
+                <asp:Label ID="lbLegalResourcesReviewCompletionDate" runat="server" Text="Completion Date" AssociatedControlID="tbLegalResourcesReviewCompletionDate" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-6">
+                    <asp:TextBox ID="tbLegalResourcesReviewCompletionDate" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
+                </div>
+            </div>
+            <div class="form-group">
+                <asp:Label ID="lbLegalResourcesNote" runat="server" Text="Note" AssociatedControlID="tbLegalResourcesReviewNote" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-6">
+                    <asp:TextBox ID="tbLegalResourcesReviewNote" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
+                </div>
+            </div>
+        </fieldset>
 
         <div class="form-group"></div>
         <%--empty line--%>
         <div class="form-group"></div>
-
-
         <div class="form-group">
             <div class="col-md-2"></div>
             <div class="col-md-6">
@@ -535,7 +576,7 @@
                 <asp:Button ID="btnPublishConfirm" runat="server" Text="Publish" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnInitiatePublication_Click" />
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnDeleteConfirm_Click" />
-
+                <asp:Button ID="btnReopen" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" OnClick="btnReopen_Click" />
             </div>
         </div>
         <%--<div class="form-group">

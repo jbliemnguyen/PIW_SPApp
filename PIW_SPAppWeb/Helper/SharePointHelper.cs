@@ -148,6 +148,68 @@ namespace PIW_SPAppWeb.Helper
             return citationListItems;
 
         }
+
+        public void SaveFormStatus(ClientContext clientContext, ListItem listItem, string FormStatus, string PreviousFormStatus)
+        {
+            var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
+
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
+
+        public void SaveDeleteInfoAndStatus(ClientContext clientContext, ListItem listItem,string FormStatus,string PreviousFormStatus)
+        {
+            var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            clientContext.Load(clientContext.Web.CurrentUser, user => user.Id);
+            clientContext.ExecuteQuery();
+
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
+
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsActive]] = false;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_CitationNumber]] = string.Empty;
+
+
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
+
+        public void SavePublishingInfoAndStatus(ClientContext clientContext, ListItem listItem,string FormStatus,string PreviousFormStatus)
+        {
+            var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            clientContext.Load(clientContext.Web.CurrentUser, user => user.Id);
+            clientContext.ExecuteQuery();
+
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
+
+            //publisher
+            FieldUserValue publisher = new FieldUserValue { LookupId = clientContext.Web.CurrentUser.Id };
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PublishedBy]] = publisher;
+
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
+
+        public void SaveLegalResourcesAndReviewAndStatus(ClientContext clientContext, ListItem listItem, string formStatus, string previousFormStatus,string completionDate,string note)
+        {
+            var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = formStatus;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = previousFormStatus;
+
+            //legal resource completion date and note
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]] = completionDate;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupNote]] = note;
+
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
         #endregion
 
         #region PIW Documents
@@ -442,9 +504,114 @@ namespace PIW_SPAppWeb.Helper
 
             //return html.ToString();
         }
+
+        public void PopulateHistoryList(ClientContext clientContext,string listItemId,Repeater rpHistoryList)
+        {
+            System.Data.DataTable table = getHistoryListTable(clientContext, listItemId);
+            rpHistoryList.DataSource = table;
+            rpHistoryList.DataBind();
+        }
         #endregion
 
         #region Utils
+        public bool UploadFile(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError, Label lbRequiredUploadedDocumentError, string FormStatus,string securityControlValue)
+        {
+            bool result = false;
+            using (var fileStream = fileUpload.PostedFile.InputStream)
+            {
+                string fileName = fileUpload.FileName;
+                if (Path.GetExtension(fileName).Equals(".doc", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    lbUploadedDocumentError.Text = ".doc file is not supported, please upload .docx file";
+                    lbUploadedDocumentError.Visible = true;
+                }
+                else
+                {
+                    lbUploadedDocumentError.Visible = false;
+                    lbUploadedDocumentError.Text = string.Empty;
+
+                    //validate the upload file
+                    //copy file
+                    string desctinationURNFolder = string.Format("{0}\\{1}\\{2}",
+                        ConfigurationManager.AppSettings["PIWDocuments"], listItemId, Constants.ValidationFolder);
+                    string fullPathFileName = desctinationURNFolder + "\\" + fileName;
+
+                    CopyFile(fileStream, fileName, desctinationURNFolder);
+
+                    EPSPublicationHelper epsHelper = new EPSPublicationHelper();
+                    var validationResult = epsHelper.ValidateDocument(fullPathFileName, null, string.Empty);
+                    if (validationResult.ErrorList.Count > 0)
+                    {
+                        //set validation error
+                        lbUploadedDocumentError.Text = validationResult.ErrorList[0].Description;
+                        lbUploadedDocumentError.Visible = true;
+                    }
+                    else
+                    {
+                        UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName,
+                            listItemId, fileName, securityControlValue);
+                        
+
+                        //clear validation error
+                        lbRequiredUploadedDocumentError.Visible = false;
+                        lbUploadedDocumentError.Visible = false;
+                        lbUploadedDocumentError.Text = string.Empty;
+
+                        //history list
+                        if (getHistoryListByPIWListID(clientContext, listItemId).Count == 0)
+                        {
+                            CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus);
+                        }
+
+                        CreatePIWListHistory(clientContext, listItemId,
+                            string.Format("Document file {0} uploaded/associated with Workflow Item", fileName), FormStatus);
+                        result = true;
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public string PopulateDocumentList(ClientContext clientContext, string listItemId, Repeater rpDocumentList)
+        {
+            StringBuilder documentURLs;
+            System.Data.DataTable table = getAllDocumentsTable(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, out documentURLs);
+            rpDocumentList.DataSource = table;
+            rpDocumentList.DataBind();
+            
+            return documentURLs.ToString();
+
+        }
+        
+        public void GenerateCitation(ClientContext clientContext, DropDownList ddDocumentCategory, TextBox tbCitationNumber, DropDownList ddAvailableCitationNumbers)
+        {
+            if (ddDocumentCategory.SelectedIndex > 0)
+            {
+                int documentCategoryNumber = getDocumentCategoryNumber(ddDocumentCategory.SelectedValue);
+
+                CitationNumber citationNumberHelper = new CitationNumber(documentCategoryNumber, DateTime.Now);
+
+                tbCitationNumber.Text = citationNumberHelper.GetNextCitationNumber(clientContext);
+
+                var availableCitationNumbers = citationNumberHelper.getAllAvailableCitationNumber(clientContext);
+                if (availableCitationNumbers.Count > 1) //more than 1, 1 is already displayed in textbox
+                {
+                    ddAvailableCitationNumbers.Visible = true;
+                    ddAvailableCitationNumbers.Items.Clear();
+                    ddAvailableCitationNumbers.Items.Add("-- Available Citation # --");
+
+                    foreach (string s in availableCitationNumbers)
+                    {
+                        ddAvailableCitationNumbers.Items.Add(s);
+                    }
+                }
+                else
+                {
+                    ddAvailableCitationNumbers.Visible = false;
+                }
+            }
+        }
 
         /// <summary>
         /// check if a docket is existing in P8 
@@ -633,6 +800,15 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
             return user.Groups.Cast<Group>()
               .Any(g => g.Title == groupName);
+        }
+
+        public bool IsCurrentUserMemberOfGroup(ClientContext clientContext, string groupName)
+        {
+            var currentUser = clientContext.Web.CurrentUser;
+            clientContext.Load(currentUser);
+            clientContext.ExecuteQuery();
+
+            return IsUserMemberOfGroup(clientContext, currentUser, groupName);
         }
 
         /// <summary>
@@ -872,7 +1048,9 @@ namespace PIW_SPAppWeb.Helper
 
         }
         #endregion
-        }
+
+        
+    }
 
 }
 

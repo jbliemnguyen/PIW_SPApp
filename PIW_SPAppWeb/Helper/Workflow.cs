@@ -141,22 +141,31 @@ namespace PIW_SPAppWeb.Helper
                         throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
                     }
                     break;
-                case Constants.PIWList_FormStatus_PublishedToeLibrary:
+                case Constants.PIWList_FormStatus_PublishInitiated:
                     if (action == enumAction.ReOpen)
                     {
-                        nextStatus = Constants.PIWList_FormStatus_ReOpen;
+                        nextStatus = Constants.PIWList_FormStatus_PrePublication;
                     }
                     else
                     {
                         throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
                     }
                     break;
-                case Constants.PIWList_FormStatus_PublishInitiated:
+                case Constants.PIWList_FormStatus_PublishedToeLibrary:
+                    if (action == enumAction.Save)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_PublishedToeLibrary;
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
+                    }
+                    
                     break;
-                case Constants.PIWList_FormStatus_ReOpen:
-                    //after ReOpen, automatic transfer to PrePublication
-                    nextStatus = Constants.PIWList_FormStatus_PrePublication;
-                    break;
+                //case Constants.PIWList_FormStatus_ReOpen:
+                //    //after ReOpen, automatic transfer to PrePublication
+                //    nextStatus = Constants.PIWList_FormStatus_PrePublication;
+                //    break;
                 default:
                     throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
                     break;

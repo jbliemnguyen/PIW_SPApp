@@ -86,15 +86,7 @@ namespace PIW_SPAppWeb.Pages
             try
             {
                 _listItemId = this.Page.Request.QueryString["ID"];
-
-                //Set CitationError to invisible
-                //Validation errors may be visible from previous step, need to turn off
-                //lbCitationError.Visible = false;
-
-                //lbOSECVerificationError.Visible = false;
                 lbUploadedDocumentError.Visible = false;
-
-                _listItemId = this.Page.Request.QueryString["ID"];
 
                 helper = new SharePointHelper();
                 _isEditForm = (!string.IsNullOrEmpty(_listItemId));
@@ -105,8 +97,11 @@ namespace PIW_SPAppWeb.Pages
                     {
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
-                            PopulateDocumentList(clientContext);
-                            ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
+                            DocumentURLsFrViewState = helper.PopulateDocumentList(clientContext,_listItemId,rpDocumentList);
+                            var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext,Constants.Grp_PIWAdmin);
+                            
+                            //if current user is piw admin, load the item even if the isActive is false
+                            ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, isCurrentUserAdmin);
                             if (listItem == null)
                             {
                                 helper.RedirectToAPage(Page.Request, Page.Response, "ItemNotFound.aspx");
@@ -115,7 +110,7 @@ namespace PIW_SPAppWeb.Pages
                             {
                                 PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
                                 DisplayListItemInForm(clientContext, listItem);
-                                PopulateHistoryList(clientContext);
+                                helper.PopulateHistoryList(clientContext,_listItemId,rpHistoryList);
                                 //display form visiblility based on form status
                                 ControlsVisiblitilyBasedOnStatus(clientContext, PreviousFormStatus, FormStatus, listItem);
                                 
@@ -196,7 +191,7 @@ namespace PIW_SPAppWeb.Pages
                         //TODO: create list history for Mailing Date and FERC Report Completed.
 
                         //Refresh
-                        helper.RedirectToSourcePage(Page.Request, Page.Response);
+                        helper.RefreshPage(Page.Request, Page.Response);
                     }
                 }
             }
@@ -367,8 +362,8 @@ namespace PIW_SPAppWeb.Pages
 
                     //TODO: send email
 
-                    //TODO: Create list history
-                    //helper.CreatePIWListHistory(clientContext, _listItemId, "Submit", "Submited");
+                    //Create list history
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item deleted", FormStatus);
 
                     //Redirect
                     helper.RedirectToSourcePage(Page.Request, Page.Response);
@@ -485,32 +480,7 @@ namespace PIW_SPAppWeb.Pages
                 lbCitationNumberError.Visible = false;
                 using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
-                    if (ddDocumentCategory.SelectedIndex > 0)
-                    {
-                        int documentCategoryNumber = helper.getDocumentCategoryNumber(ddDocumentCategory.SelectedValue);
-
-                        CitationNumber citationNumberHelper = new CitationNumber(documentCategoryNumber, DateTime.Now);
-
-                        tbCitationNumber.Text = citationNumberHelper.GetNextCitationNumber(clientContext);
-
-                        var availableCitationNumbers = citationNumberHelper.getAllAvailableCitationNumber(clientContext);
-                        if (availableCitationNumbers.Count > 1) //more than 1, 1 is already displayed in textbox
-                        {
-                            ddAvailableCitationNumbers.Visible = true;
-                            ddAvailableCitationNumbers.Items.Clear();
-                            ddAvailableCitationNumbers.Items.Add("-- Available Citation # --");
-
-                            foreach (string s in availableCitationNumbers)
-                            {
-                                ddAvailableCitationNumbers.Items.Add(s);
-                            }
-                        }
-                        else
-                        {
-                            ddAvailableCitationNumbers.Visible = false;
-                        }
-
-                    }
+                    helper.GenerateCitation(clientContext,ddDocumentCategory,tbCitationNumber,ddAvailableCitationNumbers);
 
                 }
             }
@@ -520,6 +490,8 @@ namespace PIW_SPAppWeb.Pages
                 throw exc;
             }
         }
+
+        
 
         protected void btnAcceptCitationNumber_Click(object sender, EventArgs e)
         {
@@ -531,14 +503,11 @@ namespace PIW_SPAppWeb.Pages
                     {
                         string errorMessage = string.Empty;
                         int documentCategoryNumber = helper.getDocumentCategoryNumber(ddDocumentCategory.SelectedValue);
-                        var piwListinternalName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
                         CitationNumber citationNumberHelper = new CitationNumber(documentCategoryNumber, DateTime.Now);
 
                         if (citationNumberHelper.Save(clientContext, _listItemId, tbCitationNumber.Text.Trim(),
                             ref errorMessage, cbOverrideCitationNumber.Checked))
                         {
-                            lbCitationNumberError.Visible = false;
-                            lbCitationNumberError.Text = string.Empty;
                             var listItem = helper.SetCitationNumberFieldInPIWList(clientContext, _listItemId, tbCitationNumber.Text.Trim());
 
                             //need to re-populate the modified date becuase the list item is changed
@@ -616,7 +585,7 @@ namespace PIW_SPAppWeb.Pages
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
                             string removedFileName = helper.RemoveDocument(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
-                            PopulateDocumentList(clientContext);
+                            DocumentURLsFrViewState = helper.PopulateDocumentList(clientContext,_listItemId,rpDocumentList);
                             //history list
                             helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Document file {0} removed", removedFileName), FormStatus);
                         }
@@ -642,66 +611,23 @@ namespace PIW_SPAppWeb.Pages
 
                     using (var clientContext = spContext.CreateUserClientContextForSPHost())
                     {
-                        using (var fileStream = fileUpload.PostedFile.InputStream)
+                        var uploadResult  = helper.UploadFile(clientContext, fileUpload, _listItemId, rpDocumentList, lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus, ddlSecurityControl.SelectedValue);
+                        if (uploadResult)//only save the document url if the upload is good
                         {
-                            string fileName = fileUpload.FileName;
-                            if (Path.GetExtension(fileName).Equals(".doc", StringComparison.CurrentCultureIgnoreCase))
+                            DocumentURLsFrViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
+                            //Extract docket numner
+                            if (rpDocumentList.Items.Count == 1)//only extract docket number if first document uploaded
                             {
-                                lbUploadedDocumentError.Text = "Please upload docx file";
-                                lbUploadedDocumentError.Visible = true;
-                            }
-                            else
-                            {
-                                lbUploadedDocumentError.Visible = false;
-                                lbUploadedDocumentError.Text = string.Empty;
-
-                                //validate the upload file
-                                //copy file
-                                string desctinationURNFolder = string.Format("{0}\\{1}\\{2}", ConfigurationManager.AppSettings["PIWDocuments"], _listItemId, Constants.ValidationFolder);
-                                string fullPathFileName = desctinationURNFolder + "\\" + fileName;
-
-                                helper.CopyFile(fileStream, fileName, desctinationURNFolder);
-
-                                EPSPublicationHelper epsHelper = new EPSPublicationHelper();
-                                var validationResult = epsHelper.ValidateDocument(fullPathFileName, null, string.Empty);
-                                if (validationResult.ErrorList.Count > 0)
+                                if (!cbIsNonDocket.Checked)
                                 {
-                                    //set validation error
-                                    lbUploadedDocumentError.Text = validationResult.ErrorList[0].Description;
-                                    lbUploadedDocumentError.Visible = true;
+                                    tbDocketNumber.Text = helper.ExtractDocket(fileUpload.FileName);
                                 }
-                                else
-                                {
-                                    helper.UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName, _listItemId, fileName, ddlSecurityControl.SelectedValue);
-                                    PopulateDocumentList(clientContext);
 
-                                    //clear validation error
-                                    lbRequiredUploadedDocumentError.Visible = false;
-                                    lbUploadedDocumentError.Visible = false;
-                                    lbUploadedDocumentError.Text = string.Empty;
-
-                                    //history list
-                                    if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
-                                    {
-                                        helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus);
-                                    }
-
-                                    helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Document file {0} uploaded/associated with Workflow Item", fileName), FormStatus);
-                                }
                             }
-                            
                         }
                     }
 
-                    //Extract docket numner
-                    if (rpDocumentList.Items.Count == 1)//only extract docket number if first document uploaded
-                    {
-                        if (!cbIsNonDocket.Checked)
-                        {
-                            tbDocketNumber.Text = helper.ExtractDocket(fileUpload.FileName);    
-                        }
-                        
-                    }
+                    
 
 
                 }
@@ -723,7 +649,7 @@ namespace PIW_SPAppWeb.Pages
         {
             ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
 
-            if (CheckIfListItemChanged(clientContext, listItem))
+            if (helper.CheckIfListItemChanged(clientContext, listItem, DateTime.Parse(ModifiedDateTime)))
             {
                 lbMainMessage.Text = "The form has been changed, please refresh the page";
                 lbMainMessage.Visible = true;
@@ -742,6 +668,7 @@ namespace PIW_SPAppWeb.Pages
             returnedListItem = listItem;
             return true;
         }
+
         private void UpdateFormDataToList(ClientContext clientContext, ListItem listItem, enumAction action)
         {
             var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
@@ -778,7 +705,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else if (PreviousFormStatus == Constants.PIWList_FormStatus_OSECVerification)
                     {
-                        SaveOSECVerificationInfoAndStatus(clientContext, listItem, action);
+                        SaveOsecVerificationInfoAndStatus(clientContext, listItem, action);
                     }
                     else if (PreviousFormStatus == Constants.PIWList_FormStatus_PrePublication)
                     {
@@ -812,7 +739,7 @@ namespace PIW_SPAppWeb.Pages
                         (PreviousFormStatus == Constants.PIWList_FormStatus_PrePublication) ||
                         (PreviousFormStatus == Constants.PIWList_FormStatus_ReadyForPublishing))
                     {
-                        SaveFormStatus(clientContext, listItem);
+                        helper.SaveFormStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
                     }
                     else
                     {
@@ -821,7 +748,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Deleted:
                     //delete item, need to set status and remove citation number if there is assigned one
-                    SaveDeleteInfoAndStatus(clientContext, listItem);
+                    helper.SaveDeleteInfoAndStatus(clientContext, listItem,FormStatus,PreviousFormStatus);
                     helper.ReleaseCitationNumberForDeletedListItem(clientContext, _listItemId);
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
@@ -831,7 +758,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else if (PreviousFormStatus == Constants.PIWList_FormStatus_Submitted)
                     {
-                        SaveFormStatus(clientContext, listItem);
+                        helper.SaveFormStatus(clientContext, listItem,FormStatus,PreviousFormStatus);
                     }
                     else
                     {
@@ -846,11 +773,11 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else if (PreviousFormStatus == Constants.PIWList_FormStatus_OSECVerification)//come from OSEC Verification
                     {
-                        SaveOSECVerificationInfoAndStatus(clientContext, listItem, action);
+                        SaveOsecVerificationInfoAndStatus(clientContext, listItem, action);
                     }
                     else if (PreviousFormStatus == Constants.PIWList_FormStatus_Submitted)//come from Submitted
                     {
-                        SaveFormStatus(clientContext, listItem);
+                        helper.SaveFormStatus(clientContext, listItem,FormStatus,PreviousFormStatus);
                     }
                     else
                     {
@@ -876,64 +803,29 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_PublishInitiated:
                     if (PreviousFormStatus == Constants.PIWList_FormStatus_ReadyForPublishing)
                     {
-                        SavePublishingInfoAndStatus(clientContext, listItem);
+                        helper.SavePublishingInfoAndStatus(clientContext, listItem,FormStatus,PreviousFormStatus);
                     }
                     else
                     {
                         throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
                     }
                     break;
+                case Constants.PIWList_FormStatus_PublishedToeLibrary:
+                    if (PreviousFormStatus == Constants.PIWList_FormStatus_PublishedToeLibrary)
+                    {
+                        helper.SaveLegalResourcesAndReviewAndStatus(clientContext, listItem, FormStatus, PreviousFormStatus,
+                            tbLegalResourcesReviewCompletionDate.Text,tbLegalResourcesReviewNote.Text);
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                    }
+                    break;
+
                 default:
                     throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
 
             }
-        }
-
-        private void SavePublishingInfoAndStatus(ClientContext clientContext, ListItem listItem)
-        {
-            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-
-            clientContext.Load(clientContext.Web.CurrentUser, user => user.Id);
-            clientContext.ExecuteQuery();
-
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
-
-            //publisher
-            FieldUserValue publisher = new FieldUserValue { LookupId = clientContext.Web.CurrentUser.Id };
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PublishedBy]] = publisher;
-
-            listItem.Update();
-            clientContext.ExecuteQuery();
-        }
-
-        private void SaveDeleteInfoAndStatus(ClientContext clientContext, ListItem listItem)
-        {
-            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-
-            clientContext.Load(clientContext.Web.CurrentUser, user => user.Id);
-            clientContext.ExecuteQuery();
-
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
-
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsActive]] = false;
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_CitationNumber]] = string.Empty;
-
-
-            listItem.Update();
-            clientContext.ExecuteQuery();
-        }
-
-        private void SaveFormStatus(ClientContext clientContext, ListItem listItem)
-        {
-            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
-
-            listItem.Update();
-            clientContext.ExecuteQuery();
         }
 
         private void SavePrePublicationInfoAndStatus(ClientContext clientContext, ListItem listItem, enumAction action)
@@ -954,13 +846,11 @@ namespace PIW_SPAppWeb.Pages
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrePublicationReviewComment]] = tbPrePublicationComment.Text.Trim();
             }
 
-
-
             listItem.Update();
             clientContext.ExecuteQuery();
         }
 
-        private void SaveOSECVerificationInfoAndStatus(ClientContext clientContext, ListItem listItem, enumAction action)
+        private void SaveOsecVerificationInfoAndStatus(ClientContext clientContext, ListItem listItem, enumAction action)
         {
             var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
@@ -1168,33 +1058,10 @@ namespace PIW_SPAppWeb.Pages
             listItem.Update();
             clientContext.ExecuteQuery();
         }
+        
         #endregion
 
         #region Utils
-
-        /// <summary>
-        /// Populate document list and return URL of the document
-        /// </summary>
-        /// <returns></returns>
-        private void PopulateDocumentList(ClientContext clientContext)
-        {
-            StringBuilder documentURLs;
-            System.Data.DataTable table = helper.getAllDocumentsTable(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName,out documentURLs);
-            rpDocumentList.DataSource = table;
-            rpDocumentList.DataBind();
-
-            //Save documentURLs to viewstate for later save back into SharePoint in Save Main function
-            DocumentURLsFrViewState = documentURLs.ToString();
-
-        }
-
-        private void PopulateHistoryList(ClientContext clientContext)
-        {
-            System.Data.DataTable table = helper.getHistoryListTable(clientContext, _listItemId);
-            rpHistoryList.DataSource = table;
-            rpHistoryList.DataBind();
-        }
-        
         //This webmethod is called by the csom peoplepicker to retrieve search data
         //In a MVC application you can use a Json Action method
         [WebMethod]
@@ -1269,7 +1136,8 @@ namespace PIW_SPAppWeb.Pages
             helper.CheckDocketNumber(docketNumber.Trim(), ref errorMessage, isCNF, docketValidationByPass);
             return errorMessage;
         }
-        private void PopulateFormStatusAndModifiedDateProperties(ClientContext clientContext, ListItem listItem)
+
+        public void PopulateFormStatusAndModifiedDateProperties(ClientContext clientContext, ListItem listItem)
         {
             var internalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
             if (listItem[internalColumnNames[Constants.PIWList_colName_FormStatus]] != null)
@@ -1287,9 +1155,7 @@ namespace PIW_SPAppWeb.Pages
             {
                 ModifiedDateTime = listItem[internalColumnNames[Constants.PIWList_colName_Modified]].ToString();
             }
-            
         }
-
         private void DisplayListItemInForm(ClientContext clientContext, ListItem listItem)
         {
             if (listItem != null)
@@ -1487,6 +1353,19 @@ namespace PIW_SPAppWeb.Pages
                     tbCitationNumber.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_CitationNumber]].ToString();
                 }
 
+                //todo: Mail Room - Print
+
+                //Legal resources and review
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]] != null)
+                {
+                    tbLegalResourcesReviewCompletionDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]].ToString()).ToShortDateString();
+                }
+
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupNote]] != null)
+                {
+                    tbLegalResourcesReviewNote.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupNote]].ToString();
+                }
+
             }
         }
 
@@ -1496,14 +1375,7 @@ namespace PIW_SPAppWeb.Pages
                      documentCategory.Equals(Constants.PIWList_DocCat_NoticeErrata));
         }
 
-        private bool CheckIfListItemChanged(ClientContext clientContext, ListItem listItem)
-        {
-            if (helper.CheckIfListItemChanged(clientContext, listItem, DateTime.Parse(ModifiedDateTime)))
-            {
-                return true;
-            }
-            return false;
-        }
+        
         #endregion
 
         #region Visibility
@@ -1553,6 +1425,10 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetOSECVerification.Visible = false;
                     fieldsetPrePublication.Visible = false;
 
+                    //Mailed Room and Legal Resources and Review
+                    fieldsetMailedRoom.Visible = false;
+                    fieldsetLegalResourcesReview.Visible = false;
+
                     //buttons
                     btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_PIWUsers) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_OSECGroupName) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_SecretaryReviewGroupName);
 
@@ -1571,6 +1447,8 @@ namespace PIW_SPAppWeb.Pages
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
 
+                    btnReopen.Visible = false;
+
                     break;
                 case Constants.PIWList_FormStatus_Submitted:
                     //submit section   
@@ -1583,23 +1461,21 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetOSECVerification.Visible = false;
                     fieldsetPrePublication.Visible = false;
 
+                    //Mailed Room and Legal Resources and Review
+                    fieldsetMailedRoom.Visible = false;
+                    fieldsetLegalResourcesReview.Visible = false;
+
                     //Button
                     btnSave.Visible = false;
-
                     btnSubmit.Visible = btnSave.Visible;
-
                     btnEdit.Visible = false;
-
                     btnAccept.Visible = false;
-
                     btnReject.Visible = false;
-
                     btnOSECTakeOwnership.Visible = true;
-
                     btnPublish.Visible = false;
-
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
+                    btnReopen.Visible = false;
 
                     break;
                 case Constants.PIWList_FormStatus_Edited:
@@ -1623,23 +1499,21 @@ namespace PIW_SPAppWeb.Pages
                         EnableCitationNumberControls(false, false);
                     }
 
+                    //Mailed Room and Legal Resources and Review
+                    fieldsetMailedRoom.Visible = false;
+                    fieldsetLegalResourcesReview.Visible = false;
+
                     //Button
                     btnSave.Visible = true;
-
                     btnSubmit.Visible = false;
-
                     btnEdit.Visible = false;
-
                     btnAccept.Visible = false;
-
                     btnReject.Visible = false;
-
                     btnOSECTakeOwnership.Visible = false;
-
                     btnPublish.Visible = false;
-
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
+                    btnReopen.Visible = false;
 
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
@@ -1657,23 +1531,21 @@ namespace PIW_SPAppWeb.Pages
                     //prepublication
                     fieldsetPrePublication.Visible = false;
 
-                    //Button
+                    //Mailed Room and Legal Resources and Review
+                    fieldsetMailedRoom.Visible = false;
+                    fieldsetLegalResourcesReview.Visible = false;
+
+                    //Buttons
                     btnSave.Visible = false;
-
                     btnSubmit.Visible = btnSave.Visible;
-
                     btnEdit.Visible = true;
-
                     btnAccept.Visible = true;
-
                     btnReject.Visible = true;
-
                     btnOSECTakeOwnership.Visible = false;
-
                     btnPublish.Visible = false;
-
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
+                    btnReopen.Visible = false;
 
                     break;
                 case Constants.PIWList_FormStatus_PrePublication:
@@ -1696,23 +1568,21 @@ namespace PIW_SPAppWeb.Pages
                     EnablePrePublicationControls(true);
                     InitiallyEnableCitationNumberControls(clientContext, listItem);
 
+                    //Mailed Room and Legal Resources and Review
+                    fieldsetMailedRoom.Visible = false;
+                    fieldsetLegalResourcesReview.Visible = false;
+
                     //button
                     btnSave.Visible = false;
-
                     btnSubmit.Visible = btnSave.Visible;
-
                     btnEdit.Visible = true;
-
                     btnAccept.Visible = true;
-
                     btnReject.Visible = true;
-
                     btnOSECTakeOwnership.Visible = false;
-
                     btnPublish.Visible = false;
-
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
+                    btnReopen.Visible = false;
 
                     break;
                 case Constants.PIWList_FormStatus_ReadyForPublishing:
@@ -1735,23 +1605,21 @@ namespace PIW_SPAppWeb.Pages
                     EnablePrePublicationControls(false);
                     InitiallyEnableCitationNumberControls(clientContext, listItem);
 
-                    //button
+                    //Mailed Room and Legal Resources and Review
+                    fieldsetMailedRoom.Visible = false;
+                    fieldsetLegalResourcesReview.Visible = false;
+
+                    //buttons
                     btnSave.Visible = false;
-
                     btnSubmit.Visible = btnSave.Visible;
-
                     btnEdit.Visible = true;
-
                     btnAccept.Visible = false;
-
                     btnReject.Visible = false;
-
                     btnOSECTakeOwnership.Visible = false;
-
                     btnPublish.Visible = true;
-
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
+                    btnReopen.Visible = false;
 
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
@@ -1775,29 +1643,74 @@ namespace PIW_SPAppWeb.Pages
                     EnablePrePublicationControls(false);
                     EnableCitationNumberControls(false, false);
 
-                    //button
+                    //Mailed Room and Legal Resources and Review
+                    fieldsetMailedRoom.Visible = false;
+                    fieldsetLegalResourcesReview.Visible = false;
+                    
+                    //buttons
                     btnSave.Visible = false;
-
                     btnSubmit.Visible = btnSave.Visible;
-
                     btnEdit.Visible = false;
-
                     btnAccept.Visible = false;
-
                     btnReject.Visible = false;
-
                     btnOSECTakeOwnership.Visible = false;
-
                     btnPublish.Visible = false;
-
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
+                    btnReopen.Visible = true;
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    throw new Exception("Not Implemented");
+                    EnableMainPanel(false);
+                    lbMainMessage.Visible = true;
+                    lbMainMessage.Text = "This issuance is available in eLibrary.";
+                    fieldsetOSECRejectComment.Visible = false;
+                    fieldsetRecall.Visible = false;
+
+                    //OSEC section
+                    //OSEC verification
+                    if (isRequireOSECVerification)
+                    {
+                        fieldsetOSECVerification.Visible = true;
+                        tbOSECVerificationComment.Enabled = false;
+                    }
+
+                    //PrePublication
+                    fieldsetPrePublication.Visible = true;
+                    EnablePrePublicationControls(false);
+                    EnableCitationNumberControls(false, false);
+
+                    //Mailed Room and Legal Resources and Review
+                    fieldsetMailedRoom.Visible = true;
+                    fieldsetLegalResourcesReview.Visible = true;
+                    
+                    //buttons
+                    btnSave.Visible = true;
+                    btnSubmit.Visible = false;
+                    btnEdit.Visible = false;
+                    btnAccept.Visible = false;
+                    btnReject.Visible = false;
+                    btnOSECTakeOwnership.Visible = false;
+                    btnPublish.Visible = false;
+                    btnDelete.Visible = false;
+                    btnReopen.Visible = false;
                     break;
                 case Constants.PIWList_FormStatus_ReOpen:
                     throw new Exception("Not Implemented");
+                    break;
+                case Constants.PIWList_FormStatus_Deleted:
+                    //this status is only viewable by admin
+                    EnableMainPanel(false);
+                    if (isRequireOSECVerification)
+                    {
+                        fieldsetOSECVerification.Visible = true;
+                        tbOSECVerificationComment.Enabled = false;
+                    }
+
+                    //PrePublication
+                    fieldsetPrePublication.Visible = true;
+                    EnablePrePublicationControls(false);
+                    EnableCitationNumberControls(false, false);
+
                     break;
                 default:
                     throw new Exception("UnRecognized Form Status: " + formStatus);
@@ -1835,6 +1748,7 @@ namespace PIW_SPAppWeb.Pages
             tbDueDate.Enabled = enabled;
             tbComment.Enabled = enabled;
         }
+
         private void EnableFileUploadComponent(bool enabled)
         {
             //disable/enable fileupload            
@@ -1889,6 +1803,11 @@ namespace PIW_SPAppWeb.Pages
             }
         }
         #endregion
+
+        protected void btnReopen_Click(object sender, EventArgs e)
+        {
+
+        }
 
     }
 }
