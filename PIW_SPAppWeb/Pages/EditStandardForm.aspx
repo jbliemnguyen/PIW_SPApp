@@ -21,13 +21,7 @@
             $("#tbDueDate").datepicker({ minDate: 0 });
             //prevent user edit duedate and set value to past date
             $("#tbDueDate").keydown(function (event) { event.preventDefault(); });
-
-
             $("#tbLegalResourcesReviewCompletionDate").datepicker();
-            
-
-
-
 
             //disabled Docket Number textbox is IsNonDocket ischecked
             if ($("#cbIsNonDocket").is(':checked')) {
@@ -198,14 +192,12 @@
             if ($("#inputNotificationRecipient").prop("disabled")) {
                 $("#inputNotificationRecipient").parent().find("a").remove();
             }
-
-
         }
     </script>
     <form id="mainForm" runat="server" class="form-horizontal">
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
 
-        <fieldset>
+        <fieldset id="mainFieldSet">
             <legend>Standard Form</legend>
 
             <asp:Label ID="lbMainMessage" runat="server" CssClass="error" Visible="false"></asp:Label>
@@ -474,8 +466,6 @@
             </div>
         </fieldset>
 
-
-
         <fieldset runat="server" id="fieldsetPrePublication" visible="false" clientidmode="Static">
             <legend>Pre-Publication Review</legend>
             <asp:UpdatePanel runat="server">
@@ -579,14 +569,6 @@
                 <asp:Button ID="btnReopen" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" OnClick="btnReopen_Click" />
             </div>
         </div>
-        <%--<div class="form-group">
-            <div class="col-md-2"></div>
-            <div class="col-md-8">
-                <div id="historyhead" class="historyhead">
-                    History (Click here to collapse/expand)
-                </div>
-            </div>
-        </div>--%>
         <div class="form-group">
             <div class="col-md-2"></div>
             <div class="col-md-8 historyhead">

@@ -1,13 +1,6 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Configuration;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Web;
 using System.Web.Services;
-using System.Web.UI;
 using System.Web.UI.WebControls;
 using Microsoft.SharePoint.Client;
 using PIW_SPAppWeb.Helper;
@@ -156,7 +149,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, Page.Request.Url.OriginalString);
-                throw exc;
+                throw;
             }
         }
         protected void btnSave_Click(object sender, EventArgs e)
@@ -198,12 +191,11 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw exc;
+                throw;
             }
 
 
         }
-
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
             try
@@ -248,7 +240,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw exc;
+                throw;
             }
         }
 
@@ -279,7 +271,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw exc;
+                throw;
             }
         }
 
@@ -310,7 +302,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw exc;
+                throw;
             }
         }
 
@@ -341,7 +333,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw exc;
+                throw;
             }
         }
 
@@ -372,7 +364,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw exc;
+                throw;
             }
         }
 
@@ -409,7 +401,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw exc;
+                throw;
             }
         }
 
@@ -440,7 +432,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw exc;
+                throw;
             }
         }
 
@@ -468,7 +460,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw exc;
+                throw;
             }
         }
 
@@ -487,11 +479,9 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw exc;
+                throw;
             }
         }
-
-        
 
         protected void btnAcceptCitationNumber_Click(object sender, EventArgs e)
         {
@@ -535,7 +525,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw exc;
+                throw;
             }
         }
 
@@ -564,7 +554,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw exc;
+                throw;
             }
         }
 
@@ -596,7 +586,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw exc;
+                throw;
             }
         }
 
@@ -642,6 +632,34 @@ namespace PIW_SPAppWeb.Pages
 
         }
 
+        protected void btnReopen_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                const enumAction action = enumAction.ReOpen;
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
+                    //TODO: Change document and list permission
+
+                    //Create list history
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item Re-Opened", FormStatus);
+
+                    //Redirect or Refresh page
+                    helper.RefreshPage(Page.Request, Page.Response);
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
+        }
+
         #endregion
 
         #region Save Data
@@ -671,7 +689,6 @@ namespace PIW_SPAppWeb.Pages
 
         private void UpdateFormDataToList(ClientContext clientContext, ListItem listItem, enumAction action)
         {
-            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
             switch (FormStatus)//this is the next status after action is performed
             {
                 case Constants.PIWList_FormStatus_Pending:
@@ -778,6 +795,10 @@ namespace PIW_SPAppWeb.Pages
                     else if (PreviousFormStatus == Constants.PIWList_FormStatus_Submitted)//come from Submitted
                     {
                         helper.SaveFormStatus(clientContext, listItem,FormStatus,PreviousFormStatus);
+                    }
+                    else if (PreviousFormStatus == Constants.PIWList_FormStatus_PublishInitiated)//REOPEN- come from Publish Initiated
+                    {
+                        helper.SaveFormStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
                     }
                     else
                     {
@@ -1804,10 +1825,7 @@ namespace PIW_SPAppWeb.Pages
         }
         #endregion
 
-        protected void btnReopen_Click(object sender, EventArgs e)
-        {
-
-        }
+        
 
     }
 }

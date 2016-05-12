@@ -160,7 +160,7 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public void SaveDeleteInfoAndStatus(ClientContext clientContext, ListItem listItem,string FormStatus,string PreviousFormStatus)
+        public void SaveDeleteInfoAndStatus(ClientContext clientContext, ListItem listItem, string FormStatus, string PreviousFormStatus)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
@@ -178,7 +178,7 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public void SavePublishingInfoAndStatus(ClientContext clientContext, ListItem listItem,string FormStatus,string PreviousFormStatus)
+        public void SavePublishingInfoAndStatus(ClientContext clientContext, ListItem listItem, string FormStatus, string PreviousFormStatus)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
@@ -196,7 +196,7 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public void SaveLegalResourcesAndReviewAndStatus(ClientContext clientContext, ListItem listItem, string formStatus, string previousFormStatus,string completionDate,string note)
+        public void SaveLegalResourcesAndReviewAndStatus(ClientContext clientContext, ListItem listItem, string formStatus, string previousFormStatus, string completionDate, string note)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
@@ -215,22 +215,14 @@ namespace PIW_SPAppWeb.Helper
         #region PIW Documents
         public void CreatePIWDocumentsSubFolder(ClientContext clientContext, string folderName)
         {
-            try
-            {
-                List list = clientContext.Web.Lists.GetByTitle(Constants.PIWDocuments_DocumentLibraryName);
-                ListItemCreationInformation info = new ListItemCreationInformation();
-                info.UnderlyingObjectType = FileSystemObjectType.Folder;
-                info.LeafName = folderName.Trim();//Trim for spaces.Just extra check
-                ListItem newItem = list.AddItem(info);
-                newItem["Title"] = folderName;
-                newItem.Update();
-                clientContext.ExecuteQuery();
-
-            }
-            catch (Exception Ex)
-            {
-                throw Ex;
-            }
+            List list = clientContext.Web.Lists.GetByTitle(Constants.PIWDocuments_DocumentLibraryName);
+            ListItemCreationInformation info = new ListItemCreationInformation();
+            info.UnderlyingObjectType = FileSystemObjectType.Folder;
+            info.LeafName = folderName.Trim();//Trim for spaces.Just extra check
+            ListItem newItem = list.AddItem(info);
+            newItem["Title"] = folderName;
+            newItem.Update();
+            clientContext.ExecuteQuery();
         }
 
 
@@ -281,7 +273,7 @@ namespace PIW_SPAppWeb.Helper
             return files;
         }
 
-        public System.Data.DataTable getAllDocumentsTable(ClientContext clientContext, string subFoder, string libraryName,out StringBuilder DocumentURLs)
+        public System.Data.DataTable getAllDocumentsTable(ClientContext clientContext, string subFoder, string libraryName, out StringBuilder DocumentURLs)
         {
             DocumentURLs = new StringBuilder();
             var result = new System.Data.DataTable();
@@ -291,7 +283,7 @@ namespace PIW_SPAppWeb.Helper
             result.Columns.Add("Security Level");
             //result.Columns.Add("EPS Passed");
             //result.Columns.Add("EPS Error");
-            
+
             var internalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWDocuments_DocumentLibraryName);
 
             clientContext.Load(clientContext.Web, web => web.Url);
@@ -300,7 +292,7 @@ namespace PIW_SPAppWeb.Helper
             string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, libraryName, subFoder);
 
             var documentList = getAllDocuments(clientContext, uploadSubFolderURL, true);
-            
+
             foreach (File file in documentList)
             {
                 System.Data.DataRow row = result.NewRow();
@@ -323,10 +315,10 @@ namespace PIW_SPAppWeb.Helper
                 {
                     DocumentURLs.Append(Constants.DocumentURLsSeparator + row["URL"].ToString());
                 }
-                
+
             }
 
-            
+
             return result;
         }
 
@@ -430,7 +422,7 @@ namespace PIW_SPAppWeb.Helper
 
         public System.Data.DataTable getHistoryListTable(ClientContext clientContext, string piwListItemID)
         {
-            var historyList = getHistoryListByPIWListID(clientContext,piwListItemID);
+            var historyList = getHistoryListByPIWListID(clientContext, piwListItemID);
             var historyListInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
             //TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById(System.TimeZone.CurrentTimeZone.ToLocalTime());
             var result = new System.Data.DataTable();
@@ -457,18 +449,18 @@ namespace PIW_SPAppWeb.Helper
                 }
 
                 row["User"] = historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_User]] != null
-                    ? ((FieldUserValue) historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_User]]).LookupValue: string.Empty;
+                    ? ((FieldUserValue)historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_User]]).LookupValue : string.Empty;
 
                 row["Action"] = historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Action]] != null
-                    ? historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Action]].ToString(): string.Empty;
+                    ? historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Action]].ToString() : string.Empty;
 
                 row["FormStatus"] = historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_FormStatus]] != null
-                    ? historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_FormStatus]].ToString(): string.Empty;
+                    ? historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_FormStatus]].ToString() : string.Empty;
 
                 result.Rows.Add(row);
             }
 
-            
+
 
             return result;
 
@@ -505,7 +497,7 @@ namespace PIW_SPAppWeb.Helper
             //return html.ToString();
         }
 
-        public void PopulateHistoryList(ClientContext clientContext,string listItemId,Repeater rpHistoryList)
+        public void PopulateHistoryList(ClientContext clientContext, string listItemId, Repeater rpHistoryList)
         {
             System.Data.DataTable table = getHistoryListTable(clientContext, listItemId);
             rpHistoryList.DataSource = table;
@@ -514,7 +506,7 @@ namespace PIW_SPAppWeb.Helper
         #endregion
 
         #region Utils
-        public bool UploadFile(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError, Label lbRequiredUploadedDocumentError, string FormStatus,string securityControlValue)
+        public bool UploadFile(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError, Label lbRequiredUploadedDocumentError, string FormStatus, string securityControlValue)
         {
             bool result = false;
             using (var fileStream = fileUpload.PostedFile.InputStream)
@@ -550,7 +542,7 @@ namespace PIW_SPAppWeb.Helper
                     {
                         UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName,
                             listItemId, fileName, securityControlValue);
-                        
+
 
                         //clear validation error
                         lbRequiredUploadedDocumentError.Visible = false;
@@ -579,11 +571,11 @@ namespace PIW_SPAppWeb.Helper
             System.Data.DataTable table = getAllDocumentsTable(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, out documentURLs);
             rpDocumentList.DataSource = table;
             rpDocumentList.DataBind();
-            
+
             return documentURLs.ToString();
 
         }
-        
+
         public void GenerateCitation(ClientContext clientContext, DropDownList ddDocumentCategory, TextBox tbCitationNumber, DropDownList ddAvailableCitationNumbers)
         {
             if (ddDocumentCategory.SelectedIndex > 0)
@@ -892,7 +884,7 @@ namespace PIW_SPAppWeb.Helper
             }
 
 
-            RedirectToAPage(request,response,sourcePage);
+            RedirectToAPage(request, response, sourcePage);
 
         }
 
@@ -921,8 +913,8 @@ namespace PIW_SPAppWeb.Helper
         public void RedirectToAPage(HttpRequest request, HttpResponse response, string PageName)
         {
             //https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/EditStandardForm.aspx
-            
-            var newURLPage = GetPageUrl(request, PageName,string.Empty);
+
+            var newURLPage = GetPageUrl(request, PageName, string.Empty);
 
             if (!string.IsNullOrEmpty(newURLPage))
             {
@@ -937,7 +929,7 @@ namespace PIW_SPAppWeb.Helper
         /// <param name="request">HTTPRequest</param>
         /// <param name="PageName">FileName of Page, ie: EditStandardForm.aspx</param>
         /// <returns></returns>
-        private string GetPageUrl(HttpRequest request, string PageName,string sourcePage)
+        private string GetPageUrl(HttpRequest request, string PageName, string sourcePage)
         {
             const string pattern = "/pages/";
             int length = request.Url.ToString().IndexOf(pattern, StringComparison.CurrentCultureIgnoreCase) + pattern.Length;
@@ -956,7 +948,7 @@ namespace PIW_SPAppWeb.Helper
                 sourcePage
             };
 
-            var fullPageURL = string.Format("{0}?SPHostUrl={1}&SPLanguage={2}&SPClientTag={3}&SPProductNumber={4}&SPAppWebUrl={5}&Source={6}",args);
+            var fullPageURL = string.Format("{0}?SPHostUrl={1}&SPLanguage={2}&SPClientTag={3}&SPProductNumber={4}&SPAppWebUrl={5}&Source={6}", args);
             return fullPageURL;
         }
 
@@ -967,7 +959,7 @@ namespace PIW_SPAppWeb.Helper
         /// <returns></returns>
         private string getDefaultSourcePage(string pageName)
         {
-            switch ( pageName)
+            switch (pageName)
             {
                 case Constants.Page_EditStandardForm:
                     return Constants.Page_StandardForms;
@@ -994,7 +986,7 @@ namespace PIW_SPAppWeb.Helper
         }
 
 
-        public string getEditFormURL(string formType,string listItemId,HttpRequest  request,string sourcePage )
+        public string getEditFormURL(string formType, string listItemId, HttpRequest request, string sourcePage)
         {
             string result = string.Empty;
             string PageFileName = string.Empty;
@@ -1012,7 +1004,7 @@ namespace PIW_SPAppWeb.Helper
                 PageFileName = Constants.Page_EditDirectPublicationForm;
             }
 
-            result = String.Format("{0}&ID={1}",GetPageUrl(request, PageFileName,sourcePage),listItemId);
+            result = String.Format("{0}&ID={1}", GetPageUrl(request, PageFileName, sourcePage), listItemId);
             return result;
         }
 
@@ -1049,7 +1041,7 @@ namespace PIW_SPAppWeb.Helper
         }
         #endregion
 
-        
+
     }
 
 }
