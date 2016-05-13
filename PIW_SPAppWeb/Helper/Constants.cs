@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-
-namespace PIW_SPAppWeb
+﻿namespace PIW_SPAppWeb
 {
     internal static class Constants
     {
@@ -186,7 +181,8 @@ namespace PIW_SPAppWeb
         public const string Page_StandardForms = "StandardForms.aspx";
         public const string Page_AgendaForms = "AgendaForms.aspx";
         public const string Page_DirectPublicationForms = "DirectPublicationForms.aspx";
-
+        public const string Page_AccessDenied = "AccessDenied.aspx";
+        public const string Page_ItemNotFound = "ItemNotFound.aspx";
         //misc
         public const string ValidationFolder = "Validation";
 

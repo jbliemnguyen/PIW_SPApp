@@ -42,14 +42,14 @@
             //validate docket number when blur event
             $("#tbDocketNumber").blur(function () {
                 var docketNumber = $.trim($("#tbDocketNumber").val());
-                if (!(!docketNumber)) {//check if docket is not empty, javascript style, cannot eliminiate the !(!)
+                if (!(!docketNumber)) { //check if docket is not empty, javascript style, cannot eliminiate the !(!)
 
                     var docketValidationByPass = $("#cbDocketValidationByPass").is(':checked');
                     var postdata = '{docketNumber: "' + docketNumber + '",isCNF:' + false + ',docketValidationByPass:' + docketValidationByPass + ' }';
 
                     $.ajax({
                         type: "POST",
-                        url: "EditAgendaForm.aspx/ValidateDocketNumber",//same function, can be used from StandardForm
+                        url: "EditAgendaForm.aspx/ValidateDocketNumber", //same function, can be used from StandardForm
                         data: postdata,
                         contentType: "application/json; charset=utf-8",
                         dataType: "json",
@@ -102,8 +102,7 @@
                 if (dueDate > today) {
                     modalHeight = 250;
                     $("#publishDialogConfirmation").html("<span style='color:green'>Warning: Due Date is a future date</span>");
-                }
-                else {
+                } else {
                     $("#publishDialogConfirmation").html("");
                 }
 
@@ -160,55 +159,56 @@
             $(".historyhead").click(function () {
                 $(".historylist").slideToggle(100);
             });
-
-            function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
-                //Build absolute path to the layouts root with the spHostUrl
-                var layoutsRoot = spHostUrl + '/_layouts/15/';
-
-                //load all appropriate scripts for the page to function
-                $.getScript(layoutsRoot + 'SP.Runtime.js',
-                    function () {
-                        $.getScript(layoutsRoot + 'SP.js',
-                            function () {
-                                //load scripts for cross site calls (needed to use the people picker control in an IFrame)
-                                $.getScript(layoutsRoot + 'SP.RequestExecutor.js', function () {
-                                    context = new SP.ClientContext(appWebUrl);
-                                    var factory = new SP.ProxyWebRequestExecutorFactory(appWebUrl);
-                                    context.set_webRequestExecutorFactory(factory);
-
-                                    workflowInitiator = getPeoplePickerInstance(context, $('#spanWorkflowInitiator'), $('#inputWorkflowInitiator'), $('#divWorkflowInitiatorSearch'), $('#hdnWorkflowInitiator'), 'EditAgendaForm.aspx/GetPeoplePickerData', 'workflowInitiator', spLanguage);
-                                    documentOwner = getPeoplePickerInstance(context, $('#spanDocumentOwner'), $('#inputDocumentOwner'), $('#divDocumentOwnerSearch'), $('#hdnDocumentOwner'), 'EditAgendaForm.aspx/GetPeoplePickerData', 'documentOwner', spLanguage);
-                                    notificationRecipient = getPeoplePickerInstance(context, $('#spanNotificationRecipient'), $('#inputNotificationRecipient'), $('#divNotificationRecipientSearch'), $('#hdnNotificationRecipient'), 'EditAgendaForm.aspx/GetPeoplePickerData', 'notificationRecipient', spLanguage);
-
-
-                                    //we need to disable people picker here becuase this call is slow and asynchronous
-                                    //we can only disable people picker after it is loaded
-                                    disablePeoplePickers();
-                                });
-
-                            });
-                    });
-            }
-
-            function disablePeoplePickers() {
-                //people picker textbox (where user type the name) is disabled from server side, but the href link to remove user 
-                //must be disable from client side
-                //check if textbox is disabled, if yes, then disable the link
-                if ($("#inputWorkflowInitiator").prop("disabled")) {
-                    $("#inputWorkflowInitiator").parent().find("a").remove();
-                }
-
-                if ($("#inputDocumentOwner").prop("disabled")) {
-                    $("#inputDocumentOwner").parent().find("a").remove();
-                }
-
-                if ($("#inputNotificationRecipient").prop("disabled")) {
-                    $("#inputNotificationRecipient").parent().find("a").remove();
-                }
-
-
-            }
         }
+
+        function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
+            //Build absolute path to the layouts root with the spHostUrl
+            var layoutsRoot = spHostUrl + '/_layouts/15/';
+
+            //load all appropriate scripts for the page to function
+            $.getScript(layoutsRoot + 'SP.Runtime.js',
+                function () {
+                    $.getScript(layoutsRoot + 'SP.js',
+                        function () {
+                            //load scripts for cross site calls (needed to use the people picker control in an IFrame)
+                            $.getScript(layoutsRoot + 'SP.RequestExecutor.js', function () {
+                                context = new SP.ClientContext(appWebUrl);
+                                var factory = new SP.ProxyWebRequestExecutorFactory(appWebUrl);
+                                context.set_webRequestExecutorFactory(factory);
+
+                                workflowInitiator = getPeoplePickerInstance(context, $('#spanWorkflowInitiator'), $('#inputWorkflowInitiator'), $('#divWorkflowInitiatorSearch'), $('#hdnWorkflowInitiator'), 'EditAgendaForm.aspx/GetPeoplePickerData', 'workflowInitiator', spLanguage);
+                                documentOwner = getPeoplePickerInstance(context, $('#spanDocumentOwner'), $('#inputDocumentOwner'), $('#divDocumentOwnerSearch'), $('#hdnDocumentOwner'), 'EditAgendaForm.aspx/GetPeoplePickerData', 'documentOwner', spLanguage);
+                                notificationRecipient = getPeoplePickerInstance(context, $('#spanNotificationRecipient'), $('#inputNotificationRecipient'), $('#divNotificationRecipientSearch'), $('#hdnNotificationRecipient'), 'EditAgendaForm.aspx/GetPeoplePickerData', 'notificationRecipient', spLanguage);
+
+
+                                //we need to disable people picker here becuase this call is slow and asynchronous
+                                //we can only disable people picker after it is loaded
+                                disablePeoplePickers();
+                            });
+
+                        });
+                });
+        }
+
+        function disablePeoplePickers() {
+            //people picker textbox (where user type the name) is disabled from server side, but the href link to remove user 
+            //must be disable from client side
+            //check if textbox is disabled, if yes, then disable the link
+            if ($("#inputWorkflowInitiator").prop("disabled")) {
+                $("#inputWorkflowInitiator").parent().find("a").remove();
+            }
+
+            if ($("#inputDocumentOwner").prop("disabled")) {
+                $("#inputDocumentOwner").parent().find("a").remove();
+            }
+
+            if ($("#inputNotificationRecipient").prop("disabled")) {
+                $("#inputNotificationRecipient").parent().find("a").remove();
+            }
+
+
+        }
+
     </script>
     <form id="mainForm" runat="server" class="form-horizontal">
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
@@ -336,6 +336,43 @@
                 </div>
             </div>
 
+            <asp:UpdatePanel runat="server">
+                <ContentTemplate>
+                    <div class="form-group">
+                        <asp:Label ID="lbCitationNumber" runat="server" Text="Citation Number" AssociatedControlID="tbCitationNumber" CssClass="col-md-2 control-label"></asp:Label>
+                        <div class="col-md-2">
+                            <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnGenerateCitationNumber_Click" />
+                        </div>
+
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-6">
+                            <asp:TextBox ID="tbCitationNumber" ClientIDMode="Static" runat="server" CssClass="form-control" Width="200px"></asp:TextBox>
+
+                            <asp:DropDownList ID="ddAvailableCitationNumbers" CssClass="form-control" runat="server" Visible="false" Width="200px" ClientIDMode="Static" AutoPostBack="True" OnSelectedIndexChanged="ddAvailableCitationNumbers_SelectedIndexChanged">
+                                <asp:ListItem>-- Available Citation # --</asp:ListItem>
+                            </asp:DropDownList>
+
+                            <asp:CheckBox ID="cbOverrideCitationNumber" runat="server" Text="Override" CssClass="checkbox" ClientIDMode="Static" />
+
+                            <asp:Label runat="server" ID="lbCitationNumberError" Visible="false" ForeColor="Red"></asp:Label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-4">
+                            <asp:Button ID="btnAcceptCitationNumber" runat="server" Text="Accept Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnAcceptCitationNumber_Click" ClientIDMode="Static" />
+                            <asp:Button ID="btnRemoveCitationNumber" runat="server" Text="Remove Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnRemoveCitationNumber_Click" ClientIDMode="Static" />
+                        </div>
+                    </div>
+                </ContentTemplate>
+                <Triggers>
+                    <asp:AsyncPostBackTrigger ControlID="ddAvailableCitationNumbers" EventName="SelectedIndexChanged" />
+                </Triggers>
+            </asp:UpdatePanel>
+
+
             <div class="form-group">
                 <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)<span class='accentText'> *</span>" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
@@ -431,10 +468,55 @@
 
             <%--End of Main Panel--%>
 
-            <%--Button pannel--%>
+            <fieldset runat="server" id="fieldsetSecReview" visible="false">
+                <legend>Secretary Review</legend>
+                <div class="form-group">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2">
+                        <asp:Label ID="lbSecReviewAction" runat="server"></asp:Label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <asp:Label ID="lbSecReviewComment" runat="server" Text="Comment" AssociatedControlID="tbSecReviewComment" CssClass="col-md-2 control-label"></asp:Label>
+                    <div class="col-md-6">
+                        <asp:TextBox ID="tbSecReviewComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
+                    </div>
+                </div>
+            </fieldset>
 
-            <%--</form>--%>
-            <%--End of Button pannel--%>
+            <fieldset runat="server" id="fieldsetMailedRoom" visible="false">
+                <legend>Mail Room</legend>
+                <div class="form-group">
+                    <asp:Label ID="lbMailedDate" runat="server" Text="Mailed Date" AssociatedControlID="lbMailedDateValue" CssClass="col-md-2 control-label"></asp:Label>
+                    <div class="col-md-2">
+                        <asp:Label ID="lbMailedDateValue" runat="server"></asp:Label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <asp:Label ID="lbMailedRoomNote" runat="server" Text="Note" AssociatedControlID="lbMailedRoomNoteValue" CssClass="col-md-2 control-label"></asp:Label>
+                    <div class="col-md-2">
+                        <asp:Label ID="lbMailedRoomNoteValue" runat="server"></asp:Label>
+                    </div>
+                </div>
+            </fieldset>
+
+            <fieldset runat="server" id="fieldsetLegalResourcesReview" visible="false">
+                <legend>Legal Resources And Review</legend>
+                <div class="form-group">
+                    <asp:Label ID="lbLegalResourcesReviewCompletionDate" runat="server" Text="Completion Date" AssociatedControlID="tbLegalResourcesReviewCompletionDate" CssClass="col-md-2 control-label"></asp:Label>
+                    <div class="col-md-6">
+                        <asp:TextBox ID="tbLegalResourcesReviewCompletionDate" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <asp:Label ID="lbLegalResourcesNote" runat="server" Text="Note" AssociatedControlID="tbLegalResourcesReviewNote" CssClass="col-md-2 control-label"></asp:Label>
+                    <div class="col-md-6">
+                        <asp:TextBox ID="tbLegalResourcesReviewNote" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
+                    </div>
+                </div>
+            </fieldset>
+
+
         </fieldset>
         <%--        buttons--%>
         <div class="form-group"></div>

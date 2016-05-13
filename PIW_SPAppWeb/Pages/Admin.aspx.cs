@@ -1,57 +1,65 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+
 using System.ServiceModel;
 using System.Web;
 using System.Web.UI;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+
+
+
+
+
 using Microsoft.SharePoint.Client;
 using PIW_SPAppWeb.Helper;
+using File = Microsoft.SharePoint.Client.File;
+using List = Microsoft.SharePoint.Client.List;
 using ListItem = System.Web.UI.WebControls.ListItem;
+
 
 
 namespace PIW_SPAppWeb
 {
-    public partial class Default : System.Web.UI.Page
+    public partial class Admin : System.Web.UI.Page
     {
-        protected void Page_PreInit(object sender, EventArgs e)
-        {
-            Uri redirectUrl;
-            switch (SharePointContextProvider.CheckRedirectionStatus(Context, out redirectUrl))
-            {
-                case RedirectionStatus.Ok:
-                    return;
-                case RedirectionStatus.ShouldRedirect:
-                    Response.Redirect(redirectUrl.AbsoluteUri, endResponse: true);
-                    break;
-                case RedirectionStatus.CanNotRedirect:
-                    Response.Write("An error occurred while processing your request.");
-                    Response.End();
-                    break;
-            }
-        }
+        //protected void Page_PreInit(object sender, EventArgs e)
+        //{
+        //    Uri redirectUrl;
+        //    switch (SharePointContextProvider.CheckRedirectionStatus(Context, out redirectUrl))
+        //    {
+        //        case RedirectionStatus.Ok:
+        //            return;
+        //        case RedirectionStatus.ShouldRedirect:
+        //            Response.Redirect(redirectUrl.AbsoluteUri, endResponse: true);
+        //            break;
+        //        case RedirectionStatus.CanNotRedirect:
+        //            Response.Write("An error occurred while processing your request.");
+        //            Response.End();
+        //            break;
+        //    }
+        //}
+
+        private SharePointHelper helper = new SharePointHelper();
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // The following code gets the client context and Title property by using TokenHelper.
-            // To access other properties, the app may need to request permissions on the host web.
-            var spContext = SharePointContextProvider.Current.GetSharePointContext(Context);
-
-            using (var clientContext = spContext.CreateUserClientContextForSPHost())
+            using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
             {
-                //clientContext.Load(clientContext.Web, web => web.Title);
-                //clientContext.ExecuteQuery();
-                //Response.Write(clientContext.Web.Title);
-                //Response.Write(DateTime.Now.ToShortTimeString());
+                if (!helper.IsCurrentUserMemberOfGroup(clientContext, Constants.Grp_PIWAdmin))
+                {
+                    helper.RedirectToAPage(Request,Response,Constants.Page_AccessDenied);
+                }
 
             }
         }
 
         protected void Button1_Click(object sender, EventArgs e)
         {
-            var spContext = SharePointContextProvider.Current.GetSharePointContext(Context);
-
-            using (var clientContext = spContext.CreateUserClientContextForSPHost())
+            using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
             {
                 List oList = clientContext.Web.Lists.GetByTitle("Announcements");
                 ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
@@ -68,8 +76,7 @@ namespace PIW_SPAppWeb
 
         protected void btnRegisterRER_Click(object sender, EventArgs e)
         {
-            var spContext = SharePointContextProvider.Current.GetSharePointContext(Context);
-            using (var clientContext = spContext.CreateUserClientContextForSPHost())
+            using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
             {
                 var listName = Constants.PIWDocuments_DocumentLibraryName;
                 if (String.IsNullOrEmpty(listName)) return;
@@ -232,10 +239,93 @@ namespace PIW_SPAppWeb
             }
         }
 
-        protected void Unnamed1_Click(object sender, EventArgs e)
+        protected void EPSValidation_Click(object sender, EventArgs e)
         {
             //EPSPublicationHelper pubHelper = new EPSPublicationHelper();
             //pubHelper.ValidateDocument();
         }
+
+        protected void btnTestCitationAppended_Click(object sender, EventArgs e)
+        {
+            //string strDoc = @"C:\Users\Public\Documents\Letter.docx";
+            //string strDoc = @"C:\Users\lnguyen\Desktop\Temp\45\GP04-1-000-PIWTest.docx";
+            string strDoc = @"http://fdc1s-sp23wfed2.ferc.gov/piw/PIW%20Documents/40/GP04-1-000-PIWTest.docx";
+
+            using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
+            {
+                var listName = Constants.PIWDocuments_DocumentLibraryName;
+                
+                List srcList = clientContext.Web.Lists.GetByTitle(listName);
+                
+
+                CamlQuery query = new CamlQuery();
+                query.ViewXml = @"<View>
+                                    <Query>
+                                      <Where>
+                                        <Eq>
+                                          <FieldRef Name='FileLeafRef'/>
+                                          <Value Type='Text'>GP04-1-000-PIWTest.docx</Value>
+                                        </Eq>
+                                      </Where>
+                                      <RowLimit>1</RowLimit>
+                                    </Query>
+                                  </View>";
+
+                ListItemCollection listItems = srcList.GetItems(query);
+                clientContext.Load(srcList);
+                clientContext.Load(listItems);
+                clientContext.ExecuteQuery();
+
+                if (listItems.Count == 1)
+                {
+                    var item = listItems[0];
+                    FileInformation fileInformation = File.OpenBinaryDirect(clientContext, (string)item["FileRef"]);    
+                }
+                
+
+
+                //Uri filename = new Uri(strDoc);
+                //string server = filename.AbsoluteUri.Replace(filename.AbsolutePath, "");
+                //string serverrelative = filename.AbsolutePath;
+                //string url = "/PIW%20Documents/40/GP04-1-000-PIWTest.docx";
+
+                //Microsoft.SharePoint.Client.FileInformation f = Microsoft.SharePoint.Client.File.OpenBinaryDirect(clientContext, url);
+                //clientContext.ExecuteQuery();
+                //var stream = f.Stream;
+
+            }
+
+
+        }
+
+        public static void OpenAndAddTextToWordDocument(string filepath, string txt)
+        {
+            // Open a WordprocessingDocument for editing using the filepath.
+            WordprocessingDocument wordprocessingDocument =
+                WordprocessingDocument.Open(filepath, true);
+
+            // Assign a reference to the existing document body.
+            Body body = wordprocessingDocument.MainDocumentPart.Document.Body;
+
+            // Add new text.
+            Paragraph para = body.AppendChild(new Paragraph());
+            Run run = para.AppendChild(new Run());
+            run.AppendChild(new Text(txt));
+
+            // Close the handle explicitly.
+            wordprocessingDocument.Close();
+        }
+
+        static private void CopyStream(Stream source, Stream destination)
+        {
+            byte[] buffer = new byte[32768];
+            int bytesRead;
+            do
+            {
+                bytesRead = source.Read(buffer, 0, buffer.Length);
+                destination.Write(buffer, 0, bytesRead);
+            } while (bytesRead != 0);
+        }
+
     }
 }

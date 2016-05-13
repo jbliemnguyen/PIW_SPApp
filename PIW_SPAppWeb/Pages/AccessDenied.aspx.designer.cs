@@ -10,6 +10,6 @@
 namespace PIW_SPAppWeb {
     
     
-    public partial class ItemNotFound {
+    public partial class AccessDenied {
     }
 }

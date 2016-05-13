@@ -216,9 +216,11 @@ namespace PIW_SPAppWeb.Helper
         public void CreatePIWDocumentsSubFolder(ClientContext clientContext, string folderName)
         {
             List list = clientContext.Web.Lists.GetByTitle(Constants.PIWDocuments_DocumentLibraryName);
-            ListItemCreationInformation info = new ListItemCreationInformation();
-            info.UnderlyingObjectType = FileSystemObjectType.Folder;
-            info.LeafName = folderName.Trim();//Trim for spaces.Just extra check
+            ListItemCreationInformation info = new ListItemCreationInformation
+            {
+                UnderlyingObjectType = FileSystemObjectType.Folder,
+                LeafName = folderName.Trim()
+            };
             ListItem newItem = list.AddItem(info);
             newItem["Title"] = folderName;
             newItem.Update();
@@ -309,11 +311,11 @@ namespace PIW_SPAppWeb.Helper
 
                 if (DocumentURLs.Length == 0)
                 {
-                    DocumentURLs.Append(row["URL"].ToString());
+                    DocumentURLs.Append(row["URL"]);
                 }
                 else
                 {
-                    DocumentURLs.Append(Constants.DocumentURLsSeparator + row["URL"].ToString());
+                    DocumentURLs.Append(Constants.DocumentURLsSeparator + row["URL"]);
                 }
 
             }
@@ -321,23 +323,7 @@ namespace PIW_SPAppWeb.Helper
 
             return result;
         }
-
-        private string getEPSPassedIconHTML(string epsPassedStatus)
-        {
-            if (epsPassedStatus.Equals(Constants.PIWDocuments_EPSPassed_Option_True))
-            {
-                return @"<span class='glyphicon glyphicon-ok' style='color: green'></span>";
-            }
-            else if (epsPassedStatus.Equals(Constants.PIWDocuments_EPSPassed_Option_False))
-            {
-                return @"<span class='glyphicon glyphicon-remove' style='color: red'></span>";
-            }
-            else
-            {
-                return @"<img src='..\Scripts\spinner\spinner-large.gif' style='width:18px;height:18px;'></span>";
-            }
-        }
-
+        
         public string RemoveDocument(ClientContext clientContext, string subFolder, string libraryName, string Id)
         {
             string removedFileName = string.Empty;
@@ -512,7 +498,8 @@ namespace PIW_SPAppWeb.Helper
             using (var fileStream = fileUpload.PostedFile.InputStream)
             {
                 string fileName = fileUpload.FileName;
-                if (Path.GetExtension(fileName).Equals(".doc", StringComparison.CurrentCultureIgnoreCase))
+                var extension = Path.GetExtension(fileName);
+                if (extension != null && extension.Equals(".doc", StringComparison.CurrentCultureIgnoreCase))
                 {
                     lbUploadedDocumentError.Text = ".doc file is not supported, please upload .docx file";
                     lbUploadedDocumentError.Visible = true;
@@ -637,13 +624,13 @@ namespace PIW_SPAppWeb.Helper
                 foreach (string fullDocket in dockets)
                 {
                     string docketFullTrimmed = fullDocket.Trim();
-                    bool validDocket = true;
                     //Add docket to dictionary
                     if (!docketDictionary.ContainsKey(docketFullTrimmed))
                     {
                         //FullDocket: ER14-543-000 or EL02-60-007
                         int docketLength = docketFullTrimmed.LastIndexOf("-");
 
+                        bool validDocket = true;
                         if (docketLength < 0)//invalid
                         {
                             validDocket = false;
@@ -729,7 +716,7 @@ namespace PIW_SPAppWeb.Helper
                     }
 
                     //Add the new object to cache
-                    cache.Insert(listName, internalColumnList, null, DateTime.Now.AddHours(10), System.Web.Caching.Cache.NoSlidingExpiration);
+                    cache.Insert(listName, internalColumnList, null, DateTime.Now.AddHours(10), Cache.NoSlidingExpiration);
                     return internalColumnList;
                 }
             }
@@ -810,7 +797,7 @@ namespace PIW_SPAppWeb.Helper
         /// <param name="filename"></param>
         public string ExtractDocket(string filename)
         {
-            string pattern = @"^(\w+)-(\d+)-\d\d\d";
+            const string pattern = @"^(\w+)-(\d+)-\d\d\d";
             string docket = string.Empty;
 
             System.Text.RegularExpressions.Match match = System.Text.RegularExpressions.Regex.Match(filename, pattern);
@@ -856,17 +843,12 @@ namespace PIW_SPAppWeb.Helper
         /// <summary>
         /// Check if form is not saved/changed after it is opened
         /// for concurrency checking
-        /// </summary>
-        /// <param name="listItem"></param>
-        /// <param name="expectingFormStatus"></param>
-        /// <returns></returns>
         public bool CheckIfListItemChanged(ClientContext clientContext, ListItem listItem, DateTime viewModifiedDateTime)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-            DateTime currentModifiedDateTime;
             if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Modified]] != null)
             {
-                currentModifiedDateTime = DateTime.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_Modified]].ToString());
+                DateTime currentModifiedDateTime = DateTime.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_Modified]].ToString());
                 return DateTime.Compare(currentModifiedDateTime, viewModifiedDateTime) != 0;
             }
             return false;
@@ -959,21 +941,22 @@ namespace PIW_SPAppWeb.Helper
         /// <returns></returns>
         private string getDefaultSourcePage(string pageName)
         {
+            string result = string.Empty;
+
             switch (pageName)
             {
                 case Constants.Page_EditStandardForm:
-                    return Constants.Page_StandardForms;
+                    result = Constants.Page_StandardForms;
                     break;
                 case Constants.Page_EditAgendaForm:
-                    return Constants.Page_AgendaForms;
+                    result = Constants.Page_AgendaForms;
                     break;
                 case Constants.Page_EditDirectPublicationForm:
-                    return Constants.Page_DirectPublicationForms;
-                    break;
-                default:
-                    return string.Empty;
+                    result = Constants.Page_DirectPublicationForms;
                     break;
             }
+
+            return result;
         }
 
         public void RefreshPage(HttpRequest request, HttpResponse response)

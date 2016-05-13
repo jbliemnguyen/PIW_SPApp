@@ -66,11 +66,9 @@ namespace PIW_SPAppWeb.Pages
 
         //variable        
         private string _listItemId;
-        private bool _isEditForm;
-        private bool isMail;
 
         //fuction
-        static SharePointHelper helper = null;
+        static SharePointHelper helper;
         #endregion
 
         #region Events
@@ -78,15 +76,15 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                _listItemId = this.Page.Request.QueryString["ID"];
+                _listItemId = Page.Request.QueryString["ID"];
                 lbUploadedDocumentError.Visible = false;
 
                 helper = new SharePointHelper();
-                _isEditForm = (!string.IsNullOrEmpty(_listItemId));
+                
 
                 if (!Page.IsPostBack)
                 {
-                    if (_isEditForm)
+                    if (!string.IsNullOrEmpty(_listItemId))
                     {
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
@@ -97,7 +95,7 @@ namespace PIW_SPAppWeb.Pages
                             ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, isCurrentUserAdmin);
                             if (listItem == null)
                             {
-                                helper.RedirectToAPage(Page.Request, Page.Response, "ItemNotFound.aspx");
+                                helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_ItemNotFound);
                             }
                             else
                             {
@@ -107,6 +105,7 @@ namespace PIW_SPAppWeb.Pages
                                 //display form visiblility based on form status
                                 ControlsVisiblitilyBasedOnStatus(clientContext, PreviousFormStatus, FormStatus, listItem);
                                 
+                                //todo: open documents if status is ready for published
                                 ////above method get formStatus from list, store it in viewstate                       
                                 //if (FormStatus == enumFormStatus.ReadyForPublishing)
                                 //{
@@ -137,7 +136,8 @@ namespace PIW_SPAppWeb.Pages
                             //history list
                             if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
                             {
-                                helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus);
+                                //Form status must be specified becuae the viewstate hasn't have value
+                                helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", Constants.PIWList_FormStatus_Pending);
                             }
                         }
 
@@ -626,7 +626,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception ex)
             {
                 helper.LogError(Context, ex, _listItemId, string.Empty);
-                lbUploadedDocumentError.Text = ex.Message.ToString();
+                lbUploadedDocumentError.Text = ex.Message;
                 lbUploadedDocumentError.Visible = true;
             }
 
@@ -1054,7 +1054,7 @@ namespace PIW_SPAppWeb.Pages
                 {
                     //append
                     listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}<br>{3}",
-                        clientContext.Web.CurrentUser.Title, DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text, listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]].ToString());
+                        clientContext.Web.CurrentUser.Title, DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text, listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]]);
                 }
 
             }
@@ -1104,7 +1104,7 @@ namespace PIW_SPAppWeb.Pages
             else
             {
                 //check if at least 1 public item is 
-                isValid = isValid & true;
+                isValid = true;
                 lbRequiredUploadedDocumentError.Visible = false;
             }
 
@@ -1134,7 +1134,7 @@ namespace PIW_SPAppWeb.Pages
             }
             else
             {
-                isValid = isValid & false;
+                isValid = false;
                 lbDocketValidationServerSideError.Text = errorMessage;
                 lbDocketValidationServerSideError.Visible = true;
                 //display ByPass Docket Validation Check
@@ -1783,11 +1783,9 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        /// <summary>
+        
         /// enabled or disable other controls from the textbox enabled property
         /// For example: when textbox is editable,  then the accept button should be clickable to assign the citation number
-        /// </summary>
-        /// <param name="citationTextBoxEnabled"></param>
         public void EnableCitationNumberControls(bool citationNumberCanBeChanged, bool CitationNumberCanBeRemoved)
         {
             //controls

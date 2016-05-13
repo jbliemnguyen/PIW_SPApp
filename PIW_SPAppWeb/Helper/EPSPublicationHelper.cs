@@ -48,15 +48,17 @@ namespace PIW_SPAppWeb.Helper
             Publication publication = new Publication(EpsCallingApplication.PIW, EpsCatCode.ISSUANCE);
 
             //Document
-            Document document = new Document();
-            document.AvailabilityCode = documentAvailability;
-            document.OfficialFlag = documentOfficialFlag;
-            document.FileDate = DateTime.Now;
-            document.ReceivedDate = DateTime.Now;
-            document.IssueDate = DateTime.Now;
-            document.Description = description;
+            Document document = new Document
+            {
+                AvailabilityCode = documentAvailability,
+                OfficialFlag = documentOfficialFlag,
+                FileDate = DateTime.Now,
+                ReceivedDate = DateTime.Now,
+                IssueDate = DateTime.Now,
+                Description = description,
+                FERCCitation = fercCitation.Replace("¶", string.Empty).Replace(" ", string.Empty)
+            };
             //142 FERC ¶ 62,014 is passed as 142FERC62,014
-            document.FERCCitation = fercCitation.Replace("¶", string.Empty).Replace(" ", string.Empty);
 
             //File
             //string fileURN = fileStoragePath + piWlistItemId + @"\" + fileName;

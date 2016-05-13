@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using Microsoft.SharePoint.Client;
 
 namespace PIW_SPAppWeb.Helper
@@ -87,7 +85,7 @@ namespace PIW_SPAppWeb.Helper
         /// <returns></returns>
         public List<string> getAllAvailableCitationNumber(ClientContext clientContext)
         {
-            List<string> result = new List<string>();
+            var result = new List<string>();
             var citationNumberInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.CitationNumberListName);
             var citationListItems = getListItemByQuarterNumberAndDocumentCategory(clientContext,_quarterNumber,_documentCategoryNumber);
 
@@ -252,9 +250,8 @@ namespace PIW_SPAppWeb.Helper
         /// output: _sequenceNumber = 5, _quarterNumber = 134, _documentCategoryNumber = 61
         private void ParseCitationNumber(string FullCitationNumber)
         {
-            string searchKey;
             //parse quarterNumber
-            searchKey = " ";
+            string searchKey = " ";
             string quarter = FullCitationNumber.Substring(0, FullCitationNumber.IndexOf(searchKey) + 1);
             _quarterNumber = int.Parse(quarter);
 
@@ -290,7 +287,7 @@ namespace PIW_SPAppWeb.Helper
         /// <returns></returns>
         private bool ValidateFormatCitationNumber(string fullCitationNumber)
         {
-            string pattern = @"^[1-9]\d+ FERC ¶ (61|62|63),\d+$";
+            const string pattern = @"^[1-9]\d+ FERC ¶ (61|62|63),\d+$";
             return System.Text.RegularExpressions.Regex.IsMatch(fullCitationNumber, pattern);
         }
 
@@ -300,7 +297,7 @@ namespace PIW_SPAppWeb.Helper
         {
             List citationNumberList = clientContext.Web.Lists.GetByTitle(Constants.CitationNumberListName);
             var citationNumberInternalNameList = helper.getInternalColumnNamesFromCache(clientContext, Constants.CitationNumberListName);
-            CamlQuery query = new CamlQuery();
+            var query = new CamlQuery();
             var args = new string[]
             {
                 citationNumberInternalNameList[Constants.CitationNumberList_colName_QuarterNumber],
@@ -344,7 +341,7 @@ namespace PIW_SPAppWeb.Helper
         {
             List citationNumberList = clientContext.Web.Lists.GetByTitle(Constants.CitationNumberListName);
             var citationNumberInternalNameList = helper.getInternalColumnNamesFromCache(clientContext, Constants.CitationNumberListName);
-            CamlQuery query = new CamlQuery();
+            var query = new CamlQuery();
             var args = new string[]
             {
                 citationNumberInternalNameList[Constants.CitationNumberList_colName_QuarterNumber],
@@ -393,7 +390,7 @@ namespace PIW_SPAppWeb.Helper
             var citationNumberInternalNameList = helper.getInternalColumnNamesFromCache(clientContext, Constants.CitationNumberListName);
 
             //piwlist
-            FieldLookupValue lv = new FieldLookupValue { LookupId = int.Parse(piwListItemID) };
+            var lv = new FieldLookupValue { LookupId = int.Parse(piwListItemID) };
             citationNumberListItem[citationNumberInternalNameList[Constants.CitationNumberList_colName_PIWList]] = lv;
 
             citationNumberListItem[citationNumberInternalNameList[Constants.CitationNumberList_colName_Status]] = Constants.CitationNumber_REASSIGNED_Status;
@@ -409,7 +406,7 @@ namespace PIW_SPAppWeb.Helper
             List citationNumberList = clientContext.Web.Lists.GetByTitle(Constants.CitationNumberListName);
             var citationNumberInternalNameList = helper.getInternalColumnNamesFromCache(clientContext, Constants.CitationNumberListName);
 
-            ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
+            var itemCreateInfo = new ListItemCreationInformation();
             
             ListItem newItem = citationNumberList.AddItem(itemCreateInfo);
             newItem[citationNumberInternalNameList[Constants.CitationNumberList_colName_QuarterNumber]] = _quarterNumber;
@@ -422,7 +419,7 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
 
             //set ref to piwlist
-            FieldLookupValue lv = new FieldLookupValue { LookupId = int.Parse(piwListItemID) };
+            var lv = new FieldLookupValue { LookupId = int.Parse(piwListItemID) };
             newItem[citationNumberInternalNameList[Constants.CitationNumberList_colName_PIWList]] = lv;
             newItem.Update();
             clientContext.ExecuteQuery();
