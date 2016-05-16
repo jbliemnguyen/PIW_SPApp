@@ -164,7 +164,7 @@
         //ModifiedDateTime key
         public const string ModifiedDateTimeKey = "ModifiedDateTimeKey";
 
-        //DocumentURLsFrViewState key
+        //DocumentURLsFromViewState key
         public const string DocumentURLsKey = "DocumentURLsKey";
 
         //document urls seperator

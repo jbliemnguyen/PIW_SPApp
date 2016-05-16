@@ -51,7 +51,7 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        public string DocumentURLsFrViewState
+        public string DocumentURLsFromViewState
         {
             get
             {
@@ -88,7 +88,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
-                            DocumentURLsFrViewState = helper.PopulateDocumentList(clientContext,_listItemId,rpDocumentList);
+                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext,_listItemId,rpDocumentList);
                             var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext,Constants.Grp_PIWAdmin);
                             
                             //if current user is piw admin, load the item even if the isActive is false
@@ -487,7 +487,8 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                //using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
                 {
                     if (ddDocumentCategory.SelectedIndex > 0)
                     {
@@ -500,17 +501,39 @@ namespace PIW_SPAppWeb.Pages
                         {
                             var listItem = helper.SetCitationNumberFieldInPIWList(clientContext, _listItemId, tbCitationNumber.Text.Trim());
 
-                            //need to re-populate the modified date becuase the list item is changed
-                            PopulateFormStatusAndModifiedDateProperties(clientContext,listItem);
+                            try
+                            {
+                                //add citation number into the documents
+                                var documentURLs = DocumentURLsFromViewState.Split(new string[] {Constants.DocumentURLsSeparator},
+                                        StringSplitOptions.RemoveEmptyEntries);
+                                foreach (var documentURL in documentURLs)//add citation to all documents
+                                {
+                                    var fileName = helper.getFileNameFromURL(documentURL);
+                                    helper.AddCitationNumberToDocument(clientContext, tbCitationNumber.Text.Trim(),
+                                        _listItemId, fileName);
+                                    
+                                }
 
-                            //controls
-                            //after accept, citation number cannot be changed
-                            EnableCitationNumberControls(false, true);
-                            lbCitationNumberError.Text = string.Empty;
-                            lbCitationNumberError.Visible = false;
+                                //need to re-populate the modified date becuase the list item is changed
+                                PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
 
-                            //history list
-                            helper.CreatePIWListHistory(clientContext, _listItemId, "Citation number assigned: " + tbCitationNumber.Text.Trim(), FormStatus);
+                                //controls
+                                //after accept, citation number cannot be changed
+                                EnableCitationNumberControls(false, true);
+                                lbCitationNumberError.Text = string.Empty;
+                                lbCitationNumberError.Visible = false;
+
+                                //history list
+                                helper.CreatePIWListHistory(clientContext, _listItemId, "Citation number assigned: " + tbCitationNumber.Text.Trim(), FormStatus);
+                            }
+                            catch (Exception exc)
+                            {
+                                lbCitationNumberError.Visible = true;
+                                lbCitationNumberError.Text = "Cannot add citation number to the document";
+                            }
+                            
+
+                            
                         }
                         else//display error message
                         {
@@ -575,7 +598,7 @@ namespace PIW_SPAppWeb.Pages
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
                             string removedFileName = helper.RemoveDocument(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
-                            DocumentURLsFrViewState = helper.PopulateDocumentList(clientContext,_listItemId,rpDocumentList);
+                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext,_listItemId,rpDocumentList);
                             //history list
                             helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Document file {0} removed", removedFileName), FormStatus);
                         }
@@ -604,7 +627,7 @@ namespace PIW_SPAppWeb.Pages
                         var uploadResult  = helper.UploadFile(clientContext, fileUpload, _listItemId, rpDocumentList, lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus, ddlSecurityControl.SelectedValue);
                         if (uploadResult)//only save the document url if the upload is good
                         {
-                            DocumentURLsFrViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
+                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
                             //Extract docket numner
                             if (rpDocumentList.Items.Count == 1)//only extract docket number if first document uploaded
                             {
@@ -1070,9 +1093,9 @@ namespace PIW_SPAppWeb.Pages
             }
 
             //Document URLs
-            if (DocumentURLsFrViewState != null)
+            if (DocumentURLsFromViewState != null)
             {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentURLs]] = DocumentURLsFrViewState;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentURLs]] = DocumentURLsFromViewState;
             }
 
             //execute query

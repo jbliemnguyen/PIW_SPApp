@@ -247,84 +247,86 @@ namespace PIW_SPAppWeb
 
         protected void btnTestCitationAppended_Click(object sender, EventArgs e)
         {
-            //string strDoc = @"C:\Users\Public\Documents\Letter.docx";
-            //string strDoc = @"C:\Users\lnguyen\Desktop\Temp\45\GP04-1-000-PIWTest.docx";
-            string strDoc = @"http://fdc1s-sp23wfed2.ferc.gov/piw/PIW%20Documents/40/GP04-1-000-PIWTest.docx";
-
-            using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
+            //this call must use this clientContext. Create clientContext as usual CreateUserClientContextForSPHost not works
+            using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
             {
                 var listName = Constants.PIWDocuments_DocumentLibraryName;
                 
-                List srcList = clientContext.Web.Lists.GetByTitle(listName);
+                var citationNumber = "Citation Number " + DateTime.Now.ToLongTimeString();
+                string listItemID = "36";
+                var fileName = "ER02-2001-000.docx";
+                var documentServerRelativeURL = getDocumentServerRelativeURL(clientContext, listItemID, fileName);
+
+                //var newclientContext = new ClientContext(Request.QueryString["SPHostUrl"]);
+                FileInformation fileInformation = File.OpenBinaryDirect(clientContext, documentServerRelativeURL);
                 
-
-                CamlQuery query = new CamlQuery();
-                query.ViewXml = @"<View>
-                                    <Query>
-                                      <Where>
-                                        <Eq>
-                                          <FieldRef Name='FileLeafRef'/>
-                                          <Value Type='Text'>GP04-1-000-PIWTest.docx</Value>
-                                        </Eq>
-                                      </Where>
-                                      <RowLimit>1</RowLimit>
-                                    </Query>
-                                  </View>";
-
-                ListItemCollection listItems = srcList.GetItems(query);
-                clientContext.Load(srcList);
-                clientContext.Load(listItems);
-                clientContext.ExecuteQuery();
-
-                if (listItems.Count == 1)
+                using (MemoryStream memoryStream = new MemoryStream())
                 {
-                    var item = listItems[0];
-                    FileInformation fileInformation = File.OpenBinaryDirect(clientContext, (string)item["FileRef"]);    
+                    fileInformation.Stream.CopyTo(memoryStream);
+                    using (WordprocessingDocument doc = WordprocessingDocument.Open(memoryStream, true))
+                    {
+                        // Insert a new paragraph at the beginning of the document.
+                        var paragraph = GenerateCitParagraph(citationNumber);
+                        doc.MainDocumentPart.Document.Body.InsertAt(paragraph, 0);
+                    }
+                    // Seek to beginning before writing to the SharePoint server.
+                    memoryStream.Seek(0, SeekOrigin.Begin);
+                    
+                    File.SaveBinaryDirect(clientContext, documentServerRelativeURL, memoryStream, true);
                 }
+
                 
-
-
-                //Uri filename = new Uri(strDoc);
-                //string server = filename.AbsoluteUri.Replace(filename.AbsolutePath, "");
-                //string serverrelative = filename.AbsolutePath;
-                //string url = "/PIW%20Documents/40/GP04-1-000-PIWTest.docx";
-
-                //Microsoft.SharePoint.Client.FileInformation f = Microsoft.SharePoint.Client.File.OpenBinaryDirect(clientContext, url);
-                //clientContext.ExecuteQuery();
-                //var stream = f.Stream;
 
             }
 
 
         }
 
-        public static void OpenAndAddTextToWordDocument(string filepath, string txt)
+        public string getDocumentServerRelativeURL(ClientContext clientContext, string listItemID, string fileName)
         {
-            // Open a WordprocessingDocument for editing using the filepath.
-            WordprocessingDocument wordprocessingDocument =
-                WordprocessingDocument.Open(filepath, true);
+            clientContext.Load(clientContext.Web);
+            clientContext.ExecuteQuery();
 
-            // Assign a reference to the existing document body.
-            Body body = wordprocessingDocument.MainDocumentPart.Document.Body;
-
-            // Add new text.
-            Paragraph para = body.AppendChild(new Paragraph());
-            Run run = para.AppendChild(new Run());
-            run.AppendChild(new Text(txt));
-
-            // Close the handle explicitly.
-            wordprocessingDocument.Close();
+            return string.Format("{0}/{1}/{2}/{3}", clientContext.Web.ServerRelativeUrl,
+                    Constants.PIWDocuments_DocumentLibraryName, listItemID, fileName);
+   
         }
 
-        static private void CopyStream(Stream source, Stream destination)
+        public Paragraph GenerateCitParagraph(string text)
         {
-            byte[] buffer = new byte[32768];
-            int bytesRead;
-            do
+            //citation paragraph will be bold, centered and size 13, font size by default will be Times New Romain
+            Paragraph paragraph1 = new Paragraph() {};
+
+            ParagraphProperties paragraphProperties1 = new ParagraphProperties();
+
+            Justification justification1 = new Justification()
             {
-                bytesRead = source.Read(buffer, 0, buffer.Length);
-                destination.Write(buffer, 0, bytesRead);
-            } while (bytesRead != 0);
+                Val = JustificationValues.Center,
+            
+            };
+
+            paragraphProperties1.Append(justification1);
+
+            Run run1 = new Run();
+
+            RunProperties runProperties1 = new RunProperties();
+            
+            //RunFonts runFonts1 = new RunFonts() { Ascii = "Times New Roman"};
+            Bold bold1 = new Bold();
+            FontSize fontSize1 = new FontSize() { Val = "26" };//font size 13 - half size paramater
+
+            runProperties1.Append(bold1);
+            runProperties1.Append(fontSize1);
+            
+            Text text1 = new Text();
+            text1.Text = text;
+
+            run1.Append(runProperties1);
+            run1.Append(text1);
+
+            paragraph1.Append(paragraphProperties1);
+            paragraph1.Append(run1);
+            return paragraph1;
         }
 
     }

@@ -8,6 +8,8 @@ using System.Web;
 using System.Web.Caching;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.UserProfiles;
 using File = Microsoft.SharePoint.Client.File;
@@ -15,6 +17,7 @@ using ListItem = Microsoft.SharePoint.Client.ListItem;
 using FERC.FOL.ATMS.Remote.Interfaces;
 using ListItemCollection = Microsoft.SharePoint.Client.ListItemCollection;
 using System.Text;
+using FontSize = System.Web.UI.WebControls.FontSize;
 
 //using FERC.FOL.ATMS.Structure;
 
@@ -492,6 +495,77 @@ namespace PIW_SPAppWeb.Helper
         #endregion
 
         #region Utils
+
+        public void AddCitationNumberToDocument(ClientContext clientContext,string citationNumber,string listItemID,string fileName)
+        {
+            var documentServerRelativeURL = getDocumentServerRelativeURL(clientContext, listItemID, fileName);
+
+            //var newclientContext = new ClientContext(Request.QueryString["SPHostUrl"]);
+            FileInformation fileInformation = File.OpenBinaryDirect(clientContext, documentServerRelativeURL);
+
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                fileInformation.Stream.CopyTo(memoryStream);
+                using (WordprocessingDocument doc = WordprocessingDocument.Open(memoryStream, true))
+                {
+                    // Insert a new paragraph at the beginning of the document.
+                    var paragraph = GenerateCitParagraph(citationNumber);
+                    doc.MainDocumentPart.Document.Body.InsertAt(paragraph, 0);
+                }
+                // Seek to beginning before writing to the SharePoint server.
+                memoryStream.Seek(0, SeekOrigin.Begin);
+
+                File.SaveBinaryDirect(clientContext, documentServerRelativeURL, memoryStream, true);
+            }
+        }
+
+        public string getDocumentServerRelativeURL(ClientContext clientContext, string listItemID, string fileName)
+        {
+            clientContext.Load(clientContext.Web);
+            clientContext.ExecuteQuery();
+
+            return string.Format("{0}/{1}/{2}/{3}", clientContext.Web.ServerRelativeUrl,
+                    Constants.PIWDocuments_DocumentLibraryName, listItemID, fileName);
+
+        }
+
+        public Paragraph GenerateCitParagraph(string text)
+        {
+            //citation paragraph will be bold, centered and size 13, font size by default will be Times New Romain
+            Paragraph paragraph1 = new Paragraph() { };
+
+            ParagraphProperties paragraphProperties1 = new ParagraphProperties();
+
+            Justification justification1 = new Justification()
+            {
+                Val = JustificationValues.Center,
+
+            };
+
+            paragraphProperties1.Append(justification1);
+
+            Run run1 = new Run();
+
+            RunProperties runProperties1 = new RunProperties();
+
+            //RunFonts runFonts1 = new RunFonts() { Ascii = "Times New Roman"};
+            Bold bold1 = new Bold();
+            DocumentFormat.OpenXml.Wordprocessing.FontSize fontSize1 = new DocumentFormat.OpenXml.Wordprocessing.FontSize() { Val = "26" };//font size 13 - half size paramater
+
+            runProperties1.Append(bold1);
+            runProperties1.Append(fontSize1);
+
+            Text text1 = new Text();
+            text1.Text = text;
+
+            run1.Append(runProperties1);
+            run1.Append(text1);
+
+            paragraph1.Append(paragraphProperties1);
+            paragraph1.Append(run1);
+            return paragraph1;
+        }
+
         public bool UploadFile(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError, Label lbRequiredUploadedDocumentError, string FormStatus, string securityControlValue)
         {
             bool result = false;
