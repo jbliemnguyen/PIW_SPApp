@@ -56,7 +56,7 @@ namespace PIW_SPAppWeb.Pages
             get
             {
                 return ViewState[Constants.DocumentURLsKey] != null ? ViewState[Constants.DocumentURLsKey].ToString() : string.Empty;
-                
+
             }
             set
             {
@@ -80,7 +80,7 @@ namespace PIW_SPAppWeb.Pages
                 lbUploadedDocumentError.Visible = false;
 
                 helper = new SharePointHelper();
-                
+
 
                 if (!Page.IsPostBack)
                 {
@@ -88,9 +88,9 @@ namespace PIW_SPAppWeb.Pages
                     {
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
-                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext,_listItemId,rpDocumentList);
-                            var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext,Constants.Grp_PIWAdmin);
-                            
+                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
+                            var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext, Constants.Grp_PIWAdmin);
+
                             //if current user is piw admin, load the item even if the isActive is false
                             ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, isCurrentUserAdmin);
                             if (listItem == null)
@@ -101,10 +101,10 @@ namespace PIW_SPAppWeb.Pages
                             {
                                 PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
                                 DisplayListItemInForm(clientContext, listItem);
-                                helper.PopulateHistoryList(clientContext,_listItemId,rpHistoryList);
+                                helper.PopulateHistoryList(clientContext, _listItemId, rpHistoryList);
                                 //display form visiblility based on form status
                                 ControlsVisiblitilyBasedOnStatus(clientContext, PreviousFormStatus, FormStatus, listItem);
-                                
+
                                 //todo: open documents if status is ready for published
                                 ////above method get formStatus from list, store it in viewstate                       
                                 //if (FormStatus == enumFormStatus.ReadyForPublishing)
@@ -311,13 +311,31 @@ namespace PIW_SPAppWeb.Pages
             try
             {
                 const enumAction action = enumAction.Publish;
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                //using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
                 {
                     ListItem listItem = null;
                     if (!SaveData(clientContext, action, ref listItem))
                     {
                         return;
                     }
+
+                    //publish
+                    Dictionary<string,string> files = new Dictionary<string, string>();
+                    foreach (RepeaterItem row in rpDocumentList.Items)
+                    {
+                        var url = ((HyperLink)row.FindControl("hyperlinkFileURL")).NavigateUrl;
+                        var securityLevel = ((Label)row.FindControl("lbSecurityLevel")).Text;
+                        if (!files.ContainsKey(url))
+                        {
+                            files.Add(url,securityLevel);
+                        }
+                    }
+                    EPSPublicationHelper epsHelper = new EPSPublicationHelper();
+                    epsHelper.Publish(clientContext, files, listItem);
+
+
+                    //todo: change status
 
                     //TODO: Change document and list permission
 
@@ -472,7 +490,7 @@ namespace PIW_SPAppWeb.Pages
                 lbCitationNumberError.Visible = false;
                 using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
-                    helper.GenerateCitation(clientContext,ddDocumentCategory,tbCitationNumber,ddAvailableCitationNumbers);
+                    helper.GenerateCitation(clientContext, ddDocumentCategory, tbCitationNumber, ddAvailableCitationNumbers);
 
                 }
             }
@@ -503,17 +521,6 @@ namespace PIW_SPAppWeb.Pages
 
                             try
                             {
-                                //add citation number into the documents
-                                var documentURLs = DocumentURLsFromViewState.Split(new string[] {Constants.DocumentURLsSeparator},
-                                        StringSplitOptions.RemoveEmptyEntries);
-                                foreach (var documentURL in documentURLs)//add citation to all documents
-                                {
-                                    var fileName = helper.getFileNameFromURL(documentURL);
-                                    helper.AddCitationNumberToDocument(clientContext, tbCitationNumber.Text.Trim(),
-                                        _listItemId, fileName);
-                                    
-                                }
-
                                 //need to re-populate the modified date becuase the list item is changed
                                 PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
 
@@ -525,15 +532,27 @@ namespace PIW_SPAppWeb.Pages
 
                                 //history list
                                 helper.CreatePIWListHistory(clientContext, _listItemId, "Citation number assigned: " + tbCitationNumber.Text.Trim(), FormStatus);
+
+                                //add citation number into the documents - must be the last action because it can throw exceptioniled if the docs is opened in MS-Word
+                                //it will not able to finish all actions
+                                var documentURLs = DocumentURLsFromViewState.Split(new string[] { Constants.DocumentURLsSeparator },
+                                        StringSplitOptions.RemoveEmptyEntries);
+                                foreach (var documentURL in documentURLs)//add citation to all documents
+                                {
+                                    var fileName = helper.getFileNameFromURL(documentURL);
+                                    helper.AddCitationNumberToDocument(clientContext, tbCitationNumber.Text.Trim(),
+                                        _listItemId, fileName);
+
+                                }
                             }
                             catch (Exception exc)
                             {
                                 lbCitationNumberError.Visible = true;
                                 lbCitationNumberError.Text = "Cannot add citation number to the document";
                             }
-                            
 
-                            
+
+
                         }
                         else//display error message
                         {
@@ -556,21 +575,42 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                //using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
                 {
                     //just delete the citation item - instead of settign the status to deleted
                     var listItem = helper.deleteAssociatedCitationNumberListItem(clientContext, _listItemId);
 
-                    //need to re-populate the modified date becuase the list item is changed
-                    PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
+                    try
+                    {
+                        //need to re-populate the modified date becuase the list item is changed
+                        PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
 
-                    //controls
-                    tbCitationNumber.Text = string.Empty;
-                    //after remove, citation canbe changed
-                    EnableCitationNumberControls(true, false);
+                        //controls
+                        tbCitationNumber.Text = string.Empty;
+                        //after remove, citation canbe changed
+                        EnableCitationNumberControls(true, false);
 
-                    //history list
-                    helper.CreatePIWListHistory(clientContext, _listItemId, "Citation number removed", FormStatus);
+                        //history list
+                        helper.CreatePIWListHistory(clientContext, _listItemId, "Citation number removed", FormStatus);
+
+                        //remove citation number from the documents - must be the last action because it can throw exceptioniled if the docs is opened in MS-Word
+                        //it will not able to finish all actions
+                        var documentURLs = DocumentURLsFromViewState.Split(new string[] { Constants.DocumentURLsSeparator },
+                                StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var documentURL in documentURLs)//add citation to all documents
+                        {
+                            var fileName = helper.getFileNameFromURL(documentURL);
+                            helper.RemoveCitationNumberFromDocument(clientContext, tbCitationNumber.Text.Trim(), _listItemId, fileName);
+
+                        }
+                    }
+                    catch (Exception exc)
+                    {
+                        lbCitationNumberError.Visible = true;
+                        lbCitationNumberError.Text = "Cannot remove citation number from the document";
+                    }
+
 
                 }
             }
@@ -598,7 +638,7 @@ namespace PIW_SPAppWeb.Pages
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
                             string removedFileName = helper.RemoveDocument(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
-                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext,_listItemId,rpDocumentList);
+                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
                             //history list
                             helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Document file {0} removed", removedFileName), FormStatus);
                         }
@@ -624,7 +664,7 @@ namespace PIW_SPAppWeb.Pages
 
                     using (var clientContext = spContext.CreateUserClientContextForSPHost())
                     {
-                        var uploadResult  = helper.UploadFile(clientContext, fileUpload, _listItemId, rpDocumentList, lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus, ddlSecurityControl.SelectedValue);
+                        var uploadResult = helper.UploadFile(clientContext, fileUpload, _listItemId, rpDocumentList, lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus, ddlSecurityControl.SelectedValue);
                         if (uploadResult)//only save the document url if the upload is good
                         {
                             DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
@@ -640,7 +680,7 @@ namespace PIW_SPAppWeb.Pages
                         }
                     }
 
-                    
+
 
 
                 }
@@ -686,7 +726,7 @@ namespace PIW_SPAppWeb.Pages
         #endregion
 
         #region Save Data
-        private bool SaveData(ClientContext clientContext, enumAction action,ref ListItem returnedListItem)
+        private bool SaveData(ClientContext clientContext, enumAction action, ref ListItem returnedListItem)
         {
             ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
 
@@ -788,7 +828,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Deleted:
                     //delete item, need to set status and remove citation number if there is assigned one
-                    helper.SaveDeleteInfoAndStatus(clientContext, listItem,FormStatus,PreviousFormStatus);
+                    helper.SaveDeleteInfoAndStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
                     helper.ReleaseCitationNumberForDeletedListItem(clientContext, _listItemId);
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
@@ -798,7 +838,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else if (PreviousFormStatus == Constants.PIWList_FormStatus_Submitted)
                     {
-                        helper.SaveFormStatus(clientContext, listItem,FormStatus,PreviousFormStatus);
+                        helper.SaveFormStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
                     }
                     else
                     {
@@ -817,7 +857,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else if (PreviousFormStatus == Constants.PIWList_FormStatus_Submitted)//come from Submitted
                     {
-                        helper.SaveFormStatus(clientContext, listItem,FormStatus,PreviousFormStatus);
+                        helper.SaveFormStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
                     }
                     else if (PreviousFormStatus == Constants.PIWList_FormStatus_PublishInitiated)//REOPEN- come from Publish Initiated
                     {
@@ -847,7 +887,7 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_PublishInitiated:
                     if (PreviousFormStatus == Constants.PIWList_FormStatus_ReadyForPublishing)
                     {
-                        helper.SavePublishingInfoAndStatus(clientContext, listItem,FormStatus,PreviousFormStatus);
+                        helper.SavePublishingInfoAndStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
                     }
                     else
                     {
@@ -858,7 +898,7 @@ namespace PIW_SPAppWeb.Pages
                     if (PreviousFormStatus == Constants.PIWList_FormStatus_PublishedToeLibrary)
                     {
                         helper.SaveLegalResourcesAndReviewAndStatus(clientContext, listItem, FormStatus, PreviousFormStatus,
-                            tbLegalResourcesReviewCompletionDate.Text,tbLegalResourcesReviewNote.Text);
+                            tbLegalResourcesReviewCompletionDate.Text, tbLegalResourcesReviewNote.Text);
                     }
                     else
                     {
@@ -1102,7 +1142,7 @@ namespace PIW_SPAppWeb.Pages
             listItem.Update();
             clientContext.ExecuteQuery();
         }
-        
+
         #endregion
 
         #region Utils
@@ -1419,7 +1459,7 @@ namespace PIW_SPAppWeb.Pages
                      documentCategory.Equals(Constants.PIWList_DocCat_NoticeErrata));
         }
 
-        
+
         #endregion
 
         #region Visibility
@@ -1690,7 +1730,7 @@ namespace PIW_SPAppWeb.Pages
                     //Mailed Room and Legal Resources and Review
                     fieldsetMailedRoom.Visible = false;
                     fieldsetLegalResourcesReview.Visible = false;
-                    
+
                     //buttons
                     btnSave.Visible = false;
                     btnSubmit.Visible = btnSave.Visible;
@@ -1726,7 +1766,7 @@ namespace PIW_SPAppWeb.Pages
                     //Mailed Room and Legal Resources and Review
                     fieldsetMailedRoom.Visible = true;
                     fieldsetLegalResourcesReview.Visible = true;
-                    
+
                     //buttons
                     btnSave.Visible = true;
                     btnSubmit.Visible = false;
@@ -1806,7 +1846,7 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        
+
         /// enabled or disable other controls from the textbox enabled property
         /// For example: when textbox is editable,  then the accept button should be clickable to assign the citation number
         public void EnableCitationNumberControls(bool citationNumberCanBeChanged, bool CitationNumberCanBeRemoved)
@@ -1846,7 +1886,7 @@ namespace PIW_SPAppWeb.Pages
         }
         #endregion
 
-        
+
 
     }
 }

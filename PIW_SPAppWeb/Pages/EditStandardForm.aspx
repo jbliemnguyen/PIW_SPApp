@@ -218,9 +218,9 @@
                     <asp:Label ID="lbSecurityLevel" runat="server" Text="Security Level" AssociatedControlID="ddlSecurityControl" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-2">
                         <asp:DropDownList ID="ddlSecurityControl" CssClass="form-control" runat="server">
-                            <asp:ListItem>Public</asp:ListItem>
-                            <asp:ListItem>CEII</asp:ListItem>
-                            <asp:ListItem>Priviledged</asp:ListItem>
+                            <asp:ListItem>Public</asp:ListItem><%--Note:Update the Constants.cs if change this value--%>
+                            <asp:ListItem>CEII</asp:ListItem><%--Note:Update the Constants.cs if change this value--%>
+                            <asp:ListItem>Priviledged</asp:ListItem><%--Note:Update the Constants.cs if change this value--%>
                         </asp:DropDownList>
                     </div>
                     <div class="col-md-2">
@@ -238,7 +238,7 @@
                         </HeaderTemplate>
                         <ItemTemplate>
                             <li class="list-group-item">
-                                <asp:HyperLink ID="HyperLink1" runat="server" Text='<%#DataBinder.Eval(Container.DataItem,"Name")%>'
+                                <asp:HyperLink ID="hyperlinkFileURL" runat="server" Text='<%#DataBinder.Eval(Container.DataItem,"Name")%>'
                                     NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"URL")%>'>
                                 </asp:HyperLink>
                                 &nbsp;&nbsp;|&nbsp;&nbsp;

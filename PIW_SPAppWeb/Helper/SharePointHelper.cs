@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Caching;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.SharePoint.Client;
@@ -326,7 +327,7 @@ namespace PIW_SPAppWeb.Helper
 
             return result;
         }
-        
+
         public string RemoveDocument(ClientContext clientContext, string subFolder, string libraryName, string Id)
         {
             string removedFileName = string.Empty;
@@ -496,7 +497,28 @@ namespace PIW_SPAppWeb.Helper
 
         #region Utils
 
-        public void AddCitationNumberToDocument(ClientContext clientContext,string citationNumber,string listItemID,string fileName)
+        public string getEPSAvailabilityCode(string ddldocumentSecurity)
+        {
+            string result = string.Empty;
+            switch ( ddldocumentSecurity)
+            {
+                case Constants.ddlSecurityControl_Option_Public:
+                    result = Constants.PIWDocuments_EPSSecurityLevel_Option_Public;
+                    break;
+                case Constants.ddlSecurityControl_Option_CEII:
+                    result = Constants.PIWDocuments_EPSSecurityLevel_Option_CEII;
+                    break;
+                case Constants.ddlSecurityControl_Option_Priviledged:
+                    result = Constants.PIWDocuments_EPSSecurityLevel_Option_NonPublic;
+                    break;
+                default:
+                    break;
+            }
+            return result;
+
+        }
+
+        public void AddCitationNumberToDocument(ClientContext clientContext, string citationNumber, string listItemID, string fileName)
         {
             var documentServerRelativeURL = getDocumentServerRelativeURL(clientContext, listItemID, fileName);
 
@@ -519,6 +541,39 @@ namespace PIW_SPAppWeb.Helper
             }
         }
 
+        public void RemoveCitationNumberFromDocument(ClientContext clientContext, string citationNumber, string listItemID, string fileName)
+        {
+            var documentServerRelativeURL = getDocumentServerRelativeURL(clientContext, listItemID, fileName);
+
+            //var newclientContext = new ClientContext(Request.QueryString["SPHostUrl"]);
+            FileInformation fileInformation = File.OpenBinaryDirect(clientContext, documentServerRelativeURL);
+
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                fileInformation.Stream.CopyTo(memoryStream);
+                using (WordprocessingDocument doc = WordprocessingDocument.Open(memoryStream, true))
+                {
+                    MainDocumentPart mainpart = doc.MainDocumentPart;
+                    IEnumerable<OpenXmlElement> elems = mainpart.Document.Body.Descendants().ToList();
+
+                    foreach (OpenXmlElement elem in elems)
+                    {
+                        if (elem is Text && elem.InnerText.Contains(citationNumber))
+                        {
+                            Run run = (Run)elem.Parent;
+                            Paragraph p = (Paragraph)run.Parent;
+                            p.RemoveAllChildren();
+                            p.Remove();
+                            break;
+                        }
+                    }
+                }
+                // Seek to beginning before writing to the SharePoint server.
+                memoryStream.Seek(0, SeekOrigin.Begin);
+
+                File.SaveBinaryDirect(clientContext, documentServerRelativeURL, memoryStream, true);
+            }
+        }
         public string getDocumentServerRelativeURL(ClientContext clientContext, string listItemID, string fileName)
         {
             clientContext.Load(clientContext.Web);
@@ -527,6 +582,32 @@ namespace PIW_SPAppWeb.Helper
             return string.Format("{0}/{1}/{2}/{3}", clientContext.Web.ServerRelativeUrl,
                     Constants.PIWDocuments_DocumentLibraryName, listItemID, fileName);
 
+        }
+
+        /// <summary>
+        /// Convert dictionary of documents full URL to document server relative url
+        /// </summary>
+        /// <param name="clientContext"></param>
+        /// <param name="listItemID"></param>
+        /// <param name="fileURLs"></param>
+        /// <returns></returns>
+        public Dictionary<string,string> getDocumentServerRelativeURL(ClientContext clientContext, string listItemID, Dictionary<string,string> fileURLs )
+        {
+            var result = new Dictionary<string, string>();
+            clientContext.Load(clientContext.Web);
+            clientContext.ExecuteQuery();
+
+            foreach (KeyValuePair<string, string> kvp in fileURLs)
+            {
+                var documentServerRelativeURL = string.Format("{0}/{1}/{2}/{3}", clientContext.Web.ServerRelativeUrl,
+                    Constants.PIWDocuments_DocumentLibraryName, listItemID, getFileNameFromURL(kvp.Key));
+                if (!result.ContainsKey(documentServerRelativeURL))
+                {
+                    result.Add(documentServerRelativeURL,kvp.Value);
+                }
+            }
+
+            return result;
         }
 
         public Paragraph GenerateCitParagraph(string text)
@@ -1079,7 +1160,7 @@ namespace PIW_SPAppWeb.Helper
             }
 
         }
-        public void CopyFile(ClientContext clientContext, string fileName, string sourceFileURL, string DestinationURNFolder)
+        public string CopyFile(ClientContext clientContext, string sourceFileURL, string DestinationURNFolder)
         {
             if (!Directory.Exists(DestinationURNFolder))
             {
@@ -1088,12 +1169,14 @@ namespace PIW_SPAppWeb.Helper
 
 
             FileInformation fileInfo = File.OpenBinaryDirect(clientContext, sourceFileURL);
-
-            using (var fileStream = System.IO.File.Create(DestinationURNFolder + "\\" + fileName))
+            string fileName = getFileNameFromURL(sourceFileURL);
+            var destinationFileURN = DestinationURNFolder + "\\" + fileName;
+            using (var fileStream = System.IO.File.Create(destinationFileURN))
             {
                 fileInfo.Stream.CopyTo(fileStream);
             }
 
+            return destinationFileURN;
 
         }
         #endregion

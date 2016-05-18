@@ -12,7 +12,7 @@
 
         public const string Timer_JOB_Title = "Check EPS Response Timer";
 
-        #region List Setting
+        
 
         public const string PIWListName = "PIWList";
 
@@ -107,6 +107,14 @@
         public const string PIWDocuments_EPSPassed_Option_False = "False";
         public const string PIWDocuments_EPSPassed_Option_Pending = "Pending";
 
+        public const string PIWDocuments_EPSSecurityLevel_Option_Public = "P";
+        public const string PIWDocuments_EPSSecurityLevel_Option_CEII = "C";
+        public const string PIWDocuments_EPSSecurityLevel_Option_NonPublic = "N";
+
+        public const string ddlSecurityControl_Option_Public = "Public";
+        public const string ddlSecurityControl_Option_CEII = "CEII";
+        public const string ddlSecurityControl_Option_Priviledged = "Priviledged";
+
         //ErrorLog list
         public const string ErrorLogListName = "ErrorLog";
         public const string ErrorLog_colName_PIWListItem = "PIWListItem";
@@ -183,6 +191,15 @@
         public const string Page_DirectPublicationForms = "DirectPublicationForms.aspx";
         public const string Page_AccessDenied = "AccessDenied.aspx";
         public const string Page_ItemNotFound = "ItemNotFound.aspx";
+
+        #region Publishing
+        public const string Affiliation_FirstName = "K";
+        public const string Affiliation_LastName = "Bose";
+        public const string Affiliation_MiddleInitial = "D";
+        public const string Affiliation_Organization = "SECRETARY OF THE COMMISSION, FERC";
+        public const int document_OfficialFlag = 1;
+
+
         //misc
         public const string ValidationFolder = "Validation";
 
