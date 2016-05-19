@@ -657,32 +657,39 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                if ((fileUpload.HasFiles) && (fileUpload.PostedFile.ContentLength > 0) &&
-                    (fileUpload.PostedFile.ContentLength < 52428800))
+                if (fileUpload.HasFiles)
                 {
-                    var spContext = SharePointContextProvider.Current.GetSharePointContext(Context);
-
-                    using (var clientContext = spContext.CreateUserClientContextForSPHost())
+                    if (fileUpload.PostedFile.ContentLength < 52428800)
                     {
-                        var uploadResult = helper.UploadFile(clientContext, fileUpload, _listItemId, rpDocumentList, lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus, ddlSecurityControl.SelectedValue);
-                        if (uploadResult)//only save the document url if the upload is good
-                        {
-                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
-                            //Extract docket numner
-                            if (rpDocumentList.Items.Count == 1)//only extract docket number if first document uploaded
-                            {
-                                if (!cbIsNonDocket.Checked)
-                                {
-                                    tbDocketNumber.Text = helper.ExtractDocket(fileUpload.FileName);
-                                }
+                        var spContext = SharePointContextProvider.Current.GetSharePointContext(Context);
 
+                        using (var clientContext = spContext.CreateUserClientContextForSPHost())
+                        {
+                            var uploadResult = helper.UploadFile(clientContext, fileUpload, _listItemId, rpDocumentList,
+                                lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus,
+                                ddlSecurityControl.SelectedValue);
+                            if (uploadResult) //only save the document url if the upload is good
+                            {
+                                DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId,
+                                    rpDocumentList);
+                                //Extract docket numner
+                                if (rpDocumentList.Items.Count == 1)
+                                //only extract docket number if first document uploaded
+                                {
+                                    if (!cbIsNonDocket.Checked)
+                                    {
+                                        tbDocketNumber.Text = helper.ExtractDocket(fileUpload.FileName);
+                                    }
+
+                                }
                             }
                         }
                     }
-
-
-
-
+                    else
+                    {
+                        lbUploadedDocumentError.Text = "file cannot bigger than 52MB";
+                        lbUploadedDocumentError.Visible = true;
+                    }
                 }
 
             }
@@ -1133,7 +1140,7 @@ namespace PIW_SPAppWeb.Pages
             }
 
             //Document URLs
-            if (DocumentURLsFromViewState != null)
+            if (!string.IsNullOrEmpty(DocumentURLsFromViewState))
             {
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentURLs]] = DocumentURLsFromViewState;
             }

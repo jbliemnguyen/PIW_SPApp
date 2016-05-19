@@ -218,9 +218,12 @@
                     <asp:Label ID="lbSecurityLevel" runat="server" Text="Security Level" AssociatedControlID="ddlSecurityControl" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-2">
                         <asp:DropDownList ID="ddlSecurityControl" CssClass="form-control" runat="server">
-                            <asp:ListItem>Public</asp:ListItem><%--Note:Update the Constants.cs if change this value--%>
-                            <asp:ListItem>CEII</asp:ListItem><%--Note:Update the Constants.cs if change this value--%>
-                            <asp:ListItem>Priviledged</asp:ListItem><%--Note:Update the Constants.cs if change this value--%>
+                            <asp:ListItem>Public</asp:ListItem>
+                            <%--Note:Update the Constants.cs if change this value--%>
+                            <asp:ListItem>CEII</asp:ListItem>
+                            <%--Note:Update the Constants.cs if change this value--%>
+                            <asp:ListItem>Priviledged</asp:ListItem>
+                            <%--Note:Update the Constants.cs if change this value--%>
                         </asp:DropDownList>
                     </div>
                     <div class="col-md-2">
@@ -301,6 +304,9 @@
                 <div class="col-md-6">
                     <asp:TextBox ID="tbInstruction" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" MaxLength="255"></asp:TextBox>
                 </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-2"></div>
                 <div class="col-md-2">
                     <asp:CheckBox ID="cbFederalRegister" runat="server" CssClass="checkbox" Text="Federal Register" />
                 </div>
@@ -475,7 +481,7 @@
                         <div class="col-md-2">
                             <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnGenerateCitationNumber_Click" />
                         </div>
-                        
+
                     </div>
                     <div class="form-group">
                         <div class="col-md-2"></div>
@@ -517,7 +523,7 @@
                 </div>
             </div>
         </fieldset>
-        
+
         <fieldset runat="server" id="fieldsetMailedRoom" visible="false">
             <legend>Mail Room</legend>
             <div class="form-group">
@@ -533,7 +539,7 @@
                 </div>
             </div>
         </fieldset>
-        
+
         <fieldset runat="server" id="fieldsetLegalResourcesReview" visible="false">
             <legend>Legal Resources And Review</legend>
             <div class="form-group">

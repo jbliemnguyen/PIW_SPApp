@@ -51,7 +51,7 @@ namespace PIW_SPAppWeb
             }
         }
 
-        public string DocumentURLsFrViewState
+        public string DocumentURLsFromViewState
         {
             get
             {
@@ -70,6 +70,7 @@ namespace PIW_SPAppWeb
         //fuction
         static SharePointHelper helper = null;
         #endregion
+
         #region Events
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -87,7 +88,7 @@ namespace PIW_SPAppWeb
                     {
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
-                            DocumentURLsFrViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
+                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
                             var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext, Constants.Grp_PIWAdmin);
 
                             //if current user is piw admin, load the item even if the isActive is false
@@ -156,52 +157,695 @@ namespace PIW_SPAppWeb
 
         protected void btnSave_Click(object sender, EventArgs e)
         {
+            try
+            {
+                const enumAction action = enumAction.Save;
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    if (ValidFormData(action))
+                    {
+                        ListItem listItem = null;
+                        if (!SaveData(clientContext, action, ref listItem))
+                        {
+                            return;
+                        }
 
+                        //TODO: Change document and list permission
+
+                        //TODO: send email
+
+                        //Create list history
+                        if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
+                        {
+                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus);
+                        }
+                        else
+                        {
+                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item saved", FormStatus);
+                        }
+
+                        //TODO: create list history for Mailing Date and FERC Report Completed.
+
+                        //Refresh
+                        helper.RefreshPage(Page.Request, Page.Response);
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
         }
 
         protected void btnSubmitToSecReview_Click(object sender, EventArgs e)
         {
+            try
+            {
+                const enumAction action = enumAction.SubmitToSecReview;
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    if (ValidFormData(action))
+                    {
+                        ListItem listItem = null;
+                        if (!SaveData(clientContext, action, ref listItem))
+                        {
+                            return;
+                        }
 
+                        //TODO: Change document and list permission
+
+                        //TODO: send email
+
+                        //Create list history
+                        if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
+                        {
+                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus);
+                        }
+
+                        if ((FormStatus == Constants.PIWList_FormStatus_Rejected) || (FormStatus == Constants.PIWList_FormStatus_Recalled))
+                        {
+                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item resubmitted", FormStatus);
+                        }
+                        else
+                        {
+                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item submitted", FormStatus);
+                        }
+
+                        //Redirect
+                        helper.RedirectToSourcePage(Page.Request, Page.Response);
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
         }
 
         protected void btnEdit_Click(object sender, EventArgs e)
         {
+            try
+            {
+                const enumAction action = enumAction.Edit;
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
+                    //TODO: Change document and list permission
 
+                    //Create list history
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item edited", FormStatus);
+
+                    //Redirect or Refresh page
+                    helper.RefreshPage(Page.Request, Page.Response);
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
         }
 
         protected void btnAccept_Click(object sender, EventArgs e)
         {
+            try
+            {
+                const enumAction action = enumAction.Accept;
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
 
+                    //TODO: Change document and list permission
+
+                    //TODO: send email
+
+                    //Create list history
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item accepted", FormStatus);
+
+                    //Redirect
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
         }
 
         protected void btnReject_Click(object sender, EventArgs e)
         {
+            try
+            {
+                const enumAction action = enumAction.Reject;
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
 
+                    //TODO: Change document and list permission
+
+                    //TODO: send email
+
+                    //Create list history
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item rejected", FormStatus);
+
+                    //Redirect
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
         }
 
         protected void btnPublish_Click(object sender, EventArgs e)
         {
-
+            throw new NotImplementedException();
         }
 
         protected void btnDelete_Click(object sender, EventArgs e)
         {
+            try
+            {
+                const enumAction action = enumAction.Delete;
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
 
+                    //TODO: Change document and list permission
+
+                    //TODO: send email
+
+                    //Create list history
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item deleted", FormStatus);
+
+                    //Redirect
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
         }
 
         protected void btnReopen_Click(object sender, EventArgs e)
         {
+            try
+            {
+                const enumAction action = enumAction.ReOpen;
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
 
+                    //TODO: Change document and list permission
+
+                    //TODO: send email
+
+                    //Create list history
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item Re-Opened", FormStatus);
+
+                    //Refresh
+                    helper.RefreshPage(Page.Request, Page.Response);
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
         }
 
         protected void btnUpload_Click(object sender, EventArgs e)
         {
+            try
+            {
+                if (fileUpload.HasFiles)
+                {
+                    if (fileUpload.PostedFile.ContentLength < 52428800)
+                    {
+                        var spContext = SharePointContextProvider.Current.GetSharePointContext(Context);
 
+                        using (var clientContext = spContext.CreateUserClientContextForSPHost())
+                        {
+                            var uploadResult = helper.UploadFile(clientContext, fileUpload, _listItemId, rpDocumentList,
+                                lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus,
+                                ddlSecurityControl.SelectedValue);
+                            if (uploadResult) //only save the document url if the upload is good
+                            {
+                                DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId,
+                                    rpDocumentList);
+                                //Extract docket numner
+                                if (rpDocumentList.Items.Count == 1)
+                                    //only extract docket number if first document uploaded
+                                {
+                                    if (!cbIsNonDocket.Checked)
+                                    {
+                                        tbDocketNumber.Text = helper.ExtractDocket(fileUpload.FileName);
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        lbUploadedDocumentError.Text = "file cannot bigger than 52MB";
+                        lbUploadedDocumentError.Visible = true;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                helper.LogError(Context, ex, _listItemId, string.Empty);
+                lbUploadedDocumentError.Text = ex.Message;
+                lbUploadedDocumentError.Visible = true;
+            }
         }
 
         protected void rpDocumentList_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
+            try
+            {
+                if (e.CommandName == "RemoveDocument")
+                {
+                    if (!string.IsNullOrEmpty(e.CommandArgument.ToString()))
+                    {
 
+                        using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                        {
+                            string removedFileName = helper.RemoveDocument(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
+                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
+                            //history list
+                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Document file {0} removed", removedFileName), FormStatus);
+                        }
+
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
+        }
+
+        
+        protected void btnGenerateCitationNumber_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                lbCitationNumberError.Text = string.Empty;
+                lbCitationNumberError.Visible = false;
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                {
+                    helper.GenerateCitation(clientContext, ddDocumentCategory, tbCitationNumber, ddAvailableCitationNumbers);
+
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
+        }
+
+        protected void btnAcceptCitationNumber_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected void btnRemoveCitationNumber_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        protected void ddAvailableCitationNumbers_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+        
+        #endregion
+
+        #region Save Data
+        private bool SaveData(ClientContext clientContext, enumAction action, ref ListItem returnedListItem)
+        {
+            ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
+
+            if (helper.CheckIfListItemChanged(clientContext, listItem, DateTime.Parse(ModifiedDateTime)))
+            {
+                lbMainMessage.Text = "The form has been changed, please refresh the page";
+                lbMainMessage.Visible = true;
+                return false;
+            }
+
+            //get next form status
+            var currentFormStatus = FormStatus;
+            var wf = new AgendaFormWorkflow();
+            FormStatus = wf.Execute(PreviousFormStatus, FormStatus, action);
+            PreviousFormStatus = currentFormStatus;
+
+            UpdateFormDataToList(clientContext, listItem, action);
+
+            returnedListItem = listItem;
+            return true;
+        }
+
+        private void UpdateFormDataToList(ClientContext clientContext, ListItem listItem, enumAction action)
+        {
+            switch (FormStatus)//this is the next status after action is performed
+            {
+                case Constants.PIWList_FormStatus_Pending:
+                    if (FormStatus == PreviousFormStatus)//save action
+                    {
+                        SaveMainPanelAndStatus(clientContext, listItem);
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                    }
+                    break;
+                
+                case Constants.PIWList_FormStatus_Rejected:
+                    if (FormStatus == PreviousFormStatus)//save action
+                    {
+                        SaveMainPanelAndStatus(clientContext, listItem);
+                    }
+                    else if (PreviousFormStatus == Constants.PIWList_FormStatus_SecretaryReview)
+                    {
+                        SaveSecReviewInfoAndStatus(clientContext, listItem, action);
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_SecretaryReview:
+                    if (PreviousFormStatus == Constants.PIWList_FormStatus_Pending)
+                    {
+                        SaveMainPanelAndStatus(clientContext, listItem);
+                    }
+                    else if (PreviousFormStatus == Constants.PIWList_FormStatus_Rejected)
+                    {
+                        //resubmit
+                        SaveMainPanelAndStatus(clientContext, listItem);
+                        //clear sec review comment and action when a rejected item is re-submit
+                        ClearSecReviewActionsAndCommentsBeforeReSubmit(clientContext, listItem);
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                    }
+
+                    break;
+                case Constants.PIWList_FormStatus_Edited:
+                    if (PreviousFormStatus == Constants.PIWList_FormStatus_SecretaryReview)
+                    {
+                        helper.SaveFormStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_Deleted:
+                    //delete item, need to set status and remove citation number if there is assigned one
+                    helper.SaveDeleteInfoAndStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
+                    helper.ReleaseCitationNumberForDeletedListItem(clientContext, _listItemId);
+                    break;
+                case Constants.PIWList_FormStatus_ReadyForPublishing:
+
+                    if (PreviousFormStatus == Constants.PIWList_FormStatus_Edited) //save
+                    {
+                        SaveMainPanelAndStatus(clientContext, listItem);
+                    }
+                    else if (PreviousFormStatus == Constants.PIWList_FormStatus_SecretaryReview)
+                    {
+                        SaveSecReviewInfoAndStatus(clientContext, listItem, action);
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                    }
+
+                    break;
+                case Constants.PIWList_FormStatus_PublishInitiated:
+                    if (PreviousFormStatus == Constants.PIWList_FormStatus_ReadyForPublishing)
+                    {
+                        helper.SavePublishingInfoAndStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_PublishedToeLibrary:
+                    if (PreviousFormStatus == Constants.PIWList_FormStatus_PublishedToeLibrary)
+                    {
+                        helper.SaveLegalResourcesAndReviewAndStatus(clientContext, listItem, FormStatus, PreviousFormStatus,
+                            tbLegalResourcesReviewCompletionDate.Text, tbLegalResourcesReviewNote.Text);
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_ReOpen:
+                    SaveReOpenAction(clientContext, listItem);
+                    break;
+                default:
+                    throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+
+            }
+        }
+
+        private void SaveSecReviewInfoAndStatus(ClientContext clientContext, ListItem listItem, enumAction action)
+        {
+            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
+
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewAction]] = action.ToString();
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_OSECRejectedComment]] = tbSecReviewComment.Text.Trim();
+
+            if (action == enumAction.Reject)
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_OSECRejectedComment]] = tbSecReviewComment.Text.Trim();
+            }
+            else//accept
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewComment]] = tbSecReviewComment.Text.Trim();
+            }
+
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
+
+        private void SaveReOpenAction(ClientContext clientContext, ListItem listItem)
+        {
+            //todo: clear accession number, set status
+            throw new NotImplementedException();
+        }
+
+        private void ClearSecReviewActionsAndCommentsBeforeReSubmit(ClientContext clientContext, ListItem listItem)
+        {
+            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewAction]] = string.Empty;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewComment]] = string.Empty;
+
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
+
+        private void SaveMainPanelAndStatus(ClientContext clientContext, ListItem listItem)
+        {
+            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            //each update has its own Execute query. If we set the field of the list item, then execute the ExecuteQuery to populate data
+            //without calling the listitem.update, then the changes is lost 
+            //We need to prepare all the necessary data before update all fields without calling any ExecuteQuery in middle of it
+
+            //Populate data
+
+            //Populate document owner
+            FieldUserValue[] documentOwners = null;
+            if (!string.IsNullOrEmpty(hdnDocumentOwner.Value))
+            {
+                List<PeoplePickerUser> users = PeoplePickerHelper.GetValuesFromPeoplePicker(hdnDocumentOwner);
+
+                documentOwners = new FieldUserValue[users.Count];
+                for (var i = 0; i < users.Count; i++)
+                {
+                    var newUser = clientContext.Web.EnsureUser(users[i].Login);//ensure user so usr can be added to site if they are not --> receive email
+                    clientContext.Load(newUser);
+                    clientContext.ExecuteQuery();
+                    documentOwners[i] = new FieldUserValue { LookupId = newUser.Id };
+                }
+            }
+
+            //Populate notification recipient 
+            FieldUserValue[] notificationRecipients = null;
+            if (!string.IsNullOrEmpty(hdnNotificationRecipient.Value))
+            {
+                List<PeoplePickerUser> users = PeoplePickerHelper.GetValuesFromPeoplePicker(hdnNotificationRecipient);
+
+                notificationRecipients = new FieldUserValue[users.Count];
+                for (var i = 0; i < users.Count; i++)
+                {
+                    var newUser = clientContext.Web.EnsureUser(users[i].Login);//ensure user so usr can be added to site if they are not --> receive email
+                    clientContext.Load(newUser);
+                    clientContext.ExecuteQuery();
+                    notificationRecipients[i] = new FieldUserValue { LookupId = newUser.Id };
+                }
+            }
+
+            //Populate current user title
+            clientContext.Load(clientContext.Web.CurrentUser, user => user.Title);
+            clientContext.ExecuteQuery();
+
+            //Save Data
+
+            //Save IsActive
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsActive]] = true;
+
+            //Save Docket Number
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]] = tbDocketNumber.Text.Trim();
+            
+            //Non-Docketed
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsNonDocket]] = cbIsNonDocket.Checked;
+
+            //By Pass Docket Validation
+            //listItem[internalColumnNames[Constants.PIWList_colName_ByPassDocketValidation]] = cbby.Checked;
+
+            //Description
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_Description]] = tbDescription.Text.Trim();
+
+
+            //alternate identifier
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_AlternateIdentifier]] = tbAlternateIdentifier.Text.Trim();
+            
+
+            //instruction for osec
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_InstructionForOSEC]] = tbInstruction.Text.Trim();
+            
+            //Federal register
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FederalRegister]] = cbFederalRegister.Checked;
+
+            //section 206 notice
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_Section206Notice]] = cbSection206Notice.Checked;
+
+            //hearing order
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_HearingOrder]] = cbHearingOrder.Checked;
+
+            //document category
+            if (ddDocumentCategory.SelectedIndex != 0)
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]] = ddDocumentCategory.SelectedValue;
+            }
+            else
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]] = string.Empty;
+            }
+
+            //program office(wokflow initiator)
+            if (ddProgramOfficeWorkflowInitiator.SelectedIndex != 0)
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = ddProgramOfficeWorkflowInitiator.SelectedValue;
+            }
+            else
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = string.Empty;
+            }
+
+
+
+            //Workflow initiator - set by default to current login value when form is created
+
+
+            //program office(document owner)
+            //program office(wokflow initiator)
+            if (ddProgramOfficeDocumentOwner.SelectedIndex != 0)
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] = ddProgramOfficeDocumentOwner.SelectedValue;
+            }
+            else
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] = string.Empty;
+            }
+
+            //document owner
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentOwner]] = documentOwners;
+
+            //notification recipient
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_NotificationRecipient]] = notificationRecipients;
+
+            //due date
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_DueDate]] = tbDueDate.Text;
+
+            //comment
+            if (!string.IsNullOrEmpty(tbComment.Text))
+            {
+                if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] == null)
+                {
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}", clientContext.Web.CurrentUser.Title,
+                        DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text);
+                }
+                else
+                {
+                    //append
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}<br>{3}",
+                        clientContext.Web.CurrentUser.Title, DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text, listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]]);
+                }
+
+            }
+
+            if (!string.IsNullOrEmpty(FormStatus))
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
+            }
+
+            if (!string.IsNullOrEmpty(PreviousFormStatus))
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
+            }
+
+            //Document URLs
+            if (!string.IsNullOrEmpty(DocumentURLsFromViewState))
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentURLs]] = DocumentURLsFromViewState;
+            }
+
+            //execute query
+            listItem.Update();
+            clientContext.ExecuteQuery();
         }
         #endregion
 
@@ -215,6 +859,49 @@ namespace PIW_SPAppWeb
             return PeoplePickerHelper.GetPeoplePickerSearchData();
         }
 
+        private bool ValidFormData(enumAction action)
+        {
+            bool isValid = true;
+
+            //Check if there is a uploaded document
+            if (rpDocumentList.Items.Count < 1)//validation fails
+            {
+                isValid = false;
+                lbRequiredUploadedDocumentError.Visible = true;
+            }
+            else
+            {
+                //check if at least 1 public item is 
+                isValid = true;
+                lbRequiredUploadedDocumentError.Visible = false;
+            }
+
+            //Check docket validation
+            string errorMessage = string.Empty;
+            helper.CheckDocketNumber(tbDocketNumber.Text.Trim(), ref errorMessage, false, cbDocketValidationByPass.Checked);
+
+            //check error message to see if all dockets are valid
+            if (string.IsNullOrEmpty(errorMessage))//dockets are valid
+            {
+                isValid = isValid & true;
+                lbDocketValidationServerSideError.Visible = false;
+            }
+            else
+            {
+                isValid = false;
+                lbDocketValidationServerSideError.Text = errorMessage;
+                lbDocketValidationServerSideError.Visible = true;
+                //display ByPass Docket Validation Check
+                if (lbDocketValidationServerSideError.Text.Equals(Constants.ATMSRemotingServiceConnectionError))
+                {
+                    cbDocketValidationByPass.Visible = true;
+                }
+            }
+
+
+
+            return isValid;
+        }
         public void PopulateFormStatusAndModifiedDateProperties(ClientContext clientContext, ListItem listItem)
         {
             var internalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
@@ -278,6 +965,18 @@ namespace PIW_SPAppWeb
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_FederalRegister]] != null)
                 {
                     cbFederalRegister.Checked = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_FederalRegister]].ToString());
+                }
+
+                //Section 206 Notice
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_Section206Notice]] != null)
+                {
+                    cbSection206Notice.Checked = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_Section206Notice]].ToString());
+                }
+
+                //Hearing Order
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_HearingOrder]] != null)
+                {
+                    cbHearingOrder.Checked = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_HearingOrder]].ToString());
                 }
 
                 //Document Category
@@ -421,27 +1120,6 @@ namespace PIW_SPAppWeb
                 }
 
             }
-        }
-        
-
-        protected void btnGenerateCitationNumber_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected void btnAcceptCitationNumber_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected void btnRemoveCitationNumber_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        protected void ddAvailableCitationNumbers_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
         }
         #endregion
 

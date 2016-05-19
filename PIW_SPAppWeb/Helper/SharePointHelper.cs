@@ -971,27 +971,35 @@ namespace PIW_SPAppWeb.Helper
         public int getDocumentCategoryNumber(string documentCategory)
         {
             int documentCategoryNumber = 0;
-            switch (documentCategory)
-            {
-                case Constants.PIWList_DocCat_DelegatedErrata:
-                case Constants.PIWList_DocCat_DelegatedLetter:
-                case Constants.PIWList_DocCat_DelegatedNotice:
-                case Constants.PIWList_DocCat_DelegatedOrder:
-                    documentCategoryNumber = 62;
-                    break;
-                case Constants.PIWList_DocCat_OALJ:
-                case Constants.PIWList_DocCat_OALJErrata:
-                    documentCategoryNumber = 63;
-                    break;
-                case Constants.PIWList_DocCat_NoticeErrata:
-                case Constants.PIWList_DocCat_Notice:
-                    documentCategoryNumber = 61;
-                    break;
-                default:
-                    throw new Exception("Unknown document category: " + documentCategory);
-                    break;
-            }
-
+                switch (documentCategory)
+                {
+                    case Constants.PIWList_DocCat_DelegatedErrata:
+                    case Constants.PIWList_DocCat_DelegatedLetter:
+                    case Constants.PIWList_DocCat_DelegatedNotice:
+                    case Constants.PIWList_DocCat_DelegatedOrder:
+                        documentCategoryNumber = 62;
+                        break;
+                    case Constants.PIWList_DocCat_OALJ:
+                    case Constants.PIWList_DocCat_OALJErrata:
+                        documentCategoryNumber = 63;
+                        break;
+                    case Constants.PIWList_DocCat_NoticeErrata:
+                    case Constants.PIWList_DocCat_Notice:
+                        //Agenda
+                    case Constants.PIWList_DocCat_NotationalOrder:
+                    case Constants.PIWList_DocCat_NotationalNotice:
+                    case Constants.PIWList_DocCat_CommissionOrder:
+                    case Constants.PIWList_DocCat_Consent:
+                    case Constants.PIWList_DocCat_Errata:
+                    case Constants.PIWList_DocCat_TollingOrder:
+                    case Constants.PIWList_DocCat_SunshineNotice:
+                    case Constants.PIWList_DocCat_NoticeofActionTaken:
+                        documentCategoryNumber = 61;
+                        break;
+                    default:
+                        throw new Exception("Unknown document category: " + documentCategory);
+                        break;
+                }    
             return documentCategoryNumber;
         }
 

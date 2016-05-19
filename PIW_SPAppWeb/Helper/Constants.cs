@@ -1,4 +1,6 @@
-﻿namespace PIW_SPAppWeb
+﻿using Microsoft.SqlServer.Server;
+
+namespace PIW_SPAppWeb
 {
     internal static class Constants
     {
@@ -58,7 +60,10 @@
         public const string PIWList_colName_RecallComment = "Recall Comment";
         public const string PIWList_colName_OSECRejectedComment = "OSEC Reject Comment";
         public const string PIWList_colName_Modified = "Modified";
-        
+        public const string PIWList_colName_Section206Notice = "Section 206 Notice";
+        public const string PIWList_colName_HearingOrder = "Hearing Order";
+
+
 
 
 
@@ -85,8 +90,15 @@
         public const string PIWList_DocCat_OALJ = "OALJ";
         public const string PIWList_DocCat_NoticeErrata = "Notice Errata";
         public const string PIWList_DocCat_Notice = "Notice";
-        
-
+        //Agenda
+        public const string PIWList_DocCat_NotationalOrder = "Notational Order";
+        public const string PIWList_DocCat_NotationalNotice = "Notational Notice";
+        public const string PIWList_DocCat_CommissionOrder = "Commission Order";
+        public const string PIWList_DocCat_Consent = "Consent";
+        public const string PIWList_DocCat_Errata = "Errata";
+        public const string PIWList_DocCat_TollingOrder = "Tolling Order";
+        public const string PIWList_DocCat_SunshineNotice = "Sunshine Notice";
+        public const string PIWList_DocCat_NoticeofActionTaken = "Notice of Action Taken";
 
 
 
@@ -213,6 +225,7 @@
         Reject,
         Accept,
         OSECTakeOwnerShip,
+        SubmitToSecReview,
         Publish,
         Save,
         Edit,

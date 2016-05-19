@@ -56,6 +56,7 @@ namespace PIW_SPAppWeb.Helper
 
             //start publishing
             Publication publication = new Publication(EpsCallingApplication.PIW, EpsCatCode.ISSUANCE);
+            publication.HasFamily = (documentWithFullURLs.Count > 1);//if more than 1 document, set the HasFamily to true so parent/child relationship canbe set in EPS
             if (!docketNumber.Equals("non-docket", StringComparison.OrdinalIgnoreCase))
             {
                 //docket list                                                                     
@@ -74,6 +75,7 @@ namespace PIW_SPAppWeb.Helper
             publication.AffiliationsList.Add(affiliationInfo);
 
             var documentsWithServerRelativeURL = helper.getDocumentServerRelativeURL(clientContext, listItemId, documentWithFullURLs);
+
             //Copy all documentWithFullURLs
             foreach (KeyValuePair<string, string> file in documentsWithServerRelativeURL)
             {

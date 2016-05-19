@@ -308,34 +308,6 @@
                     <asp:TextBox ID="tbDescription" runat="server" TextMode="MultiLine" Rows="4" CssClass="form-control"></asp:TextBox>
                 </div>
             </div>
-
-            <div class="form-group">
-                <asp:Label ID="lbInstructionForOSEC" runat="server" Text="Instructions for OSEC" AssociatedControlID="tbInstruction" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-6">
-                    <asp:TextBox ID="tbInstruction" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" MaxLength="255"></asp:TextBox>
-                </div>
-                <div class="col-md-2">
-                    <asp:CheckBox ID="cbFederalRegister" runat="server" CssClass="checkbox" Text="Federal Register" />
-                </div>
-            </div>
-
-            <div class="form-group">
-                <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-3">
-                    <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server">
-                        <asp:ListItem Value="">Please Select</asp:ListItem>
-                        <asp:ListItem>Notational Order</asp:ListItem>
-                        <asp:ListItem>Notational Notice</asp:ListItem>
-                        <asp:ListItem>Commission Order</asp:ListItem>
-                        <asp:ListItem>Consent</asp:ListItem>
-                        <asp:ListItem>Errata</asp:ListItem>
-                        <asp:ListItem>Tolling Order</asp:ListItem>
-                        <asp:ListItem>Sunshine Notice</asp:ListItem>
-                        <asp:ListItem>Notice of Action Taken</asp:ListItem>
-                    </asp:DropDownList>
-                </div>
-            </div>
-
             <asp:UpdatePanel runat="server">
                 <ContentTemplate>
                     <div class="form-group">
@@ -371,8 +343,41 @@
                     <asp:AsyncPostBackTrigger ControlID="ddAvailableCitationNumbers" EventName="SelectedIndexChanged" />
                 </Triggers>
             </asp:UpdatePanel>
+            <div class="form-group">
+                <asp:Label ID="lbInstructionForOSEC" runat="server" Text="Instructions for OSEC" AssociatedControlID="tbInstruction" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-6">
+                    <asp:TextBox ID="tbInstruction" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" MaxLength="255"></asp:TextBox>
+                </div>
+                </div>
+            <div class="form-group">
+                <div class="col-md-2"></div>
+                <div class="col-md-2">
+                    <asp:CheckBox ID="cbFederalRegister" runat="server" CssClass="checkbox" Text="Federal Register" />
+                </div>
+                <div class="col-md-2">
+                    <asp:CheckBox ID="cbSection206Notice" runat="server" CssClass="checkbox" Text="Section 206 Notice" />
+                </div>
+                <div class="col-md-2">
+                    <asp:CheckBox ID="cbHearingOrder" runat="server" CssClass="checkbox" Text="Hearing Order" />
+                </div>
+            </div>
 
-
+            <div class="form-group">
+                <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-3">
+                    <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server">
+                        <asp:ListItem Value="">Please Select</asp:ListItem>
+                        <asp:ListItem>Notational Order</asp:ListItem>
+                        <asp:ListItem>Notational Notice</asp:ListItem>
+                        <asp:ListItem>Commission Order</asp:ListItem>
+                        <asp:ListItem>Consent</asp:ListItem>
+                        <asp:ListItem>Errata</asp:ListItem>
+                        <asp:ListItem>Tolling Order</asp:ListItem>
+                        <asp:ListItem>Sunshine Notice</asp:ListItem>
+                        <asp:ListItem>Notice of Action Taken</asp:ListItem>
+                    </asp:DropDownList>
+                </div>
+            </div>
             <div class="form-group">
                 <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)<span class='accentText'> *</span>" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
