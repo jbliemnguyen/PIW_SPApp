@@ -334,9 +334,53 @@ namespace PIW_SPAppWeb
             }
         }
 
-        protected void btnPublish_Click(object sender, EventArgs e)
+        protected void btnInitiatePublication_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            try
+            {
+                const enumAction action = enumAction.Publish;
+                //using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
+                {
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
+
+                    //publish
+                    Dictionary<string, string> files = new Dictionary<string, string>();
+                    foreach (RepeaterItem row in rpDocumentList.Items)
+                    {
+                        var url = ((HyperLink)row.FindControl("hyperlinkFileURL")).NavigateUrl;
+                        var securityLevel = ((Label)row.FindControl("lbSecurityLevel")).Text;
+                        if (!files.ContainsKey(url))
+                        {
+                            files.Add(url, securityLevel);
+                        }
+                    }
+                    EPSPublicationHelper epsHelper = new EPSPublicationHelper();
+                    epsHelper.Publish(clientContext, files, listItem);
+
+
+                    //todo: change status
+
+                    //TODO: Change document and list permission
+
+                    //TODO: send email
+
+                    //Create list history
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item publication to eLibrary Data Entry initiated", FormStatus);
+
+                    //Refresh
+                    helper.RefreshPage(Page.Request, Page.Response);
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
         }
 
         protected void btnDelete_Click(object sender, EventArgs e)
@@ -485,7 +529,7 @@ namespace PIW_SPAppWeb
                 lbCitationNumberError.Visible = false;
                 using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
-                    helper.GenerateCitation(clientContext, ddDocumentCategory, tbCitationNumber, ddAvailableCitationNumbers);
+                    helper.GenerateCitation(clientContext, ddDocumentCategory, tbCitationNumber, ddAvailableCitationNumbers,true);
 
                 }
             }
@@ -498,17 +542,127 @@ namespace PIW_SPAppWeb
 
         protected void btnAcceptCitationNumber_Click(object sender, EventArgs e)
         {
+            try
+            {
+                //using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
+                {
+                    if (ddDocumentCategory.SelectedIndex > 0)
+                    {
+                        string errorMessage = string.Empty;
+                        int documentCategoryNumber = helper.getDocumentCategoryNumber(ddDocumentCategory.SelectedValue, true);
+                        CitationNumber citationNumberHelper = new CitationNumber(documentCategoryNumber, DateTime.Now);
 
+                        if (citationNumberHelper.Save(clientContext, _listItemId, tbCitationNumber.Text.Trim(),
+                            ref errorMessage, cbOverrideCitationNumber.Checked))
+                        {
+                            var listItem = helper.SetCitationNumberFieldInPIWList(clientContext, _listItemId, tbCitationNumber.Text.Trim());
+
+                            try
+                            {
+                                //need to re-populate the modified date becuase the list item is changed
+                                PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
+
+                                //controls
+                                //after accept, citation number cannot be changed
+                                EnableCitationNumberControls(false, true);
+                                lbCitationNumberError.Text = string.Empty;
+                                lbCitationNumberError.Visible = false;
+
+                                //history list
+                                helper.CreatePIWListHistory(clientContext, _listItemId, "Citation number assigned: " + tbCitationNumber.Text.Trim(), FormStatus);
+
+                                //add citation number into the documents - must be the last action because it can throw exceptioniled if the docs is opened in MS-Word
+                                //it will not able to finish all actions
+                                var documentURLs = DocumentURLsFromViewState.Split(new string[] { Constants.DocumentURLsSeparator },
+                                        StringSplitOptions.RemoveEmptyEntries);
+                                foreach (var documentURL in documentURLs)//add citation to all documents
+                                {
+                                    var fileName = helper.getFileNameFromURL(documentURL);
+                                    helper.AddCitationNumberToDocument(clientContext, tbCitationNumber.Text.Trim(),
+                                        _listItemId, fileName);
+
+                                }
+                            }
+                            catch (Exception exc)
+                            {
+                                lbCitationNumberError.Visible = true;
+                                lbCitationNumberError.Text = "Cannot add citation number to the document";
+                            }
+
+
+
+                        }
+                        else//display error message
+                        {
+                            lbCitationNumberError.Visible = true;
+                            lbCitationNumberError.Text = errorMessage;
+                        }
+
+                    }
+
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
         }
 
         protected void btnRemoveCitationNumber_Click(object sender, EventArgs e)
         {
+            try
+            {
+                //using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
+                {
+                    //just delete the citation item - instead of settign the status to deleted
+                    var listItem = helper.deleteAssociatedCitationNumberListItem(clientContext, _listItemId);
 
+                    try
+                    {
+                        //need to re-populate the modified date becuase the list item is changed
+                        PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
+
+                        //controls
+                        tbCitationNumber.Text = string.Empty;
+                        //after remove, citation canbe changed
+                        EnableCitationNumberControls(true, false);
+
+                        //history list
+                        helper.CreatePIWListHistory(clientContext, _listItemId, "Citation number removed", FormStatus);
+
+                        //remove citation number from the documents - must be the last action because it can throw exceptioniled if the docs is opened in MS-Word
+                        //it will not able to finish all actions
+                        var documentURLs = DocumentURLsFromViewState.Split(new string[] { Constants.DocumentURLsSeparator },
+                                StringSplitOptions.RemoveEmptyEntries);
+                        foreach (var documentURL in documentURLs)//add citation to all documents
+                        {
+                            var fileName = helper.getFileNameFromURL(documentURL);
+                            helper.RemoveCitationNumberFromDocument(clientContext, tbCitationNumber.Text.Trim(), _listItemId, fileName);
+
+                        }
+                    }
+                    catch (Exception exc)
+                    {
+                        lbCitationNumberError.Visible = true;
+                        lbCitationNumberError.Text = "Cannot remove citation number from the document";
+                    }
+
+
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
         }
 
         protected void ddAvailableCitationNumbers_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            tbCitationNumber.Text = ddAvailableCitationNumbers.SelectedValue;
         }
         
         #endregion
@@ -585,7 +739,8 @@ namespace PIW_SPAppWeb
 
                     break;
                 case Constants.PIWList_FormStatus_Edited:
-                    if (PreviousFormStatus == Constants.PIWList_FormStatus_SecretaryReview)
+                    if ((PreviousFormStatus == Constants.PIWList_FormStatus_SecretaryReview) || 
+                        (PreviousFormStatus == Constants.PIWList_FormStatus_ReadyForPublishing))
                     {
                         helper.SaveFormStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
                     }
@@ -1157,7 +1312,7 @@ namespace PIW_SPAppWeb
                         fieldsetOSECRejectComment.Visible = false;
                     }
 
-
+                    InitiallyEnableCitationNumberControls(clientContext, listItem);
                     //OSEC section
                     fieldsetSecReview.Visible = false;
 
@@ -1177,7 +1332,7 @@ namespace PIW_SPAppWeb
                     btnReject.Visible = false;
                     
 
-                    btnPublish.Visible = false;
+                    btnInitiatePublication.Visible = false;
 
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
@@ -1190,8 +1345,8 @@ namespace PIW_SPAppWeb
                     EnableMainPanel(false);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
-                    
 
+                    InitiallyEnableCitationNumberControls(clientContext, listItem);
                     //OSEC section
                     fieldsetSecReview.Visible = true;
 
@@ -1202,10 +1357,10 @@ namespace PIW_SPAppWeb
                     //Button
                     btnSave.Visible = false;
                     btnSubmitToSecReview.Visible = btnSave.Visible;
-                    btnEdit.Visible = false;
-                    btnAccept.Visible = false;
-                    btnReject.Visible = false;
-                    btnPublish.Visible = false;
+                    btnEdit.Visible = true;
+                    btnAccept.Visible = true;
+                    btnReject.Visible = true;
+                    btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
@@ -1216,6 +1371,7 @@ namespace PIW_SPAppWeb
                     EnableMainPanel(true);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
+                    InitiallyEnableCitationNumberControls(clientContext, listItem);
 
                     //Sec review section
                     if (previousFormStatus.Equals(Constants.PIWList_FormStatus_PrePublication) ||
@@ -1235,7 +1391,7 @@ namespace PIW_SPAppWeb
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
-                    btnPublish.Visible = false;
+                    btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
@@ -1246,11 +1402,8 @@ namespace PIW_SPAppWeb
                     EnableMainPanel(false);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
-                    
 
-                    //secretary review
-                    //OSEC verification
-
+                    InitiallyEnableCitationNumberControls(clientContext, listItem);
                     //Secretary Review
                     fieldsetSecReview.Visible = true;
                     EnableSecReviewControls(false);
@@ -1265,7 +1418,7 @@ namespace PIW_SPAppWeb
                     btnEdit.Visible = true;
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
-                    btnPublish.Visible = true;
+                    btnInitiatePublication.Visible = true;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
@@ -1292,7 +1445,7 @@ namespace PIW_SPAppWeb
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
-                    btnPublish.Visible = false;
+                    btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = true;
@@ -1317,7 +1470,7 @@ namespace PIW_SPAppWeb
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
-                    btnPublish.Visible = false;
+                    btnInitiatePublication.Visible = false;
                     btnDelete.Visible = false;
                     btnReopen.Visible = false;
                     break;
@@ -1349,6 +1502,8 @@ namespace PIW_SPAppWeb
             tbDescription.Enabled = enabled;
             tbInstruction.Enabled = enabled;
             cbFederalRegister.Enabled = enabled;
+            cbSection206Notice.Enabled = enabled;
+            cbHearingOrder.Enabled = enabled;
             ddDocumentCategory.Enabled = enabled;
             ddProgramOfficeWorkflowInitiator.Enabled = enabled;
             //initiator
@@ -1360,7 +1515,7 @@ namespace PIW_SPAppWeb
 
             //notification receiver
             inputNotificationRecipient.Enabled = enabled;
-
+            
             tbDueDate.Enabled = enabled;
             tbComment.Enabled = enabled;
         }
@@ -1375,6 +1530,41 @@ namespace PIW_SPAppWeb
             {
                 var btnRemoveDocument = (LinkButton)row.FindControl("btnRemoveDocument");
                 btnRemoveDocument.Enabled = enabled;
+            }
+        }
+
+        public void EnableCitationNumberControls(bool citationNumberCanBeChanged, bool CitationNumberCanBeRemoved)
+        {
+            //controls
+            tbCitationNumber.Enabled = citationNumberCanBeChanged;
+            ddAvailableCitationNumbers.Visible = citationNumberCanBeChanged;
+            cbOverrideCitationNumber.Visible = citationNumberCanBeChanged;
+            //button
+            btnGenerateCitationNumber.Visible = citationNumberCanBeChanged;
+            btnAcceptCitationNumber.Visible = citationNumberCanBeChanged;
+            btnRemoveCitationNumber.Visible = CitationNumberCanBeRemoved;
+        }
+        public void InitiallyEnableCitationNumberControls(ClientContext clientContext, ListItem piwListItem)
+        {
+            var piwListinternalName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+            string citationNumber = string.Empty;
+            if (piwListItem[piwListinternalName[Constants.PIWList_colName_CitationNumber]] != null)
+            {
+                citationNumber = piwListItem[piwListinternalName[Constants.PIWList_colName_CitationNumber]].ToString();
+            }
+
+            if (string.IsNullOrEmpty(citationNumber))
+            {
+                //no citation assigned in piwlist
+                //system should allow to generate and assign citation number
+                EnableCitationNumberControls(true, false);
+
+            }
+            else
+            {
+                //there is citation number assigned to piw list item
+                EnableCitationNumberControls(false, true);
+
             }
         }
         #endregion

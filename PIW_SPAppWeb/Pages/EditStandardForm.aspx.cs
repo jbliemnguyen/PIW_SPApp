@@ -490,7 +490,7 @@ namespace PIW_SPAppWeb.Pages
                 lbCitationNumberError.Visible = false;
                 using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
-                    helper.GenerateCitation(clientContext, ddDocumentCategory, tbCitationNumber, ddAvailableCitationNumbers);
+                    helper.GenerateCitation(clientContext, ddDocumentCategory, tbCitationNumber, ddAvailableCitationNumbers,false);
 
                 }
             }
@@ -511,7 +511,7 @@ namespace PIW_SPAppWeb.Pages
                     if (ddDocumentCategory.SelectedIndex > 0)
                     {
                         string errorMessage = string.Empty;
-                        int documentCategoryNumber = helper.getDocumentCategoryNumber(ddDocumentCategory.SelectedValue);
+                        int documentCategoryNumber = helper.getDocumentCategoryNumber(ddDocumentCategory.SelectedValue,false);
                         CitationNumber citationNumberHelper = new CitationNumber(documentCategoryNumber, DateTime.Now);
 
                         if (citationNumberHelper.Save(clientContext, _listItemId, tbCitationNumber.Text.Trim(),
@@ -1533,7 +1533,7 @@ namespace PIW_SPAppWeb.Pages
 
                     btnOSECTakeOwnership.Visible = false;
 
-                    btnPublish.Visible = false;
+                    btnInitiatePublication.Visible = false;
 
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
@@ -1563,7 +1563,7 @@ namespace PIW_SPAppWeb.Pages
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
                     btnOSECTakeOwnership.Visible = true;
-                    btnPublish.Visible = false;
+                    btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
@@ -1601,7 +1601,7 @@ namespace PIW_SPAppWeb.Pages
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
                     btnOSECTakeOwnership.Visible = false;
-                    btnPublish.Visible = false;
+                    btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
@@ -1633,7 +1633,7 @@ namespace PIW_SPAppWeb.Pages
                     btnAccept.Visible = true;
                     btnReject.Visible = true;
                     btnOSECTakeOwnership.Visible = false;
-                    btnPublish.Visible = false;
+                    btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
@@ -1670,7 +1670,7 @@ namespace PIW_SPAppWeb.Pages
                     btnAccept.Visible = true;
                     btnReject.Visible = true;
                     btnOSECTakeOwnership.Visible = false;
-                    btnPublish.Visible = false;
+                    btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
@@ -1707,7 +1707,7 @@ namespace PIW_SPAppWeb.Pages
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
                     btnOSECTakeOwnership.Visible = false;
-                    btnPublish.Visible = true;
+                    btnInitiatePublication.Visible = true;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
@@ -1745,7 +1745,7 @@ namespace PIW_SPAppWeb.Pages
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
                     btnOSECTakeOwnership.Visible = false;
-                    btnPublish.Visible = false;
+                    btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = true;
@@ -1781,7 +1781,7 @@ namespace PIW_SPAppWeb.Pages
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
                     btnOSECTakeOwnership.Visible = false;
-                    btnPublish.Visible = false;
+                    btnInitiatePublication.Visible = false;
                     btnDelete.Visible = false;
                     btnReopen.Visible = false;
                     break;

@@ -500,7 +500,7 @@ namespace PIW_SPAppWeb.Helper
         public string getEPSAvailabilityCode(string ddldocumentSecurity)
         {
             string result = string.Empty;
-            switch ( ddldocumentSecurity)
+            switch (ddldocumentSecurity)
             {
                 case Constants.ddlSecurityControl_Option_Public:
                     result = Constants.PIWDocuments_EPSSecurityLevel_Option_Public;
@@ -591,7 +591,7 @@ namespace PIW_SPAppWeb.Helper
         /// <param name="listItemID"></param>
         /// <param name="fileURLs"></param>
         /// <returns></returns>
-        public Dictionary<string,string> getDocumentServerRelativeURL(ClientContext clientContext, string listItemID, Dictionary<string,string> fileURLs )
+        public Dictionary<string, string> getDocumentServerRelativeURL(ClientContext clientContext, string listItemID, Dictionary<string, string> fileURLs)
         {
             var result = new Dictionary<string, string>();
             clientContext.Load(clientContext.Web);
@@ -603,7 +603,7 @@ namespace PIW_SPAppWeb.Helper
                     Constants.PIWDocuments_DocumentLibraryName, listItemID, getFileNameFromURL(kvp.Key));
                 if (!result.ContainsKey(documentServerRelativeURL))
                 {
-                    result.Add(documentServerRelativeURL,kvp.Value);
+                    result.Add(documentServerRelativeURL, kvp.Value);
                 }
             }
 
@@ -718,11 +718,11 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public void GenerateCitation(ClientContext clientContext, DropDownList ddDocumentCategory, TextBox tbCitationNumber, DropDownList ddAvailableCitationNumbers)
+        public void GenerateCitation(ClientContext clientContext, DropDownList ddDocumentCategory, TextBox tbCitationNumber, DropDownList ddAvailableCitationNumbers,bool isAgendaForm)
         {
             if (ddDocumentCategory.SelectedIndex > 0)
             {
-                int documentCategoryNumber = getDocumentCategoryNumber(ddDocumentCategory.SelectedValue);
+                int documentCategoryNumber = getDocumentCategoryNumber(ddDocumentCategory.SelectedValue,isAgendaForm);
 
                 CitationNumber citationNumberHelper = new CitationNumber(documentCategoryNumber, DateTime.Now);
 
@@ -968,9 +968,15 @@ namespace PIW_SPAppWeb.Helper
             return docket;
         }
 
-        public int getDocumentCategoryNumber(string documentCategory)
+        public int getDocumentCategoryNumber(string documentCategory, bool isAgendaForm)
         {
             int documentCategoryNumber = 0;
+            if (isAgendaForm)
+            {
+                documentCategoryNumber = 61;
+            }
+            else
+            {
                 switch (documentCategory)
                 {
                     case Constants.PIWList_DocCat_DelegatedErrata:
@@ -986,20 +992,22 @@ namespace PIW_SPAppWeb.Helper
                     case Constants.PIWList_DocCat_NoticeErrata:
                     case Constants.PIWList_DocCat_Notice:
                         //Agenda
-                    case Constants.PIWList_DocCat_NotationalOrder:
-                    case Constants.PIWList_DocCat_NotationalNotice:
-                    case Constants.PIWList_DocCat_CommissionOrder:
-                    case Constants.PIWList_DocCat_Consent:
-                    case Constants.PIWList_DocCat_Errata:
-                    case Constants.PIWList_DocCat_TollingOrder:
-                    case Constants.PIWList_DocCat_SunshineNotice:
-                    case Constants.PIWList_DocCat_NoticeofActionTaken:
+                        //case Constants.PIWList_DocCat_NotationalOrder:
+                        //case Constants.PIWList_DocCat_NotationalNotice:
+                        //case Constants.PIWList_DocCat_CommissionOrder:
+                        //case Constants.PIWList_DocCat_Consent:
+                        //case Constants.PIWList_DocCat_Errata:
+                        //case Constants.PIWList_DocCat_TollingOrder:
+                        //case Constants.PIWList_DocCat_SunshineNotice:
+                        //case Constants.PIWList_DocCat_NoticeofActionTaken:
                         documentCategoryNumber = 61;
                         break;
                     default:
                         throw new Exception("Unknown document category: " + documentCategory);
                         break;
-                }    
+                }
+            }
+
             return documentCategoryNumber;
         }
 

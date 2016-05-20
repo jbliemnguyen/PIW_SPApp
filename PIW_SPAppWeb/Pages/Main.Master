@@ -52,6 +52,8 @@
             <div class="col-xs-5 col-sm-3 col-md-2 sidebar-offcanvas" id="sidebar">
                 <div class="list-group">
                     <a href="StandardForms.aspx" class="list-group-item" id="StandardFormsURL">Standard Forms</a>
+                    <a href="AgendaForms.aspx" class="list-group-item" id="AgendaFormsURL">Agenda Forms</a>
+                    
                     <a href="EditStandardForm.aspx" class="list-group-item" id="EditStandardFormURL">New Standard Form</a>
                     <a href="EditAgendaForm.aspx" class="list-group-item" id="EditAgendaFormURL">New Agenda Form</a>
                     <a href="EditDirectPublicationForm.aspx" class="list-group-item" id="EditDirectPublicationFormURL">New Direct Publication Form</a>

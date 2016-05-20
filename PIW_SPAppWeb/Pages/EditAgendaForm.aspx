@@ -88,11 +88,11 @@
                             $("#btnDeleteConfirm").click();
                         }
                     }
-                }, { width: 500 });
+                }, { width: 600 });
             });
 
             //Confirm of publish
-            $("#btnPublish").click(function (event) {
+            $("#btnInitiatePublication").click(function (event) {
                 event.preventDefault();
 
                 //display warning if due date is future date
@@ -124,7 +124,7 @@
             //confirm Submit to Secretary Review
             $("#btnSubmitToSecReview").click(function (event) {
                 event.preventDefault();
-                $("#deleteDialogConfirmation").dialog({
+                $("#submitDialogConfirmation").dialog({
                     buttons: {
                         "No": function (e) {
                             $(this).dialog("close");
@@ -134,12 +134,12 @@
                             $("#btnSubmitToSecReviewConfirm").click();
                         }
                     }
-                }, { width: 500 });
+                }, { width: 750 });
             });
 
             //spinner
             $("#btnPublishConfirm").click(function (event) {
-                var btnPublish = $("#btnPublish");
+                var btnInitiatePublication = $("#btnInitiatePublication");
                 var opt = {
                     img: '../Scripts/spinner/spinner-large.gif',
                     position: 'center',
@@ -147,9 +147,9 @@
                     width: 48
                 };
 
-                btnPublish.spinner(opt);
+                btnInitiatePublication.spinner(opt);
                 //disable Publish and Edit button - avoid use clicking when long-process printing
-                $("#btnPublish").attr("disabled", "disabled");
+                $("#btnInitiatePublication").attr("disabled", "disabled");
                 $("#btnEdit").attr("disabled", "disabled");
                 $("#btnAcceptCitationNumber").attr("disabled", "disabled");
                 $("#btnRemoveCitationNumber").attr("disabled", "disabled");
@@ -536,8 +536,8 @@
                 <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" OnClick="btnEdit_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" OnClick="btnAccept_Click" />
                 <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" OnClick="btnReject_Click" />
-                <asp:Button ID="btnPublish" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnPublish_Click" />
-                <asp:Button ID="btnPublishConfirm" runat="server" Text="Publish" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnPublish_Click" />
+                <asp:Button ID="btnInitiatePublication" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnInitiatePublication_Click" />
+                <asp:Button ID="btnPublishConfirm" runat="server" Text="Publish" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnInitiatePublication_Click" />
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnDelete_Click" />
                 <asp:Button ID="btnReopen" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" OnClick="btnReopen_Click" />
@@ -585,7 +585,7 @@
         </div>
         <div id="deleteDialogConfirmation" title="Are you sure you wish to delete this workflow item?"></div>
         <div id="publishDialogConfirmation" title="Are you sure you wish to publish this issuance?"></div>
-        <div id="submitDialogConfirmation" title="Are you sure you wish to submit this issuance to Secrectary Review?"></div>
+        <div id="submitDialogConfirmation" title="Are you sure you wish to submit this issuance for Secrectary Review?"></div>
     </form>
 
 

@@ -94,7 +94,7 @@
             });
 
             //Confirm of Publish
-            $("#btnPublish").click(function (event) {
+            $("#btnInitiatePublication").click(function (event) {
                 event.preventDefault();
 
                 //display warning if due date is future date
@@ -126,7 +126,7 @@
 
             //spinner
             $("#btnPublishConfirm").click(function (event) {
-                var btnPublish = $("#btnPublish");
+                var btnInitiatePublication = $("#btnInitiatePublication");
                 var opt = {
                     img: '../Scripts/spinner/spinner-large.gif',
                     position: 'center',
@@ -134,9 +134,9 @@
                     width: 48
                 };
 
-                btnPublish.spinner(opt);
+                btnInitiatePublication.spinner(opt);
                 //disable Publish and Edit button - avoid use clicking when long-process printing
-                $("#btnPublish").attr("disabled", "disabled");
+                $("#btnInitiatePublication").attr("disabled", "disabled");
                 $("#btnEdit").attr("disabled", "disabled");
                 $("#btnAcceptCitationNumber").attr("disabled", "disabled");
                 $("#btnRemoveCitationNumber").attr("disabled", "disabled");
@@ -568,7 +568,7 @@
                 <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" OnClick="btnEdit_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" OnClick="btnAccept_Click" />
                 <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" OnClick="btnReject_Click" />
-                <asp:Button ID="btnPublish" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                <asp:Button ID="btnInitiatePublication" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnPublishConfirm" runat="server" Text="Publish" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnInitiatePublication_Click" />
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnDeleteConfirm_Click" />

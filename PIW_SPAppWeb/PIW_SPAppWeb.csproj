@@ -166,6 +166,7 @@
     <Content Include="Content\themes\base\theme.css" />
     <Content Include="Content\themes\base\tooltip.css" />
     <Content Include="Pages\AccessDenied.aspx" />
+    <Content Include="Pages\AgendaForms.aspx" />
     <Content Include="Pages\EditAgendaForm.aspx" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="packages.config" />
@@ -242,6 +243,13 @@
     </Compile>
     <Compile Include="Pages\AccessDenied.aspx.designer.cs">
       <DependentUpon>AccessDenied.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\AgendaForms.aspx.cs">
+      <DependentUpon>AgendaForms.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\AgendaForms.aspx.designer.cs">
+      <DependentUpon>AgendaForms.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\EditAgendaForm.aspx.cs">
       <DependentUpon>EditAgendaForm.aspx</DependentUpon>
