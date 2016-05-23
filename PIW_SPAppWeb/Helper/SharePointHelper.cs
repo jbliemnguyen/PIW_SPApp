@@ -233,7 +233,7 @@ namespace PIW_SPAppWeb.Helper
 
 
 
-        public string UploadDocumentContentStream(ClientContext clientContext, Stream fileStream, string libraryName, string subFolder, string fileName, string securityLevel)
+        public string UploadDocumentContentStream(ClientContext clientContext, Stream fileStream, string libraryName, string subFolder, string fileName, string securityLevel,string docType)
         {
             var internalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWDocuments_DocumentLibraryName);
 
@@ -255,6 +255,7 @@ namespace PIW_SPAppWeb.Helper
             clientContext.Load(uploadFile);
 
             uploadFile.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_SecurityLevel]] = securityLevel;
+            uploadFile.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_DocType]] = docType;
             uploadFile.ListItemAllFields.Update();
 
             clientContext.ExecuteQuery();
@@ -262,24 +263,28 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        private FileCollection getAllDocuments(ClientContext ctx, string uploadSubFolderURL, bool includeListItemAllFields)
+        private List<File> getAllIssuanceDocuments(ClientContext clientContext, string uploadSubFolderURL, bool includeListItemAllFields)
         {
-            Folder folder = ctx.Web.GetFolderByServerRelativeUrl(uploadSubFolderURL);
+            var internalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWDocuments_DocumentLibraryName);
+            Folder folder = clientContext.Web.GetFolderByServerRelativeUrl(uploadSubFolderURL);
 
             FileCollection files = folder.Files;
-            ctx.Load(files);
-            ctx.Load(files, includes => includes.Include(i => i.ListItemAllFields.Id));
+            clientContext.Load(files);
+            clientContext.Load(files, includes => includes.Include(i => i.ListItemAllFields.Id));
 
             if (includeListItemAllFields)
             {
-                ctx.Load(files, includes => includes.Include(i => i.ListItemAllFields));
+                clientContext.Load(files, includes => includes.Include(i => i.ListItemAllFields));
             }
 
-            ctx.ExecuteQuery();//file not found exception if the folder is not exist, let it crash because it is totally wrong somewhere
-            return files;
+            clientContext.ExecuteQuery();//file not found exception if the folder is not exist, let it crash because it is totally wrong somewhere
+
+            var issuanceFiles = files.Where(
+                file => file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_DocType]].Equals(Constants.PIWDocuments_DocTypeOption_Issuance));
+            return issuanceFiles.ToList();
         }
 
-        public System.Data.DataTable getAllDocumentsTable(ClientContext clientContext, string subFoder, string libraryName, out StringBuilder DocumentURLs)
+        public System.Data.DataTable getAllIssuanceDocumentsTable(ClientContext clientContext, string subFoder, string libraryName, out StringBuilder DocumentURLs)
         {
             DocumentURLs = new StringBuilder();
             var result = new System.Data.DataTable();
@@ -297,7 +302,7 @@ namespace PIW_SPAppWeb.Helper
 
             string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, libraryName, subFoder);
 
-            var documentList = getAllDocuments(clientContext, uploadSubFolderURL, true);
+            var documentList = getAllIssuanceDocuments(clientContext, uploadSubFolderURL, true);
 
             foreach (File file in documentList)
             {
@@ -307,10 +312,7 @@ namespace PIW_SPAppWeb.Helper
                 row["URL"] = uploadSubFolderURL + "/" + row["Name"];
                 row["Security Level"] =
                     file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_SecurityLevel]];
-                //row["EPS Passed"] =
-                //    getEPSPassedIconHTML(file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_EPSPassed]].ToString());
-                //row["EPS Error"] =
-                //    file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_EPSError]];
+                
                 result.Rows.Add(row);
 
                 if (DocumentURLs.Length == 0)
@@ -334,7 +336,7 @@ namespace PIW_SPAppWeb.Helper
             clientContext.Load(clientContext.Web, web => web.Url);
             clientContext.ExecuteQuery();
             string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, libraryName, subFolder);
-            var documentList = getAllDocuments(clientContext, uploadSubFolderURL, false);
+            var documentList = getAllIssuanceDocuments(clientContext, uploadSubFolderURL, false);
 
             foreach (File file in documentList)
             {
@@ -647,7 +649,7 @@ namespace PIW_SPAppWeb.Helper
             return paragraph1;
         }
 
-        public bool UploadFile(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError, Label lbRequiredUploadedDocumentError, string FormStatus, string securityControlValue)
+        public bool UploadFile(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError, Label lbRequiredUploadedDocumentError, string FormStatus, string securityControlValue,string docType)
         {
             bool result = false;
             using (var fileStream = fileUpload.PostedFile.InputStream)
@@ -683,7 +685,7 @@ namespace PIW_SPAppWeb.Helper
                     else
                     {
                         UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName,
-                            listItemId, fileName, securityControlValue);
+                            listItemId, fileName, securityControlValue,docType);
 
 
                         //clear validation error
@@ -710,7 +712,7 @@ namespace PIW_SPAppWeb.Helper
         public string PopulateDocumentList(ClientContext clientContext, string listItemId, Repeater rpDocumentList)
         {
             StringBuilder documentURLs;
-            System.Data.DataTable table = getAllDocumentsTable(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, out documentURLs);
+            System.Data.DataTable table = getAllIssuanceDocumentsTable(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, out documentURLs);
             rpDocumentList.DataSource = table;
             rpDocumentList.DataBind();
 

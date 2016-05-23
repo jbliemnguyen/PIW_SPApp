@@ -307,25 +307,39 @@ namespace PIW_SPAppWeb
         {
             try
             {
-                const enumAction action = enumAction.Reject;
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                if (string.IsNullOrEmpty(tbSecReviewComment.Text))
                 {
-                    ListItem listItem = null;
-                    if (!SaveData(clientContext, action, ref listItem))
-                    {
-                        return;
-                    }
-
-                    //TODO: Change document and list permission
-
-                    //TODO: send email
-
-                    //Create list history
-                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item rejected", FormStatus);
-
-                    //Redirect
-                    helper.RedirectToSourcePage(Page.Request, Page.Response);
+                    lbSecReviewCommentError.Visible = true;
+                    lbSecReviewCommentError.Text = "Please provide comment";
+                    return;
                 }
+                else
+                {
+                    lbSecReviewCommentError.Visible = false;
+                    lbSecReviewCommentError.Text = string.Empty;
+
+                    const enumAction action = enumAction.Reject;
+                    using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                    {
+                        ListItem listItem = null;
+                        if (!SaveData(clientContext, action, ref listItem))
+                        {
+                            return;
+                        }
+
+                        //TODO: Change document and list permission
+
+                        //TODO: send email
+
+                        //Create list history
+                        helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item rejected", FormStatus);
+
+                        //Redirect
+                        helper.RedirectToSourcePage(Page.Request, Page.Response);
+                    }
+                }
+
+                
             }
             catch (Exception exc)
             {
@@ -459,7 +473,7 @@ namespace PIW_SPAppWeb
                         {
                             var uploadResult = helper.UploadFile(clientContext, fileUpload, _listItemId, rpDocumentList,
                                 lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus,
-                                ddlSecurityControl.SelectedValue);
+                                ddlSecurityControl.SelectedValue,Constants.PIWDocuments_DocTypeOption_Issuance);
                             if (uploadResult) //only save the document url if the upload is good
                             {
                                 DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId,
@@ -721,7 +735,8 @@ namespace PIW_SPAppWeb
                     }
                     break;
                 case Constants.PIWList_FormStatus_SecretaryReview:
-                    if (PreviousFormStatus == Constants.PIWList_FormStatus_Pending)
+                    if ((PreviousFormStatus == Constants.PIWList_FormStatus_Pending) || 
+                        (PreviousFormStatus == Constants.PIWList_FormStatus_Edited))
                     {
                         SaveMainPanelAndStatus(clientContext, listItem);
                     }
@@ -1057,6 +1072,15 @@ namespace PIW_SPAppWeb
 
             return isValid;
         }
+
+        [WebMethod]
+        public static string ValidateDocketNumber(string docketNumber, bool isCNF, bool docketValidationByPass)
+        {
+            //string errorMessage = docketNumber;
+            string errorMessage = string.Empty;
+            helper.CheckDocketNumber(docketNumber.Trim(), ref errorMessage, isCNF, docketValidationByPass);
+            return errorMessage;
+        }
         public void PopulateFormStatusAndModifiedDateProperties(ClientContext clientContext, ListItem listItem)
         {
             var internalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
@@ -1282,12 +1306,7 @@ namespace PIW_SPAppWeb
         public void ControlsVisiblitilyBasedOnStatus(ClientContext clientContext, string previousFormStatus, string formStatus, ListItem listItem)
         {
             var piwlistInternalColumnName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-            var documentCategory = string.Empty;
-            if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_DocumentCategory]] != null)
-            {
-                documentCategory = listItem[piwlistInternalColumnName[Constants.PIWList_colName_DocumentCategory]].ToString();
-            }
-            
+
             //SPUser checkoutUser = null;
             var currentUser = clientContext.Web.CurrentUser;
             clientContext.Load(currentUser);
@@ -1430,6 +1449,7 @@ namespace PIW_SPAppWeb
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "Publication has been initiated for this issuance.";
                     fieldsetOSECRejectComment.Visible = false;
+                    EnableCitationNumberControls(false, false);
 
                     //Sec Review
                     fieldsetSecReview.Visible = true;
@@ -1455,6 +1475,7 @@ namespace PIW_SPAppWeb
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "This issuance is available in eLibrary.";
                     fieldsetOSECRejectComment.Visible = false;
+                    EnableCitationNumberControls(false, false);
 
                     //Sec Review
                     fieldsetSecReview.Visible = true;

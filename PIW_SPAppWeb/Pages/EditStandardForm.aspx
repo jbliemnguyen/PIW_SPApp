@@ -13,7 +13,7 @@
 
             //set active left navigation tab 
             $("#sidebar a").removeClass("active");
-            $("#EditStandardFormURL").addClass("active");
+            //$("#EditStandardFormURL").addClass("active");
 
             registerPeoplePicker(spHostUrl, spAppWebUrl, SPLanguage);
 
@@ -28,6 +28,11 @@
                 $("#tbDocketNumber").prop("readonly", "readonly");
             }
 
+            //Event for CNF checkbox
+            $("#cbIsCNF").change(function () {
+                $("#tbDocketNumber").blur();//call blur event to validate the docket number and display message
+            });
+
             //event for Non-Docketed checkbox
             $("#cbIsNonDocket").change(function () {
                 if (this.checked) {
@@ -38,6 +43,8 @@
                     $("#tbDocketNumber").removeProp("readonly");
                     $("#tbDocketNumber").prop("value", ""); //can combined with above, but this way is clearer
                 }
+
+                $("#tbDocketNumber").blur();//call blur event to validate the docket number and display message
             });
 
             //validate docket number when blur event

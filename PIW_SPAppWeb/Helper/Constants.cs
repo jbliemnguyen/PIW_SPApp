@@ -112,12 +112,12 @@ namespace PIW_SPAppWeb
         public const string PIWDocuments_DocumentLibraryName = "PIW Documents";
         public const string PIWDocuments_colName_SecurityLevel = "Security Level";
         public const string PIWDocuments_colName_NumberOfPages = "Number Of Pages";
-        public const string PIWDocuments_colName_EPSPassed = "EPS Passed";
-        public const string PIWDocuments_colName_EPSError = "EPS Error";
+        public const string PIWDocuments_colName_DocType = "DocType";
+        
 
-        public const string PIWDocuments_EPSPassed_Option_True = "True";
-        public const string PIWDocuments_EPSPassed_Option_False = "False";
-        public const string PIWDocuments_EPSPassed_Option_Pending = "Pending";
+        public const string PIWDocuments_DocTypeOption_Issuance = "Issuance";
+        public const string PIWDocuments_DocTypeOption_SupplementalMailingList = "Supplemental Mailing List";
+        public const string PIWDocuments_DocTypeOption_FOLAServiceMailingList = "FOLA Service Mailing List";
 
         public const string PIWDocuments_EPSSecurityLevel_Option_Public = "P";
         public const string PIWDocuments_EPSSecurityLevel_Option_CEII = "C";

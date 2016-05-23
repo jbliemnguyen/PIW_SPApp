@@ -3,3 +3,4 @@ C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppJob\bin\Debug\PIW_SPAppJob.exe
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppJob\bin\Debug\PIW_SPAppJob.pdb
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppJob\obj\Debug\PIW_SPAppJob.exe
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppJob\obj\Debug\PIW_SPAppJob.pdb
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppJob\obj\Debug\PIW_SPAppJob.csprojResolveAssemblyReference.cache

@@ -333,9 +333,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     EPSPublicationHelper epsHelper = new EPSPublicationHelper();
                     epsHelper.Publish(clientContext, files, listItem);
-
-
-                    //todo: change status
+                    
 
                     //TODO: Change document and list permission
 
@@ -667,7 +665,7 @@ namespace PIW_SPAppWeb.Pages
                         {
                             var uploadResult = helper.UploadFile(clientContext, fileUpload, _listItemId, rpDocumentList,
                                 lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus,
-                                ddlSecurityControl.SelectedValue);
+                                ddlSecurityControl.SelectedValue,Constants.PIWDocuments_DocTypeOption_Issuance);
                             if (uploadResult) //only save the document url if the upload is good
                             {
                                 DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId,
@@ -1491,7 +1489,7 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_Recalled:
                 case Constants.PIWList_FormStatus_Rejected:
                     //submit section    
-                    EnableMainPanel(true);
+                    EnableMainPanel(true,formStatus);
                     lbMainMessage.Visible = false;
                     if (formStatus.Equals(Constants.PIWList_FormStatus_Recalled))
                     {
@@ -1543,7 +1541,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Submitted:
                     //submit section   
-                    EnableMainPanel(false);
+                    EnableMainPanel(false,formStatus);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
                     fieldsetRecall.Visible = true;
@@ -1571,7 +1569,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Edited:
                     //submitter
-                    EnableMainPanel(true);
+                    EnableMainPanel(true, formStatus);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
                     fieldsetRecall.Visible = false;
@@ -1609,7 +1607,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
                     //submitter
-                    EnableMainPanel(false);
+                    EnableMainPanel(false, formStatus);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
                     fieldsetRecall.Visible = false;
@@ -1641,7 +1639,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_PrePublication:
                     //submitter
-                    EnableMainPanel(false);
+                    EnableMainPanel(false, formStatus);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
                     fieldsetRecall.Visible = false;
@@ -1678,7 +1676,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_ReadyForPublishing:
                     //submitter
-                    EnableMainPanel(false);
+                    EnableMainPanel(false, formStatus);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
                     fieldsetRecall.Visible = false;
@@ -1715,7 +1713,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
                     //submitter
-                    EnableMainPanel(false);
+                    EnableMainPanel(false, formStatus);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "Publication has been initiated for this issuance.";
                     fieldsetOSECRejectComment.Visible = false;
@@ -1751,7 +1749,7 @@ namespace PIW_SPAppWeb.Pages
                     btnReopen.Visible = true;
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    EnableMainPanel(false);
+                    EnableMainPanel(false, formStatus);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "This issuance is available in eLibrary.";
                     fieldsetOSECRejectComment.Visible = false;
@@ -1790,7 +1788,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Deleted:
                     //this status is only viewable by admin
-                    EnableMainPanel(false);
+                    EnableMainPanel(false, formStatus);
                     if (isRequireOSECVerification)
                     {
                         fieldsetOSECVerification.Visible = true;
@@ -1814,7 +1812,7 @@ namespace PIW_SPAppWeb.Pages
             tbPrePublicationComment.Enabled = enabled;
         }
 
-        private void EnableMainPanel(bool enabled)
+        private void EnableMainPanel(bool enabled,string FormStatus)
         {
             EnableFileUploadComponent(enabled);
             tbDocketNumber.Enabled = enabled;
@@ -1824,7 +1822,19 @@ namespace PIW_SPAppWeb.Pages
             tbDescription.Enabled = enabled;
             tbInstruction.Enabled = enabled;
             cbFederalRegister.Enabled = enabled;
-            ddDocumentCategory.Enabled = enabled;
+
+            //only allow document category to be changed if Status is not Edited
+            if (FormStatus.Equals(Constants.PIWList_FormStatus_Edited))
+            {
+                ddDocumentCategory.Enabled = false;
+            }
+            else
+            {
+                ddDocumentCategory.Enabled = enabled;
+            }
+            
+
+
             ddProgramOfficeWorkflowInitiator.Enabled = enabled;
             //initiator
             inputWorkflowInitiator.Enabled = false;//initiator alsways disabled

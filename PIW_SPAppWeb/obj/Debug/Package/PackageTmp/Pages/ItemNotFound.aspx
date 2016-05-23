@@ -14,7 +14,7 @@
     <div class="container">
         <div class="jumbotron">
             <h1>Item Not Found.</h1>
-            The workflow may be deleted.
+            The workflow item has been deleted.
         </div>
     </div>
     
