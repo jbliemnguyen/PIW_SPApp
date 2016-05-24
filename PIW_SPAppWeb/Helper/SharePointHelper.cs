@@ -7,8 +7,10 @@ using System.Runtime.Remoting.Channels;
 using System.Web;
 using System.Web.Caching;
 using System.Web.UI;
+using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Office.CustomUI;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.SharePoint.Client;
@@ -19,6 +21,7 @@ using FERC.FOL.ATMS.Remote.Interfaces;
 using ListItemCollection = Microsoft.SharePoint.Client.ListItemCollection;
 using System.Text;
 using FontSize = System.Web.UI.WebControls.FontSize;
+using Group = Microsoft.SharePoint.Client.Group;
 
 //using FERC.FOL.ATMS.Structure;
 
@@ -233,7 +236,7 @@ namespace PIW_SPAppWeb.Helper
 
 
 
-        public string UploadDocumentContentStream(ClientContext clientContext, Stream fileStream, string libraryName, string subFolder, string fileName, string securityLevel,string docType)
+        public string UploadDocumentContentStream(ClientContext clientContext, Stream fileStream, string libraryName, string subFolder, string fileName, string securityLevel, string docType)
         {
             var internalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWDocuments_DocumentLibraryName);
 
@@ -263,28 +266,39 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        private List<File> getAllIssuanceDocuments(ClientContext clientContext, string uploadSubFolderURL, bool includeListItemAllFields)
+        private List<File> getDocumentsByDocType(ClientContext clientContext, string uploadSubFolderURL, string docType)
         {
             var internalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWDocuments_DocumentLibraryName);
             Folder folder = clientContext.Web.GetFolderByServerRelativeUrl(uploadSubFolderURL);
 
             FileCollection files = folder.Files;
             clientContext.Load(files);
-            clientContext.Load(files, includes => includes.Include(i => i.ListItemAllFields.Id));
-
-            if (includeListItemAllFields)
-            {
-                clientContext.Load(files, includes => includes.Include(i => i.ListItemAllFields));
-            }
-
+            clientContext.Load(files, includes => includes.Include(i => i.ListItemAllFields));
             clientContext.ExecuteQuery();//file not found exception if the folder is not exist, let it crash because it is totally wrong somewhere
 
-            var issuanceFiles = files.Where(
-                file => file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_DocType]].Equals(Constants.PIWDocuments_DocTypeOption_Issuance));
-            return issuanceFiles.ToList();
+            var issuanceFiles = new List<File>();
+
+            if (string.IsNullOrEmpty(docType))//get all docs
+            {
+                issuanceFiles = files.ToList();
+            }
+            else
+            {
+                foreach (var file in files)
+                {
+                    if (file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_DocType]] != null &&
+                        file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_DocType]].Equals(docType))
+                    {
+                        issuanceFiles.Add(file);
+                    }
+                }
+            }
+
+
+            return issuanceFiles;
         }
 
-        public System.Data.DataTable getAllIssuanceDocumentsTable(ClientContext clientContext, string subFoder, string libraryName, out StringBuilder DocumentURLs)
+        public System.Data.DataTable getDocumentsTableByDocType(ClientContext clientContext, string subFoder, string libraryName, out StringBuilder DocumentURLs, string docType)
         {
             DocumentURLs = new StringBuilder();
             var result = new System.Data.DataTable();
@@ -302,7 +316,7 @@ namespace PIW_SPAppWeb.Helper
 
             string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, libraryName, subFoder);
 
-            var documentList = getAllIssuanceDocuments(clientContext, uploadSubFolderURL, true);
+            var documentList = getDocumentsByDocType(clientContext, uploadSubFolderURL, docType);
 
             foreach (File file in documentList)
             {
@@ -312,7 +326,7 @@ namespace PIW_SPAppWeb.Helper
                 row["URL"] = uploadSubFolderURL + "/" + row["Name"];
                 row["Security Level"] =
                     file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_SecurityLevel]];
-                
+
                 result.Rows.Add(row);
 
                 if (DocumentURLs.Length == 0)
@@ -336,7 +350,7 @@ namespace PIW_SPAppWeb.Helper
             clientContext.Load(clientContext.Web, web => web.Url);
             clientContext.ExecuteQuery();
             string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, libraryName, subFolder);
-            var documentList = getAllIssuanceDocuments(clientContext, uploadSubFolderURL, false);
+            var documentList = getDocumentsByDocType(clientContext, uploadSubFolderURL, string.Empty);
 
             foreach (File file in documentList)
             {
@@ -649,7 +663,7 @@ namespace PIW_SPAppWeb.Helper
             return paragraph1;
         }
 
-        public bool UploadFile(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError, Label lbRequiredUploadedDocumentError, string FormStatus, string securityControlValue,string docType)
+        public bool UploadIssuanceDocument(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError, Label lbRequiredUploadedDocumentError, string FormStatus, string securityControlValue, string docType)
         {
             bool result = false;
             using (var fileStream = fileUpload.PostedFile.InputStream)
@@ -685,7 +699,7 @@ namespace PIW_SPAppWeb.Helper
                     else
                     {
                         UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName,
-                            listItemId, fileName, securityControlValue,docType);
+                            listItemId, fileName, securityControlValue, docType);
 
 
                         //clear validation error
@@ -709,22 +723,73 @@ namespace PIW_SPAppWeb.Helper
             return result;
         }
 
-        public string PopulateDocumentList(ClientContext clientContext, string listItemId, Repeater rpDocumentList)
+        public bool UploadSupplementalMailingListDocument(ClientContext clientContext, FileUpload fileUpload, string listItemId,
+            Repeater rpDocumentList, Label lbUploadedDocumentError, 
+            string FormStatus, string securityControlValue, string docType)
         {
-            StringBuilder documentURLs;
-            System.Data.DataTable table = getAllIssuanceDocumentsTable(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, out documentURLs);
-            rpDocumentList.DataSource = table;
-            rpDocumentList.DataBind();
+            bool result = false;
+            using (var fileStream = fileUpload.PostedFile.InputStream)
+            {
+                string fileName = fileUpload.FileName;
+                var extension = Path.GetExtension(fileName);
+                if (extension != null && (!extension.Equals(".xlsx", StringComparison.CurrentCultureIgnoreCase)))
+                {
+                    lbUploadedDocumentError.Text = "Please upload excel file with .xlsx extension";
+                    lbUploadedDocumentError.Visible = true;
+                }
+                else
+                {
+                    UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName,
+                        listItemId, fileName, securityControlValue, docType);
 
-            return documentURLs.ToString();
+
+                    //clear validation error
+                    lbUploadedDocumentError.Visible = false;
+                    lbUploadedDocumentError.Text = string.Empty;
+
+                    //history list
+                    if (getHistoryListByPIWListID(clientContext, listItemId).Count == 0)
+                    {
+                        CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus);
+                    }
+
+                    CreatePIWListHistory(clientContext, listItemId,
+                        string.Format("Supplemental Mailing List {0} uploaded/associated with Workflow Item", fileName), FormStatus);
+                    result = true;
+
+                }
+            }
+
+            return result;
 
         }
 
-        public void GenerateCitation(ClientContext clientContext, DropDownList ddDocumentCategory, TextBox tbCitationNumber, DropDownList ddAvailableCitationNumbers,bool isAgendaForm)
+        public string PopulateIssuanceDocumentList(ClientContext clientContext, string listItemId, Repeater rpDocumentList)
+        {
+            StringBuilder documentURLs;
+            System.Data.DataTable table = getDocumentsTableByDocType(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, out documentURLs, Constants.PIWDocuments_DocTypeOption_Issuance);
+            rpDocumentList.DataSource = table;
+            rpDocumentList.DataBind();
+            return documentURLs.ToString();
+
+        }
+        public void PopulateSupplementalMailingListDocumentList(ClientContext clientContext, string listItemId, Repeater rpDocumentList,HtmlGenericControl supplementalMailingListFieldSet)
+        {
+            StringBuilder documentURLs;
+            System.Data.DataTable table = getDocumentsTableByDocType(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, out documentURLs, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList);
+            rpDocumentList.DataSource = table;
+            rpDocumentList.DataBind();
+
+            //only allow ONE supplemental mailing list uploaded
+            supplementalMailingListFieldSet.Visible = table.Rows.Count == 0;
+
+        }
+
+        public void GenerateCitation(ClientContext clientContext, DropDownList ddDocumentCategory, TextBox tbCitationNumber, DropDownList ddAvailableCitationNumbers, bool isAgendaForm)
         {
             if (ddDocumentCategory.SelectedIndex > 0)
             {
-                int documentCategoryNumber = getDocumentCategoryNumber(ddDocumentCategory.SelectedValue,isAgendaForm);
+                int documentCategoryNumber = getDocumentCategoryNumber(ddDocumentCategory.SelectedValue, isAgendaForm);
 
                 CitationNumber citationNumberHelper = new CitationNumber(documentCategoryNumber, DateTime.Now);
 

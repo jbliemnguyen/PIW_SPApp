@@ -88,7 +88,9 @@ namespace PIW_SPAppWeb.Pages
                     {
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
-                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
+                            DocumentURLsFromViewState = helper.PopulateIssuanceDocumentList(clientContext, _listItemId, rpDocumentList);
+                            helper.PopulateSupplementalMailingListDocumentList(clientContext,_listItemId,rpSupplementalMailingListDocumentList,fieldSetSupplementalMailingList);
+                            
                             var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext, Constants.Grp_PIWAdmin);
 
                             //if current user is piw admin, load the item even if the isActive is false
@@ -636,7 +638,7 @@ namespace PIW_SPAppWeb.Pages
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
                             string removedFileName = helper.RemoveDocument(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
-                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
+                            DocumentURLsFromViewState = helper.PopulateIssuanceDocumentList(clientContext, _listItemId, rpDocumentList);
                             //history list
                             helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Document file {0} removed", removedFileName), FormStatus);
                         }
@@ -651,6 +653,36 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
+        protected void rpSupplementalMailingListDocumentList_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            try
+            {
+                if (e.CommandName == "RemoveDocument")
+                {
+                    if (!string.IsNullOrEmpty(e.CommandArgument.ToString()))
+                    {
+
+                        using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                        {
+                            string removedFileName = helper.RemoveDocument(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
+                            helper.PopulateSupplementalMailingListDocumentList(clientContext, _listItemId, rpSupplementalMailingListDocumentList,fieldSetSupplementalMailingList);
+                            
+                            //history list
+                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Supplemental Mailing List {0} removed", removedFileName), FormStatus);
+                        }
+
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                throw;
+            }
+        }
+
+        
+
         protected void btnUpload_Click(object sender, EventArgs e)
         {
             try
@@ -663,12 +695,12 @@ namespace PIW_SPAppWeb.Pages
 
                         using (var clientContext = spContext.CreateUserClientContextForSPHost())
                         {
-                            var uploadResult = helper.UploadFile(clientContext, fileUpload, _listItemId, rpDocumentList,
+                            var uploadResult = helper.UploadIssuanceDocument(clientContext, fileUpload, _listItemId, rpDocumentList,
                                 lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus,
                                 ddlSecurityControl.SelectedValue,Constants.PIWDocuments_DocTypeOption_Issuance);
                             if (uploadResult) //only save the document url if the upload is good
                             {
-                                DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId,
+                                DocumentURLsFromViewState = helper.PopulateIssuanceDocumentList(clientContext, _listItemId,
                                     rpDocumentList);
                                 //Extract docket numner
                                 if (rpDocumentList.Items.Count == 1)
@@ -696,6 +728,41 @@ namespace PIW_SPAppWeb.Pages
                 helper.LogError(Context, ex, _listItemId, string.Empty);
                 lbUploadedDocumentError.Text = ex.Message;
                 lbUploadedDocumentError.Visible = true;
+            }
+
+        }
+
+        protected void btnSupplementalMailingListUpload_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (supplementalMailingListFileUpload.HasFiles)
+                {
+                    if (supplementalMailingListFileUpload.PostedFile.ContentLength < 52428800)
+                    {
+                        using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
+                        {
+                            var uploadResult = helper.UploadSupplementalMailingListDocument(clientContext, supplementalMailingListFileUpload, _listItemId, rpSupplementalMailingListDocumentList,
+                                lbSupplementalMailingListUploadError,FormStatus,Constants.PIWDocuments_EPSSecurityLevel_Option_Public,Constants.PIWDocuments_DocTypeOption_SupplementalMailingList);
+                            if (uploadResult) //only save the document url if the upload is good
+                            {
+                                helper.PopulateSupplementalMailingListDocumentList(clientContext, _listItemId,rpSupplementalMailingListDocumentList,fieldSetSupplementalMailingList);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        lbSupplementalMailingListUploadError.Text = "file cannot bigger than 52MB";
+                        lbSupplementalMailingListUploadError.Visible = true;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                helper.LogError(Context, ex, _listItemId, string.Empty);
+                lbSupplementalMailingListUploadError.Text = ex.Message;
+                lbSupplementalMailingListUploadError.Visible = true;
             }
 
         }
@@ -1854,9 +1921,24 @@ namespace PIW_SPAppWeb.Pages
         {
             //disable/enable fileupload            
             fieldsetUpload.Visible = enabled;
+
+            //supplemental mailing list only allowd 1 document,
+            //need to check first, if the control is invisible, don't change it
+            //this method is called to disable controls based on status, the control may be already invisible from the PopulateSupplementalMailingListDocumentList method
+            if (fieldSetSupplementalMailingList.Visible)
+            {
+                fieldSetSupplementalMailingList.Visible = enabled;    
+            }
+            
             //disable/enable the Remove button
             //the link always be enable so user can open document
             foreach (RepeaterItem row in rpDocumentList.Items)
+            {
+                var btnRemoveDocument = (LinkButton)row.FindControl("btnRemoveDocument");
+                btnRemoveDocument.Enabled = enabled;
+            }
+
+            foreach (RepeaterItem row in rpSupplementalMailingListDocumentList.Items)
             {
                 var btnRemoveDocument = (LinkButton)row.FindControl("btnRemoveDocument");
                 btnRemoveDocument.Enabled = enabled;

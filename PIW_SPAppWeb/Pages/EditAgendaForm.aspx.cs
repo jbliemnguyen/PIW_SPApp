@@ -88,7 +88,7 @@ namespace PIW_SPAppWeb
                     {
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
-                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
+                            DocumentURLsFromViewState = helper.PopulateIssuanceDocumentList(clientContext, _listItemId, rpDocumentList);
                             var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext, Constants.Grp_PIWAdmin);
 
                             //if current user is piw admin, load the item even if the isActive is false
@@ -471,12 +471,12 @@ namespace PIW_SPAppWeb
 
                         using (var clientContext = spContext.CreateUserClientContextForSPHost())
                         {
-                            var uploadResult = helper.UploadFile(clientContext, fileUpload, _listItemId, rpDocumentList,
+                            var uploadResult = helper.UploadIssuanceDocument(clientContext, fileUpload, _listItemId, rpDocumentList,
                                 lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus,
                                 ddlSecurityControl.SelectedValue,Constants.PIWDocuments_DocTypeOption_Issuance);
                             if (uploadResult) //only save the document url if the upload is good
                             {
-                                DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId,
+                                DocumentURLsFromViewState = helper.PopulateIssuanceDocumentList(clientContext, _listItemId,
                                     rpDocumentList);
                                 //Extract docket numner
                                 if (rpDocumentList.Items.Count == 1)
@@ -519,7 +519,7 @@ namespace PIW_SPAppWeb
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
                             string removedFileName = helper.RemoveDocument(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
-                            DocumentURLsFromViewState = helper.PopulateDocumentList(clientContext, _listItemId, rpDocumentList);
+                            DocumentURLsFromViewState = helper.PopulateIssuanceDocumentList(clientContext, _listItemId, rpDocumentList);
                             //history list
                             helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Document file {0} removed", removedFileName), FormStatus);
                         }
