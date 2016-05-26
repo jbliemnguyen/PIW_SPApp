@@ -454,8 +454,6 @@
                     </div>
                 </div>
             </fieldset>
-
-
             <fieldset runat="server" id="fieldSetSupplementalMailingList">
                 <div class="form-group">
                     <asp:Label ID="lbSupplementalMailingListFileName" runat="server" Text="Supplemental Mailing List" AssociatedControlID="supplementalMailingListFileUpload" CssClass="col-md-2 control-label"></asp:Label>

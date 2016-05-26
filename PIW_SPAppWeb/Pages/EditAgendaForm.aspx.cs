@@ -89,6 +89,8 @@ namespace PIW_SPAppWeb
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
                             DocumentURLsFromViewState = helper.PopulateIssuanceDocumentList(clientContext, _listItemId, rpDocumentList);
+                            helper.PopulateSupplementalMailingListDocumentList(clientContext, _listItemId, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
+
                             var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext, Constants.Grp_PIWAdmin);
 
                             //if current user is piw admin, load the item even if the isActive is false
@@ -143,7 +145,7 @@ namespace PIW_SPAppWeb
                         }
 
                         //forward to Edit
-                        Response.Redirect(Request.Url + "&ID=" + _listItemId);
+                        Response.Redirect(Request.Url + "&ID=" + _listItemId,false);
                         
                     }
                 }
@@ -151,7 +153,7 @@ namespace PIW_SPAppWeb
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, Page.Request.Url.OriginalString);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -194,7 +196,7 @@ namespace PIW_SPAppWeb
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -225,11 +227,11 @@ namespace PIW_SPAppWeb
 
                         if ((FormStatus == Constants.PIWList_FormStatus_Rejected) || (FormStatus == Constants.PIWList_FormStatus_Recalled))
                         {
-                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item resubmitted", FormStatus);
+                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item resubmitted for Secretary Review", FormStatus);
                         }
                         else
                         {
-                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item submitted", FormStatus);
+                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item submitted for Secretary Review", FormStatus);
                         }
 
                         //Redirect
@@ -240,7 +242,7 @@ namespace PIW_SPAppWeb
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -268,7 +270,7 @@ namespace PIW_SPAppWeb
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -292,14 +294,14 @@ namespace PIW_SPAppWeb
                     //Create list history
                     helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item accepted", FormStatus);
 
-                    //Redirect
-                    helper.RedirectToSourcePage(Page.Request, Page.Response);
+                    //Refresh the page
+                    helper.RefreshPage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -344,7 +346,7 @@ namespace PIW_SPAppWeb
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -376,9 +378,6 @@ namespace PIW_SPAppWeb
                     EPSPublicationHelper epsHelper = new EPSPublicationHelper();
                     epsHelper.Publish(clientContext, files, listItem);
 
-
-                    //todo: change status
-
                     //TODO: Change document and list permission
 
                     //TODO: send email
@@ -393,7 +392,7 @@ namespace PIW_SPAppWeb
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -424,7 +423,7 @@ namespace PIW_SPAppWeb
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -455,7 +454,7 @@ namespace PIW_SPAppWeb
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -507,6 +506,41 @@ namespace PIW_SPAppWeb
             }
         }
 
+        protected void btnSupplementalMailingListUpload_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (supplementalMailingListFileUpload.HasFiles)
+                {
+                    if (supplementalMailingListFileUpload.PostedFile.ContentLength < 52428800)
+                    {
+                        using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
+                        {
+                            var uploadResult = helper.UploadSupplementalMailingListDocument(clientContext, supplementalMailingListFileUpload, _listItemId, rpSupplementalMailingListDocumentList,
+                                lbSupplementalMailingListUploadError, FormStatus, Constants.PIWDocuments_EPSSecurityLevel_Option_Public, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList);
+                            if (uploadResult) //only save the document url if the upload is good
+                            {
+                                helper.PopulateSupplementalMailingListDocumentList(clientContext, _listItemId, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        lbSupplementalMailingListUploadError.Text = "file cannot bigger than 52MB";
+                        lbSupplementalMailingListUploadError.Visible = true;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                helper.LogError(Context, ex, _listItemId, string.Empty);
+                lbSupplementalMailingListUploadError.Text = ex.Message;
+                lbSupplementalMailingListUploadError.Visible = true;
+            }
+
+        }
+
         protected void rpDocumentList_ItemCommand(object source, RepeaterCommandEventArgs e)
         {
             try
@@ -530,11 +564,38 @@ namespace PIW_SPAppWeb
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
-        
+        protected void rpSupplementalMailingListDocumentList_ItemCommand(object source, RepeaterCommandEventArgs e)
+        {
+            try
+            {
+                if (e.CommandName == "RemoveDocument")
+                {
+                    if (!string.IsNullOrEmpty(e.CommandArgument.ToString()))
+                    {
+
+                        using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                        {
+                            string removedFileName = helper.RemoveDocument(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
+                            helper.PopulateSupplementalMailingListDocumentList(clientContext, _listItemId, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
+
+                            //history list
+                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Supplemental Mailing List {0} removed", removedFileName), FormStatus);
+                        }
+
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, exc, _listItemId, string.Empty);
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+            }
+        }
+
         protected void btnGenerateCitationNumber_Click(object sender, EventArgs e)
         {
             try
@@ -550,7 +611,7 @@ namespace PIW_SPAppWeb
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -620,7 +681,7 @@ namespace PIW_SPAppWeb
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -636,6 +697,7 @@ namespace PIW_SPAppWeb
 
                     try
                     {
+                        var citationNumber = tbCitationNumber.Text.Trim();
                         //need to re-populate the modified date becuase the list item is changed
                         PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
 
@@ -654,7 +716,7 @@ namespace PIW_SPAppWeb
                         foreach (var documentURL in documentURLs)//add citation to all documents
                         {
                             var fileName = helper.getFileNameFromURL(documentURL);
-                            helper.RemoveCitationNumberFromDocument(clientContext, tbCitationNumber.Text.Trim(), _listItemId, fileName);
+                            helper.RemoveCitationNumberFromDocument(clientContext, citationNumber, _listItemId, fileName);
 
                         }
                     }
@@ -670,7 +732,7 @@ namespace PIW_SPAppWeb
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -735,8 +797,8 @@ namespace PIW_SPAppWeb
                     }
                     break;
                 case Constants.PIWList_FormStatus_SecretaryReview:
-                    if ((PreviousFormStatus == Constants.PIWList_FormStatus_Pending) || 
-                        (PreviousFormStatus == Constants.PIWList_FormStatus_Edited))
+                    if ((PreviousFormStatus == Constants.PIWList_FormStatus_Pending) ||
+                        (PreviousFormStatus == Constants.PIWList_FormStatus_Edited) || (PreviousFormStatus == Constants.PIWList_FormStatus_ReOpen))
                     {
                         SaveMainPanelAndStatus(clientContext, listItem);
                     }
@@ -807,7 +869,7 @@ namespace PIW_SPAppWeb
                     }
                     break;
                 case Constants.PIWList_FormStatus_ReOpen:
-                    SaveReOpenAction(clientContext, listItem);
+                    helper.SaveReOpenInfoAndStatus(clientContext,listItem,FormStatus,PreviousFormStatus);
                     break;
                 default:
                     throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
@@ -836,12 +898,6 @@ namespace PIW_SPAppWeb
 
             listItem.Update();
             clientContext.ExecuteQuery();
-        }
-
-        private void SaveReOpenAction(ClientContext clientContext, ListItem listItem)
-        {
-            //todo: clear accession number, set status
-            throw new NotImplementedException();
         }
 
         private void ClearSecReviewActionsAndCommentsBeforeReSubmit(ClientContext clientContext, ListItem listItem)
@@ -1545,9 +1601,24 @@ namespace PIW_SPAppWeb
         {
             //disable/enable fileupload            
             fieldsetUpload.Visible = enabled;
+
+            //supplemental mailing list only allowd 1 document,
+            //need to check first, if the control is invisible, don't change it
+            //this method is called to disable controls based on status, the control may be already invisible from the PopulateSupplementalMailingListDocumentList method
+            if (fieldSetSupplementalMailingList.Visible)
+            {
+                fieldSetSupplementalMailingList.Visible = enabled;
+            }
+
             //disable/enable the Remove button
             //the link always be enable so user can open document
             foreach (RepeaterItem row in rpDocumentList.Items)
+            {
+                var btnRemoveDocument = (LinkButton)row.FindControl("btnRemoveDocument");
+                btnRemoveDocument.Enabled = enabled;
+            }
+
+            foreach (RepeaterItem row in rpSupplementalMailingListDocumentList.Items)
             {
                 var btnRemoveDocument = (LinkButton)row.FindControl("btnRemoveDocument");
                 btnRemoveDocument.Enabled = enabled;

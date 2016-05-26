@@ -156,6 +156,24 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
+        public void SaveReOpenInfoAndStatus(ClientContext clientContext, ListItem listItem, string FormStatus, string PreviousFormStatus)
+        {
+            var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
+
+            //clear secreview action and comment
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewAction]] = string.Empty;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewComment]] = string.Empty;
+            
+            //clear accession number
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
+
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
+
         public void SaveFormStatus(ClientContext clientContext, ListItem listItem, string FormStatus, string PreviousFormStatus)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
@@ -560,9 +578,9 @@ namespace PIW_SPAppWeb.Helper
         public void RemoveCitationNumberFromDocument(ClientContext clientContext, string citationNumber, string listItemID, string fileName)
         {
             var documentServerRelativeURL = getDocumentServerRelativeURL(clientContext, listItemID, fileName);
-
-            //var newclientContext = new ClientContext(Request.QueryString["SPHostUrl"]);
+            
             FileInformation fileInformation = File.OpenBinaryDirect(clientContext, documentServerRelativeURL);
+            bool foundCitationNumberInDocument = false;
 
             using (MemoryStream memoryStream = new MemoryStream())
             {
@@ -580,14 +598,19 @@ namespace PIW_SPAppWeb.Helper
                             Paragraph p = (Paragraph)run.Parent;
                             p.RemoveAllChildren();
                             p.Remove();
+                            foundCitationNumberInDocument = true;
                             break;
                         }
                     }
                 }
-                // Seek to beginning before writing to the SharePoint server.
-                memoryStream.Seek(0, SeekOrigin.Begin);
 
-                File.SaveBinaryDirect(clientContext, documentServerRelativeURL, memoryStream, true);
+                if (foundCitationNumberInDocument)
+                {
+                    // Seek to beginning before writing to the SharePoint server.
+                    memoryStream.Seek(0, SeekOrigin.Begin);
+                    File.SaveBinaryDirect(clientContext, documentServerRelativeURL, memoryStream, true);    
+                }
+                
             }
         }
         public string getDocumentServerRelativeURL(ClientContext clientContext, string listItemID, string fileName)

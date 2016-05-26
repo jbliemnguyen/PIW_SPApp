@@ -144,14 +144,14 @@ namespace PIW_SPAppWeb.Pages
                         }
 
                         //forward to Edit
-                        Response.Redirect(Request.Url + "&ID=" + _listItemId);
+                        Response.Redirect(Request.Url + "&ID=" + _listItemId,false);
                     }
                 }
             }
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, Page.Request.Url.OriginalString);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
         protected void btnSave_Click(object sender, EventArgs e)
@@ -193,7 +193,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
 
 
@@ -242,7 +242,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -273,7 +273,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -304,7 +304,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -351,7 +351,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -382,7 +382,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -419,7 +419,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -450,7 +450,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -478,7 +478,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -497,7 +497,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -567,7 +567,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -583,6 +583,7 @@ namespace PIW_SPAppWeb.Pages
 
                     try
                     {
+                        var citationNumber = tbCitationNumber.Text.Trim();
                         //need to re-populate the modified date becuase the list item is changed
                         PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
 
@@ -601,7 +602,7 @@ namespace PIW_SPAppWeb.Pages
                         foreach (var documentURL in documentURLs)//add citation to all documents
                         {
                             var fileName = helper.getFileNameFromURL(documentURL);
-                            helper.RemoveCitationNumberFromDocument(clientContext, tbCitationNumber.Text.Trim(), _listItemId, fileName);
+                            helper.RemoveCitationNumberFromDocument(clientContext, citationNumber, _listItemId, fileName);
 
                         }
                     }
@@ -617,7 +618,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -649,7 +650,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -677,7 +678,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -791,7 +792,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, exc, _listItemId, string.Empty);
-                throw;
+                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
 
@@ -933,7 +934,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else if (PreviousFormStatus == Constants.PIWList_FormStatus_PublishInitiated)//REOPEN- come from Publish Initiated
                     {
-                        helper.SaveFormStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
+                        helper.SaveReOpenInfoAndStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
                     }
                     else
                     {
@@ -984,6 +985,20 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
+        private void SaveReOpenInfoAndStatus(ClientContext clientContext, ListItem listItem)
+        {
+            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
+
+            //clear accession number
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
+
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
+        
         private void SavePrePublicationInfoAndStatus(ClientContext clientContext, ListItem listItem, enumAction action)
         {
             var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);

@@ -471,6 +471,49 @@
                     </div>
                 </div>
             </fieldset>
+            <fieldset runat="server" id="fieldSetSupplementalMailingList">
+                <div class="form-group">
+                    <asp:Label ID="lbSupplementalMailingListFileName" runat="server" Text="Supplemental Mailing List" AssociatedControlID="supplementalMailingListFileUpload" CssClass="col-md-2 control-label"></asp:Label>
+
+                    <div class="col-md-7">
+                        <asp:FileUpload ID="supplementalMailingListFileUpload" runat="server" Width="100%" placeholder="Click here to browse the file" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <asp:Label ID="lbSupplementalMailingListUploadError" runat="server" ForeColor="Red" Visible="false"></asp:Label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-2">
+                        <asp:Button ID="btnSupplementalMailingListUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary cancel" OnClick="btnSupplementalMailingListUpload_Click" />
+                        <%--Note: "cancel" in CssClass is to bypass the jquery validation when user upload file--%>
+                    </div>
+                </div>
+            </fieldset>
+            <div class="form-group">
+                <asp:Label ID="lbUploadedSupplementalMailingList" runat="server" Text="Uploaded Supplemental Mailing List" AssociatedControlID="rpSupplementalMailingListDocumentList" ClientIDMode="Static" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-9">
+                    <asp:Repeater ID="rpSupplementalMailingListDocumentList" runat="server" OnItemCommand="rpSupplementalMailingListDocumentList_ItemCommand">
+                        <HeaderTemplate>
+                            <ol class="list-group">
+                        </HeaderTemplate>
+                        <ItemTemplate>
+                            <li class="list-group-item">
+                                <asp:HyperLink ID="hyperlinkFileURL" runat="server" Text='<%#DataBinder.Eval(Container.DataItem,"Name")%>'
+                                    NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"URL")%>'>
+                                </asp:HyperLink>
+                                &nbsp;&nbsp;|&nbsp;&nbsp;
+                            <asp:LinkButton ID="btnRemoveDocument" runat="server" Text="Remove" CommandName="RemoveDocument"
+                                CommandArgument='<%#DataBinder.Eval(Container.DataItem,"ID")%>' />
+                            </li>
+                        </ItemTemplate>
+                        <FooterTemplate>
+                            </ol>
+                        </FooterTemplate>
+                    </asp:Repeater>
+                </div>
+            </div>
 
             <%--End of Main Panel--%>
 

@@ -535,6 +535,69 @@ namespace PIW_SPAppWeb {
         protected global::System.Web.UI.WebControls.Label lbOSECRejectCommentValue;
         
         /// <summary>
+        /// fieldSetSupplementalMailingList control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldSetSupplementalMailingList;
+        
+        /// <summary>
+        /// lbSupplementalMailingListFileName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbSupplementalMailingListFileName;
+        
+        /// <summary>
+        /// supplementalMailingListFileUpload control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.FileUpload supplementalMailingListFileUpload;
+        
+        /// <summary>
+        /// lbSupplementalMailingListUploadError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbSupplementalMailingListUploadError;
+        
+        /// <summary>
+        /// btnSupplementalMailingListUpload control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSupplementalMailingListUpload;
+        
+        /// <summary>
+        /// lbUploadedSupplementalMailingList control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbUploadedSupplementalMailingList;
+        
+        /// <summary>
+        /// rpSupplementalMailingListDocumentList control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rpSupplementalMailingListDocumentList;
+        
+        /// <summary>
         /// fieldsetSecReview control.
         /// </summary>
         /// <remarks>
