@@ -62,7 +62,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_Modified = "Modified";
         public const string PIWList_colName_Section206Notice = "Section 206 Notice";
         public const string PIWList_colName_HearingOrder = "Hearing Order";
-
+        public const string PIWList_colName_FOLAServiceRequired = "FOLA Service Required";
 
 
 

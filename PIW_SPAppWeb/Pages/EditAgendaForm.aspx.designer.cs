@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace PIW_SPAppWeb {
+namespace PIW_SPAppWeb.Pages {
     
     
     public partial class EditAgendaForm {

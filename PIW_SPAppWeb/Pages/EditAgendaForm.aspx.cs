@@ -6,7 +6,7 @@ using Microsoft.SharePoint.Client;
 using PIW_SPAppWeb.Helper;
 using ListItem = Microsoft.SharePoint.Client.ListItem;
 
-namespace PIW_SPAppWeb
+namespace PIW_SPAppWeb.Pages
 {
     public partial class EditAgendaForm : System.Web.UI.Page
     {
@@ -470,10 +470,10 @@ namespace PIW_SPAppWeb
 
                         using (var clientContext = spContext.CreateUserClientContextForSPHost())
                         {
-                            var uploadResult = helper.UploadIssuanceDocument(clientContext, fileUpload, _listItemId, rpDocumentList,
+                            var uploadedFileURL = helper.UploadIssuanceDocument(clientContext, fileUpload, _listItemId, rpDocumentList,
                                 lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus,
                                 ddlSecurityControl.SelectedValue,Constants.PIWDocuments_DocTypeOption_Issuance);
-                            if (uploadResult) //only save the document url if the upload is good
+                            if (!string.IsNullOrEmpty(uploadedFileURL)) //only save the document url if the upload is good
                             {
                                 DocumentURLsFromViewState = helper.PopulateIssuanceDocumentList(clientContext, _listItemId,
                                     rpDocumentList);
@@ -487,6 +487,9 @@ namespace PIW_SPAppWeb
                                     }
 
                                 }
+
+                                //pop-up upload document 
+                                helper.OpenDocument(Page,uploadedFileURL);
                             }
                         }
                     }
@@ -517,7 +520,7 @@ namespace PIW_SPAppWeb
                         using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
                         {
                             var uploadResult = helper.UploadSupplementalMailingListDocument(clientContext, supplementalMailingListFileUpload, _listItemId, rpSupplementalMailingListDocumentList,
-                                lbSupplementalMailingListUploadError, FormStatus, Constants.PIWDocuments_EPSSecurityLevel_Option_Public, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList);
+                                lbSupplementalMailingListUploadError, FormStatus, Constants.ddlSecurityControl_Option_Public, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList);
                             if (uploadResult) //only save the document url if the upload is good
                             {
                                 helper.PopulateSupplementalMailingListDocumentList(clientContext, _listItemId, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
@@ -583,7 +586,7 @@ namespace PIW_SPAppWeb
                             helper.PopulateSupplementalMailingListDocumentList(clientContext, _listItemId, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
 
                             //history list
-                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Supplemental Mailing List {0} removed", removedFileName), FormStatus);
+                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Supplemental Mailing List file {0} removed", removedFileName), FormStatus);
                         }
 
                     }

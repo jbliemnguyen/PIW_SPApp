@@ -280,7 +280,7 @@ namespace PIW_SPAppWeb.Helper
             uploadFile.ListItemAllFields.Update();
 
             clientContext.ExecuteQuery();
-            return uploadFile.Name;
+            return string.Format("{0}/{1}",uploadSubFolderURL,uploadFile.Name);
 
         }
 
@@ -530,6 +530,15 @@ namespace PIW_SPAppWeb.Helper
         #endregion
 
         #region Utils
+        public void OpenDocument(Page page, string documentPath)
+        {
+            if (string.IsNullOrEmpty(documentPath))
+            {
+                return;
+            }
+
+            page.ClientScript.RegisterStartupScript(this.GetType(), "documentWindow", String.Format("<script>window.open('{0}');</script>", documentPath));
+        }
 
         public string getEPSAvailabilityCode(string ddldocumentSecurity)
         {
@@ -686,9 +695,9 @@ namespace PIW_SPAppWeb.Helper
             return paragraph1;
         }
 
-        public bool UploadIssuanceDocument(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError, Label lbRequiredUploadedDocumentError, string FormStatus, string securityControlValue, string docType)
+        public string UploadIssuanceDocument(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError, Label lbRequiredUploadedDocumentError, string FormStatus, string securityControlValue, string docType)
         {
-            bool result = false;
+            var uploadedFileURL = string.Empty;
             using (var fileStream = fileUpload.PostedFile.InputStream)
             {
                 string fileName = fileUpload.FileName;
@@ -721,7 +730,7 @@ namespace PIW_SPAppWeb.Helper
                     }
                     else
                     {
-                        UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName,
+                        uploadedFileURL = UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName,
                             listItemId, fileName, securityControlValue, docType);
 
 
@@ -738,12 +747,12 @@ namespace PIW_SPAppWeb.Helper
 
                         CreatePIWListHistory(clientContext, listItemId,
                             string.Format("Document file {0} uploaded/associated with Workflow Item", fileName), FormStatus);
-                        result = true;
+                        
                     }
                 }
             }
 
-            return result;
+            return uploadedFileURL;
         }
 
         public bool UploadSupplementalMailingListDocument(ClientContext clientContext, FileUpload fileUpload, string listItemId,
@@ -777,7 +786,7 @@ namespace PIW_SPAppWeb.Helper
                     }
 
                     CreatePIWListHistory(clientContext, listItemId,
-                        string.Format("Supplemental Mailing List {0} uploaded/associated with Workflow Item", fileName), FormStatus);
+                        string.Format("Supplemental Mailing List file {0} uploaded/associated with Workflow Item", fileName), FormStatus);
                     result = true;
 
                 }

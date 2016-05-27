@@ -669,7 +669,7 @@ namespace PIW_SPAppWeb.Pages
                             helper.PopulateSupplementalMailingListDocumentList(clientContext, _listItemId, rpSupplementalMailingListDocumentList,fieldSetSupplementalMailingList);
                             
                             //history list
-                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Supplemental Mailing List {0} removed", removedFileName), FormStatus);
+                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Supplemental Mailing List file {0} removed", removedFileName), FormStatus);
                         }
 
                     }
@@ -696,10 +696,10 @@ namespace PIW_SPAppWeb.Pages
 
                         using (var clientContext = spContext.CreateUserClientContextForSPHost())
                         {
-                            var uploadResult = helper.UploadIssuanceDocument(clientContext, fileUpload, _listItemId, rpDocumentList,
+                            var uploadedFileURL = helper.UploadIssuanceDocument(clientContext, fileUpload, _listItemId, rpDocumentList,
                                 lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus,
                                 ddlSecurityControl.SelectedValue,Constants.PIWDocuments_DocTypeOption_Issuance);
-                            if (uploadResult) //only save the document url if the upload is good
+                            if (!string.IsNullOrEmpty(uploadedFileURL)) //only save the document url if the upload is good
                             {
                                 DocumentURLsFromViewState = helper.PopulateIssuanceDocumentList(clientContext, _listItemId,
                                     rpDocumentList);

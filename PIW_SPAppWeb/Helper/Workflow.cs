@@ -282,4 +282,62 @@ namespace PIW_SPAppWeb.Helper
             return nextStatus;
         }
     }
+
+    public class DirectPublicationFormWorkflow
+    {
+        public string Execute(string currentStatus, enumAction action)
+        {
+            string nextStatus = currentStatus;
+            switch (currentStatus)
+            {
+                case Constants.PIWList_FormStatus_Pending:
+                case Constants.PIWList_FormStatus_ReOpen:
+                    //in Pending, ReOpen
+                    //user can only perform publish action
+                    if (action == enumAction.Publish)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_PublishInitiated;
+                    }
+                    else if (action == enumAction.Save)
+                    {
+                        nextStatus = currentStatus;
+                    }
+                    else if (action == enumAction.Delete)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_Deleted;
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
+                    }
+                    break;
+                
+                case Constants.PIWList_FormStatus_PublishInitiated:
+                    if (action == enumAction.ReOpen)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_ReOpen;
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_PublishedToeLibrary:
+                    if (action == enumAction.Save)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_PublishedToeLibrary;
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
+                    }
+
+                    break;
+                default:
+                    throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
+                    break;
+            }
+            return nextStatus;
+        }
+    }
 }
