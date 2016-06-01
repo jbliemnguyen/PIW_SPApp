@@ -7,6 +7,7 @@ using System.Linq;
 using System.ServiceModel;
 using System.Web;
 using System.Web.UI;
+using DocumentFormat.OpenXml.Office.CustomUI;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 
@@ -327,6 +328,31 @@ namespace PIW_SPAppWeb
             paragraph1.Append(paragraphProperties1);
             paragraph1.Append(run1);
             return paragraph1;
+        }
+
+        protected void btnTestExcelGeneration_Click(object sender, EventArgs e)
+        {
+            FOLAMailingListData folaData = new FOLAMailingListData();
+
+            //Header
+            folaData.Headers.Add("Contact Name");
+            folaData.Headers.Add("FERCID");
+
+            //Data
+            for (int i = 0; i < 10 ;i++)
+            {
+                List<String> row = new List<string>();
+                row.Add(i.ToString());
+                row.Add(DateTime.Now.ToShortTimeString());
+                folaData.DataRows.Add(row);
+    
+            }
+            
+            FOLAMailingListExcelWriter excelWriter = new FOLAMailingListExcelWriter();
+            var file = excelWriter.GenerateExcel(folaData);
+            Response.AddHeader("Content-Disposition",
+                "attachment; filename=ExcelFile.xlsx");
+            Response.BinaryWrite(file);
         }
 
     }

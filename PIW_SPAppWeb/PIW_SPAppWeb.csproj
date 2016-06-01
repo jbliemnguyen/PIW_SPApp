@@ -236,6 +236,8 @@
     <Compile Include="Helper\CitationNumber.cs" />
     <Compile Include="Helper\Constants.cs" />
     <Compile Include="Helper\EPSPublicationHelper.cs" />
+    <Compile Include="Helper\FOLAMailingListData.cs" />
+    <Compile Include="Helper\FOLAMailingListExcelWriter.cs" />
     <Compile Include="Helper\SharePointHelper.cs" />
     <Compile Include="Helper\Workflow.cs" />
     <Compile Include="Pages\AccessDenied.aspx.cs">

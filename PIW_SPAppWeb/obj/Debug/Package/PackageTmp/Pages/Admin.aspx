@@ -24,5 +24,7 @@
         <asp:Button ID="EPSValidation" runat="server" Text="Test Doc Validation" OnClick="EPSValidation_Click" />
         </br>
         <asp:Button ID="btnTestCitationAppended" runat="server" Text="Test Citation Number Append" OnClick="btnTestCitationAppended_Click" />
+        <br/>
+        <asp:Button ID="btnTestExcelGeneration" runat="server" Text="Test Excel Generation" OnClick="btnTestExcelGeneration_Click" />
     </form>
 </asp:Content>
