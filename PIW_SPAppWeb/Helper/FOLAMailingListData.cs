@@ -8,10 +8,15 @@ namespace PIW_SPAppWeb.Helper
         public List<string> Headers { get; set; }
         public List<List<string>> DataRows { get; set; }
 
-        public FOLAMailingListData()
+        public FOLAMailingListData(string[] docket)
         {
             Headers = new List<string>();
-            DataRows = new List<List<string>>();
+            DataRows = getFOLAMailingList(docket);
+        }
+
+        public List<List<string>> getFOLAMailingList(string[] docket)
+        {
+            
         }
 
     }

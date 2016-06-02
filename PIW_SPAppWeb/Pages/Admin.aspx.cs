@@ -350,9 +350,10 @@ namespace PIW_SPAppWeb
             
             FOLAMailingListExcelWriter excelWriter = new FOLAMailingListExcelWriter();
             var file = excelWriter.GenerateExcel(folaData);
-            Response.AddHeader("Content-Disposition",
-                "attachment; filename=ExcelFile.xlsx");
-            Response.BinaryWrite(file);
+            //Response.AddHeader("Content-Disposition",
+            //    "attachment; filename=ExcelFile.xlsx");
+            //Response.BinaryWrite(file);
+            System.IO.File.WriteAllBytes(@"E:\PIWDocuments\TestMailingList.xlsx",file);
         }
 
     }

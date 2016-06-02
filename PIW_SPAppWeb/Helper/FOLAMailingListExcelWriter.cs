@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -30,121 +29,68 @@ namespace PIW_SPAppWeb.Helper
         {
             var cell = new Cell
             {
-                //DataType = CellValues.InlineString,
-                //CellReference = header + index
-                CellValue = new CellValue(text)
+                DataType = CellValues.InlineString,
+                CellReference = header + index
             };
 
-            //var istring = new InlineString();
-            //var t = new Text { Text = text };
-            //istring.AppendChild(t);
-            //cell.AppendChild(istring);
+            var istring = new InlineString();
+            var t = new Text { Text = text };
+            istring.AppendChild(t);
+            cell.AppendChild(istring);
             return cell;
         }
 
         public byte[] GenerateExcel(FOLAMailingListData data)
         {
             var stream = new MemoryStream();
-            using (var package = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
+            using (var document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
             {
-                //test
-                // Add a new workbook part.
+                var workbookpart = document.AddWorkbookPart();
+                workbookpart.Workbook = new Workbook();
+                var worksheetPart = workbookpart.AddNewPart<WorksheetPart>();
+                var sheetData = new SheetData();
 
-                package.AddWorkbookPart();
+                worksheetPart.Worksheet = new Worksheet(sheetData);
 
-                package.WorkbookPart.Workbook = new Workbook();
+                var sheets = document.WorkbookPart.Workbook.
+                    AppendChild<Sheets>(new Sheets());
 
-                // Add a new worksheet part.
-
-                package.WorkbookPart.AddNewPart<WorksheetPart>();
-
-                //Create the Spreadsheet DOM.
-
-                package.WorkbookPart.WorksheetParts.First().Worksheet =
-
-                  new Worksheet(
-
-                    new SheetData(
-
-                      new Row(
-
-                        new Cell(
-
-                          new InlineString(
-
-                            new DocumentFormat.OpenXml.Spreadsheet.Text("Hello World!"))) { DataType = CellValues.InlineString })));
-
-                // Save changes to the spreadsheet part.
-
-                package.WorkbookPart.WorksheetParts.First().Worksheet.Save();
-
-                // create the worksheet to workbook relation
-
-                package.WorkbookPart.Workbook.AppendChild(new Sheets());
-
-                package.WorkbookPart.Workbook.GetFirstChild<Sheets>().AppendChild(new Sheet()
-
+                var sheet = new Sheet()
                 {
-
-                    Id = package.WorkbookPart.GetIdOfPart(package.WorkbookPart.WorksheetParts.First()),
-
+                    Id = document.WorkbookPart
+                        .GetIdOfPart(worksheetPart),
                     SheetId = 1,
-
-                    Name = "Hello World!"
-
-                });
-
-                package.WorkbookPart.Workbook.Save();
-                //test
-
-
-                //var workbookpart = document.AddWorkbookPart();
-                //workbookpart.Workbook = new Workbook();
-                //var worksheetPart = workbookpart.AddNewPart<WorksheetPart>();
-                //var sheetData = new SheetData();
-
-                //worksheetPart.Worksheet = new Worksheet(sheetData);
-
-                //var sheets = document.WorkbookPart.Workbook.
-                //    AppendChild<Sheets>(new Sheets());
-
-                //var sheet = new Sheet()
-                //{
-                //    Id = document.WorkbookPart.GetIdOfPart(worksheetPart),
-                //    SheetId = 1,
-                //    Name = "Sheet1"
-                //};
-                //sheets.AppendChild(sheet);
+                    Name = "Sheet 1"
+                };
+                sheets.AppendChild(sheet);
 
                 // Add header
-                //UInt32 rowIdex = 0;
-                //var row = new Row {RowIndex = ++rowIdex};
-                //sheetData.AppendChild(row);
-                //var cellIdex = 0;
+                UInt32 rowIdex = 0;
+                var row = new Row { RowIndex = ++rowIdex };
+                sheetData.AppendChild(row);
+                var cellIdex = 0;
 
-                //foreach (var header in data.Headers)
-                //{
-                //    row.AppendChild(CreateTextCell(ColumnLetter(cellIdex++),
-                //        rowIdex, header ?? string.Empty));
-                //}
+                foreach (var header in data.Headers)
+                {
+                    row.AppendChild(CreateTextCell(ColumnLetter(cellIdex++),
+                        rowIdex, header ?? string.Empty));
+                }
 
                 // Add sheet data
-                //foreach (var rowData in data.DataRows)
-                //{
-                //    cellIdex = 0;
-                //    row = new Row {RowIndex = ++rowIdex};
-                //    sheetData.AppendChild(row);
-                //    foreach (var callData in rowData)
-                //    {
-                //        var cell = CreateTextCell(ColumnLetter(cellIdex++),
-                //            rowIdex, callData ?? string.Empty);
-                //        row.AppendChild(cell);
-                //    }
-                //}
+                foreach (var rowData in data.DataRows)
+                {
+                    cellIdex = 0;
+                    row = new Row { RowIndex = ++rowIdex };
+                    sheetData.AppendChild(row);
+                    foreach (var callData in rowData)
+                    {
+                        var cell = CreateTextCell(ColumnLetter(cellIdex++),
+                            rowIdex, callData ?? string.Empty);
+                        row.AppendChild(cell);
+                    }
+                }
 
-                //workbookpart.Workbook.Save();
-
-
+                workbookpart.Workbook.Save();
             }
 
             return stream.ToArray();
