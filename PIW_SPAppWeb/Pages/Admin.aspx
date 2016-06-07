@@ -26,5 +26,7 @@
         <asp:Button ID="btnTestCitationAppended" runat="server" Text="Test Citation Number Append" OnClick="btnTestCitationAppended_Click" />
         <br/>
         <asp:Button ID="btnTestExcelGeneration" runat="server" Text="Test Excel Generation" OnClick="btnTestExcelGeneration_Click" />
+        <br />
+        <asp:Button ID="Button2" runat="server" OnClick="Button2_Click" Text="Test FOLA" />
     </form>
 </asp:Content>

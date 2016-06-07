@@ -126,17 +126,19 @@
             //confirm Submit to Secretary Review
             $("#btnSubmitToSecReview").click(function (event) {
                 event.preventDefault();
-                $("#submitDialogConfirmation").dialog({
-                    buttons: {
-                        "No": function (e) {
-                            $(this).dialog("close");
+                if ($("#mainForm").valid()) {
+                    $("#submitDialogConfirmation").dialog({
+                        buttons: {
+                            "No": function(e) {
+                                $(this).dialog("close");
 
-                        },
-                        "Yes": function (e) {
-                            $("#btnSubmitToSecReviewConfirm").click();
+                            },
+                            "Yes": function(e) {
+                                $("#btnSubmitToSecReviewConfirm").click();
+                            }
                         }
-                    }
-                }, { width: 750 });
+                    }, { width: 750 });
+                }
             });
 
             //spinner

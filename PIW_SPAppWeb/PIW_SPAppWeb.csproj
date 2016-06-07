@@ -236,6 +236,7 @@
     <Compile Include="Helper\CitationNumber.cs" />
     <Compile Include="Helper\Constants.cs" />
     <Compile Include="Helper\EPSPublicationHelper.cs" />
+    <Compile Include="Helper\FOLAMailingList.cs" />
     <Compile Include="Helper\FOLAMailingListData.cs" />
     <Compile Include="Helper\FOLAMailingListExcelWriter.cs" />
     <Compile Include="Helper\SharePointHelper.cs" />

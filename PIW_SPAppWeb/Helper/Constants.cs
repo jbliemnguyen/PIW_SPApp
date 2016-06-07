@@ -215,6 +215,21 @@ namespace PIW_SPAppWeb
         //misc
         public const string ValidationFolder = "Validation";
 
+        //FOLA database mailing list
+        public const string FOLA_MailingListColumnName_Contact_Full_Name = "Contact_Full_Name";
+        public const string FOLA_MailingListColumnName_Contact_FERC_id = "Contact_FERC_id";
+        public const string FOLA_MailingListColumnName_Contact_Title = "Contact_Title";
+        public const string FOLA_MailingListColumnName_Contact_Organization = "Contact_Organization";
+        public const string FOLA_MailingListColumnName_Contact_Po_Box = "Contact_Po_Box";
+        public const string FOLA_MailingListColumnName_Contact_Address_Line1 = "Contact_Address_Line1";
+        public const string FOLA_MailingListColumnName_Contact_Address_Line2 = "Contact_Address_Line2";
+        public const string FOLA_MailingListColumnName_Contact_City = "Contact_City";
+        public const string FOLA_MailingListColumnName_Contact_Zip_2 = "Contact_Zip_2";
+        public const string FOLA_MailingListColumnName_Contact_CS = "Contact_CS";
+        public const string FOLA_MailingListColumnName_Work_Set_Short_Label = "Work_Set_Short_Label";
+
+
+
 
     }
 

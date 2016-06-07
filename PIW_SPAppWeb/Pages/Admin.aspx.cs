@@ -332,28 +332,21 @@ namespace PIW_SPAppWeb
 
         protected void btnTestExcelGeneration_Click(object sender, EventArgs e)
         {
-            FOLAMailingListData folaData = new FOLAMailingListData();
-
-            //Header
-            folaData.Headers.Add("Contact Name");
-            folaData.Headers.Add("FERCID");
-
-            //Data
-            for (int i = 0; i < 10 ;i++)
-            {
-                List<String> row = new List<string>();
-                row.Add(i.ToString());
-                row.Add(DateTime.Now.ToShortTimeString());
-                folaData.DataRows.Add(row);
-    
-            }
+            FOLAMailingList fola = new FOLAMailingList();
+            var folaMailingList = fola.GetFOLAMailingList("p-2165");
             
             FOLAMailingListExcelWriter excelWriter = new FOLAMailingListExcelWriter();
-            var file = excelWriter.GenerateExcel(folaData);
+            var file = excelWriter.GenerateExcel(folaMailingList);
             //Response.AddHeader("Content-Disposition",
             //    "attachment; filename=ExcelFile.xlsx");
             //Response.BinaryWrite(file);
             System.IO.File.WriteAllBytes(@"E:\PIWDocuments\TestMailingList.xlsx",file);
+        }
+
+        protected void Button2_Click(object sender, EventArgs e)
+        {
+            FOLAMailingList fola = new FOLAMailingList();
+            var folaMailingList = fola.GetFOLAMailingList("p-14780");
         }
 
     }

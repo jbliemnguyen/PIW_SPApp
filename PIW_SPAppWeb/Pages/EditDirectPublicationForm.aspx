@@ -92,32 +92,25 @@
             //Confirm of Publish
             $("#btnInitiatePublication").click(function (event) {
                 event.preventDefault();
+                //run validator
+                if ($("#mainForm").valid()) {
+                    var modalHeight = 100;
+                    //dialog
+                    $("#publishDialogConfirmation").dialog({
+                        buttons: {
+                            "No": function (e) {
+                                $(this).dialog("close");
 
-                //display warning if due date is future date
-                var modalHeight = 100;
-                var dueDate = new Date($("#tbDueDate").attr('value'));
-                var today = new Date();
-                if (dueDate > today) {
-                    modalHeight = 250;
-                    $("#publishDialogConfirmation").html("<span style='color:green'>Warning: Due Date is a future date</span>");
-                }
-                else {
-                    $("#publishDialogConfirmation").html("");
-                }
-
-                //dialog
-                $("#publishDialogConfirmation").dialog({
-                    buttons: {
-                        "No": function (e) {
-                            $(this).dialog("close");
-
-                        },
-                        "Yes": function (e) {
-                            $("#btnPublishConfirm").click();
-                            $(this).dialog("close");
+                            },
+                            "Yes": function (e) {
+                                $("#btnPublishConfirm").click();
+                                $(this).dialog("close");
+                            }
                         }
-                    }
-                }, { width: 600, height: modalHeight });
+                    }, { width: 600, height: modalHeight });
+                }
+                
+                
             });
 
             //spinner
@@ -131,8 +124,11 @@
                 };
 
                 btnInitiatePublication.spinner(opt);
-                //disable Publish and Edit button - avoid use clicking when long-process printing
+                //disable Publish, Delete,Save, Supplemental Upload button - avoid use clicking when long-process printing
                 $("#btnInitiatePublication").attr("disabled", "disabled");
+                $("#btnDelete").attr("disabled", "disabled");
+                $("#btnSave").attr("disabled", "disabled");
+                $("#btnSupplementalMailingListUpload").attr("disabled", "disabled");
             });
 
             $(".historyhead").click(function () {
@@ -190,7 +186,7 @@
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
 
         <fieldset id="mainFieldSet">
-            <legend>Standard Form</legend>
+            <legend>Direct Publication Form</legend>
 
             <asp:Label ID="lbMainMessage" runat="server" CssClass="error" Visible="false"></asp:Label>
 
@@ -419,7 +415,7 @@
                 <div class="form-group">
                     <div class="col-md-2"></div>
                     <div class="col-md-2">
-                        <asp:Button ID="btnSupplementalMailingListUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary cancel" OnClick="btnSupplementalMailingListUpload_Click" />
+                        <asp:Button ID="btnSupplementalMailingListUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary cancel" OnClick="btnSupplementalMailingListUpload_Click" ClientIDMode="Static"/>
                         <%--Note: "cancel" in CssClass is to bypass the jquery validation when user upload file--%>
                     </div>
                 </div>
@@ -495,7 +491,7 @@
         <div class="form-group">
             <div class="col-md-2"></div>
             <div class="col-md-6">
-                <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary active" OnClick="btnSave_Click" />
+                <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary active" OnClick="btnSave_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnInitiatePublication" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnPublishConfirm" runat="server" Text="Publish" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnInitiatePublication_Click" />
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
