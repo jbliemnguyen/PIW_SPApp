@@ -333,21 +333,20 @@ namespace PIW_SPAppWeb
         protected void btnTestExcelGeneration_Click(object sender, EventArgs e)
         {
             FOLAMailingList fola = new FOLAMailingList();
-            var folaMailingList = fola.GetFOLAMailingList("p-2165");
+            //var folaMailingList = fola.GetFOLAMailingList("p-2165");
+            var folaMailingList = fola.GetFOLAMailingList(tbDocket.Text.Trim());
             
             FOLAMailingListExcelWriter excelWriter = new FOLAMailingListExcelWriter();
             var file = excelWriter.GenerateExcel(folaMailingList);
-            //Response.AddHeader("Content-Disposition",
-            //    "attachment; filename=ExcelFile.xlsx");
-            //Response.BinaryWrite(file);
+            
             System.IO.File.WriteAllBytes(@"E:\PIWDocuments\TestMailingList.xlsx",file);
         }
 
-        protected void Button2_Click(object sender, EventArgs e)
-        {
-            FOLAMailingList fola = new FOLAMailingList();
-            var folaMailingList = fola.GetFOLAMailingList("p-14780");
-        }
+        //protected void Button2_Click(object sender, EventArgs e)
+        //{
+        //    FOLAMailingList fola = new FOLAMailingList();
+        //    var folaMailingList = fola.GetFOLAMailingList("p-14780");
+        //}
 
     }
 }

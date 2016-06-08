@@ -26,22 +26,22 @@ namespace PIW_SPAppWeb.Helper
             data.Headers.Add("Zip 2");
             data.Headers.Add("State");
             data.Headers.Add("Docket");
-
-
+            
             using (SqlConnection con = new SqlConnection(ConfigurationManager.AppSettings["FOLAConnectionString"]))
             {
                 using (SqlCommand cmd = new SqlCommand("p_fola_rpt_getmailinglist4", con))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
+                    con.Open();
+
 
                     cmd.Parameters.Add("@Work_Set_Short_Label", SqlDbType.VarChar).Value = WorksetShortLabel;
-                    cmd.Parameters.Add("@Include_Senators", SqlDbType.Bit).Value = 1;
-                    cmd.Parameters.Add("@Include_eReg", SqlDbType.Bit).Value = 1;
-                    cmd.Parameters.Add("@ReturnBlankAddress", SqlDbType.Bit).Value = 1;
+                    cmd.Parameters.Add("@Include_Senators", SqlDbType.Bit).Value = 0;
+                    cmd.Parameters.Add("@Include_eReg", SqlDbType.Bit).Value = 0;
+                    cmd.Parameters.Add("@ReturnBlankAddress", SqlDbType.Bit).Value = 0;
 
-                    con.Open();
+
                     SqlDataReader reader = cmd.ExecuteReader();
-
                     List<string> row;
                     while (reader.Read())
                     {
@@ -58,14 +58,15 @@ namespace PIW_SPAppWeb.Helper
                         {
                             row.Add(string.Empty);
                         }
-                        
-                        
+
+
                         //row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_Full_Name].ToString());
 
 
                         //FERC ID
                         if ((reader[Constants.FOLA_MailingListColumnName_Contact_FERC_id] != null) &&
-                            !string.IsNullOrEmpty(reader[Constants.FOLA_MailingListColumnName_Contact_FERC_id].ToString()))
+                            !string.IsNullOrEmpty(
+                                reader[Constants.FOLA_MailingListColumnName_Contact_FERC_id].ToString()))
                         {
                             row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_FERC_id].ToString());
                         }
@@ -73,10 +74,11 @@ namespace PIW_SPAppWeb.Helper
                         {
                             row.Add(string.Empty);
                         }
-                        
+
                         //Contact Title
                         if ((reader[Constants.FOLA_MailingListColumnName_Contact_Title] != null) &&
-                            !string.IsNullOrEmpty(reader[Constants.FOLA_MailingListColumnName_Contact_Title].ToString()))
+                            !string.IsNullOrEmpty(
+                                reader[Constants.FOLA_MailingListColumnName_Contact_Title].ToString()))
                         {
                             row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_Title].ToString());
                         }
@@ -87,7 +89,8 @@ namespace PIW_SPAppWeb.Helper
 
                         //Contact Organization
                         if ((reader[Constants.FOLA_MailingListColumnName_Contact_Organization] != null) &&
-                            !string.IsNullOrEmpty(reader[Constants.FOLA_MailingListColumnName_Contact_Organization].ToString()))
+                            !string.IsNullOrEmpty(
+                                reader[Constants.FOLA_MailingListColumnName_Contact_Organization].ToString()))
                         {
                             row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_Organization].ToString());
                         }
@@ -98,9 +101,11 @@ namespace PIW_SPAppWeb.Helper
 
                         //PO Box value = "PO Box:" + value of Contact_PO_Box if it is not null
                         if ((reader[Constants.FOLA_MailingListColumnName_Contact_Po_Box] != null) &&
-                            !string.IsNullOrEmpty(reader[Constants.FOLA_MailingListColumnName_Contact_Po_Box].ToString()))
+                            !string.IsNullOrEmpty(
+                                reader[Constants.FOLA_MailingListColumnName_Contact_Po_Box].ToString()))
                         {
-                            row.Add("PO Box: " + reader[Constants.FOLA_MailingListColumnName_Contact_Po_Box].ToString());
+                            row.Add("PO Box: " +
+                                    reader[Constants.FOLA_MailingListColumnName_Contact_Po_Box].ToString());
                         }
                         else
                         {
@@ -109,7 +114,8 @@ namespace PIW_SPAppWeb.Helper
 
                         //Address Line 1
                         if ((reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line1] != null) &&
-                            !string.IsNullOrEmpty(reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line1].ToString()))
+                            !string.IsNullOrEmpty(
+                                reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line1].ToString()))
                         {
                             row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line1].ToString());
                         }
@@ -120,7 +126,8 @@ namespace PIW_SPAppWeb.Helper
 
                         //Address Line 2
                         if ((reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line2] != null) &&
-                            !string.IsNullOrEmpty(reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line2].ToString()))
+                            !string.IsNullOrEmpty(
+                                reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line2].ToString()))
                         {
                             row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line2].ToString());
                         }
@@ -131,7 +138,8 @@ namespace PIW_SPAppWeb.Helper
 
                         //Contact City
                         if ((reader[Constants.FOLA_MailingListColumnName_Contact_City] != null) &&
-                            !string.IsNullOrEmpty(reader[Constants.FOLA_MailingListColumnName_Contact_City].ToString()))
+                            !string.IsNullOrEmpty(
+                                reader[Constants.FOLA_MailingListColumnName_Contact_City].ToString()))
                         {
                             row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_City].ToString());
                         }
@@ -139,12 +147,15 @@ namespace PIW_SPAppWeb.Helper
                         {
                             row.Add(string.Empty);
                         }
-                        
+
                         //Zip and Zip 2
                         if ((reader[Constants.FOLA_MailingListColumnName_Contact_Zip_2] != null) &&
-                            !string.IsNullOrEmpty(reader[Constants.FOLA_MailingListColumnName_Contact_Zip_2].ToString()))
+                            !string.IsNullOrEmpty(
+                                reader[Constants.FOLA_MailingListColumnName_Contact_Zip_2].ToString()))
                         {
-                            var zips = reader[Constants.FOLA_MailingListColumnName_Contact_Zip_2].ToString().Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+                            var zips =
+                                reader[Constants.FOLA_MailingListColumnName_Contact_Zip_2].ToString()
+                                    .Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
                             if (zips.Count() == 1)
                             {
                                 row.Add(zips[0]);
@@ -192,12 +203,8 @@ namespace PIW_SPAppWeb.Helper
                 }
             }
 
-            return data;
-        }
 
-        public void GetFOLAMailingList(string[] dockets)
-        {
-            
+            return data;
         }
     }
 }
