@@ -12,6 +12,7 @@ using FERC.eLibrary.Eps.Common;
 using FERC.MSOffice;
 using FERC.MSOffice;
 using FERC.MSOfficeAutomation;
+using iTextSharp.text.pdf;
 using Microsoft.Office.Interop.Word;
 using Microsoft.SharePoint.Client;
 using Document = FERC.eLibrary.Eps.Common.Document;
@@ -271,7 +272,8 @@ namespace PIW_SPAppWeb.Helper
             string extension = fileInfo.Extension;
             if (extension.ToLower() == ".pdf")
             {
-                numberOfPages = getPDFNumberOfPages(fileURN);
+                PdfReader pdfReader = new PdfReader(fileURN);
+                numberOfPages = pdfReader.NumberOfPages;
             }
             else if (extension.ToLower() == ".docx")
             {
@@ -279,27 +281,6 @@ namespace PIW_SPAppWeb.Helper
             }
 
             return numberOfPages;
-        }
-        public int getPDFNumberOfPages(string fileURL)
-        {
-            //http://www.dotnetspider.com/resources/21866-Count-pages-PDF-file.aspx
-            //Function for finding the number of pages in a given PDF file
-            FileStream fs = new FileStream(fileURL, FileMode.Open, FileAccess.Read);
-            StreamReader sr = new StreamReader(fs);
-            string pdf = sr.ReadToEnd();
-            Regex rx = new Regex(@"/Type\s/Page[^s]");
-            //Regex rx = new Regex(@"/Type/Page");
-
-            int pages = rx.Matches(pdf).Count;
-
-
-            if (pages == 0)
-            {
-                rx = new Regex(@"/Type/Page");
-                pages = rx.Matches(pdf).Count;
-            }
-
-            return pages;
         }
 
         public int getDOCXNumberOfPages(string fileURN)

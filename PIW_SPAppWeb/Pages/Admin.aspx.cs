@@ -340,8 +340,8 @@ namespace PIW_SPAppWeb
         protected void btnTestGetNumberOfPages_Click(object sender, EventArgs e)
         {
             EPSPublicationHelper helper = new EPSPublicationHelper();
-            string fileURN = @"E:\PIWDocuments\P-10855-259.pdf";
-            //string fileURN = @"E:\PIWDocuments\SharePoint2016Features.pdf";
+            //string fileURN = @"E:\PIWDocuments\P-10855-259.pdf";
+            string fileURN = @"E:\PIWDocuments\SharePoint2016Features.pdf";
             int numberOfPages = helper.getNumberOfPages(fileURN);
             lbNumberOfPages.Text = "Number of Pages:" + numberOfPages;
         }
