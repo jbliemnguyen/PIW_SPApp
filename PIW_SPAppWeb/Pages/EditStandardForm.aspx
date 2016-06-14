@@ -624,6 +624,7 @@
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnDeleteConfirm_Click" />
                 <asp:Button ID="btnReopen" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" OnClick="btnReopen_Click" />
+                <asp:Button ID="btnGenerateMailingList" runat="server" Text="Generate Mailing List" CssClass="btn-sm btn-primary active" OnClick="btnGenerateMailingList_Click" />
             </div>
         </div>
         <div class="form-group">

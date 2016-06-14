@@ -332,14 +332,18 @@ namespace PIW_SPAppWeb
 
         protected void btnTestExcelGeneration_Click(object sender, EventArgs e)
         {
-            FOLAMailingList fola = new FOLAMailingList();
-            //var folaMailingList = fola.GetFOLAMailingList("p-2165");
-            var folaMailingList = fola.GetFOLAMailingList(tbDocket.Text.Trim());
             
-            FOLAMailingListExcelWriter excelWriter = new FOLAMailingListExcelWriter();
-            var file = excelWriter.GenerateExcel(folaMailingList);
             
-            System.IO.File.WriteAllBytes(@"E:\PIWDocuments\TestMailingList.xlsx",file);
+            //System.IO.File.WriteAllBytes(@"E:\PIWDocuments\TestMailingList.xlsx",file);
+        }
+
+        protected void btnTestGetNumberOfPages_Click(object sender, EventArgs e)
+        {
+            EPSPublicationHelper helper = new EPSPublicationHelper();
+            string fileURN = @"E:\PIWDocuments\P-10855-259.pdf";
+            //string fileURN = @"E:\PIWDocuments\SharePoint2016Features.pdf";
+            int numberOfPages = helper.getNumberOfPages(fileURN);
+            lbNumberOfPages.Text = "Number of Pages:" + numberOfPages;
         }
 
         //protected void Button2_Click(object sender, EventArgs e)

@@ -1619,6 +1619,7 @@ namespace PIW_SPAppWeb.Pages
                     btnDelete.Visible = btnSave.Visible;
 
                     btnReopen.Visible = false;
+                    btnGenerateMailingList.Visible = false;
 
                     break;
                 case Constants.PIWList_FormStatus_Submitted:
@@ -1647,6 +1648,7 @@ namespace PIW_SPAppWeb.Pages
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
+                    btnGenerateMailingList.Visible = false;
 
                     break;
                 case Constants.PIWList_FormStatus_Edited:
@@ -1685,6 +1687,7 @@ namespace PIW_SPAppWeb.Pages
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
+                    btnGenerateMailingList.Visible = false;
 
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
@@ -1717,6 +1720,7 @@ namespace PIW_SPAppWeb.Pages
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
+                    btnGenerateMailingList.Visible = false;
 
                     break;
                 case Constants.PIWList_FormStatus_PrePublication:
@@ -1754,6 +1758,7 @@ namespace PIW_SPAppWeb.Pages
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
+                    btnGenerateMailingList.Visible = false;
 
                     break;
                 case Constants.PIWList_FormStatus_ReadyForPublishing:
@@ -1791,6 +1796,7 @@ namespace PIW_SPAppWeb.Pages
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
+                    btnGenerateMailingList.Visible = false;
 
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
@@ -1829,6 +1835,7 @@ namespace PIW_SPAppWeb.Pages
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = true;
+                    btnGenerateMailingList.Visible = false;
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
                     EnableMainPanel(false, formStatus);
@@ -1864,6 +1871,7 @@ namespace PIW_SPAppWeb.Pages
                     btnInitiatePublication.Visible = false;
                     btnDelete.Visible = false;
                     btnReopen.Visible = false;
+                    btnGenerateMailingList.Visible = true;
                     break;
                 case Constants.PIWList_FormStatus_ReOpen:
                     throw new Exception("Not Implemented");
@@ -1999,6 +2007,19 @@ namespace PIW_SPAppWeb.Pages
             }
         }
         #endregion
+
+        protected void btnGenerateMailingList_Click(object sender, EventArgs e)
+        {
+            using (var clientContext =SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
+            {
+                FOLAMailingList folaMailingList = new FOLAMailingList();
+                folaMailingList.GenerateFOLAMailingExcelFile(clientContext,tbDocketNumber.Text.Trim(),_listItemId);
+
+            }
+
+
+
+        }
 
 
 

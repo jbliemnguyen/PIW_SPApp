@@ -31,5 +31,9 @@
         <asp:TextBox ID="tbDocket" runat="server">QF90-203,P-14425</asp:TextBox>
         <asp:Button ID="btnTestExcelGeneration" runat="server" Text="Test Excel Generation" OnClick="btnTestExcelGeneration_Click" />
         <br />
+        <br />
+        <asp:Button ID="btnTestGetNumberOfPages" runat="server" Text="Test get number of pages" OnClick="btnTestGetNumberOfPages_Click"/>
+    &nbsp;&nbsp;
+        <asp:Label ID="lbNumberOfPages" runat="server"></asp:Label>
     </form>
 </asp:Content>

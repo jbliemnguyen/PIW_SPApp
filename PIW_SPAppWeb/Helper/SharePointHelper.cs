@@ -6,12 +6,12 @@ using System.Linq;
 using System.Runtime.Remoting.Channels;
 using System.Web;
 using System.Web.Caching;
-using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Office.CustomUI;
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.UserProfiles;
@@ -20,8 +20,13 @@ using ListItem = Microsoft.SharePoint.Client.ListItem;
 using FERC.FOL.ATMS.Remote.Interfaces;
 using ListItemCollection = Microsoft.SharePoint.Client.ListItemCollection;
 using System.Text;
+using Bold = DocumentFormat.OpenXml.Wordprocessing.Bold;
 using FontSize = System.Web.UI.WebControls.FontSize;
 using Group = Microsoft.SharePoint.Client.Group;
+using Page = System.Web.UI.Page;
+using Run = DocumentFormat.OpenXml.Wordprocessing.Run;
+using RunProperties = DocumentFormat.OpenXml.Wordprocessing.RunProperties;
+using Text = DocumentFormat.OpenXml.Wordprocessing.Text;
 
 //using FERC.FOL.ATMS.Structure;
 
@@ -166,7 +171,7 @@ namespace PIW_SPAppWeb.Helper
             //clear secreview action and comment
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewAction]] = string.Empty;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewComment]] = string.Empty;
-            
+
             //clear accession number
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
 
@@ -235,6 +240,26 @@ namespace PIW_SPAppWeb.Helper
             listItem.Update();
             clientContext.ExecuteQuery();
         }
+
+        public void SaveNumberOfFOLAMailingListAddress(ClientContext clientContext, ListItem listItem, int numberOfFOLAMailingListAddress)
+        {
+            var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] = numberOfFOLAMailingListAddress;
+
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
+
+        public void SaveNumberOfSupplementalMailingListAddress(ClientContext clientContext, ListItem listItem, int numberOfSupplementalMailingListAddress)
+        {
+            var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] = numberOfSupplementalMailingListAddress;
+
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
         #endregion
 
         #region PIW Documents
@@ -254,7 +279,7 @@ namespace PIW_SPAppWeb.Helper
 
 
 
-        public string UploadDocumentContentStream(ClientContext clientContext, Stream fileStream, string libraryName, string subFolder, string fileName, string securityLevel, string docType)
+        public string UploadDocumentContentStream(ClientContext clientContext, Stream fileStream, string libraryName, string subFolder, string fileName, string securityLevel, string docType, bool overwrite)
         {
             var internalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWDocuments_DocumentLibraryName);
 
@@ -269,7 +294,7 @@ namespace PIW_SPAppWeb.Helper
             {
                 ContentStream = fileStream,
                 Url = Path.GetFileName(fileName),
-                Overwrite = false
+                Overwrite = overwrite
             };
 
             File uploadFile = uploadSubFolder.Files.Add(flciNewFile);
@@ -280,7 +305,7 @@ namespace PIW_SPAppWeb.Helper
             uploadFile.ListItemAllFields.Update();
 
             clientContext.ExecuteQuery();
-            return string.Format("{0}/{1}",uploadSubFolderURL,uploadFile.Name);
+            return string.Format("{0}/{1}", uploadSubFolderURL, uploadFile.Name);
 
         }
 
@@ -587,7 +612,7 @@ namespace PIW_SPAppWeb.Helper
         public void RemoveCitationNumberFromDocument(ClientContext clientContext, string citationNumber, string listItemID, string fileName)
         {
             var documentServerRelativeURL = getDocumentServerRelativeURL(clientContext, listItemID, fileName);
-            
+
             FileInformation fileInformation = File.OpenBinaryDirect(clientContext, documentServerRelativeURL);
             bool foundCitationNumberInDocument = false;
 
@@ -617,9 +642,9 @@ namespace PIW_SPAppWeb.Helper
                 {
                     // Seek to beginning before writing to the SharePoint server.
                     memoryStream.Seek(0, SeekOrigin.Begin);
-                    File.SaveBinaryDirect(clientContext, documentServerRelativeURL, memoryStream, true);    
+                    File.SaveBinaryDirect(clientContext, documentServerRelativeURL, memoryStream, true);
                 }
-                
+
             }
         }
         public string getDocumentServerRelativeURL(ClientContext clientContext, string listItemID, string fileName)
@@ -731,7 +756,7 @@ namespace PIW_SPAppWeb.Helper
                     else
                     {
                         uploadedFileURL = UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName,
-                            listItemId, fileName, securityControlValue, docType);
+                            listItemId, fileName, securityControlValue, docType, false);
 
 
                         //clear validation error
@@ -747,7 +772,7 @@ namespace PIW_SPAppWeb.Helper
 
                         CreatePIWListHistory(clientContext, listItemId,
                             string.Format("Document file {0} uploaded/associated with Workflow Item", fileName), FormStatus);
-                        
+
                     }
                 }
             }
@@ -756,7 +781,7 @@ namespace PIW_SPAppWeb.Helper
         }
 
         public bool UploadSupplementalMailingListDocument(ClientContext clientContext, FileUpload fileUpload, string listItemId,
-            Repeater rpDocumentList, Label lbUploadedDocumentError, 
+            Repeater rpDocumentList, Label lbUploadedDocumentError,
             string FormStatus, string securityControlValue, string docType)
         {
             bool result = false;
@@ -771,23 +796,57 @@ namespace PIW_SPAppWeb.Helper
                 }
                 else
                 {
-                    UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName,
-                        listItemId, fileName, securityControlValue, docType);
-
-
-                    //clear validation error
-                    lbUploadedDocumentError.Visible = false;
-                    lbUploadedDocumentError.Text = string.Empty;
-
-                    //history list
-                    if (getHistoryListByPIWListID(clientContext, listItemId).Count == 0)
+                    //use open xml to count the number of rows
+                    using (SpreadsheetDocument myDoc = SpreadsheetDocument.Open(fileStream, false))
                     {
-                        CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus);
+                        var worksheetParts = myDoc.WorkbookPart.WorksheetParts;
+                        int numberOfRows = 0;
+                        foreach (var worksheetPart in worksheetParts)
+                        {
+                            SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+                            int AddressRows = sheetData.Elements<Row>().Count() - 1;//subtract the header
+
+                            if (AddressRows > 0)
+                            {
+                                numberOfRows = numberOfRows + AddressRows;
+                            }
+                        }
+
+                        if (numberOfRows > 0)
+                        {
+                            var listItem = GetPiwListItemById(clientContext, listItemId, true);
+                            SaveNumberOfSupplementalMailingListAddress(clientContext, listItem, numberOfRows);
+
+                            UploadDocumentContentStream(clientContext, fileStream,
+                                Constants.PIWDocuments_DocumentLibraryName,
+                                listItemId, fileName, securityControlValue, docType, false);
+
+
+                            //clear validation error
+                            lbUploadedDocumentError.Visible = false;
+                            lbUploadedDocumentError.Text = string.Empty;
+
+                            //history list
+                            if (getHistoryListByPIWListID(clientContext, listItemId).Count == 0)
+                            {
+                                CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus);
+                            }
+
+                            CreatePIWListHistory(clientContext, listItemId,
+                                string.Format(
+                                    "Supplemental Mailing List file {0} uploaded/associated with Workflow Item",
+                                    fileName), FormStatus);
+                            result = true;
+                        }
+                        else
+                        {
+                            //no data (address row) in the file uploaded
+                            lbUploadedDocumentError.Visible = true;
+                            lbUploadedDocumentError.Text = "Please upload file with the header and mailing address(es)";
+                        }
                     }
 
-                    CreatePIWListHistory(clientContext, listItemId,
-                        string.Format("Supplemental Mailing List file {0} uploaded/associated with Workflow Item", fileName), FormStatus);
-                    result = true;
+
 
                 }
             }
@@ -805,7 +864,7 @@ namespace PIW_SPAppWeb.Helper
             return documentURLs.ToString();
 
         }
-        public void PopulateSupplementalMailingListDocumentList(ClientContext clientContext, string listItemId, Repeater rpDocumentList,HtmlGenericControl supplementalMailingListFieldSet)
+        public void PopulateSupplementalMailingListDocumentList(ClientContext clientContext, string listItemId, Repeater rpDocumentList, HtmlGenericControl supplementalMailingListFieldSet)
         {
             StringBuilder documentURLs;
             System.Data.DataTable table = getDocumentsTableByDocType(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, out documentURLs, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList);

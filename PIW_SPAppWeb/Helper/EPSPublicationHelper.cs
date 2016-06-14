@@ -4,6 +4,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using FERC.Common.Queues;
 using FERC.eLibrary.Eps.Common;
@@ -27,7 +28,7 @@ namespace PIW_SPAppWeb.Helper
             string submissionQueue = ConfigurationManager.AppSettings["submissionqueue"];
             string responseQueue = ConfigurationManager.AppSettings["responsequeue"];
             string fileStoragePath = ConfigurationManager.AppSettings["PIWDocuments"];
-            
+
 
             var internalColumnNameList = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
@@ -135,8 +136,6 @@ namespace PIW_SPAppWeb.Helper
 
             return HasMSWordModifications(publication);
         }
-
-
 
         Publication PopulatePublication(int documentOfficialFlag, string documentAvailability, string description, string fercCitation, string fileURN)
         {
@@ -263,6 +262,49 @@ namespace PIW_SPAppWeb.Helper
             }
 
             return result;
+        }
+
+        public int getNumberOfPages(string fileURN)
+        {
+            int numberOfPages = 0;
+            var fileInfo = new FileInfo(fileURN);
+            string extension = fileInfo.Extension;
+            if (extension.ToLower() == ".pdf")
+            {
+                numberOfPages = getPDFNumberOfPages(fileURN);
+            }
+            else if (extension.ToLower() == ".docx")
+            {
+                numberOfPages = getDOCXNumberOfPages(fileURN);
+            }
+
+            return numberOfPages;
+        }
+        public int getPDFNumberOfPages(string fileURL)
+        {
+            //http://www.dotnetspider.com/resources/21866-Count-pages-PDF-file.aspx
+            //Function for finding the number of pages in a given PDF file
+            FileStream fs = new FileStream(fileURL, FileMode.Open, FileAccess.Read);
+            StreamReader sr = new StreamReader(fs);
+            string pdf = sr.ReadToEnd();
+            Regex rx = new Regex(@"/Type\s/Page[^s]");
+            //Regex rx = new Regex(@"/Type/Page");
+
+            int pages = rx.Matches(pdf).Count;
+
+
+            if (pages == 0)
+            {
+                rx = new Regex(@"/Type/Page");
+                pages = rx.Matches(pdf).Count;
+            }
+
+            return pages;
+        }
+
+        public int getDOCXNumberOfPages(string fileURN)
+        {
+            throw new NotImplementedException();
         }
     }
 }

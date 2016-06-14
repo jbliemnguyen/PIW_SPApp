@@ -63,6 +63,11 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_Section206Notice = "Section 206 Notice";
         public const string PIWList_colName_HearingOrder = "Hearing Order";
         public const string PIWList_colName_FOLAServiceRequired = "FOLA Service Required";
+        public const string PIWList_colName_NumberOfFOLAMailingListAddress = "Number Of FOLA Mailing List Address";
+        public const string PIWList_colName_NumberOfSupplementalMailingListAddress = "Number Of Supplemental Mailing List Address";
+
+        
+            
 
 
 
@@ -216,6 +221,7 @@ namespace PIW_SPAppWeb
         public const string ValidationFolder = "Validation";
 
         //FOLA database mailing list
+        public const string FOLA_MailingList_FileName = "MailingList.xlsx";
         public const string FOLA_MailingListColumnName_Contact_Full_Name = "Contact_Full_Name";
         public const string FOLA_MailingListColumnName_Contact_FERC_id = "Contact_FERC_id";
         public const string FOLA_MailingListColumnName_Contact_Title = "Contact_Title";

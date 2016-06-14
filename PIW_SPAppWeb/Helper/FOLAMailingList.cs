@@ -3,15 +3,25 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.ApplicationServices;
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Microsoft.SharePoint.Client;
 
 namespace PIW_SPAppWeb.Helper
 {
     public class FOLAMailingList
     {
-        public FOLAMailingListData GetFOLAMailingList(string WorksetShortLabel)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="WorksetShortLabel">root dockets seperated by comma - ex: P-1234,PQ-789</param>
+        /// <returns></returns>
+        private FOLAMailingListData GetFOLAMailingList(string WorksetShortLabel)
         {
             FOLAMailingListData data = new FOLAMailingListData();
             data.Headers.Add("Contact Name");
@@ -206,5 +216,156 @@ namespace PIW_SPAppWeb.Helper
 
             return data;
         }
+
+        public void GenerateFOLAMailingExcelFile(ClientContext clientContext,string docketNumber,string listItemID)
+        {
+            SharePointHelper helper = new SharePointHelper();
+            string rootDocketNumbers = string.Empty;
+            if (!docketNumber.Equals("non-docket", StringComparison.OrdinalIgnoreCase))
+            {
+                //docket list                                                                     
+                string[] dockets = docketNumber.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                Dictionary<string, int> docketDictionary = new Dictionary<string, int>();//use string to avoid duplicate
+                foreach (string docket in dockets)
+                {
+                    //remove sub-docket- P-12345-000 ---> P-12345
+                    var rootDocket = docket.Substring(0, docket.LastIndexOf("-"));
+                    if (!docketDictionary.ContainsKey(rootDocket))
+                    {
+                        docketDictionary.Add(rootDocket, 1);
+                        //append to rootDocket string for FOLA use
+                        if (string.IsNullOrEmpty(rootDocketNumbers))
+                        {
+                            rootDocketNumbers = rootDocket;
+                        }
+                        else
+                        {
+                            rootDocketNumbers = rootDocketNumbers + "," + rootDocket;
+                        }
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(rootDocketNumbers))
+                {
+                    var folaMailingList = GetFOLAMailingList(rootDocketNumbers);
+                    if (folaMailingList.DataRows.Count > 0)
+                    {
+                        var file = GenerateExcel(folaMailingList);
+                        if (file != null)
+                        {
+                            string uploadedFileURL = helper.UploadDocumentContentStream(clientContext, file,
+                                Constants.PIWDocuments_DocumentLibraryName,
+                                listItemID, Constants.FOLA_MailingList_FileName,
+                                Constants.ddlSecurityControl_Option_Public,
+                                Constants.PIWDocuments_DocTypeOption_FOLAServiceMailingList, true);
+
+                            //save number of fola mailing list address
+                            ListItem listItem = helper.GetPiwListItemById(clientContext, listItemID, false);
+                            helper.SaveNumberOfFOLAMailingListAddress(clientContext, listItem,folaMailingList.DataRows.Count);
+
+                        }
+                    }
+                }
+
+            }
+
+            
+        }
+
+        #region Excel file writer
+        private string ColumnLetter(int intCol)
+        {
+            var intFirstLetter = ((intCol) / 676) + 64;
+            var intSecondLetter = ((intCol % 676) / 26) + 64;
+            var intThirdLetter = (intCol % 26) + 65;
+
+            var firstLetter = (intFirstLetter > 64)
+                ? (char)intFirstLetter : ' ';
+            var secondLetter = (intSecondLetter > 64)
+                ? (char)intSecondLetter : ' ';
+            var thirdLetter = (char)intThirdLetter;
+
+            return string.Concat(firstLetter, secondLetter,
+                thirdLetter).Trim();
+        }
+
+        private Cell CreateTextCell(string header, UInt32 index,
+            string text)
+        {
+            var cell = new Cell
+            {
+                DataType = CellValues.InlineString,
+                CellReference = header + index
+            };
+
+            var istring = new InlineString();
+            var t = new Text { Text = text };
+            istring.AppendChild(t);
+            cell.AppendChild(istring);
+            return cell;
+        }
+
+        public Stream GenerateExcel(FOLAMailingListData data)
+        {
+            if (data.DataRows.Count == 0)
+            {
+                return null;
+            }
+
+            var stream = new MemoryStream();
+            using (var document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
+            {
+                var workbookpart = document.AddWorkbookPart();
+                workbookpart.Workbook = new Workbook();
+                var worksheetPart = workbookpart.AddNewPart<WorksheetPart>();
+                var sheetData = new SheetData();
+
+                worksheetPart.Worksheet = new Worksheet(sheetData);
+
+                var sheets = document.WorkbookPart.Workbook.
+                    AppendChild<Sheets>(new Sheets());
+
+                var sheet = new Sheet()
+                {
+                    Id = document.WorkbookPart
+                        .GetIdOfPart(worksheetPart),
+                    SheetId = 1,
+                    Name = "Sheet 1"
+                };
+                sheets.AppendChild(sheet);
+
+                // Add header
+                UInt32 rowIdex = 0;
+                var row = new Row { RowIndex = ++rowIdex };
+                sheetData.AppendChild(row);
+                var cellIdex = 0;
+
+                foreach (var header in data.Headers)
+                {
+                    row.AppendChild(CreateTextCell(ColumnLetter(cellIdex++),
+                        rowIdex, header ?? string.Empty));
+                }
+
+                // Add sheet data
+                foreach (var rowData in data.DataRows)
+                {
+                    cellIdex = 0;
+                    row = new Row { RowIndex = ++rowIdex };
+                    sheetData.AppendChild(row);
+                    foreach (var callData in rowData)
+                    {
+                        var cell = CreateTextCell(ColumnLetter(cellIdex++),
+                            rowIdex, callData ?? string.Empty);
+                        row.AppendChild(cell);
+                    }
+                }
+
+                workbookpart.Workbook.Save();
+            }
+
+            return stream;
+        }
+        #endregion
     }
 }
