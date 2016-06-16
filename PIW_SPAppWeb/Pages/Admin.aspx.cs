@@ -339,11 +339,18 @@ namespace PIW_SPAppWeb
 
         protected void btnTestGetNumberOfPages_Click(object sender, EventArgs e)
         {
-            EPSPublicationHelper helper = new EPSPublicationHelper();
-            //string fileURN = @"E:\PIWDocuments\P-10855-259.pdf";
-            string fileURN = @"E:\PIWDocuments\SharePoint2016Features.pdf";
-            int numberOfPages = helper.getNumberOfPages(fileURN);
-            lbNumberOfPages.Text = "Number of Pages:" + numberOfPages;
+            //using (var clientContext =SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
+            using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
+            {
+                EPSPublicationHelper helper = new EPSPublicationHelper();
+                //https://fdc1s-sp23wfed2.ferc.gov/piw/PIW%20Documents/101/P-14769-21rows.xlsx
+                //string fileURN = @"E:\PIWDocuments\P-10855-259.pdf";
+                string fileURN = @"E:\PIWDocuments\SharePoint2016Features.pdf";
+                int numberOfPages = helper.getNumberOfRowsFromSupplementalMailingListExcelFile(clientContext, "101", "P-14769-21rows.xlsx");
+
+                lbNumberOfPages.Text = "Number of Pages:" + numberOfPages;
+            }
+            
         }
 
         //protected void Button2_Click(object sender, EventArgs e)

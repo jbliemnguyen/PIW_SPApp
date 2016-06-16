@@ -314,7 +314,7 @@ namespace PIW_SPAppWeb.Pages
             {
                 const enumAction action = enumAction.Publish;
                 //using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
-                using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
+                using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))//run with system account
                 {
                     ListItem listItem = null;
                     if (!SaveData(clientContext, action, ref listItem))
@@ -323,26 +323,43 @@ namespace PIW_SPAppWeb.Pages
                     }
 
                     //publish
-                    Dictionary<string,string> files = new Dictionary<string, string>();
+                    //issuance documents
+                    Dictionary<string,string> issuanceDocuments = new Dictionary<string, string>();
                     foreach (RepeaterItem row in rpDocumentList.Items)
                     {
                         var url = ((HyperLink)row.FindControl("hyperlinkFileURL")).NavigateUrl;
                         var securityLevel = ((Label)row.FindControl("lbSecurityLevel")).Text;
-                        if (!files.ContainsKey(url))
+                        if (!issuanceDocuments.ContainsKey(url))
                         {
-                            files.Add(url,securityLevel);
+                            issuanceDocuments.Add(url,securityLevel);
                         }
                     }
+                    
+                    //supplemental mailing list - only 1 excel document
+                    string supplementalMailingListFileName = string.Empty;
+                    if (rpSupplementalMailingListDocumentList.Items.Count > 0)
+                    {
+                        RepeaterItem row = rpSupplementalMailingListDocumentList.Items[0];
+                        supplementalMailingListFileName = ((HyperLink)row.FindControl("hyperlinkFileURL")).Text;
+                    }
+
+
                     EPSPublicationHelper epsHelper = new EPSPublicationHelper();
-                    epsHelper.Publish(clientContext, files, listItem);
+                    epsHelper.Publish(clientContext, issuanceDocuments, supplementalMailingListFileName, listItem);
                     
 
                     //TODO: Change document and list permission
 
                     //TODO: send email
 
-                    //Create list history
-                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item publication to eLibrary Data Entry initiated", FormStatus);
+                    //Create list history - must create new client context because current client context is system account
+                    //so it can have permission to perform files copy.
+                    //But we must use normal client context so we can capture current user in History List
+                    using (var clientContextwithCurrentLogin = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                    {
+                        helper.CreatePIWListHistory(clientContextwithCurrentLogin, _listItemId, "Workflow Item publication to eLibrary Data Entry initiated", FormStatus);    
+                    }
+                    
 
                     //Refresh
                     helper.RefreshPage(Page.Request, Page.Response);

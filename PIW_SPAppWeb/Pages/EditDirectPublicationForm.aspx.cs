@@ -213,7 +213,9 @@ namespace PIW_SPAppWeb.Pages
                         return;
                     }
 
-                    //publish
+                    
+
+                    //issuance documents
                     Dictionary<string, string> files = new Dictionary<string, string>();
                     foreach (RepeaterItem row in rpDocumentList.Items)
                     {
@@ -224,16 +226,31 @@ namespace PIW_SPAppWeb.Pages
                             files.Add(url, securityLevel);
                         }
                     }
+
+                    //supplemental mailing list - only 1 excel document
+                    string supplementalMailingListFileName = string.Empty;
+                    if (rpSupplementalMailingListDocumentList.Items.Count > 0)
+                    {
+                        RepeaterItem row = rpSupplementalMailingListDocumentList.Items[0];
+                        supplementalMailingListFileName = ((HyperLink)row.FindControl("hyperlinkFileURL")).Text;
+                    }
+
+                    //publish
                     EPSPublicationHelper epsHelper = new EPSPublicationHelper();
-                    epsHelper.Publish(clientContext, files, listItem);
+                    epsHelper.Publish(clientContext, files, supplementalMailingListFileName, listItem);
 
 
                     //TODO: Change document and list permission
 
                     //TODO: send email
 
-                    //Create list history
-                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item publication to eLibrary Data Entry initiated", FormStatus);
+                    //Create list history - must create new client context because current client context is system account
+                    //so it can have permission to perform files copy.
+                    //But we must use normal client context so we can capture current user in History List
+                    using (var clientContextwithCurrentLogin = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                    {
+                        helper.CreatePIWListHistory(clientContextwithCurrentLogin, _listItemId, "Workflow Item publication to eLibrary Data Entry initiated", FormStatus);
+                    }
 
                     //Refresh
                     helper.RefreshPage(Page.Request, Page.Response);

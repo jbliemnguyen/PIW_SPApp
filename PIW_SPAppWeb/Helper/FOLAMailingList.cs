@@ -217,6 +217,12 @@ namespace PIW_SPAppWeb.Helper
             return data;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientContext"></param>
+        /// <param name="docketNumber">root dockets seperated by comma - ex: P-1234,PQ-789</param>
+        /// <param name="listItemID"></param>
         public void GenerateFOLAMailingExcelFile(ClientContext clientContext,string docketNumber,string listItemID)
         {
             SharePointHelper helper = new SharePointHelper();

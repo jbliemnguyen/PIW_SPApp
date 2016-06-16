@@ -65,6 +65,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_FOLAServiceRequired = "FOLA Service Required";
         public const string PIWList_colName_NumberOfFOLAMailingListAddress = "Number Of FOLA Mailing List Address";
         public const string PIWList_colName_NumberOfSupplementalMailingListAddress = "Number Of Supplemental Mailing List Address";
+        public const string PIWList_colName_NumberOfPublicPages = "Number Of Public Pages";
 
         
             

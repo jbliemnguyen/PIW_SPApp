@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Web;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using FERC.Common.Queues;
 using FERC.eLibrary.Eps.Common;
 //using FERC.eLibrary.Eps.Data;
@@ -17,15 +19,17 @@ using Microsoft.Office.Interop.Word;
 using Microsoft.SharePoint.Client;
 using Document = FERC.eLibrary.Eps.Common.Document;
 using File = Microsoft.SharePoint.Client.File;
+using Row = Microsoft.Office.Interop.Word.Row;
 
 namespace PIW_SPAppWeb.Helper
 {
     public class EPSPublicationHelper
     {
-        SharePointHelper helper = new SharePointHelper();
-        public bool Publish(ClientContext clientContext, Dictionary<string, string> documentWithFullURLs, ListItem listItem)
+        private SharePointHelper helper = new SharePointHelper();
+
+        public bool Publish(ClientContext clientContext, Dictionary<string, string> documentWithFullURLs, string supplementalMailingListFileName, ListItem piwListItem)
         {
-            bool result = false;
+            int totalPublicDocPages = 0;
             string submissionQueue = ConfigurationManager.AppSettings["submissionqueue"];
             string responseQueue = ConfigurationManager.AppSettings["responsequeue"];
             string fileStoragePath = ConfigurationManager.AppSettings["PIWDocuments"];
@@ -33,24 +37,31 @@ namespace PIW_SPAppWeb.Helper
 
             var internalColumnNameList = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
-            string listItemId = listItem["ID"].ToString();
-            string docketNumber = listItem[internalColumnNameList[Constants.PIWList_colName_DocketNumber]] != null ?
-                listItem[internalColumnNameList[Constants.PIWList_colName_DocketNumber]].ToString() : string.Empty;
+            string listItemId = piwListItem["ID"].ToString();
+            string docketNumber = piwListItem[internalColumnNameList[Constants.PIWList_colName_DocketNumber]] != null
+                ? piwListItem[internalColumnNameList[Constants.PIWList_colName_DocketNumber]].ToString()
+                : string.Empty;
 
-            string description = listItem[internalColumnNameList[Constants.PIWList_colName_Description]] != null ?
-                listItem[internalColumnNameList[Constants.PIWList_colName_Description]].ToString() : string.Empty;
+            string description = piwListItem[internalColumnNameList[Constants.PIWList_colName_Description]] != null
+                ? piwListItem[internalColumnNameList[Constants.PIWList_colName_Description]].ToString()
+                : string.Empty;
 
-            string fercCitation = listItem[internalColumnNameList[Constants.PIWList_colName_CitationNumber]] != null ?
-                listItem[internalColumnNameList[Constants.PIWList_colName_CitationNumber]].ToString() : string.Empty;
+            string fercCitation = piwListItem[internalColumnNameList[Constants.PIWList_colName_CitationNumber]] != null
+                ? piwListItem[internalColumnNameList[Constants.PIWList_colName_CitationNumber]].ToString()
+                : string.Empty;
 
             string destinationUrnFolder = string.Format("{0}\\{1}", fileStoragePath, listItemId);
 
             DateTime dueDate;
-            if (listItem[internalColumnNameList[Constants.PIWList_colName_DueDate]] != null)
+            if (piwListItem[internalColumnNameList[Constants.PIWList_colName_DueDate]] != null)
             {
-                if (!string.IsNullOrEmpty(listItem[internalColumnNameList[Constants.PIWList_colName_DueDate]].ToString().Trim()))
+                if (
+                    !string.IsNullOrEmpty(
+                        piwListItem[internalColumnNameList[Constants.PIWList_colName_DueDate]].ToString().Trim()))
                 {
-                    dueDate = DateTime.Parse(listItem[internalColumnNameList[Constants.PIWList_colName_DueDate]].ToString().Trim()).Date;
+                    dueDate =
+                        DateTime.Parse(
+                            piwListItem[internalColumnNameList[Constants.PIWList_colName_DueDate]].ToString().Trim()).Date;
                 }
             }
 
@@ -58,7 +69,8 @@ namespace PIW_SPAppWeb.Helper
 
             //start publishing
             Publication publication = new Publication(EpsCallingApplication.PIW, EpsCatCode.ISSUANCE);
-            publication.HasFamily = (documentWithFullURLs.Count > 1);//if more than 1 document, set the HasFamily to true so parent/child relationship canbe set in EPS
+            publication.HasFamily = (documentWithFullURLs.Count > 1);
+            //if more than 1 document, set the HasFamily to true so parent/child relationship canbe set in EPS
             if (!docketNumber.Equals("non-docket", StringComparison.OrdinalIgnoreCase))
             {
                 //docket list                                                                     
@@ -72,20 +84,29 @@ namespace PIW_SPAppWeb.Helper
 
 
             //affiliation list
-            AffiliationInfo affiliationInfo = new AffiliationInfo(Constants.Affiliation_FirstName, Constants.Affiliation_LastName,
+            AffiliationInfo affiliationInfo = new AffiliationInfo(Constants.Affiliation_FirstName,
+                Constants.Affiliation_LastName,
                 Constants.Affiliation_MiddleInitial, Constants.Affiliation_Organization, AuthRecipRole.AUTHOR);
             publication.AffiliationsList.Add(affiliationInfo);
 
-            var documentsWithServerRelativeURL = helper.getDocumentServerRelativeURL(clientContext, listItemId, documentWithFullURLs);
+            var documentsWithServerRelativeURL = helper.getDocumentServerRelativeURL(clientContext, listItemId,
+                documentWithFullURLs);
 
-            //Copy all documentWithFullURLs
+            //Copy all documentWithFullURLs and calcuate number of public pages
             foreach (KeyValuePair<string, string> file in documentsWithServerRelativeURL)
             {
-                string fileURN = helper.CopyFile(clientContext, file.Key, destinationUrnFolder);
+                int filePages = 0;
+                string fileURN = CopyFile(clientContext, file.Key, destinationUrnFolder, ref filePages);
+
+                //count the page if the document is Public, used for Printing
+                if (file.Value.Equals(Constants.ddlSecurityControl_Option_Public))
+                {
+                    totalPublicDocPages = totalPublicDocPages + filePages;
+                }
 
                 //Document
                 Document document = new Document();
-                document.AvailabilityCode = helper.getEPSAvailabilityCode(file.Value);
+                document.AvailabilityCode = getEPSAvailabilityCode(file.Value);
                 document.OfficialFlag = Constants.document_OfficialFlag;
                 document.FileDate = DateTime.Now;
                 document.ReceivedDate = DateTime.Now;
@@ -117,11 +138,66 @@ namespace PIW_SPAppWeb.Helper
             QueueSender<QueueMessage<Publication>> qs = new QueueSender<QueueMessage<Publication>>(submissionQueue);
             qs.Send(new QueueMessage<Publication>(responseQueue, int.Parse(listItemId), publication));
 
-            result = true;
+            //Set number of pages - total public doc pages and supplemental mailing list numnber of rows(addresses)
+            int supplementalMailingListNumberOfPages = 0;
+            if (!string.IsNullOrEmpty(supplementalMailingListFileName))
+            {
+                supplementalMailingListNumberOfPages = getNumberOfRowsFromSupplementalMailingListExcelFile(clientContext, listItemId, supplementalMailingListFileName);
+            }
+            helper.SaveNumberOfPublicPagesAndSupplementalMailingListAddress(clientContext,piwListItem,totalPublicDocPages,supplementalMailingListNumberOfPages);
 
-            return result;
+            //generate fola excel mailing list file
+            FOLAMailingList folaMailingList = new FOLAMailingList();
+            folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemId);
+            
+
+            return true;
         }
-        public EpsResult ValidateDocument(string fullPathFileName, int? documentOfficialFlag, string documentAvailability)
+
+        public string getEPSAvailabilityCode(string ddldocumentSecurity)
+        {
+            string result = string.Empty;
+            switch (ddldocumentSecurity)
+            {
+                case Constants.ddlSecurityControl_Option_Public:
+                    result = Constants.PIWDocuments_EPSSecurityLevel_Option_Public;
+                    break;
+                case Constants.ddlSecurityControl_Option_CEII:
+                    result = Constants.PIWDocuments_EPSSecurityLevel_Option_CEII;
+                    break;
+                case Constants.ddlSecurityControl_Option_Priviledged:
+                    result = Constants.PIWDocuments_EPSSecurityLevel_Option_NonPublic;
+                    break;
+                default:
+                    break;
+            }
+            return result;
+
+        }
+        public string CopyFile(ClientContext clientContext, string sourceFileURL, string DestinationURNFolder, ref int pages)
+        {
+            if (!Directory.Exists(DestinationURNFolder))
+            {
+                Directory.CreateDirectory(DestinationURNFolder);
+            }
+
+
+            FileInformation fileInfo = File.OpenBinaryDirect(clientContext, sourceFileURL);
+            string fileName = helper.getFileNameFromURL(sourceFileURL);
+            var destinationFileURN = DestinationURNFolder + "\\" + fileName;
+            using (var fileStream = System.IO.File.Create(destinationFileURN))
+            {
+                fileInfo.Stream.CopyTo(fileStream);
+            }
+
+            pages = getPublishedIssuanceNumberOfPages(destinationFileURN);
+
+            return destinationFileURN;
+
+        }
+
+        public EpsResult ValidateDocument(string fullPathFileName, int? documentOfficialFlag,
+            string documentAvailability)
         {
             if (documentOfficialFlag == null)
             {
@@ -133,12 +209,14 @@ namespace PIW_SPAppWeb.Helper
                 documentAvailability = "P";
             }
 
-            var publication = PopulatePublication(documentOfficialFlag.Value, documentAvailability, string.Empty, string.Empty, fullPathFileName);
+            var publication = PopulatePublication(documentOfficialFlag.Value, documentAvailability, string.Empty,
+                string.Empty, fullPathFileName);
 
             return HasMSWordModifications(publication);
         }
 
-        Publication PopulatePublication(int documentOfficialFlag, string documentAvailability, string description, string fercCitation, string fileURN)
+        private Publication PopulatePublication(int documentOfficialFlag, string documentAvailability,
+            string description, string fercCitation, string fileURN)
         {
             Publication publication = new Publication(EpsCallingApplication.PIW, EpsCatCode.ISSUANCE);
 
@@ -200,7 +278,8 @@ namespace PIW_SPAppWeb.Helper
 
                                 if (FERC.MSOffice.XMLDocument.WordDocHasRevisions(file.FullName))
                                 {
-                                    result.ErrorList.Add((int)EpsResponseCode.FAILURE, "Has Revisions: " + file.FileName);
+                                    result.ErrorList.Add((int)EpsResponseCode.FAILURE,
+                                        "Has Revisions: " + file.FileName);
                                 }
 
 
@@ -211,23 +290,31 @@ namespace PIW_SPAppWeb.Helper
 
                                 break;
 
-                            case "DOC"://never happens, we are not allowed to upload doc file
+                            case "DOC": //never happens, we are not allowed to upload doc file
                                 // use word automation to clean up old Word DOC format document.
 
                                 // timeout for hung MS Word automation.
-                                int MSWordAutomationOpenTimeout = Convert.ToInt32(ConfigurationManager.AppSettings.Get("MSWordAutomationOpenTimeout"));
+                                int MSWordAutomationOpenTimeout =
+                                    Convert.ToInt32(ConfigurationManager.AppSettings.Get("MSWordAutomationOpenTimeout"));
                                 if (MSWordAutomationOpenTimeout < 30) MSWordAutomationOpenTimeout = 30;
 
-                                int MSWordAutomationHasFieldTimeout = Convert.ToInt32(ConfigurationManager.AppSettings.Get("MSWordAutomationHasFieldTimeout"));
+                                int MSWordAutomationHasFieldTimeout =
+                                    Convert.ToInt32(
+                                        ConfigurationManager.AppSettings.Get("MSWordAutomationHasFieldTimeout"));
                                 if (MSWordAutomationHasFieldTimeout < 30) MSWordAutomationHasFieldTimeout = 30;
 
-                                int MSWordAutomationHasRevisionsTimeout = Convert.ToInt32(ConfigurationManager.AppSettings.Get("MSWordAutomationHasRevisionsTimeout"));
+                                int MSWordAutomationHasRevisionsTimeout =
+                                    Convert.ToInt32(
+                                        ConfigurationManager.AppSettings.Get("MSWordAutomationHasRevisionsTimeout"));
                                 if (MSWordAutomationHasRevisionsTimeout < 30) MSWordAutomationHasRevisionsTimeout = 30;
 
-                                int MSWordAutomationHasCommentsTimeout = Convert.ToInt32(ConfigurationManager.AppSettings.Get("MSWordAutomationHasCommentsTimeout"));
+                                int MSWordAutomationHasCommentsTimeout =
+                                    Convert.ToInt32(
+                                        ConfigurationManager.AppSettings.Get("MSWordAutomationHasCommentsTimeout"));
                                 if (MSWordAutomationHasCommentsTimeout < 30) MSWordAutomationHasCommentsTimeout = 30;
 
-                                int MSWordAutomationCloseTimeout = Convert.ToInt32(ConfigurationManager.AppSettings.Get("MSWordAutomationCloseTimeout"));
+                                int MSWordAutomationCloseTimeout =
+                                    Convert.ToInt32(ConfigurationManager.AppSettings.Get("MSWordAutomationCloseTimeout"));
                                 if (MSWordAutomationCloseTimeout < 30) MSWordAutomationCloseTimeout = 30;
 
                                 using (MSWord msw = new MSWord())
@@ -236,17 +323,20 @@ namespace PIW_SPAppWeb.Helper
 
                                     if (msw.HasComments(MSWordAutomationHasCommentsTimeout))
                                     {
-                                        result.ErrorList.Add((int)EpsResponseCode.FAILURE, "Has Comments: " + file.FileName);
+                                        result.ErrorList.Add((int)EpsResponseCode.FAILURE,
+                                            "Has Comments: " + file.FileName);
                                     }
 
                                     if (msw.HasRevisions(MSWordAutomationHasRevisionsTimeout))
                                     {
-                                        result.ErrorList.Add((int)EpsResponseCode.FAILURE, "Has Revisions: " + file.FileName);
+                                        result.ErrorList.Add((int)EpsResponseCode.FAILURE,
+                                            "Has Revisions: " + file.FileName);
                                     }
 
                                     if (msw.HasFieldType(WdFieldType.wdFieldDate, MSWordAutomationHasFieldTimeout))
                                     {
-                                        result.ErrorList.Add((int)EpsResponseCode.FAILURE, "Has Macros: " + file.FileName);
+                                        result.ErrorList.Add((int)EpsResponseCode.FAILURE,
+                                            "Has Macros: " + file.FileName);
                                     }
 
                                     msw.Close(MSWordAutomationCloseTimeout);
@@ -265,7 +355,7 @@ namespace PIW_SPAppWeb.Helper
             return result;
         }
 
-        public int getNumberOfPages(string fileURN)
+        public int getPublishedIssuanceNumberOfPages(string fileURN)
         {
             int numberOfPages = 0;
             var fileInfo = new FileInfo(fileURN);
@@ -277,15 +367,47 @@ namespace PIW_SPAppWeb.Helper
             }
             else if (extension.ToLower() == ".docx")
             {
-                numberOfPages = getDOCXNumberOfPages(fileURN);
+                using (WordprocessingDocument doc = WordprocessingDocument.Open(fileURN, false))
+                {
+                    numberOfPages = int.Parse(doc.ExtendedFilePropertiesPart.Properties.Pages.InnerText);
+                }
+
             }
 
             return numberOfPages;
         }
+        
 
-        public int getDOCXNumberOfPages(string fileURN)
+        public int getNumberOfRowsFromSupplementalMailingListExcelFile(ClientContext clientContext, string listItemID, string fileName)
         {
-            throw new NotImplementedException();
+            var documentServerRelativeURL = helper.getDocumentServerRelativeURL(clientContext, listItemID, fileName);
+            FileInformation fileInformation = File.OpenBinaryDirect(clientContext, documentServerRelativeURL);
+
+            using (MemoryStream fileStream = new MemoryStream())
+            {
+                fileInformation.Stream.CopyTo(fileStream);
+
+                int numberOfRows = 0;
+                using (SpreadsheetDocument myDoc = SpreadsheetDocument.Open(fileStream, false))
+                {
+                    var worksheetParts = myDoc.WorkbookPart.WorksheetParts;
+                    foreach (var worksheetPart in worksheetParts)
+                    {
+                        SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().FirstOrDefault();
+                        if (sheetData != null)
+                        {
+                            int AddressRows = sheetData.Elements<DocumentFormat.OpenXml.Spreadsheet.Row>().Count() - 1;
+                            //subtract the header
+
+                            if (AddressRows > 0)
+                            {
+                                numberOfRows = numberOfRows + AddressRows;
+                            }
+                        }
+                    }
+                }
+                return numberOfRows;
+            }
         }
     }
 }
