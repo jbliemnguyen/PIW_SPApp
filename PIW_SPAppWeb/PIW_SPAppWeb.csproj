@@ -175,6 +175,7 @@
     <Content Include="packages.config" />
     <Content Include="Pages\Default.aspx" />
     <Content Include="Pages\EditDirectPublicationForm.aspx" />
+    <Content Include="Pages\EditPrintReqForm.aspx" />
     <Content Include="Pages\EditStandardForm.aspx" />
     <Content Include="Pages\Error.aspx" />
     <Content Include="Pages\ItemNotFound.aspx" />
@@ -297,6 +298,13 @@
     </Compile>
     <Compile Include="Pages\EditDirectPublicationForm.aspx.designer.cs">
       <DependentUpon>EditDirectPublicationForm.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\EditPrintReqForm.aspx.cs">
+      <DependentUpon>EditPrintReqForm.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\EditPrintReqForm.aspx.designer.cs">
+      <DependentUpon>EditPrintReqForm.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\EditStandardForm.aspx.cs">
       <DependentUpon>EditStandardForm.aspx</DependentUpon>

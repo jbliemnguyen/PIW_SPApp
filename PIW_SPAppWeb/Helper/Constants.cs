@@ -67,6 +67,29 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_NumberOfSupplementalMailingListAddress = "Number Of Supplemental Mailing List Address";
         public const string PIWList_colName_NumberOfPublicPages = "Number Of Public Pages";
 
+        public const string PIWList_colName_PrintReqDateRequested = "PrintReq Date Requested";
+        public const string PIWList_colName_PrintReqDateRequired = "PrintReq Date Required";
+
+        public const string PIWList_colName_PrintReqNumberofPages = "PrintReq Number of Pages";
+        public const string PIWList_colName_PrintReqNumberofCopies = "PrintReq Number of Copies";
+
+
+
+        public const string PIWList_colName_TotalPrintPages = "Total Print Pages";
+        public const string PIWList_colName_PrintReqPrintPriority = "PrintReq Print Priority";
+        public const string PIWList_colName_PrintReqMailJobCompleteDate = "PrintReq Mail Job Complete Date";
+        public const string PIWList_colName_PrintReqPrintJobCompleteDate = "PrintReq Print Job Complete Date";
+        public const string PIWList_colName_PrintReqNotes = "PrintReq Notes";
+        
+        
+        
+        
+
+
+
+
+        
+
         
             
 

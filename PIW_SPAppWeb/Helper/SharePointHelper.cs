@@ -319,7 +319,7 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        private List<File> getDocumentsByDocType(ClientContext clientContext, string uploadSubFolderURL, string docType)
+        public List<File> getDocumentsByDocType(ClientContext clientContext, string uploadSubFolderURL, string docType)
         {
             var internalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWDocuments_DocumentLibraryName);
             Folder folder = clientContext.Web.GetFolderByServerRelativeUrl(uploadSubFolderURL);
