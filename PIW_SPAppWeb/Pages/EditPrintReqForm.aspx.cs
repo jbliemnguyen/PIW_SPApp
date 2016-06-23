@@ -100,9 +100,84 @@ namespace PIW_SPAppWeb.Pages
                 //Docket
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]] != null)
                 {
-                    tbDocketNumber.Text =
-                        listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
+                    tbDocketNumber.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
                 }
+
+                //Date Requested
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqDateRequested]] != null)
+                {
+                    tbDateRequested.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqDateRequested]].ToString()).ToShortDateString();
+                }
+
+                //Date Required
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqDateRequired]] != null)
+                {
+                    tbDateRequired.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqDateRequired]].ToString()).ToShortDateString();
+                }
+
+                //Authorizing Office - map to Program Office Initiator
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] != null)
+                {
+                    tbAuthorizingOffice.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]].ToString();
+                }
+
+                //Number of Pages
+                int numberOfPrintPages = 0;
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_NumberOfPublicPages]] != null)
+                {
+                    numberOfPrintPages = int.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_NumberOfPublicPages]].ToString());
+                    tbNumberofPages.Text = numberOfPrintPages.ToString();
+
+                }
+
+                //Number of Copies - this should not be calculated field, user can change --> has it own field
+                int numberOfCopies = 0;
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] != null)
+                {
+                    numberOfCopies = int.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]].ToString());
+                    tbNumberofCopies.Text = numberOfCopies.ToString();
+                }
+
+                //Total Print Pages (calculated field)
+                tbTotalPrintPages.Text = (numberOfCopies * numberOfPrintPages).ToString();
+
+                //Print Priority
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintPriority]] != null)
+                {
+                    tbPriority.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintPriority]].ToString();
+                }
+
+                //Print Job Completed
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleted]] != null)
+                {
+                    cbPrintJobCompleted.Checked = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleted]].ToString());
+                }
+
+
+                //Print Job Completed Date
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]] != null)
+                {
+                    tbPrintJobCompletedDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]].ToString()).ToShortDateString();
+                }
+
+                //Mail Job Completed
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleted]] != null)
+                {
+                    cbMailJobCompleted.Checked = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleted]].ToString());
+                }
+
+                //Mail Job Completed Date
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]] != null)
+                {
+                    tbMailJobCompletedDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]].ToString()).ToShortDateString();
+                }
+
+                //Note
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqNotes]] != null)
+                {
+                    tbNote.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqNotes]].ToString();
+                }
+
             }
         }
 

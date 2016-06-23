@@ -324,14 +324,16 @@
                 <div class="col-md-3">
                     <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server">
                         <asp:ListItem Value="">Please Select</asp:ListItem>
-                        <asp:ListItem>Delegated Errata</asp:ListItem>
                         <asp:ListItem>Delegated Letter</asp:ListItem>
                         <asp:ListItem>Delegated Notice</asp:ListItem>
                         <asp:ListItem>Delegated Order</asp:ListItem>
+                        <asp:ListItem>Delegated Errata</asp:ListItem>
+                        <asp:ListItem disabled="true">----------</asp:ListItem>
                         <asp:ListItem>OALJ</asp:ListItem>
                         <asp:ListItem>OALJ Errata</asp:ListItem>
-                        <asp:ListItem>Notice Errata</asp:ListItem>
+                        <asp:ListItem disabled="true">----------</asp:ListItem>
                         <asp:ListItem>Notice</asp:ListItem>
+                        <asp:ListItem>Notice Errata</asp:ListItem>
                     </asp:DropDownList>
                 </div>
             </div>

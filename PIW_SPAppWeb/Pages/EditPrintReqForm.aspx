@@ -14,10 +14,11 @@
             $("#tbPrintJobCompletedDate").keydown(function (event) { event.preventDefault(); });
             $("#tbMailJobCompletedDate").keydown(function (event) { event.preventDefault(); });
 
-            
+
         }
     </script>
     <form id="mainForm" runat="server" class="form-horizontal">
+        <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
         <fieldset id="mainFieldSet">
             <div class="form-group">
                 <asp:Label ID="lbDocketNumber" runat="server" Text="Docket Number" CssClass="col-md-2 control-label" AssociatedControlID="tbDocketNumber"></asp:Label>
@@ -99,33 +100,37 @@
         </fieldset>
         <fieldset id="documents">
             <legend>Tasks</legend>
-            <div class="form-group">
-                <div class="col-md-2"></div>
-                <div class="col-md-2">
-                    <asp:CheckBox ID="cbPrintJobCompleted" runat="server" Text="Print Job Completed" CssClass="checkbox" ClientIDMode="Static" OnCheckedChanged="cbPrintJobCompleted_CheckedChanged" AutoPostBack="True" />
-                </div>
-                <asp:Label ID="lbPrintJobCompletedDate" runat="server" Text="Print Date" CssClass="col-md-2 control-label" AssociatedControlID="tbPrintJobCompletedDate"></asp:Label>
-                <div class="col-md-2">
-                    <asp:TextBox ID="tbPrintJobCompletedDate" runat="server" CssClass="form-control" ClientIDMode="Static" Enabled="False"></asp:TextBox>
-                </div>
+            <asp:UpdatePanel runat="server">
+                <ContentTemplate>
+                    <div class="form-group">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-2">
+                            <asp:CheckBox ID="cbPrintJobCompleted" runat="server" Text="Print Job Completed" CssClass="checkbox" ClientIDMode="Static" OnCheckedChanged="cbPrintJobCompleted_CheckedChanged" AutoPostBack="True" />
+                        </div>
+                        <asp:Label ID="lbPrintJobCompletedDate" runat="server" Text="Print Date" CssClass="col-md-2 control-label" AssociatedControlID="tbPrintJobCompletedDate"></asp:Label>
+                        <div class="col-md-2">
+                            <asp:TextBox ID="tbPrintJobCompletedDate" runat="server" CssClass="form-control" ClientIDMode="Static" Enabled="False"></asp:TextBox>
+                        </div>
 
-            </div>
-            <div class="form-group">
-                <div class="col-md-2"></div>
-                <div class="col-md-2">
-                    <asp:CheckBox ID="cbMailJobCompleted" runat="server" Text="Mail Job Completed" CssClass="checkbox" ClientIDMode="Static" OnCheckedChanged="cbMailJobCompleted_CheckedChanged" AutoPostBack="True" />
-                </div>
-                <asp:Label ID="lbMailJobCompletedDate" runat="server" Text="Mail Date" CssClass="col-md-2 control-label" AssociatedControlID="tbMailJobCompletedDate"></asp:Label>
-                <div class="col-md-2">
-                    <asp:TextBox ID="tbMailJobCompletedDate" runat="server" CssClass="form-control" ClientIDMode="Static" Enabled="False"></asp:TextBox>
-                </div>
-            </div>
-            <div class="form-group">
-                <asp:Label ID="lbNote" runat="server" Text="Note" CssClass="col-md-2 control-label" AssociatedControlID="tbNote"></asp:Label>
-                <div class="col-md-6">
-                    <asp:TextBox ID="tbNote" TextMode="MultiLine" Rows="4" CssClass="form-control" runat="server"></asp:TextBox>
-                </div>
-            </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-2"></div>
+                        <div class="col-md-2">
+                            <asp:CheckBox ID="cbMailJobCompleted" runat="server" Text="Mail Job Completed" CssClass="checkbox" ClientIDMode="Static" OnCheckedChanged="cbMailJobCompleted_CheckedChanged" AutoPostBack="True" />
+                        </div>
+                        <asp:Label ID="lbMailJobCompletedDate" runat="server" Text="Mail Date" CssClass="col-md-2 control-label" AssociatedControlID="tbMailJobCompletedDate"></asp:Label>
+                        <div class="col-md-2">
+                            <asp:TextBox ID="tbMailJobCompletedDate" runat="server" CssClass="form-control" ClientIDMode="Static" Enabled="False"></asp:TextBox>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <asp:Label ID="lbNote" runat="server" Text="Note" CssClass="col-md-2 control-label" AssociatedControlID="tbNote"></asp:Label>
+                        <div class="col-md-6">
+                            <asp:TextBox ID="tbNote" TextMode="MultiLine" Rows="4" CssClass="form-control" runat="server"></asp:TextBox>
+                        </div>
+                    </div>
+                </ContentTemplate>
+            </asp:UpdatePanel>
         </fieldset>
         <div class="form-group"></div>
         <div class="form-group">
@@ -138,7 +143,7 @@
                 <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-lg btn-primary active" />
             </div>
         </div>
-                <div class="form-group">
+        <div class="form-group">
             <div class="col-md-2"></div>
             <div class="col-md-8 historyhead">
                 History (Click here to collapse/expand)
