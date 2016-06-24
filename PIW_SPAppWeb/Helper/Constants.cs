@@ -72,7 +72,7 @@ namespace PIW_SPAppWeb
 
         //public const string PIWList_colName_PrintReqNumberofPages = "PrintReq Number of Pages";
         public const string PIWList_colName_PrintReqNumberofCopies = "PrintReq Number of Copies";
-
+        public const string PIWList_colName_PrintReqStatus = "PrintReq Status";
 
 
         //public const string PIWList_colName_TotalPrintPages = "Total Print Pages";
@@ -112,6 +112,11 @@ namespace PIW_SPAppWeb
         public const string PIWList_FormStatus_PublishInitiated = "Publish Initiated";
         public const string PIWList_FormStatus_PublishedToeLibrary = "Published To eLibrary";
         public const string PIWList_FormStatus_ReOpen = "ReOpen";
+
+        public const string PrintReq_FormStatus_PrintReqGenerated = "Print Req Generated";
+        public const string PrintReq_FormStatus_PrintJobCompleted = "Print Job Completed";
+        public const string PrintReq_FormStatus_MailJobCompleted = "Mail Job Completed";
+        public const string PrintReq_FormStatus_PrintReqRejected = "Print Req Rejected";
 
 
         public const string PIWList_DocCat_DelegatedErrata = "Delegated Errata";
@@ -166,15 +171,21 @@ namespace PIW_SPAppWeb
         public const string ErrorLog_colName_ErrorMessage = "ErrorMessage";
         public const string ErrorLog_colName_ErrorPageName = "ErrorPageName";
 
-        //PIWListHistory listreje
+        //PIWListHistory list
         public const string PIWListHistory_ListName = "PIWListHistory";
         public const string PIWListHistory_colName_Title = "Title";
         public const string PIWListHistory_colName_PIWList = "PIW List Item";
         public const string PIWListHistory_colName_User = "User";
         public const string PIWListHistory_colName_Action = "Action";
         public const string PIWListHistory_colName_FormStatus = "Form Status";
+        public const string PIWListHistory_colName_FormType = "Form Type";
         public const string PIWListHistory_colName_Created = "Created";
         public const string PIWListHistory_colName_CreatedBy = "Created By";
+
+        public const string PIWListHistory_FormTypeOption_EditForm = "EditForm";
+        public const string PIWListHistory_FormTypeOption_PrintReq = "PrintReq";
+
+        
 
         //CitationNumber list
         public const string CitationNumberListName = "Citation Number";
@@ -221,6 +232,9 @@ namespace PIW_SPAppWeb
 
         //document urls seperator
         public const string DocumentURLsSeparator = "_##_";
+
+        public const string PrintJobCompletedKey = "PrintJobCompletedKey";
+        public const string MailJobCompletedKey = "MailJobCompletedKey";
 
         //ATMS Validation error
         public const string ATMSRemotingServiceConnectionError = "Cannot connect to ATMS to validate docket.";

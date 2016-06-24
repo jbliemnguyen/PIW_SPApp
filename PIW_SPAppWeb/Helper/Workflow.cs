@@ -168,7 +168,6 @@ namespace PIW_SPAppWeb.Helper
                 //    break;
                 default:
                     throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
-                    break;
             }
             return nextStatus;
         }
@@ -277,7 +276,7 @@ namespace PIW_SPAppWeb.Helper
                     break;
                 default:
                     throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
-                    break;
+                    
             }
             return nextStatus;
         }
@@ -335,7 +334,7 @@ namespace PIW_SPAppWeb.Helper
                     break;
                 default:
                     throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
-                    break;
+                    
             }
             return nextStatus;
         }

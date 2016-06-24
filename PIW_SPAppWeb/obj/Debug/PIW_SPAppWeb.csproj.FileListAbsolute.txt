@@ -18,6 +18,6 @@ C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\FileNetFacade.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\FERC.MSOfficeAutomation.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\office.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\office.xml
-C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Debug\PIW_SPAppWeb.csprojResolveAssemblyReference.cache
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\itextsharp.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\itextsharp.xml
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Debug\PIW_SPAppWeb.csprojResolveAssemblyReference.cache

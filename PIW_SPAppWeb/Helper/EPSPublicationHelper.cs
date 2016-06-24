@@ -12,7 +12,6 @@ using FERC.Common.Queues;
 using FERC.eLibrary.Eps.Common;
 //using FERC.eLibrary.Eps.Data;
 using FERC.MSOffice;
-using FERC.MSOffice;
 using FERC.MSOfficeAutomation;
 using iTextSharp.text.pdf;
 using Microsoft.Office.Interop.Word;

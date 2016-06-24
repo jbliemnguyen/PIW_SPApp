@@ -103,7 +103,7 @@ namespace PIW_SPAppWeb.Pages
                             {
                                 PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
                                 DisplayListItemInForm(clientContext, listItem);
-                                helper.PopulateHistoryList(clientContext, _listItemId, rpHistoryList);
+                                helper.PopulateHistoryList(clientContext, _listItemId, rpHistoryList, Constants.PIWListHistory_FormTypeOption_EditForm);
                                 //display form visiblility based on form status
                                 ControlsVisiblitilyBasedOnStatus(clientContext, PreviousFormStatus, FormStatus, listItem);
 
@@ -136,10 +136,10 @@ namespace PIW_SPAppWeb.Pages
                             helper.CreatePIWDocumentsSubFolder(clientContext, _listItemId);
 
                             //history list
-                            if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
+                            if (helper.getHistoryListByPIWListID(clientContext, _listItemId, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                             {
                                 //Form status must be specified becuae the viewstate hasn't have value
-                                helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", Constants.PIWList_FormStatus_Pending);
+                                helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", Constants.PIWList_FormStatus_Pending, Constants.PIWListHistory_FormTypeOption_EditForm);
                             }
                         }
 
@@ -174,13 +174,13 @@ namespace PIW_SPAppWeb.Pages
                         //TODO: send email
 
                         //Create list history
-                        if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
+                        if (helper.getHistoryListByPIWListID(clientContext, _listItemId, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
-                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus);
+                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
                         }
                         else
                         {
-                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item saved", FormStatus);
+                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item saved", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
                         }
 
                         //TODO: create list history for Mailing Date and FERC Report Completed.
@@ -218,18 +218,18 @@ namespace PIW_SPAppWeb.Pages
                         //TODO: send email
 
                         //Create list history
-                        if (helper.getHistoryListByPIWListID(clientContext, _listItemId).Count == 0)
+                        if (helper.getHistoryListByPIWListID(clientContext, _listItemId, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
-                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus);
+                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item created", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
                         }
 
                         if ((FormStatus == Constants.PIWList_FormStatus_Rejected) || (FormStatus == Constants.PIWList_FormStatus_Recalled))
                         {
-                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item resubmitted", FormStatus);
+                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item resubmitted", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
                         }
                         else
                         {
-                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item submitted", FormStatus);
+                            helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item submitted", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
                         }
 
                         //Redirect
@@ -264,7 +264,7 @@ namespace PIW_SPAppWeb.Pages
                     //TODO: send email
 
                     //Create list history
-                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item accepted", FormStatus);
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item accepted", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
 
                     //Redirect
                     helper.RedirectToSourcePage(Page.Request, Page.Response);
@@ -295,7 +295,7 @@ namespace PIW_SPAppWeb.Pages
                     //TODO: send email
 
                     //Create list history
-                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item rejected", FormStatus);
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item rejected", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
 
                     //Redirect
                     helper.RedirectToSourcePage(Page.Request, Page.Response);
@@ -357,7 +357,7 @@ namespace PIW_SPAppWeb.Pages
                     //But we must use normal client context so we can capture current user in History List
                     using (var clientContextwithCurrentLogin = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                     {
-                        helper.CreatePIWListHistory(clientContextwithCurrentLogin, _listItemId, "Workflow Item publication to eLibrary Data Entry initiated", FormStatus);    
+                        helper.CreatePIWListHistory(clientContextwithCurrentLogin, _listItemId, "Workflow Item publication to eLibrary Data Entry initiated", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);    
                     }
                     
 
@@ -390,7 +390,7 @@ namespace PIW_SPAppWeb.Pages
                     //TODO: send email
 
                     //Create list history
-                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item deleted", FormStatus);
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item deleted", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
 
                     //Redirect
                     helper.RedirectToSourcePage(Page.Request, Page.Response);
@@ -424,7 +424,7 @@ namespace PIW_SPAppWeb.Pages
                         //TODO: send email
 
                         //Create list history
-                        helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item recalled", FormStatus);
+                        helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item recalled", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
 
                         //Redirect
                         helper.RedirectToSourcePage(Page.Request, Page.Response);
@@ -458,7 +458,7 @@ namespace PIW_SPAppWeb.Pages
                     //TODO: send email
 
                     //Create list history
-                    helper.CreatePIWListHistory(clientContext, _listItemId, "OSEC took ownership of Workflow Item", FormStatus);
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "OSEC took ownership of Workflow Item", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
 
                     //refresh
                     helper.RefreshPage(Page.Request, Page.Response);
@@ -486,7 +486,7 @@ namespace PIW_SPAppWeb.Pages
                     //TODO: Change document and list permission
 
                     //Create list history
-                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item edited", FormStatus);
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item edited", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
 
                     //Redirect or Refresh page
                     helper.RefreshPage(Page.Request, Page.Response);
@@ -548,7 +548,7 @@ namespace PIW_SPAppWeb.Pages
                                 lbCitationNumberError.Visible = false;
 
                                 //history list
-                                helper.CreatePIWListHistory(clientContext, _listItemId, "Citation number assigned: " + tbCitationNumber.Text.Trim(), FormStatus);
+                                helper.CreatePIWListHistory(clientContext, _listItemId, "Citation number assigned: " + tbCitationNumber.Text.Trim(), FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
 
                                 //add citation number into the documents - must be the last action because it can throw exceptioniled if the docs is opened in MS-Word
                                 //it will not able to finish all actions
@@ -610,7 +610,7 @@ namespace PIW_SPAppWeb.Pages
                         EnableCitationNumberControls(true, false);
 
                         //history list
-                        helper.CreatePIWListHistory(clientContext, _listItemId, "Citation number removed", FormStatus);
+                        helper.CreatePIWListHistory(clientContext, _listItemId, "Citation number removed", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
 
                         //remove citation number from the documents - must be the last action because it can throw exceptioniled if the docs is opened in MS-Word
                         //it will not able to finish all actions
@@ -658,7 +658,7 @@ namespace PIW_SPAppWeb.Pages
                             string removedFileName = helper.RemoveDocument(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
                             DocumentURLsFromViewState = helper.PopulateIssuanceDocumentList(clientContext, _listItemId, rpDocumentList);
                             //history list
-                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Document file {0} removed", removedFileName), FormStatus);
+                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Document file {0} removed", removedFileName), FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
                         }
 
                     }
@@ -686,7 +686,7 @@ namespace PIW_SPAppWeb.Pages
                             helper.PopulateSupplementalMailingListDocumentList(clientContext, _listItemId, rpSupplementalMailingListDocumentList,fieldSetSupplementalMailingList);
                             
                             //history list
-                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Supplemental Mailing List file {0} removed", removedFileName), FormStatus);
+                            helper.CreatePIWListHistory(clientContext, _listItemId, string.Format("Supplemental Mailing List file {0} removed", removedFileName), FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
                         }
 
                     }
@@ -800,7 +800,7 @@ namespace PIW_SPAppWeb.Pages
                     //TODO: Change document and list permission
 
                     //Create list history
-                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item Re-Opened", FormStatus);
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Workflow Item Re-Opened", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
 
                     //Redirect or Refresh page
                     helper.RefreshPage(Page.Request, Page.Response);
@@ -1892,7 +1892,6 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_ReOpen:
                     throw new Exception("Not Implemented");
-                    break;
                 case Constants.PIWList_FormStatus_Deleted:
                     //this status is only viewable by admin
                     EnableMainPanel(false, formStatus);
@@ -1910,7 +1909,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 default:
                     throw new Exception("UnRecognized Form Status: " + formStatus);
-                    break;
+                    
             }
         }
 

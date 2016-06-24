@@ -20,6 +20,7 @@
     <form id="mainForm" runat="server" class="form-horizontal">
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
         <fieldset id="mainFieldSet">
+            <asp:Label ID="lbMainMessage" runat="server" CssClass="error" Visible="false"></asp:Label>
             <div class="form-group">
                 <asp:Label ID="lbDocketNumber" runat="server" Text="Docket Number" CssClass="col-md-2 control-label" AssociatedControlID="tbDocketNumber"></asp:Label>
                 <div class="col-md-6">
@@ -140,7 +141,7 @@
 
             </div>
             <div class="col-md-1">
-                <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-lg btn-primary active" />
+                <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-lg btn-primary active" OnClick="btnReject_Click" />
             </div>
         </div>
         <div class="form-group">

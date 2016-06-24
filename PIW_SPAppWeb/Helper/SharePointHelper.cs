@@ -423,7 +423,7 @@ namespace PIW_SPAppWeb.Helper
 
         #region PIWListHistory
 
-        public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus)
+        public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus,string FormType)
         {
             List piwlisthistory = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
             var piwlistHistoryInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
@@ -437,6 +437,7 @@ namespace PIW_SPAppWeb.Helper
 
             newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_Action]] = action;
             newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_FormStatus]] = FormStatus;
+            newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_FormType]] = FormType;
 
             newItem.Update();
             clientContext.ExecuteQuery();//we need to create item first before set lookup field.
@@ -452,21 +453,34 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public ListItemCollection getHistoryListByPIWListID(ClientContext clientContext, string piwListItemID)
+        public ListItemCollection getHistoryListByPIWListID(ClientContext clientContext, string piwListItemID,string FormType)
         {
             List historyList = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
             var historyListInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
+            var args = new string[]
+            {
+                historyListInternalNameList[Constants.PIWListHistory_colName_PIWList],
+                piwListItemID.ToString(),
+                historyListInternalNameList[Constants.PIWListHistory_colName_FormType],
+                FormType
+            };
             CamlQuery query = new CamlQuery();
             query.ViewXml = string.Format(@"<View>
 	                                            <Query>
 		                                            <Where>
-			                                            <Eq>
-				                                            <FieldRef Name='{0}' LookupId='TRUE' />
-				                                            <Value Type='Lookup'>{1}</Value>
-			                                            </Eq>			
+                                                        <And>
+			                                                <Eq>
+				                                                <FieldRef Name='{0}' LookupId='TRUE' />
+				                                                <Value Type='Lookup'>{1}</Value>
+			                                                </Eq>
+                                                            <Eq>
+						                                         <FieldRef Name='{2}'/>
+						                                         <Value Type='Text'>{3}</Value>
+					                                        </Eq>
+                                                        </And>			
 		                                            </Where>		
 	                                            </Query>
-                                            </View>", historyListInternalNameList[Constants.PIWListHistory_colName_PIWList], piwListItemID);
+                                            </View>", args);
 
             var historyListItems = historyList.GetItems(query);
 
@@ -479,9 +493,9 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public System.Data.DataTable getHistoryListTable(ClientContext clientContext, string piwListItemID)
+        public System.Data.DataTable getHistoryListTable(ClientContext clientContext, string piwListItemID,string FormType)
         {
-            var historyList = getHistoryListByPIWListID(clientContext, piwListItemID);
+            var historyList = getHistoryListByPIWListID(clientContext, piwListItemID,FormType);
             var historyListInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
             //TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById(System.TimeZone.CurrentTimeZone.ToLocalTime());
             var result = new System.Data.DataTable();
@@ -519,46 +533,12 @@ namespace PIW_SPAppWeb.Helper
                 result.Rows.Add(row);
             }
 
-
-
             return result;
-
-
-
-
-
-            //StringBuilder html = new StringBuilder("<table border='1' cellpadding='10'>");
-            //html.Append("<tr style='font-weight:bold'><td>Date and Time</td><td>User</td><td>Action</td><td>Post-Action PIW Status</td></tr>");
-            //foreach (ListItem historyItem in historyList)
-            //{
-            //    html.AppendLine("<tr>");
-
-            //    html.Append("<td>");
-            //    html.Append(historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Created]] != null ? historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Created]].ToString() : string.Empty);
-            //    html.Append("</td>");
-
-            //    html.Append("<td>");
-            //    html.Append(historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_User]] != null ? ((FieldUserValue)historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_User]]).LookupValue : string.Empty);
-            //    html.Append("</td>");
-
-            //    html.Append("<td>");
-            //    html.Append(historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Action]] != null ? historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_Action]].ToString() : string.Empty);
-            //    html.Append("</td>");
-
-            //    html.Append("<td>");
-            //    html.Append(historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_FormStatus]] != null ? historyItem[historyListInternalNameList[Constants.PIWListHistory_colName_FormStatus]].ToString() : string.Empty);
-            //    html.Append("</td>");
-
-            //    html.AppendLine("</tr>");
-            //}
-            //html.AppendLine("</table>");
-
-            //return html.ToString();
         }
 
-        public void PopulateHistoryList(ClientContext clientContext, string listItemId, Repeater rpHistoryList)
+        public void PopulateHistoryList(ClientContext clientContext, string listItemId, Repeater rpHistoryList,string FormType)
         {
-            System.Data.DataTable table = getHistoryListTable(clientContext, listItemId);
+            System.Data.DataTable table = getHistoryListTable(clientContext, listItemId, FormType);
             rpHistoryList.DataSource = table;
             rpHistoryList.DataBind();
         }
@@ -757,13 +737,13 @@ namespace PIW_SPAppWeb.Helper
                         lbUploadedDocumentError.Text = string.Empty;
 
                         //history list
-                        if (getHistoryListByPIWListID(clientContext, listItemId).Count == 0)
+                        if (getHistoryListByPIWListID(clientContext, listItemId, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
-                            CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus);
+                            CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus,Constants.PIWListHistory_FormTypeOption_EditForm);
                         }
 
                         CreatePIWListHistory(clientContext, listItemId,
-                            string.Format("Document file {0} uploaded/associated with Workflow Item", fileName), FormStatus);
+                            string.Format("Document file {0} uploaded/associated with Workflow Item", fileName), FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
 
                     }
                 }
@@ -795,13 +775,13 @@ namespace PIW_SPAppWeb.Helper
                     lbUploadedDocumentError.Text = string.Empty;
 
                     //history list
-                    if (getHistoryListByPIWListID(clientContext, listItemId).Count == 0)
+                    if (getHistoryListByPIWListID(clientContext, listItemId, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                     {
-                        CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus);
+                        CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
                     }
 
                     CreatePIWListHistory(clientContext, listItemId,
-                        string.Format("Supplemental Mailing List file {0} uploaded/associated with Workflow Item",fileName), FormStatus);
+                        string.Format("Supplemental Mailing List file {0} uploaded/associated with Workflow Item", fileName), FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
                     result = true;
                 }
             }
@@ -1116,7 +1096,6 @@ namespace PIW_SPAppWeb.Helper
                         break;
                     default:
                         throw new Exception("Unknown document category: " + documentCategory);
-                        break;
                 }
             }
 
