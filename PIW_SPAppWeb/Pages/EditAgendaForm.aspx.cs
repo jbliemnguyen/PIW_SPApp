@@ -188,8 +188,15 @@ namespace PIW_SPAppWeb.Pages
 
                         //TODO: create list history for Mailing Date and FERC Report Completed.
 
-                        //Refresh
-                        helper.RefreshPage(Page.Request, Page.Response);
+                        //Refresh or Redirect depends on Previous Status
+                        if (PreviousFormStatus.Equals(Constants.PIWList_FormStatus_Pending))
+                        {
+                            helper.RedirectToSourcePage(Request, Response);
+                        }
+                        else
+                        {
+                            helper.RefreshPage(Request, Response);
+                        }
                     }
                 }
             }

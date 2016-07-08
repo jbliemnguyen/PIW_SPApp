@@ -223,9 +223,10 @@ namespace PIW_SPAppWeb.Helper
         /// <param name="clientContext"></param>
         /// <param name="docketNumber">root dockets seperated by comma - ex: P-1234,PQ-789</param>
         /// <param name="listItemID"></param>
-        public void GenerateFOLAMailingExcelFile(ClientContext clientContext,string docketNumber,string listItemID)
+        public int GenerateFOLAMailingExcelFile(ClientContext clientContext,string docketNumber,string listItemID)
         {
             SharePointHelper helper = new SharePointHelper();
+            int numberOfAddress = 0;
             string rootDocketNumbers = string.Empty;
             if (!docketNumber.Equals("non-docket", StringComparison.OrdinalIgnoreCase))
             {
@@ -265,10 +266,10 @@ namespace PIW_SPAppWeb.Helper
                                 listItemID, Constants.FOLA_MailingList_FileName,
                                 Constants.ddlSecurityControl_Option_Public,
                                 Constants.PIWDocuments_DocTypeOption_FOLAServiceMailingList, true);
-
                             //save number of fola mailing list address
-                            ListItem listItem = helper.GetPiwListItemById(clientContext, listItemID, false);
-                            helper.SaveNumberOfFOLAMailingListAddress(clientContext, listItem,folaMailingList.DataRows.Count);
+                            //ListItem listItem = helper.GetPiwListItemById(clientContext, listItemID, false);
+                            //helper.InitiatePrintReqForm(clientContext, listItem, folaMailingList.DataRows.Count);
+                            numberOfAddress = folaMailingList.DataRows.Count;
 
                         }
                     }
@@ -276,7 +277,7 @@ namespace PIW_SPAppWeb.Helper
 
             }
 
-            
+            return numberOfAddress;
         }
 
         #region Excel file writer

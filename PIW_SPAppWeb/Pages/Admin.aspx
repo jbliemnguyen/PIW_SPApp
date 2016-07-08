@@ -35,5 +35,7 @@
         <asp:Button ID="btnTestGetNumberOfPages" runat="server" Text="Test get number of pages" OnClick="btnTestGetNumberOfPages_Click"/>
     &nbsp;&nbsp;
         <asp:Label ID="lbNumberOfPages" runat="server"></asp:Label>
+        <br/>
+        <asp:Button runat="server" ID="btnTestPermissionSetting" Text="Permission Setting" OnClick="btnTestPermissionSetting_Click"/>
     </form>
 </asp:Content>

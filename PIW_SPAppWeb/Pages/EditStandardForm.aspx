@@ -271,6 +271,25 @@
             <%--<form id="mainForm1">--%>
             <%--Main panel--%>
             <div class="form-group">
+                <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-3">
+                    <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server">
+                        <asp:ListItem Value="">Please Select</asp:ListItem>
+                        <asp:ListItem disabled="true">----------</asp:ListItem>
+                        <asp:ListItem>Delegated Letter</asp:ListItem>
+                        <asp:ListItem>Delegated Notice</asp:ListItem>
+                        <asp:ListItem>Delegated Order</asp:ListItem>
+                        <asp:ListItem>Delegated Errata</asp:ListItem>
+                        <asp:ListItem disabled="true">----------</asp:ListItem>
+                        <asp:ListItem>OALJ</asp:ListItem>
+                        <asp:ListItem>OALJ Errata</asp:ListItem>
+                        <asp:ListItem disabled="true">----------</asp:ListItem>
+                        <asp:ListItem>Notice</asp:ListItem>
+                        <asp:ListItem>Notice Errata</asp:ListItem>
+                    </asp:DropDownList>
+                </div>
+            </div>
+            <div class="form-group">
                 <asp:Label ID="lbDocketNumber" runat="server" Text="Docket Number<span class='accentText'> *</span>" CssClass="col-md-2 control-label" AssociatedControlID="tbDocketNumber"></asp:Label>
 
                 <div class="col-md-6">
@@ -318,26 +337,6 @@
                     <asp:CheckBox ID="cbFederalRegister" runat="server" CssClass="checkbox" Text="Federal Register" />
                 </div>
             </div>
-
-            <div class="form-group">
-                <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-3">
-                    <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server">
-                        <asp:ListItem Value="">Please Select</asp:ListItem>
-                        <asp:ListItem>Delegated Letter</asp:ListItem>
-                        <asp:ListItem>Delegated Notice</asp:ListItem>
-                        <asp:ListItem>Delegated Order</asp:ListItem>
-                        <asp:ListItem>Delegated Errata</asp:ListItem>
-                        <asp:ListItem disabled="true">----------</asp:ListItem>
-                        <asp:ListItem>OALJ</asp:ListItem>
-                        <asp:ListItem>OALJ Errata</asp:ListItem>
-                        <asp:ListItem disabled="true">----------</asp:ListItem>
-                        <asp:ListItem>Notice</asp:ListItem>
-                        <asp:ListItem>Notice Errata</asp:ListItem>
-                    </asp:DropDownList>
-                </div>
-            </div>
-
             <div class="form-group">
                 <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)<span class='accentText'> *</span>" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
@@ -422,17 +421,6 @@
                     <asp:TextBox ID="tbDueDate" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
                 </div>
             </div>
-
-            <div class="form-group">
-                <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-3">
-                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
-                </div>
-                <div class="col-md-1"></div>
-                <div class="col-md-5">
-                    <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
-                </div>
-            </div>
             <fieldset runat="server" id="fieldsetOSECRejectComment" visible="true">
                 <div class="form-group">
                     <asp:Label ID="lbOSECRejectComment" runat="server" Text="OSEC Reject Comment" AssociatedControlID="lbOSECRejectCommentValue" CssClass="col-md-2 control-label"></asp:Label>
@@ -497,6 +485,17 @@
                             </ol>
                         </FooterTemplate>
                     </asp:Repeater>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-3">
+                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
+                </div>
+                <div class="col-md-1"></div>
+                <div class="col-md-5">
+                    <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
                 </div>
             </div>
 
@@ -578,17 +577,23 @@
         </fieldset>
 
         <fieldset runat="server" id="fieldsetMailedRoom" visible="false">
-            <legend>Mail Room</legend>
+            <legend>Print Requisition</legend>
             <div class="form-group">
-                <asp:Label ID="lbMailedDate" runat="server" Text="Mailed Date" AssociatedControlID="lbMailedDateValue" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-2"></div>
                 <div class="col-md-2">
-                    <asp:Label ID="lbMailedDateValue" runat="server"></asp:Label>
+                    <asp:HyperLink ID="hyperlinkPrintReq" runat="server" Text="Print Requisition Form" Target="_blank"></asp:HyperLink>
                 </div>
             </div>
             <div class="form-group">
-                <asp:Label ID="lbMailedRoomNote" runat="server" Text="Note" AssociatedControlID="lbMailedRoomNoteValue" CssClass="col-md-2 control-label"></asp:Label>
+                <asp:Label ID="lbPrintDate" runat="server" Text="Print Date" AssociatedControlID="tbPrintDate" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-2">
-                    <asp:Label ID="lbMailedRoomNoteValue" runat="server"></asp:Label>
+                    <asp:TextBox runat="server" ID="tbPrintDate" Enabled="False" ClientIDMode="Static"></asp:TextBox>
+                </div>
+            </div>
+            <div class="form-group">
+                <asp:Label ID="lbMailedDate" runat="server" Text="Mail Date" AssociatedControlID="tbMailDate" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-2">
+                    <asp:TextBox runat="server" ID="tbMailDate" Enabled="False" ClientIDMode="Static"></asp:TextBox>
                 </div>
             </div>
         </fieldset>

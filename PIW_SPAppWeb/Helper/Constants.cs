@@ -144,6 +144,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_FormType_StandardForm = "Standard Form";
         public const string PIWList_FormType_AgendaForm = "Agenda Form";
         public const string PIWList_FormType_DirectPublicationForm = "Direct Publication Form";
+        public const string PIWList_FormType_PrintReqForm = "PrintReq Form";
 
         //PIWDocument list
         public const string PIWDocuments_DocumentLibraryName = "PIW Documents";
@@ -244,6 +245,7 @@ namespace PIW_SPAppWeb
         public const string Page_EditStandardForm = "EditStandardForm.aspx";
         public const string Page_EditAgendaForm = "EditAgendaForm.aspx";
         public const string Page_EditDirectPublicationForm = "EditDirectPublicationForm.aspx";
+        public const string Page_EditPrintReqForm = "EditPrintReqForm.aspx";
         public const string Page_StandardForms = "StandardForms.aspx";
         public const string Page_AgendaForms = "AgendaForms.aspx";
         public const string Page_DirectPublicationForms = "DirectPublicationForms.aspx";

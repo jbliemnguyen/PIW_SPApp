@@ -14,6 +14,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.SharePoint.Client;
+using Microsoft.SharePoint.Client.Sharing;
 using Microsoft.SharePoint.Client.UserProfiles;
 using File = Microsoft.SharePoint.Client.File;
 using ListItem = Microsoft.SharePoint.Client.ListItem;
@@ -241,14 +242,29 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public void SaveNumberOfFOLAMailingListAddress(ClientContext clientContext, ListItem listItem, int numberOfFOLAMailingListAddress)
+        public bool InitiatePrintReqForm(ClientContext clientContext, ListItem listItem, int numberOfFOLAMailingListAddress,string PrintReqStatus)
         {
+            int supplementalMailingListAddress = 0;
+            bool result = false;
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
+            if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
+            {
+                supplementalMailingListAddress =int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+            }
+
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] = numberOfFOLAMailingListAddress;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = numberOfFOLAMailingListAddress + supplementalMailingListAddress;
+
+            if ((supplementalMailingListAddress + numberOfFOLAMailingListAddress) > 0)
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqStatus]] = PrintReqStatus;
+                result = true;
+            }
 
             listItem.Update();
             clientContext.ExecuteQuery();
+            return result;
         }
 
         public void SaveNumberOfPublicPagesAndSupplementalMailingListAddress(ClientContext clientContext, ListItem listItem, int numberOfPublicPages, int numberOfSupplementalMailingListAddress)
@@ -626,6 +642,15 @@ namespace PIW_SPAppWeb.Helper
             return string.Format("{0}/{1}/{2}/{3}", clientContext.Web.ServerRelativeUrl,
                     Constants.PIWDocuments_DocumentLibraryName, listItemID, fileName);
 
+        }
+
+        public string getFolderServerRelativeURL(ClientContext clientContext, string listItemID)
+        {
+            clientContext.Load(clientContext.Web);
+            clientContext.ExecuteQuery();
+
+            return string.Format("{0}/{1}/{2}", clientContext.Web.ServerRelativeUrl,
+                    Constants.PIWDocuments_DocumentLibraryName, listItemID);
         }
 
         /// <summary>
@@ -1248,6 +1273,10 @@ namespace PIW_SPAppWeb.Helper
             {
                 PageFileName = Constants.Page_EditDirectPublicationForm;
             }
+            else if (formType == Constants.PIWList_FormType_PrintReqForm)
+            {
+                PageFileName = Constants.Page_EditPrintReqForm;
+            }
 
             result = String.Format("{0}&ID={1}", GetPageUrl(request, PageFileName, sourcePage), listItemId);
             return result;
@@ -1268,6 +1297,35 @@ namespace PIW_SPAppWeb.Helper
 
         }
         
+        #endregion
+
+        #region Permission for Document List Item
+
+        public void AssignUniqueRoles(ClientContext clientContext,string listitemID)
+        {
+            string groupName = "PIWUsers";
+            var folderServerRelativeURL = getFolderServerRelativeURL(clientContext, listitemID);
+            var folder = clientContext.Web.GetFolderByServerRelativeUrl(folderServerRelativeURL);
+            folder.ListItemAllFields.BreakRoleInheritance(true,true);
+            var group = clientContext.Web.SiteGroups.GetByName(groupName);
+
+            AssignRoleForGroup(clientContext, group, "ContributeNoDelete", folder);
+        }
+
+        public void AssignRoleForGroup(ClientContext clientContext,Group group,string role,Folder folder)
+        {
+            var web = clientContext.Web;
+
+            //remove existing group role
+            folder.ListItemAllFields.RoleAssignments.Groups.Remove(group);
+
+            var rolebindingCol = new RoleDefinitionBindingCollection(clientContext);
+            rolebindingCol.Add(web.RoleDefinitions.GetByName(role));
+
+            folder.ListItemAllFields.RoleAssignments.Add(group, rolebindingCol);
+            folder.Update();
+            clientContext.ExecuteQuery();          
+        }
         #endregion
 
         #region FOLA and eLibrary connection

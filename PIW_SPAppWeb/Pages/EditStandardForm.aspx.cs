@@ -185,8 +185,16 @@ namespace PIW_SPAppWeb.Pages
 
                         //TODO: create list history for Mailing Date and FERC Report Completed.
 
-                        //Refresh
-                        helper.RefreshPage(Page.Request, Page.Response);
+                        //Refresh or Redirect depends on Previous Status
+                        if (PreviousFormStatus.Equals(Constants.PIWList_FormStatus_Pending))
+                        {
+                            helper.RedirectToSourcePage(Request,Response);
+                        }
+                        else
+                        {
+                            helper.RefreshPage(Request, Response);    
+                        }
+                        
                     }
                 }
             }
@@ -699,8 +707,6 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        
-
         protected void btnUpload_Click(object sender, EventArgs e)
         {
             try
@@ -813,6 +819,41 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
+        protected void btnGenerateMailingList_Click(object sender, EventArgs e)
+        {
+            using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
+            {
+                FOLAMailingList folaMailingList = new FOLAMailingList();
+                int numberOfFOLAAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, tbDocketNumber.Text.Trim(), _listItemId);
+
+                //save number of fola mailing list address
+                ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
+                string PrintReqStatus = Constants.PrintReq_FormStatus_PrintReqGenerated;
+
+                bool printReqGenerated = helper.InitiatePrintReqForm(clientContext, listItem, numberOfFOLAAddress, PrintReqStatus);
+
+                //create first history list
+                if (printReqGenerated)
+                {
+                    //add history list for the main form 
+                    helper.CreatePIWListHistory(clientContext, _listItemId, "Print Requisition Generated",
+                            FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
+
+                    //Add history list for the print req form
+                    if (helper.getHistoryListByPIWListID(clientContext, _listItemId, Constants.PIWListHistory_FormTypeOption_PrintReq).Count == 0)
+                    {
+                        helper.CreatePIWListHistory(clientContext, _listItemId, "Print Requisition Generated",
+                            PrintReqStatus, Constants.PIWListHistory_FormTypeOption_PrintReq);
+                    }
+
+                }
+
+                helper.RefreshPage(Request, Response);
+            }
+
+
+
+        }
         #endregion
 
         #region Save Data
@@ -1541,7 +1582,18 @@ namespace PIW_SPAppWeb.Pages
                     tbCitationNumber.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_CitationNumber]].ToString();
                 }
 
-                //todo: Mail Room - Print
+                //Print Requisition
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]] != null)
+                {
+                    tbPrintDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]].ToString()).ToShortDateString();
+                }
+
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]] != null)
+                {
+                    tbMailDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]].ToString()).ToShortDateString();
+                }
+
+                hyperlinkPrintReq.NavigateUrl = helper.getEditFormURL(Constants.PIWList_FormType_PrintReqForm, _listItemId, Request, string.Empty);
 
                 //Legal resources and review
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]] != null)
@@ -1576,6 +1628,20 @@ namespace PIW_SPAppWeb.Pages
                 documentCategory = listItem[piwlistInternalColumnName[Constants.PIWList_colName_DocumentCategory]].ToString();
             }
             bool isRequireOSECVerification = isRequiredOSECVerificationStep(documentCategory);
+
+            //number of fola mailing list and supp mailing list address
+            int numberOfFOLAMailingListAddress = 0;
+            int numberOfSuppMailingListAddress = 0;
+            if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] != null)
+            {
+                numberOfFOLAMailingListAddress = int.Parse(listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]].ToString());
+            }
+
+            if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
+            {
+                numberOfSuppMailingListAddress = int.Parse(listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+            }
+            
             //SPUser checkoutUser = null;
             var currentUser = clientContext.Web.CurrentUser;
             clientContext.Load(currentUser);
@@ -1875,7 +1941,7 @@ namespace PIW_SPAppWeb.Pages
                     EnableCitationNumberControls(false, false);
 
                     //Mailed Room and Legal Resources and Review
-                    fieldsetMailedRoom.Visible = true;
+                    fieldsetMailedRoom.Visible = (numberOfFOLAMailingListAddress + numberOfSuppMailingListAddress) > 0;
                     fieldsetLegalResourcesReview.Visible = true;
 
                     //buttons
@@ -2024,18 +2090,7 @@ namespace PIW_SPAppWeb.Pages
         }
         #endregion
 
-        protected void btnGenerateMailingList_Click(object sender, EventArgs e)
-        {
-            using (var clientContext =SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
-            {
-                FOLAMailingList folaMailingList = new FOLAMailingList();
-                folaMailingList.GenerateFOLAMailingExcelFile(clientContext,tbDocketNumber.Text.Trim(),_listItemId);
-
-            }
-
-
-
-        }
+        
 
 
 

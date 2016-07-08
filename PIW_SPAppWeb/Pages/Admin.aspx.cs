@@ -353,6 +353,15 @@ namespace PIW_SPAppWeb
             
         }
 
+        protected void btnTestPermissionSetting_Click(object sender, EventArgs e)
+        {
+            //elevated 
+            using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
+            {
+                helper.AssignUniqueRoles(clientContext,"118");
+            }
+        }
+
         //protected void Button2_Click(object sender, EventArgs e)
         //{
         //    FOLAMailingList fola = new FOLAMailingList();

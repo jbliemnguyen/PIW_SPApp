@@ -209,6 +209,18 @@
                     ctl00$MainContentPlaceHolder$ddProgramOfficeWorkflowInitiator: "required",
                     ctl00$MainContentPlaceHolder$tbDueDate: "required",
                     ctl00$MainContentPlaceHolder$tbAlternateIdentifier: { requiredWhenNonDocketed: true },
+
+                    //print req validation
+                    ctl00$MainContentPlaceHolder$tbNumberofPages: {
+                        required: true,
+                        min: 1,
+                        number: true
+                    },
+                    ctl00$MainContentPlaceHolder$tbNumberofCopies: {
+                        required: true,
+                        min: 1,
+                        number: true
+                    },
                 }
             });
 

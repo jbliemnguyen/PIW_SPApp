@@ -281,6 +281,22 @@
             <%--<form id="mainForm1">--%>
             <%--Main panel--%>
             <div class="form-group">
+                <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-3">
+                    <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server">
+                        <asp:ListItem Value="">Please Select</asp:ListItem>
+                        <asp:ListItem>Notational Order</asp:ListItem>
+                        <asp:ListItem>Notational Notice</asp:ListItem>
+                        <asp:ListItem>Commission Order</asp:ListItem>
+                        <asp:ListItem>Consent</asp:ListItem>
+                        <asp:ListItem>Errata</asp:ListItem>
+                        <asp:ListItem>Tolling Order</asp:ListItem>
+                        <asp:ListItem>Sunshine Notice</asp:ListItem>
+                        <asp:ListItem>Notice of Action Taken</asp:ListItem>
+                    </asp:DropDownList>
+                </div>
+            </div>
+            <div class="form-group">
                 <asp:Label ID="lbDocketNumber" runat="server" Text="Docket Number<span class='accentText'> *</span>" CssClass="col-md-2 control-label" AssociatedControlID="tbDocketNumber"></asp:Label>
 
                 <div class="col-md-6">
@@ -310,22 +326,6 @@
                 <asp:Label ID="lbDescription" runat="server" Text="Description<span class='accentText'> *</span>" AssociatedControlID="tbDescription" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-6">
                     <asp:TextBox ID="tbDescription" runat="server" TextMode="MultiLine" Rows="4" CssClass="form-control"></asp:TextBox>
-                </div>
-            </div>
-            <div class="form-group">
-                <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-3">
-                    <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server">
-                        <asp:ListItem Value="">Please Select</asp:ListItem>
-                        <asp:ListItem>Notational Order</asp:ListItem>
-                        <asp:ListItem>Notational Notice</asp:ListItem>
-                        <asp:ListItem>Commission Order</asp:ListItem>
-                        <asp:ListItem>Consent</asp:ListItem>
-                        <asp:ListItem>Errata</asp:ListItem>
-                        <asp:ListItem>Tolling Order</asp:ListItem>
-                        <asp:ListItem>Sunshine Notice</asp:ListItem>
-                        <asp:ListItem>Notice of Action Taken</asp:ListItem>
-                    </asp:DropDownList>
                 </div>
             </div>
             <asp:UpdatePanel runat="server">
@@ -454,17 +454,6 @@
                     <asp:TextBox ID="tbDueDate" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
                 </div>
             </div>
-
-            <div class="form-group">
-                <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-3">
-                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
-                </div>
-                <div class="col-md-1"></div>
-                <div class="col-md-5">
-                    <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
-                </div>
-            </div>
             <fieldset runat="server" id="fieldsetOSECRejectComment" visible="true">
                 <div class="form-group">
                     <asp:Label ID="lbOSECRejectComment" runat="server" Text="OSEC Reject Comment" AssociatedControlID="lbOSECRejectCommentValue" CssClass="col-md-2 control-label"></asp:Label>
@@ -514,6 +503,16 @@
                             </ol>
                         </FooterTemplate>
                     </asp:Repeater>
+                </div>
+            </div>
+            <div class="form-group">
+                <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-3">
+                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
+                </div>
+                <div class="col-md-1"></div>
+                <div class="col-md-5">
+                    <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
                 </div>
             </div>
 

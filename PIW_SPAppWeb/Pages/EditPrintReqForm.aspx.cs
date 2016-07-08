@@ -69,10 +69,6 @@ namespace PIW_SPAppWeb.Pages
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            //enable controls
-            tbPrintJobCompletedDate.Enabled = cbPrintJobCompleted.Checked;
-            tbMailJobCompletedDate.Enabled = cbMailJobCompleted.Checked;
-
             try
             {
                 _listItemId = Page.Request.QueryString["ID"];
@@ -82,7 +78,7 @@ namespace PIW_SPAppWeb.Pages
                 {
                     if (!string.IsNullOrEmpty(_listItemId))
                     {
-                        using (var clientContext =(SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                        using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
                             helper.PopulateIssuanceDocumentList(clientContext, _listItemId, rpDocumentList);
                             PopulateFOLAAndSupplementalMailingListURL(clientContext);
@@ -99,13 +95,13 @@ namespace PIW_SPAppWeb.Pages
                             {
                                 PopulateFormProperties(clientContext, listItem);
                                 DisplayListItemInForm(clientContext, listItem);
-                                helper.PopulateHistoryList(clientContext, _listItemId, rpHistoryList,Constants.PIWListHistory_FormTypeOption_PrintReq);
+                                helper.PopulateHistoryList(clientContext, _listItemId, rpHistoryList, Constants.PIWListHistory_FormTypeOption_PrintReq);
 
                                 //display form visiblility based on form status
                                 ControlsVisiblitilyBasedOnStatus(FormStatus);
 
                                 //todo: open documents if status is ready for published
-                                
+
                             }
                         }
                     }
@@ -129,7 +125,7 @@ namespace PIW_SPAppWeb.Pages
                 var formType = listItem[piwListInteralColumnNames[Constants.PIWList_colName_FormType]].ToString();
                 //Link to PIW Form
                 hplPIWFormLink.NavigateUrl = helper.getEditFormURL(formType, _listItemId, Request, string.Empty);
-                
+
                 //Docket
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]] != null)
                 {
@@ -277,29 +273,28 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                using (var clientContext =(SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                 {
                     ListItem listItem = null;
-                    
-                    
+
+
                     if ((!PrintJobCompleted) && (cbPrintJobCompleted.Checked))
                     {
                         FormStatus = Constants.PrintReq_FormStatus_PrintJobCompleted;
-                        helper.CreatePIWListHistory(clientContext, _listItemId, "Print Job marked as Completed on " + tbPrintJobCompletedDate.Text, FormStatus, Constants.PIWListHistory_FormTypeOption_PrintReq);
+                        helper.CreatePIWListHistory(clientContext, _listItemId, "Print Job marked as Completed on " + tbPrintJobCompletedDate.Text, FormStatus,
+                            Constants.PIWListHistory_FormTypeOption_PrintReq);
                     }
 
                     //Create list history
                     if ((!MailJobCompleted) && (cbMailJobCompleted.Checked))
                     {
                         FormStatus = Constants.PrintReq_FormStatus_MailJobCompleted;
-                        helper.CreatePIWListHistory(clientContext, _listItemId, "Mail Job marked as Completed on " + tbMailJobCompletedDate.Text, FormStatus, Constants.PIWListHistory_FormTypeOption_PrintReq);
+                        helper.CreatePIWListHistory(clientContext, _listItemId, "Mail Job marked as Completed on " + tbMailJobCompletedDate.Text, FormStatus,
+                            Constants.PIWListHistory_FormTypeOption_PrintReq);
                     }
 
-                    if (!SaveData(clientContext, ref listItem))
-                    {
-                        return;
-                    }
-
+                    SaveData(clientContext, ref listItem);
+                    helper.RefreshPage(Page.Request, Page.Response);
 
                     //TODO: send email
                 }
@@ -405,14 +400,13 @@ namespace PIW_SPAppWeb.Pages
                     ListItem listItem = null;
 
                     FormStatus = Constants.PrintReq_FormStatus_PrintReqRejected;
+
+
+                    SaveData(clientContext, ref listItem);
+
                     helper.CreatePIWListHistory(clientContext, _listItemId, "Print Job Rejected", FormStatus, Constants.PIWListHistory_FormTypeOption_PrintReq);
-
-                    if (!SaveData(clientContext, ref listItem))
-                    {
-                        return;
-                    }
-
-
+                    helper.RefreshPage(Request,Response);
+                    
                     //TODO: send email
                 }
             }
@@ -425,10 +419,20 @@ namespace PIW_SPAppWeb.Pages
 
         public void ControlsVisiblitilyBasedOnStatus(string Status)
         {
-            if (Status.Equals(Constants.PrintReq_FormStatus_PrintReqRejected))
+            tbPrintJobCompletedDate.Enabled = cbPrintJobCompleted.Checked;
+            tbMailJobCompletedDate.Enabled = cbMailJobCompleted.Checked;
+
+            //view only if status is complete or reject
+            if (((cbMailJobCompleted.Checked) && (cbPrintJobCompleted.Checked)) || Status.Equals(Constants.PrintReq_FormStatus_PrintReqRejected))
             {
                 btnSave.Visible = false;
                 btnReject.Visible = false;
+                tbNumberofCopies.Enabled = false;
+                tbMailJobCompletedDate.Enabled = false;
+                tbPrintJobCompletedDate.Enabled = false;
+                tbNumberofPages.Enabled = false;
+                cbMailJobCompleted.Enabled = false;
+                cbPrintJobCompleted.Enabled = false;
             }
         }
     }

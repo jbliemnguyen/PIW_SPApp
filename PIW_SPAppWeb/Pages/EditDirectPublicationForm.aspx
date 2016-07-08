@@ -378,17 +378,6 @@
                     </div>
                 </div>
             </div>
-
-            <div class="form-group">
-                <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-3">
-                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
-                </div>
-                <div class="col-md-1"></div>
-                <div class="col-md-5">
-                    <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
-                </div>
-            </div>
             <div class="form-group">
                 <asp:Label ID="lbFOLAServiceRequired" runat="server" Text="FOLA Service Required<span class='accentText'> *</span>" AssociatedControlID="ddFolaServiceRequired" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
@@ -441,6 +430,17 @@
                             </ol>
                         </FooterTemplate>
                     </asp:Repeater>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-3">
+                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
+                </div>
+                <div class="col-md-1"></div>
+                <div class="col-md-5">
+                    <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
                 </div>
             </div>
 
