@@ -208,16 +208,22 @@ namespace PIW_SPAppWeb
 
         //group name
         public const string Grp_PIWUsers = "PIWUsers";
-        public const string Grp_OSECGroupName = "PIWOSEC";
-        public const string Grp_SecretaryReviewGroupName = "PIWSecReview";
+        public const string Grp_OSEC = "PIWOSEC";
+        public const string Grp_SecReview = "PIWSecReview";
         public const string Grp_PIWDirectPublication = "PIWDirectPublication";
         public const string Grp_PIWDirectPublicationSubmitOnly = "PIWDirectPublicationSubmitOnly";
+        
         public const string Grp_PIWAdmin = "PIWAdmin";
         public const string Grp_PIWSystemAdmin = "PIWSystemAdmin";
         public const string Grp_PIWAgendaNonManagement = "PIWAgendaNonManagement";
         //public const string Grp_PrintRequisitionSubmitter = "PrintRequisitionSubmitter";
         public const string Grp_CopyCenter = "CopyCenter";
         public const string Grp_PIWOSECFERCReports = "PIWOSECFERCReports";
+
+        //role
+        public const string Role_ContributeNoDelete = "ContributeNoDelete";
+        public const string Role_Read = "Read";
+
         
         //FormStatus Key
         public const string formStatusViewStateKey = "FormStatusKey";
@@ -442,8 +448,8 @@ namespace PIW_SPAppWeb
 
         ////group name
         //public const string Grp_PIWUsers = "PIWUsers";
-        //public const string Grp_OSECGroupName = "PIWOSEC";
-        //public const string Grp_SecretaryReviewGroupName = "PIWSecReview";
+        //public const string Grp_OSEC = "PIWOSEC";
+        //public const string Grp_SecReview = "PIWSecReview";
         //public const string Grp_PIWDirectPublication = "PIWDirectPublication";
         //public const string Grp_PIWDirectPublicationSubmitOnly = "PIWDirectPublicationSubmitOnly";
         //public const string Grp_PIWAdmin = "PIWAdmin";

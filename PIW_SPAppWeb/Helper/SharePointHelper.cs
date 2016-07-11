@@ -242,7 +242,7 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public bool InitiatePrintReqForm(ClientContext clientContext, ListItem listItem, int numberOfFOLAMailingListAddress,string PrintReqStatus)
+        public bool InitiatePrintReqForm(ClientContext clientContext, ListItem listItem, int numberOfFOLAMailingListAddress, string PrintReqStatus)
         {
             int supplementalMailingListAddress = 0;
             bool result = false;
@@ -250,7 +250,7 @@ namespace PIW_SPAppWeb.Helper
 
             if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
             {
-                supplementalMailingListAddress =int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+                supplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
             }
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] = numberOfFOLAMailingListAddress;
@@ -439,7 +439,7 @@ namespace PIW_SPAppWeb.Helper
 
         #region PIWListHistory
 
-        public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus,string FormType)
+        public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus, string FormType)
         {
             List piwlisthistory = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
             var piwlistHistoryInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
@@ -469,7 +469,7 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public ListItemCollection getHistoryListByPIWListID(ClientContext clientContext, string piwListItemID,string FormType)
+        public ListItemCollection getHistoryListByPIWListID(ClientContext clientContext, string piwListItemID, string FormType)
         {
             List historyList = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
             var historyListInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
@@ -509,9 +509,9 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public System.Data.DataTable getHistoryListTable(ClientContext clientContext, string piwListItemID,string FormType)
+        public System.Data.DataTable getHistoryListTable(ClientContext clientContext, string piwListItemID, string FormType)
         {
-            var historyList = getHistoryListByPIWListID(clientContext, piwListItemID,FormType);
+            var historyList = getHistoryListByPIWListID(clientContext, piwListItemID, FormType);
             var historyListInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
             //TimeZoneInfo timeZone = TimeZoneInfo.FindSystemTimeZoneById(System.TimeZone.CurrentTimeZone.ToLocalTime());
             var result = new System.Data.DataTable();
@@ -552,7 +552,7 @@ namespace PIW_SPAppWeb.Helper
             return result;
         }
 
-        public void PopulateHistoryList(ClientContext clientContext, string listItemId, Repeater rpHistoryList,string FormType)
+        public void PopulateHistoryList(ClientContext clientContext, string listItemId, Repeater rpHistoryList, string FormType)
         {
             System.Data.DataTable table = getHistoryListTable(clientContext, listItemId, FormType);
             rpHistoryList.DataSource = table;
@@ -571,7 +571,7 @@ namespace PIW_SPAppWeb.Helper
             page.ClientScript.RegisterStartupScript(this.GetType(), "documentWindow", String.Format("<script>window.open('{0}');</script>", documentPath));
         }
 
-        
+
 
         public void AddCitationNumberToDocument(ClientContext clientContext, string citationNumber, string listItemID, string fileName)
         {
@@ -678,7 +678,7 @@ namespace PIW_SPAppWeb.Helper
 
             return result;
         }
-        
+
 
         public Paragraph GenerateCitParagraph(string text)
         {
@@ -764,7 +764,7 @@ namespace PIW_SPAppWeb.Helper
                         //history list
                         if (getHistoryListByPIWListID(clientContext, listItemId, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
-                            CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus,Constants.PIWListHistory_FormTypeOption_EditForm);
+                            CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
                         }
 
                         CreatePIWListHistory(clientContext, listItemId,
@@ -793,7 +793,7 @@ namespace PIW_SPAppWeb.Helper
                 }
                 else
                 {
-                    UploadDocumentContentStream(clientContext, fileStream,Constants.PIWDocuments_DocumentLibraryName,listItemId, fileName, securityControlValue, docType, false);
+                    UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName, listItemId, fileName, securityControlValue, docType, false);
 
                     //clear validation error
                     lbUploadedDocumentError.Visible = false;
@@ -1296,23 +1296,138 @@ namespace PIW_SPAppWeb.Helper
             }
 
         }
+
+        public ClientContext getElevatedClientContext(HttpContext context,HttpRequest request)
+        {            
+            return new ClientContext(request.QueryString["SPHostUrl"]);
+        }
+
+        public ClientContext getCurrentLoginClientContext(HttpContext context, HttpRequest request)
+        {
+            return SharePointContextProvider.Current.GetSharePointContext(context).CreateUserClientContextForSPHost();
+        }
         
         #endregion
 
         #region Permission for Document List Item
 
-        public void AssignUniqueRoles(ClientContext clientContext,string listitemID)
+        public void UpdatePermissionBaseOnFormStatus(ClientContext clientContext, string listitemID, string formStatus, string formType)
         {
-            string groupName = "PIWUsers";
-            var folderServerRelativeURL = getFolderServerRelativeURL(clientContext, listitemID);
-            var folder = clientContext.Web.GetFolderByServerRelativeUrl(folderServerRelativeURL);
-            folder.ListItemAllFields.BreakRoleInheritance(true,true);
-            var group = clientContext.Web.SiteGroups.GetByName(groupName);
+            switch (formStatus)
+            {
+                case Constants.PIWList_FormStatus_Pending:
+                case Constants.PIWList_FormStatus_Recalled:
+                case Constants.PIWList_FormStatus_Rejected:
+                case Constants.PIWList_FormStatus_ReOpen:
+                    if (formType.Equals(Constants.PIWList_FormType_StandardForm))
+                    {
+                        AssignUniqueRoles(clientContext, listitemID, Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete, 
+                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read);
+                    }
+                    else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
+                    {
+                        AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_ContributeNoDelete,
+                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read);
+                    }
+                    else if (formType.Equals(Constants.PIWList_FormType_DirectPublicationForm))
+                    {
+                        AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_Read,
+                            Constants.Role_Read, Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete);
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_Submitted:
+                    AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_Read,
+                            Constants.Role_Read, Constants.Role_Read, Constants.Role_Read);
+                    break;
+                case Constants.PIWList_FormStatus_Edited:
+                    //Do nothings in Edit
+                    break;
+                case Constants.PIWList_FormStatus_OSECVerification:
+                case Constants.PIWList_FormStatus_PrePublication:
+                    AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_ContributeNoDelete,
+                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read);
+                    break;
+                case Constants.PIWList_FormStatus_SecretaryReview:
+                    AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_Read,
+                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read);
+                    break;
+                case Constants.PIWList_FormStatus_ReadyForPublishing:
+                    if (formType.Equals(Constants.PIWList_FormType_StandardForm))
+                    {
+                        AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_ContributeNoDelete,
+                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read);
+                    }
+                    else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
+                    {
+                        AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_Read,
+                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read);
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_PublishInitiated:
+                case Constants.PIWList_FormStatus_PublishedToeLibrary:
+                    AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_Read,
+                            Constants.Role_Read, Constants.Role_Read, Constants.Role_Read);
+                    break;
+                default:
+                    throw new Exception("UnKnown Form Status: " + formStatus);
 
-            AssignRoleForGroup(clientContext, group, "ContributeNoDelete", folder);
+            }
         }
 
-        public void AssignRoleForGroup(ClientContext clientContext,Group group,string role,Folder folder)
+        public void AssignUniqueRoles(ClientContext clientContext, string listitemID, string PIWUsersRole, string PIWOSECRole, string PIWSecReviewRole, string PIWDirectPublicationRole, string PIWDirectPublicationSubmissionOnlyRole)
+        {
+            var folderServerRelativeURL = getFolderServerRelativeURL(clientContext, listitemID);
+            var folder = clientContext.Web.GetFolderByServerRelativeUrl(folderServerRelativeURL);
+
+            folder.ListItemAllFields.BreakRoleInheritance(true, true);
+
+            //PIWUser group
+            if (!string.IsNullOrEmpty(PIWUsersRole))
+            {
+                var group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIWUsers);
+
+                AssignRoleForGroup(clientContext, group, PIWUsersRole, folder);
+            }
+
+            //PIWOSEC group
+            if (!string.IsNullOrEmpty(PIWOSECRole))
+            {
+                var group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_OSEC);
+
+                AssignRoleForGroup(clientContext, group, PIWOSECRole, folder);
+            }
+
+            //PIWSecReview group
+            if (!string.IsNullOrEmpty(PIWSecReviewRole))
+            {
+                var group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_SecReview);
+
+                AssignRoleForGroup(clientContext, group, PIWSecReviewRole, folder);
+            }
+
+            //PIWDirectPublication group
+            if (!string.IsNullOrEmpty(PIWDirectPublicationRole))
+            {
+                var group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIWDirectPublication);
+
+                AssignRoleForGroup(clientContext, group, PIWDirectPublicationRole, folder);
+            }
+
+            //PIWDirectPublicationSubmissionOnly group
+            if (!string.IsNullOrEmpty(PIWDirectPublicationSubmissionOnlyRole))
+            {
+                var group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIWDirectPublicationSubmitOnly);
+
+                AssignRoleForGroup(clientContext, group, PIWDirectPublicationSubmissionOnlyRole, folder);
+            }
+
+            //update
+            folder.Update();
+            clientContext.ExecuteQuery();
+
+        }
+
+        public void AssignRoleForGroup(ClientContext clientContext, Group group, string role, Folder folder)
         {
             var web = clientContext.Web;
 
@@ -1323,8 +1438,7 @@ namespace PIW_SPAppWeb.Helper
             rolebindingCol.Add(web.RoleDefinitions.GetByName(role));
 
             folder.ListItemAllFields.RoleAssignments.Add(group, rolebindingCol);
-            folder.Update();
-            clientContext.ExecuteQuery();          
+
         }
         #endregion
 

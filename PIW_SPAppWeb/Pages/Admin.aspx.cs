@@ -358,7 +358,7 @@ namespace PIW_SPAppWeb
             //elevated 
             using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
             {
-                helper.AssignUniqueRoles(clientContext,"118");
+                helper.AssignUniqueRoles(clientContext,"118","Read","Contribute","Read","Read","Read");
             }
         }
 

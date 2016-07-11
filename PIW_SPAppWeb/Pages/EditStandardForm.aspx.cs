@@ -66,6 +66,7 @@ namespace PIW_SPAppWeb.Pages
 
         //variable        
         private string _listItemId;
+        private string _formType;
 
         //fuction
         static SharePointHelper helper;
@@ -86,7 +87,7 @@ namespace PIW_SPAppWeb.Pages
                 {
                     if (!string.IsNullOrEmpty(_listItemId))
                     {
-                        using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                        using (var clientContext = helper.getElevatedClientContext(Context,Request))
                         {
                             DocumentURLsFromViewState = helper.PopulateIssuanceDocumentList(clientContext, _listItemId, rpDocumentList);
                             helper.PopulateSupplementalMailingListDocumentList(clientContext,_listItemId,rpSupplementalMailingListDocumentList,fieldSetSupplementalMailingList);
@@ -127,7 +128,7 @@ namespace PIW_SPAppWeb.Pages
                         //Then redirect to EditForm
                         //By doing it, we can attach multiple document to new piwList item under its folder ID
 
-                        using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                        using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
                             ListItem newItem = helper.createNewPIWListItem(clientContext, Constants.PIWList_FormType_StandardForm);
                             _listItemId = newItem.Id.ToString();
@@ -159,7 +160,7 @@ namespace PIW_SPAppWeb.Pages
             try
             {
                 const enumAction action = enumAction.Save;
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     if (ValidFormData(action))
                     {
@@ -169,7 +170,8 @@ namespace PIW_SPAppWeb.Pages
                             return;
                         }
 
-                        //TODO: Change document and list permission
+                        //Change document and list permission
+                        helper.UpdatePermissionBaseOnFormStatus(clientContext,_listItemId,FormStatus,_formType);
 
                         //TODO: send email
 
@@ -203,15 +205,13 @@ namespace PIW_SPAppWeb.Pages
                 helper.LogError(Context, exc, _listItemId, string.Empty);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
-
-
         }
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
             try
             {
                 const enumAction action = enumAction.Submit;
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     if (ValidFormData(action))
                     {
@@ -221,7 +221,9 @@ namespace PIW_SPAppWeb.Pages
                             return;
                         }
 
-                        //TODO: Change document and list permission
+                        //Change document and list permission
+                        
+                        helper.UpdatePermissionBaseOnFormStatus(clientContext, _listItemId, FormStatus, _formType);
 
                         //TODO: send email
 
@@ -259,7 +261,7 @@ namespace PIW_SPAppWeb.Pages
             try
             {
                 const enumAction action = enumAction.Accept;
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     ListItem listItem = null;
                     if (!SaveData(clientContext, action, ref listItem))
@@ -290,7 +292,7 @@ namespace PIW_SPAppWeb.Pages
             try
             {
                 const enumAction action = enumAction.Reject;
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     ListItem listItem = null;
                     if (!SaveData(clientContext, action, ref listItem))
@@ -321,8 +323,7 @@ namespace PIW_SPAppWeb.Pages
             try
             {
                 const enumAction action = enumAction.Publish;
-                //using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
-                using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))//run with system account
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     ListItem listItem = null;
                     if (!SaveData(clientContext, action, ref listItem))
@@ -385,7 +386,7 @@ namespace PIW_SPAppWeb.Pages
             try
             {
                 const enumAction action = enumAction.Delete;
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     ListItem listItem = null;
                     if (!SaveData(clientContext, action, ref listItem))
@@ -416,7 +417,7 @@ namespace PIW_SPAppWeb.Pages
             try
             {
                 const enumAction action = enumAction.Recall;
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     if (ValidFormData(action))
                     {
@@ -453,7 +454,7 @@ namespace PIW_SPAppWeb.Pages
             try
             {
                 const enumAction action = enumAction.OSECTakeOwnerShip;
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     ListItem listItem = null;
                     if (!SaveData(clientContext, action, ref listItem))
@@ -484,7 +485,7 @@ namespace PIW_SPAppWeb.Pages
             try
             {
                 const enumAction action = enumAction.Edit;
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     ListItem listItem = null;
                     if (!SaveData(clientContext, action, ref listItem))
@@ -513,7 +514,7 @@ namespace PIW_SPAppWeb.Pages
             {
                 lbCitationNumberError.Text = string.Empty;
                 lbCitationNumberError.Visible = false;
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     helper.GenerateCitation(clientContext, ddDocumentCategory, tbCitationNumber, ddAvailableCitationNumbers,false);
 
@@ -530,8 +531,7 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                //using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
-                using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     if (ddDocumentCategory.SelectedIndex > 0)
                     {
@@ -600,8 +600,7 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                //using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
-                using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     //just delete the citation item - instead of settign the status to deleted
                     var listItem = helper.deleteAssociatedCitationNumberListItem(clientContext, _listItemId);
@@ -661,7 +660,7 @@ namespace PIW_SPAppWeb.Pages
                     if (!string.IsNullOrEmpty(e.CommandArgument.ToString()))
                     {
 
-                        using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                        using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
                             string removedFileName = helper.RemoveDocument(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
                             DocumentURLsFromViewState = helper.PopulateIssuanceDocumentList(clientContext, _listItemId, rpDocumentList);
@@ -688,7 +687,7 @@ namespace PIW_SPAppWeb.Pages
                     if (!string.IsNullOrEmpty(e.CommandArgument.ToString()))
                     {
 
-                        using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                        using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
                             string removedFileName = helper.RemoveDocument(clientContext, _listItemId, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
                             helper.PopulateSupplementalMailingListDocumentList(clientContext, _listItemId, rpSupplementalMailingListDocumentList,fieldSetSupplementalMailingList);
@@ -717,7 +716,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         var spContext = SharePointContextProvider.Current.GetSharePointContext(Context);
 
-                        using (var clientContext = spContext.CreateUserClientContextForSPHost())
+                        using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
                             var uploadedFileURL = helper.UploadIssuanceDocument(clientContext, fileUpload, _listItemId, rpDocumentList,
                                 lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus,
@@ -764,7 +763,7 @@ namespace PIW_SPAppWeb.Pages
                 {
                     if (supplementalMailingListFileUpload.PostedFile.ContentLength < 52428800)
                     {
-                        using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
+                        using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
                             var uploadResult = helper.UploadSupplementalMailingListDocument(clientContext, supplementalMailingListFileUpload, _listItemId, rpSupplementalMailingListDocumentList,
                                 lbSupplementalMailingListUploadError,FormStatus,Constants.PIWDocuments_EPSSecurityLevel_Option_Public,Constants.PIWDocuments_DocTypeOption_SupplementalMailingList);
@@ -796,7 +795,7 @@ namespace PIW_SPAppWeb.Pages
             try
             {
                 const enumAction action = enumAction.ReOpen;
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     ListItem listItem = null;
                     if (!SaveData(clientContext, action, ref listItem))
@@ -821,7 +820,7 @@ namespace PIW_SPAppWeb.Pages
 
         protected void btnGenerateMailingList_Click(object sender, EventArgs e)
         {
-            using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
+            using (var clientContext = helper.getElevatedClientContext(Context, Request))
             {
                 FOLAMailingList folaMailingList = new FOLAMailingList();
                 int numberOfFOLAAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, tbDocketNumber.Text.Trim(), _listItemId);
@@ -1384,6 +1383,13 @@ namespace PIW_SPAppWeb.Pages
             {
                 ModifiedDateTime = listItem[internalColumnNames[Constants.PIWList_colName_Modified]].ToString();
             }
+
+            //_formType
+            if (listItem[internalColumnNames[Constants.PIWList_colName_FormType]] != null)
+            {
+                _formType = listItem[internalColumnNames[Constants.PIWList_colName_FormType]].ToString();
+            }
+
         }
         private void DisplayListItemInForm(ClientContext clientContext, ListItem listItem)
         {
@@ -1615,6 +1621,9 @@ namespace PIW_SPAppWeb.Pages
                      documentCategory.Equals(Constants.PIWList_DocCat_NoticeErrata));
         }
 
+        
+
+
 
         #endregion
 
@@ -1684,7 +1693,7 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetLegalResourcesReview.Visible = false;
 
                     //buttons
-                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_PIWUsers) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_OSECGroupName) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_SecretaryReviewGroupName);
+                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_PIWUsers) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_OSEC) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_SecReview);
 
                     btnSubmit.Visible = btnSave.Visible;
 
@@ -1974,7 +1983,7 @@ namespace PIW_SPAppWeb.Pages
 
                     break;
                 default:
-                    throw new Exception("UnRecognized Form Status: " + formStatus);
+                    throw new Exception("UnKnown Form Status: " + formStatus);
                     
             }
         }

@@ -1416,7 +1416,7 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetLegalResourcesReview.Visible = false;
 
                     //buttons
-                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_PIWUsers) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_OSECGroupName) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_SecretaryReviewGroupName);
+                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_PIWUsers) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_OSEC) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_SecReview);
 
                     btnSubmitToSecReview.Visible = btnSave.Visible;
 
@@ -1580,7 +1580,7 @@ namespace PIW_SPAppWeb.Pages
                     EnableSecReviewControls(false);
                     break;
                 default:
-                    throw new Exception("UnRecognized Form Status: " + formStatus);
+                    throw new Exception("Unknown Form Status: " + formStatus);
                     
             }
         }
