@@ -469,6 +469,37 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
+        public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus, string FormType, string _currentUserLogIn)
+        {
+            List piwlisthistory = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
+            var piwlistHistoryInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
+
+            var currentUser = clientContext.Web.EnsureUser(_currentUserLogIn);
+            clientContext.ExecuteQuery();
+
+            ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
+            ListItem newItem = piwlisthistory.AddItem(itemCreateInfo);
+            
+            newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_User]] = currentUser;
+
+            newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_Action]] = action;
+            newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_FormStatus]] = FormStatus;
+            newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_FormType]] = FormType;
+
+            newItem.Update();
+            clientContext.ExecuteQuery();//we need to create item first before set lookup field.
+
+            if (!string.IsNullOrEmpty(listItemID))
+            {
+                //get piwListItem reference
+                FieldLookupValue lv = new FieldLookupValue { LookupId = int.Parse(listItemID) };
+                newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_PIWList]] = lv;
+                newItem.Update();
+                clientContext.ExecuteQuery();
+            }
+
+        }
+
         public ListItemCollection getHistoryListByPIWListID(ClientContext clientContext, string piwListItemID, string FormType)
         {
             List historyList = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
@@ -717,7 +748,8 @@ namespace PIW_SPAppWeb.Helper
             return paragraph1;
         }
 
-        public string UploadIssuanceDocument(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError, Label lbRequiredUploadedDocumentError, string FormStatus, string securityControlValue, string docType)
+        public string UploadIssuanceDocument(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError, 
+            Label lbRequiredUploadedDocumentError, string FormStatus, string securityControlValue, string docType,string currentloginID)
         {
             var uploadedFileURL = string.Empty;
             using (var fileStream = fileUpload.PostedFile.InputStream)
@@ -764,11 +796,13 @@ namespace PIW_SPAppWeb.Helper
                         //history list
                         if (getHistoryListByPIWListID(clientContext, listItemId, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
-                            CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
+                            CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus, 
+                                Constants.PIWListHistory_FormTypeOption_EditForm,currentloginID);
                         }
 
                         CreatePIWListHistory(clientContext, listItemId,
-                            string.Format("Document file {0} uploaded/associated with Workflow Item", fileName), FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
+                            string.Format("Document file {0} uploaded/associated with Workflow Item", fileName), FormStatus, 
+                            Constants.PIWListHistory_FormTypeOption_EditForm, currentloginID);
 
                     }
                 }
@@ -778,8 +812,7 @@ namespace PIW_SPAppWeb.Helper
         }
 
         public bool UploadSupplementalMailingListDocument(ClientContext clientContext, FileUpload fileUpload, string listItemId,
-            Repeater rpDocumentList, Label lbUploadedDocumentError,
-            string FormStatus, string securityControlValue, string docType)
+            Repeater rpDocumentList, Label lbUploadedDocumentError,string FormStatus, string securityControlValue, string docType,string currentLoginID)
         {
             bool result = false;
             using (var fileStream = fileUpload.PostedFile.InputStream)
@@ -802,11 +835,11 @@ namespace PIW_SPAppWeb.Helper
                     //history list
                     if (getHistoryListByPIWListID(clientContext, listItemId, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                     {
-                        CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
+                        CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm,currentLoginID);
                     }
 
                     CreatePIWListHistory(clientContext, listItemId,
-                        string.Format("Supplemental Mailing List file {0} uploaded/associated with Workflow Item", fileName), FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm);
+                        string.Format("Supplemental Mailing List file {0} uploaded/associated with Workflow Item", fileName), FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm,currentLoginID);
                     result = true;
                 }
             }
@@ -1053,7 +1086,7 @@ namespace PIW_SPAppWeb.Helper
               .Any(g => g.Title == groupName);
         }
 
-        public bool IsCurrentUserMemberOfGroup(ClientContext clientContext, string groupName)
+        public bool IsCurrentUserMemberOfGroup(ClientContext clientContext,string groupName)
         {
             var currentUser = clientContext.Web.CurrentUser;
             clientContext.Load(currentUser);
@@ -1365,6 +1398,7 @@ namespace PIW_SPAppWeb.Helper
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
+                case Constants.PIWList_FormStatus_Deleted:
                     AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_Read,
                             Constants.Role_Read, Constants.Role_Read, Constants.Role_Read);
                     break;

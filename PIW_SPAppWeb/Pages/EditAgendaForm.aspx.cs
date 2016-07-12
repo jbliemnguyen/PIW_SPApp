@@ -66,6 +66,8 @@ namespace PIW_SPAppWeb.Pages
 
         //variable        
         private string _listItemId;
+        private string _formType;
+        private User _currentUser;
 
         //fuction
         static SharePointHelper helper = null;
