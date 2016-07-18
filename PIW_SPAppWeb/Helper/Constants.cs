@@ -27,7 +27,9 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_Comment = "Comment";
         public const string PIWList_colName_Description = "Description";
         public const string PIWList_colName_DocketNumber = "Docket Number";
-        public const string PIWList_colName_DocumentURLs = "Document URLs";
+        public const string PIWList_colName_PublicDocumentURLs = "Public Document URLs";
+        public const string PIWList_colName_CEIIDocumentURLs = "CEII Document URLs";
+        public const string PIWList_colName_PriviledgedDocumentURLs = "Previledged Document URLs";
         public const string PIWList_colName_DocumentOwner = "Document Owner";
         public const string PIWList_colName_DueDate = "Due Date";
         public const string PIWList_colName_FederalRegister = "Federal Register";
@@ -219,6 +221,9 @@ namespace PIW_SPAppWeb
         //public const string Grp_PrintRequisitionSubmitter = "PrintRequisitionSubmitter";
         public const string Grp_CopyCenter = "CopyCenter";
         public const string Grp_PIWOSECFERCReports = "PIWOSECFERCReports";
+        public const string Grp_PIW_FOL_Submission_CEII_ReadOnly = "PIW–FOL-Submission-CEII-ReadOnly";
+        public const string Grp_PIW_FOL_Submission_Privileged_ReadOnly = "PIW–FOL-Submission-Privileged–ReadOnly";
+
 
         //role
         public const string Role_ContributeNoDelete = "ContributeNoDelete";
@@ -234,8 +239,19 @@ namespace PIW_SPAppWeb
         //ModifiedDateTime key
         public const string ModifiedDateTimeKey = "ModifiedDateTimeKey";
 
-        //DocumentURLsFromViewState key
-        public const string DocumentURLsKey = "DocumentURLsKey";
+        //PublicDocumentURLsFromViewState key
+        public const string PublicDocumentURLsKey = "PublicDocumentURLsKey";
+        public const string CEIIDocumentURLsKey = "CEIIDocumentURLsKey";
+        public const string PriviledgedDocumentURLsKey = "PriviledgedDocumentURLsKey";
+
+        //FormTypeViewState key
+        public const string FormTypeKey = "FormTypeKey";
+
+        //CurrentLoginID key
+        public const string CurrentLoginIDKey = "CurrentLoginIDKey";
+
+        //ListItemID
+        public const string ListItemIDKey = "ListItemIDKey";
 
         //document urls seperator
         public const string DocumentURLsSeparator = "_##_";

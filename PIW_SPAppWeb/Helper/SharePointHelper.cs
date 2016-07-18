@@ -367,9 +367,13 @@ namespace PIW_SPAppWeb.Helper
             return issuanceFiles;
         }
 
-        public System.Data.DataTable getDocumentsTableByDocType(ClientContext clientContext, string subFoder, string libraryName, out StringBuilder DocumentURLs, string docType)
+        public System.Data.DataTable getDocumentsTableByDocType(ClientContext clientContext, string subFoder, string libraryName, 
+            out string PublicDocumentURLs,out string CEIIDocumentURLs,out string  PriviledgedDocumentURLs, string docType)
         {
-            DocumentURLs = new StringBuilder();
+            PublicDocumentURLs = string.Empty;
+            CEIIDocumentURLs = string.Empty;
+            PriviledgedDocumentURLs = string.Empty;
+
             var result = new System.Data.DataTable();
             result.Columns.Add("ID");
             result.Columns.Add("Name");
@@ -398,13 +402,38 @@ namespace PIW_SPAppWeb.Helper
 
                 result.Rows.Add(row);
 
-                if (DocumentURLs.Length == 0)
+                if (row["Security Level"].ToString().Equals(Constants.ddlSecurityControl_Option_Public))
                 {
-                    DocumentURLs.Append(row["URL"]);
+                    if (string.IsNullOrEmpty(PublicDocumentURLs))
+                    {
+                        PublicDocumentURLs = row["URL"].ToString();
+                    }
+                    else
+                    {
+                        PublicDocumentURLs = PublicDocumentURLs + Constants.DocumentURLsSeparator + row["URL"];
+                    }
                 }
-                else
+                else if (row["Security Level"].ToString().Equals(Constants.ddlSecurityControl_Option_CEII))
                 {
-                    DocumentURLs.Append(Constants.DocumentURLsSeparator + row["URL"]);
+                    if (string.IsNullOrEmpty(CEIIDocumentURLs))
+                    {
+                        CEIIDocumentURLs = row["URL"].ToString();
+                    }
+                    else
+                    {
+                        CEIIDocumentURLs = CEIIDocumentURLs + Constants.DocumentURLsSeparator + row["URL"];
+                    }
+                }
+                else if (row["Security Level"].ToString().Equals(Constants.ddlSecurityControl_Option_Priviledged))
+                {
+                    if (string.IsNullOrEmpty(PriviledgedDocumentURLs))
+                    {
+                        PriviledgedDocumentURLs = row["URL"].ToString();
+                    }
+                    else
+                    {
+                        PriviledgedDocumentURLs = PriviledgedDocumentURLs + Constants.DocumentURLsSeparator + row["URL"];
+                    }
                 }
 
             }
@@ -438,43 +467,12 @@ namespace PIW_SPAppWeb.Helper
         #endregion
 
         #region PIWListHistory
-
-        public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus, string FormType)
+        public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus, string FormType, string currentUserLogInID)
         {
             List piwlisthistory = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
             var piwlistHistoryInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
 
-            ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
-            ListItem newItem = piwlisthistory.AddItem(itemCreateInfo);
-
-            clientContext.Load(clientContext.Web.CurrentUser);
-            clientContext.ExecuteQuery();
-            newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_User]] = clientContext.Web.CurrentUser;
-
-            newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_Action]] = action;
-            newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_FormStatus]] = FormStatus;
-            newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_FormType]] = FormType;
-
-            newItem.Update();
-            clientContext.ExecuteQuery();//we need to create item first before set lookup field.
-
-            if (!string.IsNullOrEmpty(listItemID))
-            {
-                //get piwListItem reference
-                FieldLookupValue lv = new FieldLookupValue { LookupId = int.Parse(listItemID) };
-                newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_PIWList]] = lv;
-                newItem.Update();
-                clientContext.ExecuteQuery();
-            }
-
-        }
-
-        public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus, string FormType, string _currentUserLogIn)
-        {
-            List piwlisthistory = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
-            var piwlistHistoryInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
-
-            var currentUser = clientContext.Web.EnsureUser(_currentUserLogIn);
+            var currentUser = clientContext.Web.EnsureUser(currentUserLogInID);
             clientContext.ExecuteQuery();
 
             ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
@@ -602,8 +600,6 @@ namespace PIW_SPAppWeb.Helper
             page.ClientScript.RegisterStartupScript(this.GetType(), "documentWindow", String.Format("<script>window.open('{0}');</script>", documentPath));
         }
 
-
-
         public void AddCitationNumberToDocument(ClientContext clientContext, string citationNumber, string listItemID, string fileName)
         {
             var documentServerRelativeURL = getDocumentServerRelativeURL(clientContext, listItemID, fileName);
@@ -682,6 +678,12 @@ namespace PIW_SPAppWeb.Helper
 
             return string.Format("{0}/{1}/{2}", clientContext.Web.ServerRelativeUrl,
                     Constants.PIWDocuments_DocumentLibraryName, listItemID);
+        }
+
+        public string getDocumentServerRelativeURLFromURL(ClientContext clientContext,string listItemID,string fileURL)
+        {
+            string fileName = getFileNameFromURL(fileURL);
+            return getDocumentServerRelativeURL(clientContext, listItemID,fileName);
         }
 
         /// <summary>
@@ -847,19 +849,21 @@ namespace PIW_SPAppWeb.Helper
             return result;
         }
 
-        public string PopulateIssuanceDocumentList(ClientContext clientContext, string listItemId, Repeater rpDocumentList)
+        public void PopulateIssuanceDocumentList(ClientContext clientContext, string listItemId, Repeater rpDocumentList,
+            out string publicDocumentURLs, out string cEIIDocumentURLs, out string PriviledgeDocumentURLs)
         {
-            StringBuilder documentURLs;
-            System.Data.DataTable table = getDocumentsTableByDocType(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, out documentURLs, Constants.PIWDocuments_DocTypeOption_Issuance);
+            System.Data.DataTable table = getDocumentsTableByDocType(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, 
+                out publicDocumentURLs,out cEIIDocumentURLs,out PriviledgeDocumentURLs ,Constants.PIWDocuments_DocTypeOption_Issuance);
             rpDocumentList.DataSource = table;
             rpDocumentList.DataBind();
-            return documentURLs.ToString();
-
         }
         public void PopulateSupplementalMailingListDocumentList(ClientContext clientContext, string listItemId, Repeater rpDocumentList, HtmlGenericControl supplementalMailingListFieldSet)
         {
-            StringBuilder documentURLs;
-            System.Data.DataTable table = getDocumentsTableByDocType(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, out documentURLs, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList);
+            string publicDocumentUrLs;
+            string CEIIDocumentURLs;
+            string PriviledgedDocumentURLs;
+            System.Data.DataTable table = getDocumentsTableByDocType(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, 
+                out publicDocumentUrLs, out CEIIDocumentURLs,out PriviledgedDocumentURLs,Constants.PIWDocuments_DocTypeOption_SupplementalMailingList);
             rpDocumentList.DataSource = table;
             rpDocumentList.DataBind();
 
@@ -1339,6 +1343,8 @@ namespace PIW_SPAppWeb.Helper
         {
             return SharePointContextProvider.Current.GetSharePointContext(context).CreateUserClientContextForSPHost();
         }
+
+        
         
         #endregion
 
@@ -1472,6 +1478,22 @@ namespace PIW_SPAppWeb.Helper
             rolebindingCol.Add(web.RoleDefinitions.GetByName(role));
 
             folder.ListItemAllFields.RoleAssignments.Add(group, rolebindingCol);
+
+        }
+
+        public void AssignCEIIRoleForGroup(ClientContext clientContext,string listItemID, Group group, string role, string fileURL)
+        {
+            var web = clientContext.Web;
+            string documentServerRelativeUrlUrl = getDocumentServerRelativeURLFromURL(clientContext, listItemID, fileURL);
+            File document = web.GetFileByServerRelativeUrl(documentServerRelativeUrlUrl);
+            //remove existing group role
+            //folder.ListItemAllFields.RoleAssignments.Groups.Remove(group);
+            document.ListItemAllFields.BreakRoleInheritance(false,true);//clear all permission from parent
+
+            var rolebindingCol = new RoleDefinitionBindingCollection(clientContext);
+            rolebindingCol.Add(web.RoleDefinitions.GetByName(role));
+
+            document.ListItemAllFields.RoleAssignments.Add(group, rolebindingCol);
 
         }
         #endregion

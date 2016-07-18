@@ -12,8 +12,29 @@ namespace PIW_SPAppWeb.Pages
 {
     public partial class EditPrintReqForm : System.Web.UI.Page
     {
-        //variable        
-        private string _listItemId;
+        public string CurrentUserLogInID
+        {
+            get
+            {
+                return ViewState[Constants.CurrentLoginIDKey] != null ? ViewState[Constants.CurrentLoginIDKey].ToString() : string.Empty;
+            }
+            set
+            {
+                ViewState.Add(Constants.CurrentLoginIDKey, value);
+            }
+        }
+
+        public string ListItemID
+        {
+            get
+            {
+                return ViewState[Constants.ListItemIDKey] != null ? ViewState[Constants.ListItemIDKey].ToString() : string.Empty;
+            }
+            set
+            {
+                ViewState.Add(Constants.ListItemIDKey, value);
+            }
+        }
 
         //fuction
         static SharePointHelper helper = null;
@@ -71,22 +92,35 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                _listItemId = Page.Request.QueryString["ID"];
                 helper = new SharePointHelper();
+                ListItemID = Page.Request.QueryString["ID"];
+
+                using (var clientContext = helper.getCurrentLoginClientContext(Context, Request))
+                {
+                    //current login user
+                    clientContext.Load(clientContext.Web.CurrentUser);
+                    clientContext.ExecuteQuery();
+                    CurrentUserLogInID = clientContext.Web.CurrentUser.LoginName;
+                }
 
                 if (!Page.IsPostBack)
                 {
-                    if (!string.IsNullOrEmpty(_listItemId))
+                    if (!string.IsNullOrEmpty(ListItemID))
                     {
                         using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
                         {
-                            helper.PopulateIssuanceDocumentList(clientContext, _listItemId, rpDocumentList);
+                            string publicDocumentURLs;
+                            string cEiiDocumentUrLs;
+                            string priviledgedDocumentURLs;
+                            helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
+                                out publicDocumentURLs,out cEiiDocumentUrLs,out priviledgedDocumentURLs);
+
                             PopulateFOLAAndSupplementalMailingListURL(clientContext);
 
                             var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext, Constants.Grp_PIWAdmin);
 
                             //if current user is piw admin, load the item even if the isActive is false
-                            ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, isCurrentUserAdmin);
+                            ListItem listItem = helper.GetPiwListItemById(clientContext, ListItemID, isCurrentUserAdmin);
                             if (listItem == null)
                             {
                                 helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_ItemNotFound);
@@ -95,7 +129,7 @@ namespace PIW_SPAppWeb.Pages
                             {
                                 PopulateFormProperties(clientContext, listItem);
                                 DisplayListItemInForm(clientContext, listItem);
-                                helper.PopulateHistoryList(clientContext, _listItemId, rpHistoryList, Constants.PIWListHistory_FormTypeOption_PrintReq);
+                                helper.PopulateHistoryList(clientContext, ListItemID, rpHistoryList, Constants.PIWListHistory_FormTypeOption_PrintReq);
 
                                 //display form visiblility based on form status
                                 ControlsVisiblitilyBasedOnStatus(FormStatus);
@@ -109,7 +143,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, _listItemId, Page.Request.Url.OriginalString);
+                helper.LogError(Context, exc, ListItemID, Page.Request.Url.OriginalString);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
 
@@ -124,7 +158,7 @@ namespace PIW_SPAppWeb.Pages
 
                 var formType = listItem[piwListInteralColumnNames[Constants.PIWList_colName_FormType]].ToString();
                 //Link to PIW Form
-                hplPIWFormLink.NavigateUrl = helper.getEditFormURL(formType, _listItemId, Request, string.Empty);
+                hplPIWFormLink.NavigateUrl = helper.getEditFormURL(formType, ListItemID, Request, string.Empty);
 
                 //Docket
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]] != null)
@@ -243,7 +277,7 @@ namespace PIW_SPAppWeb.Pages
             clientContext.Load(clientContext.Web, web => web.Url);
             clientContext.ExecuteQuery();
 
-            string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, Constants.PIWDocuments_DocumentLibraryName, _listItemId);
+            string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, Constants.PIWDocuments_DocumentLibraryName, ListItemID);
             var folaMailingList = helper.getDocumentsByDocType(clientContext, uploadSubFolderURL,
                 Constants.PIWDocuments_DocTypeOption_FOLAServiceMailingList);
             if (folaMailingList.Count > 0)
@@ -281,16 +315,16 @@ namespace PIW_SPAppWeb.Pages
                     if ((!PrintJobCompleted) && (cbPrintJobCompleted.Checked))
                     {
                         FormStatus = Constants.PrintReq_FormStatus_PrintJobCompleted;
-                        helper.CreatePIWListHistory(clientContext, _listItemId, "Print Job marked as Completed on " + tbPrintJobCompletedDate.Text, FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_PrintReq);
+                        helper.CreatePIWListHistory(clientContext, ListItemID, "Print Job marked as Completed on " + tbPrintJobCompletedDate.Text, FormStatus,
+                            Constants.PIWListHistory_FormTypeOption_PrintReq,CurrentUserLogInID);
                     }
 
                     //Create list history
                     if ((!MailJobCompleted) && (cbMailJobCompleted.Checked))
                     {
                         FormStatus = Constants.PrintReq_FormStatus_MailJobCompleted;
-                        helper.CreatePIWListHistory(clientContext, _listItemId, "Mail Job marked as Completed on " + tbMailJobCompletedDate.Text, FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_PrintReq);
+                        helper.CreatePIWListHistory(clientContext, ListItemID, "Mail Job marked as Completed on " + tbMailJobCompletedDate.Text, FormStatus,
+                            Constants.PIWListHistory_FormTypeOption_PrintReq,CurrentUserLogInID);
                     }
 
                     SaveData(clientContext, ref listItem);
@@ -301,14 +335,14 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, _listItemId, string.Empty);
+                helper.LogError(Context, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
         private bool SaveData(ClientContext clientContext, ref ListItem returnedListItem)
         {
-            ListItem listItem = helper.GetPiwListItemById(clientContext, _listItemId, false);
+            ListItem listItem = helper.GetPiwListItemById(clientContext, ListItemID, false);
 
             if (helper.CheckIfListItemChanged(clientContext, listItem, DateTime.Parse(ModifiedDateTime)))
             {
@@ -404,7 +438,8 @@ namespace PIW_SPAppWeb.Pages
 
                     SaveData(clientContext, ref listItem);
 
-                    helper.CreatePIWListHistory(clientContext, _listItemId, "Print Job Rejected", FormStatus, Constants.PIWListHistory_FormTypeOption_PrintReq);
+                    helper.CreatePIWListHistory(clientContext, ListItemID, "Print Job Rejected", 
+                        FormStatus, Constants.PIWListHistory_FormTypeOption_PrintReq,CurrentUserLogInID);
                     helper.RefreshPage(Request,Response);
                     
                     //TODO: send email
@@ -412,7 +447,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, _listItemId, string.Empty);
+                helper.LogError(Context, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
