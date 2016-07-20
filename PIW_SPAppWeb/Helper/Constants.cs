@@ -24,7 +24,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_ProgramOfficeWFInitator = "Program Office (Workflow Initiator)";
         public const string PIWList_colName_ProgramOfficeDocumentOwner = "Program Office (Document Owner)";
         public const string PIWList_colName_ByPassDocketValidation = "ByPass Docket Validation";
-        public const string PIWList_colName_Comment = "Comment";
+        //public const string PIWList_colName_Comment = "Comment";
         public const string PIWList_colName_Description = "Description";
         public const string PIWList_colName_DocketNumber = "Docket Number";
         public const string PIWList_colName_PublicDocumentURLs = "Public Document URLs";
@@ -48,10 +48,10 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_IsNonDocket = "Is NonDocket";
         public const string PIWList_colName_IsRequireOSECVerification = "Is Require OSEC Verification";
         public const string PIWList_colName_NotificationRecipient = "Notification Recipient";
-        public const string PIWList_colName_OSECVerificationAction = "OSEC Verification Action";
-        public const string PIWList_colName_OSECVerificationComment = "OSEC Verification Comment";
-        public const string PIWList_colName_PrePublicationReviewAction = "PrePublication Review Action";
-        public const string PIWList_colName_PrePublicationReviewComment = "PrePublication Review Comment";
+        //public const string PIWList_colName_OSECVerificationAction = "OSEC Verification Action";
+        //public const string PIWList_colName_OSECVerificationComment = "OSEC Verification Comment";
+        //public const string PIWList_colName_PrePublicationReviewAction = "PrePublication Review Action";
+        //public const string PIWList_colName_PrePublicationReviewComment = "PrePublication Review Comment";
         public const string PIWList_colName_PreviousFormStatus = "Previous Form Status";
         public const string PIWList_colName_PublishedDate = "Published Date";
         public const string PIWList_colName_PublishedError = "Published Error";
@@ -59,7 +59,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_SecReviewAction = "Sec Review Action";
         public const string PIWList_colName_SecReviewComment = "Sec Review Comment";
         public const string PIWList_colName_CitationNumber = "Citation Number";
-        public const string PIWList_colName_RecallComment = "Recall Comment";
+        //public const string PIWList_colName_RecallComment = "Recall Comment";
         public const string PIWList_colName_OSECRejectedComment = "OSEC Reject Comment";
         public const string PIWList_colName_Modified = "Modified";
         public const string PIWList_colName_Section206Notice = "Section 206 Notice";

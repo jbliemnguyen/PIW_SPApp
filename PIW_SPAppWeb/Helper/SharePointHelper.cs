@@ -40,26 +40,27 @@ namespace PIW_SPAppWeb.Helper
         //when item first created, it should have IsActive set to false
         //this flag will turn to true after it is first Saved/Submitted
         //We have to create ListItem first to accommodate Upload multiple documents right away
-        public ListItem createNewPIWListItem(ClientContext context, string formType)
+        public ListItem createNewPIWListItem(ClientContext elevatedClientContext, string formType,string currentUserLoginID)
         {
-            List piwList = context.Web.Lists.GetByTitle(Constants.PIWListName);
-            var internalNameList = getInternalColumnNamesFromCache(context, Constants.PIWListName);
+            List piwList = elevatedClientContext.Web.Lists.GetByTitle(Constants.PIWListName);
+            var internalNameList = getInternalColumnNamesFromCache(elevatedClientContext, Constants.PIWListName);
 
             ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
             ListItem newItem = piwList.AddItem(itemCreateInfo);
 
 
-            User user = context.Web.CurrentUser;
-            context.Load(context.Web.CurrentUser);
-            context.ExecuteQuery();
+            User user = elevatedClientContext.Web.EnsureUser(currentUserLoginID);
+            elevatedClientContext.Load(user);
+            elevatedClientContext.ExecuteQuery();
 
             newItem[internalNameList[Constants.PIWList_colName_WorkflowInitiator]] = user;
+            newItem[internalNameList[Constants.PIWList_colName_DocumentOwner]] = user;
 
             //set FormType
             newItem[internalNameList[Constants.PIWList_colName_FormType]] = formType;
 
             newItem.Update();
-            context.ExecuteQuery();
+            elevatedClientContext.ExecuteQuery();
 
             return newItem;
         }
@@ -789,6 +790,9 @@ namespace PIW_SPAppWeb.Helper
                         uploadedFileURL = UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName,
                             listItemId, fileName, securityControlValue, docType, false);
 
+                        //set permission if CEII or Priviledged
+                        AssignPermissionForCEIIOrPriviledgedDocument(clientContext, listItemId, uploadedFileURL,securityControlValue);
+
 
                         //clear validation error
                         lbRequiredUploadedDocumentError.Visible = false;
@@ -798,12 +802,12 @@ namespace PIW_SPAppWeb.Helper
                         //history list
                         if (getHistoryListByPIWListID(clientContext, listItemId, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
-                            CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus, 
+                            CreatePIWListHistory(clientContext, listItemId, "Workflow Item created.", FormStatus, 
                                 Constants.PIWListHistory_FormTypeOption_EditForm,currentloginID);
                         }
 
                         CreatePIWListHistory(clientContext, listItemId,
-                            string.Format("Document file {0} uploaded/associated with Workflow Item", fileName), FormStatus, 
+                            string.Format("Document file {0} uploaded/associated with Workflow Item.", fileName), FormStatus, 
                             Constants.PIWListHistory_FormTypeOption_EditForm, currentloginID);
 
                     }
@@ -837,11 +841,11 @@ namespace PIW_SPAppWeb.Helper
                     //history list
                     if (getHistoryListByPIWListID(clientContext, listItemId, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                     {
-                        CreatePIWListHistory(clientContext, listItemId, "Workflow Item created", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm,currentLoginID);
+                        CreatePIWListHistory(clientContext, listItemId, "Workflow Item created.", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm,currentLoginID);
                     }
 
                     CreatePIWListHistory(clientContext, listItemId,
-                        string.Format("Supplemental Mailing List file {0} uploaded/associated with Workflow Item", fileName), FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm,currentLoginID);
+                        string.Format("Supplemental Mailing List file {0} uploaded/associated with Workflow Item.", fileName), FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm,currentLoginID);
                     result = true;
                 }
             }
@@ -1419,7 +1423,7 @@ namespace PIW_SPAppWeb.Helper
             var folderServerRelativeURL = getFolderServerRelativeURL(clientContext, listitemID);
             var folder = clientContext.Web.GetFolderByServerRelativeUrl(folderServerRelativeURL);
 
-            folder.ListItemAllFields.BreakRoleInheritance(true, true);
+            folder.ListItemAllFields.BreakRoleInheritance(true, false);//don't change the subscope becuase of CEII and Prividledge has their own permission
 
             //PIWUser group
             if (!string.IsNullOrEmpty(PIWUsersRole))
@@ -1467,6 +1471,25 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
+        public void AssignPermissionForCEIIOrPriviledgedDocument(ClientContext clientContext, string listItemID,string fileURL,string securityControl)
+        {
+            Group group = null;
+
+            if (securityControl.Equals(Constants.ddlSecurityControl_Option_CEII))
+            {
+                group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIW_FOL_Submission_CEII_ReadOnly);
+            }
+            else if (securityControl.Equals(Constants.ddlSecurityControl_Option_Priviledged))
+            {
+                group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIW_FOL_Submission_Privileged_ReadOnly);
+            }
+
+            if (group != null)
+            {
+                AssignRoleForDocument(clientContext, listItemID, group, Constants.Role_Read, fileURL);
+            }
+        }
+
         public void AssignRoleForGroup(ClientContext clientContext, Group group, string role, Folder folder)
         {
             var web = clientContext.Web;
@@ -1481,7 +1504,7 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public void AssignCEIIRoleForGroup(ClientContext clientContext,string listItemID, Group group, string role, string fileURL)
+        public void AssignRoleForDocument(ClientContext clientContext, string listItemID, Group group, string role, string fileURL)
         {
             var web = clientContext.Web;
             string documentServerRelativeUrlUrl = getDocumentServerRelativeURLFromURL(clientContext, listItemID, fileURL);
@@ -1496,6 +1519,7 @@ namespace PIW_SPAppWeb.Helper
             document.ListItemAllFields.RoleAssignments.Add(group, rolebindingCol);
 
         }
+        
         #endregion
 
         #region FOLA and eLibrary connection

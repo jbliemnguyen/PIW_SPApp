@@ -205,7 +205,7 @@ namespace PIW_SPAppWeb.Pages
 
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
-                            ListItem newItem = helper.createNewPIWListItem(clientContext, Constants.PIWList_FormType_AgendaForm);
+                            ListItem newItem = helper.createNewPIWListItem(clientContext, Constants.PIWList_FormType_AgendaForm,CurrentUserLogInID);
                             ListItemID = newItem.Id.ToString();
 
                             //Create subfolder in piwdocuments and mailing list
@@ -1161,21 +1161,21 @@ namespace PIW_SPAppWeb.Pages
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_DueDate]] = tbDueDate.Text;
 
             //comment
-            if (!string.IsNullOrEmpty(tbComment.Text))
-            {
-                if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] == null)
-                {
-                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}", clientContext.Web.CurrentUser.Title,
-                        DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text);
-                }
-                else
-                {
-                    //append
-                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}<br>{3}",
-                        clientContext.Web.CurrentUser.Title, DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text, listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]]);
-                }
+            //if (!string.IsNullOrEmpty(tbComment.Text))
+            //{
+            //    if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] == null)
+            //    {
+            //        listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}", clientContext.Web.CurrentUser.Title,
+            //            DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text);
+            //    }
+            //    else
+            //    {
+            //        //append
+            //        listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}<br>{3}",
+            //            clientContext.Web.CurrentUser.Title, DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text, listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]]);
+            //    }
 
-            }
+            //}
 
             if (!string.IsNullOrEmpty(FormStatus))
             {
@@ -1451,10 +1451,10 @@ namespace PIW_SPAppWeb.Pages
                 }
 
                 //Comment
-                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]] != null)
-                {
-                    lbCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]].ToString();
-                }
+                //if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]] != null)
+                //{
+                //    lbCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]].ToString();
+                //}
 
                 //OSEC Reject Comment
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_OSECRejectedComment]] != null)

@@ -429,12 +429,12 @@
                     </div>
                 </div>
             </fieldset>
-            <fieldset runat="server" id="fieldsetRecall" visible="true">
+            <%--<fieldset runat="server" id="fieldsetRecall" visible="true">
                 <div class="form-group">
                     <asp:Label ID="lbRecallComment" runat="server" Text="Recall Comment" AssociatedControlID="tbRecallComment" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-6">
                         <asp:TextBox ID="tbRecallComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
-                        <asp:Label ID="lbRecallCommentValidation" runat="server" ForeColor="Red" Visible="false" Text="Recall Comment is required" ClientIDMode="Static"></asp:Label>
+                        <asp:Label ID="lbCommentValidation" runat="server" ForeColor="Red" Visible="false" Text="Recall Comment is required" ClientIDMode="Static"></asp:Label>
                     </div>
                 </div>
                 <div class="form-group">
@@ -443,7 +443,7 @@
                         <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" OnClick="btnRecall_Click" />
                     </div>
                 </div>
-            </fieldset>
+            </fieldset>--%>
             <fieldset runat="server" id="fieldSetSupplementalMailingList">
                 <div class="form-group">
                     <asp:Label ID="lbSupplementalMailingListFileName" runat="server" Text="Supplemental Mailing List" AssociatedControlID="supplementalMailingListFileUpload" CssClass="col-md-2 control-label"></asp:Label>
@@ -487,41 +487,32 @@
                     </asp:Repeater>
                 </div>
             </div>
-            
+
             <div class="form-group">
                 <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
+                    <asp:Label ID="lbCommentValidation" runat="server" ForeColor="Red" Visible="false" Text="Comment is required" ClientIDMode="Static"></asp:Label>
                 </div>
-                <div class="col-md-1"></div>
-                <div class="col-md-5">
-                    <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
-                </div>
+                
             </div>
 
             <%--End of Main Panel--%>
-
-            <%--Button pannel--%>
-
-            <%--</form>--%>
-            <%--End of Button pannel--%>
+            
         </fieldset>
 
 
         <fieldset runat="server" id="fieldsetOSECVerification" visible="false">
             <legend>OSEC Verification</legend>
-            <div class="form-group">
-                <div class="col-md-2"></div>
-                <div class="col-md-2">
-                    <asp:Label ID="lbOSECVerificationAction" runat="server"></asp:Label>
-                </div>
+            <%--<div class="form-group">
+                <div class="col-md-2"></div>                
             </div>
             <div class="form-group">
                 <asp:Label ID="lbOSECVerificationComment" runat="server" Text="Comment" AssociatedControlID="tbOSECVerificationComment" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-6">
                     <asp:TextBox ID="tbOSECVerificationComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
                 </div>
-            </div>
+            </div>--%>
         </fieldset>
 
         <fieldset runat="server" id="fieldsetPrePublication" visible="false" clientidmode="Static">
@@ -562,7 +553,7 @@
                 </Triggers>
             </asp:UpdatePanel>
 
-            <div class="form-group">
+            <%--<div class="form-group">
                 <div class="col-md-2"></div>
                 <div class="col-md-2">
                     <asp:Label ID="lbPrePublicationReviewAction" runat="server" CssClass="control-label"></asp:Label>
@@ -573,7 +564,7 @@
                 <div class="col-md-6">
                     <asp:TextBox ID="tbPrePublicationComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
                 </div>
-            </div>
+            </div>--%>
         </fieldset>
 
         <fieldset runat="server" id="fieldsetMailedRoom" visible="false">
@@ -623,6 +614,7 @@
                 <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary active" OnClick="btnSave_Click" />
                 <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary active" OnClick="btnSubmit_Click" />
                 <asp:Button ID="btnOSECTakeOwnership" runat="server" Text="OSEC Take Ownership" CssClass="btn-sm btn-primary active" OnClick="btnOSECTakeOwnership_Click" />
+                <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" OnClick="btnRecall_Click" />
                 <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" OnClick="btnEdit_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" OnClick="btnAccept_Click" />
                 <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" OnClick="btnReject_Click" />

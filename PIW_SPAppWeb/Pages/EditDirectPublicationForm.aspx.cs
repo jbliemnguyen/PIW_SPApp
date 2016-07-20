@@ -204,7 +204,7 @@ namespace PIW_SPAppWeb.Pages
 
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
-                            ListItem newItem = helper.createNewPIWListItem(clientContext, Constants.PIWList_FormType_DirectPublicationForm);
+                            ListItem newItem = helper.createNewPIWListItem(clientContext, Constants.PIWList_FormType_DirectPublicationForm,CurrentUserLogInID);
                             ListItemID = newItem.Id.ToString();
 
                             //Create subfolder in piwdocuments and mailing list
@@ -508,7 +508,7 @@ namespace PIW_SPAppWeb.Pages
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
                             var uploadResult = helper.UploadSupplementalMailingListDocument(clientContext, supplementalMailingListFileUpload, ListItemID, rpSupplementalMailingListDocumentList,
-                                lbSupplementalMailingListUploadError, FormStatus, Constants.PIWDocuments_EPSSecurityLevel_Option_Public, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList,CurrentUserLogInID);
+                                lbSupplementalMailingListUploadError, FormStatus, Constants.ddlSecurityControl_Option_Public, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList,CurrentUserLogInID);
                             if (uploadResult) //only save the document url if the upload is good
                             {
                                 helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
@@ -768,21 +768,21 @@ namespace PIW_SPAppWeb.Pages
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_NotificationRecipient]] = notificationRecipients;
 
             //comment
-            if (!string.IsNullOrEmpty(tbComment.Text))
-            {
-                if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] == null)
-                {
-                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}", clientContext.Web.CurrentUser.Title,
-                        DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text);
-                }
-                else
-                {
-                    //append
-                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}<br>{3}",
-                        clientContext.Web.CurrentUser.Title, DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text, listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]]);
-                }
+            //if (!string.IsNullOrEmpty(tbComment.Text))
+            //{
+            //    if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] == null)
+            //    {
+            //        listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}", clientContext.Web.CurrentUser.Title,
+            //            DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text);
+            //    }
+            //    else
+            //    {
+            //        //append
+            //        listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}<br>{3}",
+            //            clientContext.Web.CurrentUser.Title, DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text, listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]]);
+            //    }
 
-            }
+            //}
 
             //FOLA Service Required
             if (ddFolaServiceRequired.SelectedIndex != 0)
@@ -1038,10 +1038,10 @@ namespace PIW_SPAppWeb.Pages
                 }
 
                 //Comment
-                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]] != null)
-                {
-                    lbCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]].ToString();
-                }
+                //if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]] != null)
+                //{
+                //    lbCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]].ToString();
+                //}
 
 
                 //FOLA Service Required
