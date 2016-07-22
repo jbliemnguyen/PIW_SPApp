@@ -230,13 +230,17 @@
                         <ItemTemplate>
                             <li class="list-group-item">
                                 <asp:HyperLink ID="hyperlinkFileURL" runat="server" Text='<%#DataBinder.Eval(Container.DataItem,"Name")%>'
-                                    NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"URL")%>'>
+                                    NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"DownloadURL")%>'>
                                 </asp:HyperLink>
                                 &nbsp;&nbsp;|&nbsp;&nbsp;
                             <asp:LinkButton ID="btnRemoveDocument" runat="server" Text="Remove" CommandName="RemoveDocument"
                                 CommandArgument='<%#DataBinder.Eval(Container.DataItem,"ID")%>' />
                                 &nbsp;&nbsp;|&nbsp;&nbsp;
                                         <asp:Label runat="server" ID="lbSecurityLevel" Text='<%#DataBinder.Eval(Container.DataItem,"Security Level")%>'></asp:Label>
+                                &nbsp;&nbsp;|&nbsp;&nbsp;
+                                <asp:HyperLink ID="hyperlink1" runat="server" Text="Edit"
+                                    NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"URL")%>'>
+                                </asp:HyperLink>
                             </li>
                         </ItemTemplate>
                         <FooterTemplate>
@@ -419,7 +423,7 @@
                         <ItemTemplate>
                             <li class="list-group-item">
                                 <asp:HyperLink ID="hyperlinkFileURL" runat="server" Text='<%#DataBinder.Eval(Container.DataItem,"Name")%>'
-                                    NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"URL")%>'>
+                                    NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"DownloadURL")%>'>
                                 </asp:HyperLink>
                                 &nbsp;&nbsp;|&nbsp;&nbsp;
                             <asp:LinkButton ID="btnRemoveDocument" runat="server" Text="Remove" CommandName="RemoveDocument"

@@ -166,7 +166,8 @@ namespace PIW_SPAppWeb.Pages
 
                             helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
 
-                            var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext, Constants.Grp_PIWAdmin);
+                            var isCurrentUserAdmin = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                                new[] { Constants.Grp_PIWSystemAdmin });
 
                             //if current user is piw admin, load the item even if the isActive is false
                             ListItem listItem = helper.GetPiwListItemById(clientContext, ListItemID, isCurrentUserAdmin);
@@ -1123,9 +1124,11 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetLegalResourcesReview.Visible = false;
 
                     //buttons
-                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_PIWUsers) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_OSEC) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_SecReview);
+                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                        new string[]{Constants.Grp_PIWDirectPublication,Constants.Grp_PIWDirectPublicationSubmitOnly}  );
 
-                    btnInitiatePublication.Visible = true;
+                    btnInitiatePublication.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                        new string[]{Constants.Grp_PIWDirectPublication});;
 
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;

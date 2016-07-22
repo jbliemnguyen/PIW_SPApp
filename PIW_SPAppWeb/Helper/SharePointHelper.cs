@@ -379,6 +379,7 @@ namespace PIW_SPAppWeb.Helper
             result.Columns.Add("ID");
             result.Columns.Add("Name");
             result.Columns.Add("URL");
+            result.Columns.Add("DownloadURL");
             result.Columns.Add("Security Level");
             //result.Columns.Add("EPS Passed");
             //result.Columns.Add("EPS Error");
@@ -389,15 +390,19 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
 
             string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, libraryName, subFoder);
-
+            string downloadURL = string.Format("{0}/_layouts/download.aspx?SourceURL=", clientContext.Web.Url);
             var documentList = getDocumentsByDocType(clientContext, uploadSubFolderURL, docType);
 
             foreach (File file in documentList)
             {
                 System.Data.DataRow row = result.NewRow();
+
+                string url = uploadSubFolderURL + "/" + file.Name;
+                ;
                 row["ID"] = file.ListItemAllFields["ID"];
-                row["Name"] = file.Name;
-                row["URL"] = uploadSubFolderURL + "/" + row["Name"];
+                row["Name"] = file.Name + " (View Only)";
+                row["URL"] = url;
+                row["DownloadURL"] = downloadURL + url;
                 row["Security Level"] =
                     file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_SecurityLevel]];
 
@@ -637,7 +642,10 @@ namespace PIW_SPAppWeb.Helper
                 using (WordprocessingDocument doc = WordprocessingDocument.Open(memoryStream, true))
                 {
                     MainDocumentPart mainpart = doc.MainDocumentPart;
-                    IEnumerable<OpenXmlElement> elems = mainpart.Document.Body.Descendants().ToList();
+                    //IEnumerable<OpenXmlElement> elems = mainpart.Document.Body.Descendants().ToList();
+
+                    IEnumerable<OpenXmlElement> elems = mainpart.Document.Body.Descendants<Paragraph>().ToList()[0].Descendants().ToList();
+
 
                     foreach (OpenXmlElement elem in elems)
                     {
@@ -1085,23 +1093,43 @@ namespace PIW_SPAppWeb.Helper
             }
         }
 
-        public bool IsUserMemberOfGroup(ClientContext clientContext, User user, string groupName)
+        //public bool IsUserMemberOfGroup(ClientContext clientContext, User user, string groupName)
+        //{
+        //    //Load group
+        //    clientContext.Load(user.Groups);
+        //    clientContext.ExecuteQuery();
+        //    //user.Groups.Cast<Group>().Any()
+        //    return user.Groups.Cast<Group>().Any(g => g.Title == groupName);
+        //}
+
+        public bool IsUserMemberOfGroup(ClientContext clientContext, string userLoginID, string[] groupNames)
         {
             //Load group
+            var user = clientContext.Web.EnsureUser(userLoginID);
             clientContext.Load(user.Groups);
             clientContext.ExecuteQuery();
-            return user.Groups.Cast<Group>()
-              .Any(g => g.Title == groupName);
+            bool result = false;
+            var GroupCollection = user.Groups.Cast<Group>();
+            foreach (string groupName in groupNames)
+            {
+                result = GroupCollection.Any(g => g.Title == groupName);
+                if (result)
+                {
+                    break;
+                }
+            }
+            //user.Groups.Cast<Group>().Any()
+            return result;
         }
 
-        public bool IsCurrentUserMemberOfGroup(ClientContext clientContext,string groupName)
-        {
-            var currentUser = clientContext.Web.CurrentUser;
-            clientContext.Load(currentUser);
-            clientContext.ExecuteQuery();
+        //public bool IsCurrentUserMemberOfGroup(ClientContext clientContext,,string groupName)
+        //{
+        //    var currentUser = clientContext.Web.CurrentUser;
+        //    clientContext.Load(currentUser);
+        //    clientContext.ExecuteQuery();
 
-            return IsUserMemberOfGroup(clientContext, currentUser, groupName);
-        }
+        //    return IsUserMemberOfGroup(clientContext, currentUser, new string[]{groupName});
+        //}
 
         /// <summary>
         /// Return the first docket number found in input

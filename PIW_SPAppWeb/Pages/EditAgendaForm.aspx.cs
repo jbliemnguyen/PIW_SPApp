@@ -166,7 +166,8 @@ namespace PIW_SPAppWeb.Pages
                             SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,priviledgedDocumentURLs);
                             helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
 
-                            var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext, Constants.Grp_PIWAdmin);
+                            var isCurrentUserAdmin = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                                new[] { Constants.Grp_PIWSystemAdmin });
 
                             //if current user is piw admin, load the item even if the isActive is false
                             ListItem listItem = helper.GetPiwListItemById(clientContext, ListItemID, isCurrentUserAdmin);
@@ -1009,11 +1010,11 @@ namespace PIW_SPAppWeb.Pages
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewAction]] = action.ToString();
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_OSECRejectedComment]] = tbSecReviewComment.Text.Trim();
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_RecallRejectComment]] = tbSecReviewComment.Text.Trim();
 
             if (action == enumAction.Reject)
             {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_OSECRejectedComment]] = tbSecReviewComment.Text.Trim();
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_RecallRejectComment]] = tbSecReviewComment.Text.Trim();
             }
             else//accept
             {
@@ -1457,9 +1458,9 @@ namespace PIW_SPAppWeb.Pages
                 //}
 
                 //OSEC Reject Comment
-                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_OSECRejectedComment]] != null)
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_RecallRejectComment]] != null)
                 {
-                    lbOSECRejectCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_OSECRejectedComment]].ToString();
+                    lbOSECRejectCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_RecallRejectComment]].ToString();
                 }
                 
                 //Sec review 
@@ -1550,7 +1551,8 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetLegalResourcesReview.Visible = false;
 
                     //buttons
-                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_PIWUsers) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_OSEC) || helper.IsUserMemberOfGroup(clientContext, currentUser, Constants.Grp_SecReview);
+                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                        new[] {Constants.Grp_OSEC, Constants.Grp_SecReview});
 
                     btnSubmitToSecReview.Visible = btnSave.Visible;
 

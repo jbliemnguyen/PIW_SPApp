@@ -117,7 +117,9 @@ namespace PIW_SPAppWeb.Pages
 
                             PopulateFOLAAndSupplementalMailingListURL(clientContext);
 
-                            var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext, Constants.Grp_PIWAdmin);
+                            //var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext, Constants.Grp_PIWAdmin);
+                            var isCurrentUserAdmin = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                                new[] {Constants.Grp_PIWSystemAdmin});
 
                             //if current user is piw admin, load the item even if the isActive is false
                             ListItem listItem = helper.GetPiwListItemById(clientContext, ListItemID, isCurrentUserAdmin);

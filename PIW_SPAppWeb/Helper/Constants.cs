@@ -60,7 +60,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_SecReviewComment = "Sec Review Comment";
         public const string PIWList_colName_CitationNumber = "Citation Number";
         //public const string PIWList_colName_RecallComment = "Recall Comment";
-        public const string PIWList_colName_OSECRejectedComment = "OSEC Reject Comment";
+        public const string PIWList_colName_RecallRejectComment = "Recall / Reject Comment";
         public const string PIWList_colName_Modified = "Modified";
         public const string PIWList_colName_Section206Notice = "Section 206 Notice";
         public const string PIWList_colName_HearingOrder = "Hearing Order";
@@ -215,12 +215,12 @@ namespace PIW_SPAppWeb
         public const string Grp_PIWDirectPublication = "PIWDirectPublication";
         public const string Grp_PIWDirectPublicationSubmitOnly = "PIWDirectPublicationSubmitOnly";
         
-        public const string Grp_PIWAdmin = "PIWAdmin";
-        public const string Grp_PIWSystemAdmin = "PIWSystemAdmin";
+        public const string Grp_PIWAdmin = "PIWAdmin";//this group for power user from OSEC who can ReOpen the Item
+        public const string Grp_PIWSystemAdmin = "PIWSystemAdmin";//this group is for SharePoitn team with full control of the system
         public const string Grp_PIWAgendaNonManagement = "PIWAgendaNonManagement";
         //public const string Grp_PrintRequisitionSubmitter = "PrintRequisitionSubmitter";
         public const string Grp_CopyCenter = "CopyCenter";
-        public const string Grp_PIWOSECFERCReports = "PIWOSECFERCReports";
+        public const string Grp_PIWLegalResourcesReview = "PIWLegalResourcesReview";
         public const string Grp_PIW_FOL_Submission_CEII_ReadOnly = "PIW–FOL-Submission-CEII-ReadOnly";
         public const string Grp_PIW_FOL_Submission_Privileged_ReadOnly = "PIW–FOL-Submission-Privileged–ReadOnly";
 

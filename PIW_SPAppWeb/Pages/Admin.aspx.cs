@@ -50,9 +50,14 @@ namespace PIW_SPAppWeb
         {
             using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
             {
-                if (!helper.IsCurrentUserMemberOfGroup(clientContext, Constants.Grp_PIWAdmin))
+                var currentUser = clientContext.Web.CurrentUser;
+                clientContext.Load(currentUser);
+                clientContext.ExecuteQuery();
+                var isAdmin = helper.IsUserMemberOfGroup(clientContext, currentUser.LoginName,
+                    new string[] {Constants.Grp_PIWSystemAdmin});
+                if (!isAdmin)
                 {
-                    helper.RedirectToAPage(Request,Response,Constants.Page_AccessDenied);
+                    helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
                 }
 
             }

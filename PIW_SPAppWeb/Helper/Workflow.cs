@@ -43,6 +43,25 @@ namespace PIW_SPAppWeb.Helper
                     {
                         nextStatus = Constants.PIWList_FormStatus_Deleted;
                     }
+                    else if (action == enumAction.Accept)
+                    {
+                        if (previousStatus == Constants.PIWList_FormStatus_OSECVerification)
+                        {
+                            nextStatus = Constants.PIWList_FormStatus_PrePublication;
+                        }
+                        else if (previousStatus == Constants.PIWList_FormStatus_PrePublication)
+                        {
+                            nextStatus = Constants.PIWList_FormStatus_ReadyForPublishing;
+                        }
+                    }
+                    else if (action == enumAction.Reject)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_Rejected;
+                    }
+                    else if (action == enumAction.Publish)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_PublishInitiated;
+                    }
                     else
                     {
                         throw new Exception(string.Format("WF Error - Unknown combination of Action:{0} and Form Status:{1}", action, currentStatus));
