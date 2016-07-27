@@ -1011,15 +1011,7 @@ namespace PIW_SPAppWeb.Pages
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentOwner]] != null)
                 {
                     FieldUserValue[] fuv = (FieldUserValue[])listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentOwner]];
-                    User[] users = new User[fuv.Length];
-                    for (int i = 0; i < users.Length; i++)
-                    {
-                        User user = clientContext.Web.GetUserById(fuv[i].LookupId);
-                        clientContext.Load(user);
-                        clientContext.ExecuteQuery();
-                        users[i] = user;
-
-                    }
+                    var users = helper.getUsersFromField(clientContext, fuv);
                     PeoplePickerHelper.FillPeoplePickerValue(hdnDocumentOwner, users);
                 }
 
@@ -1027,22 +1019,9 @@ namespace PIW_SPAppWeb.Pages
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_NotificationRecipient]] != null)
                 {
                     FieldUserValue[] fuv = (FieldUserValue[])listItem[piwListInteralColumnNames[Constants.PIWList_colName_NotificationRecipient]];
-                    User[] users = new User[fuv.Length];
-                    for (int i = 0; i < users.Length; i++)
-                    {
-                        User user = clientContext.Web.GetUserById(fuv[i].LookupId);
-                        clientContext.Load(user);
-                        clientContext.ExecuteQuery();
-                        users[i] = user;
-                    }
+                    var users = helper.getUsersFromField(clientContext, fuv);
                     PeoplePickerHelper.FillPeoplePickerValue(hdnNotificationRecipient, users);
                 }
-
-                //Comment
-                //if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]] != null)
-                //{
-                //    lbCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]].ToString();
-                //}
 
 
                 //FOLA Service Required

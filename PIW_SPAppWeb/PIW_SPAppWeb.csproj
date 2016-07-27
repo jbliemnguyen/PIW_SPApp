@@ -43,7 +43,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="DocumentFormat.OpenXml, Version=2.5.5631.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Email_Service_Entity, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Assemblies\Email_Service_Entity.dll</HintPath>
+    </Reference>
     <Reference Include="FERC.Common, Version=1.0.0.5, Culture=neutral, PublicKeyToken=836a1a87829cba3e, processorArchitecture=MSIL" />
     <Reference Include="FERC.eLibrary.Common, Version=4.0.0.0, Culture=neutral, PublicKeyToken=dee17512b41f7ba9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -82,7 +88,7 @@
     </Reference>
     <Reference Include="Microsoft.Office.Interop.Word, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
       <HintPath>Assemblies\Microsoft.Office.Interop.Word.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.SharePoint.Client, Version=16.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
@@ -122,6 +128,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assemblies\Email_Service_Entity.dll" />
     <Content Include="Assemblies\FERC.Common.dll" />
     <Content Include="Assemblies\FERC.eLibrary.Common.dll" />
     <Content Include="Assemblies\FERC.eLibrary.Eps.Common.dll" />
@@ -239,6 +246,7 @@
   <ItemGroup>
     <Compile Include="Helper\CitationNumber.cs" />
     <Compile Include="Helper\Constants.cs" />
+    <Compile Include="Helper\Email.cs" />
     <Compile Include="Helper\EPSPublicationHelper.cs" />
     <Compile Include="Helper\FOLAMailingList.cs" />
     <Compile Include="Helper\FOLAMailingListData.cs" />

@@ -329,6 +329,8 @@ namespace PIW_SPAppWeb.Pages
                         helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
 
                         //TODO: send email
+                        Email emailHelper = new Email();
+                        emailHelper.SendEmail(clientContext,listItem,action,PreviousFormStatus,FormStatus,CurrentUserLogInID,Request.Url.ToString());
 
                         //Create list history
                         if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
@@ -741,14 +743,7 @@ namespace PIW_SPAppWeb.Pages
                                 var fileName = helper.getFileNameFromURL(documentURLs[0]);
                                 helper.AddCitationNumberToDocument(clientContext, tbCitationNumber.Text.Trim(),
                                     ListItemID, fileName);
-
-                                //foreach (var documentURL in documentURLs)//add citation to all documents
-                                //{
-                                //    var fileName = helper.getFileNameFromURL(documentURL);
-                                //    helper.AddCitationNumberToDocument(clientContext, tbCitationNumber.Text.Trim(),
-                                //        ListItemID, fileName);
-
-                                //}
+                                
                             }
                             catch (Exception exc)
                             {
@@ -1703,8 +1698,7 @@ namespace PIW_SPAppWeb.Pages
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_WorkflowInitiator]] != null)
                 {
                     FieldUserValue fuv =
-                        (FieldUserValue)
-                            listItem[piwListInteralColumnNames[Constants.PIWList_colName_WorkflowInitiator]];
+                        (FieldUserValue)listItem[piwListInteralColumnNames[Constants.PIWList_colName_WorkflowInitiator]];
                     User initiator = clientContext.Web.GetUserById(fuv.LookupId);
                     clientContext.Load(initiator);
                     clientContext.ExecuteQuery();
@@ -1737,15 +1731,7 @@ namespace PIW_SPAppWeb.Pages
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentOwner]] != null)
                 {
                     FieldUserValue[] fuv = (FieldUserValue[])listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentOwner]];
-                    User[] users = new User[fuv.Length];
-                    for (int i = 0; i < users.Length; i++)
-                    {
-                        User user = clientContext.Web.GetUserById(fuv[i].LookupId);
-                        clientContext.Load(user);
-                        clientContext.ExecuteQuery();
-                        users[i] = user;
-
-                    }
+                    var users = helper.getUsersFromField(clientContext, fuv);
                     PeoplePickerHelper.FillPeoplePickerValue(hdnDocumentOwner, users);
                 }
 
@@ -1753,14 +1739,7 @@ namespace PIW_SPAppWeb.Pages
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_NotificationRecipient]] != null)
                 {
                     FieldUserValue[] fuv = (FieldUserValue[])listItem[piwListInteralColumnNames[Constants.PIWList_colName_NotificationRecipient]];
-                    User[] users = new User[fuv.Length];
-                    for (int i = 0; i < users.Length; i++)
-                    {
-                        User user = clientContext.Web.GetUserById(fuv[i].LookupId);
-                        clientContext.Load(user);
-                        clientContext.ExecuteQuery();
-                        users[i] = user;
-                    }
+                    var users = helper.getUsersFromField(clientContext, fuv);
                     PeoplePickerHelper.FillPeoplePickerValue(hdnNotificationRecipient, users);
                 }
 
@@ -1769,46 +1748,6 @@ namespace PIW_SPAppWeb.Pages
                 {
                     tbDueDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_DueDate]].ToString()).ToShortDateString();
                 }
-
-                //Comment
-                //if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]] != null)
-                //{
-                //    lbCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]].ToString();
-                //}
-
-                //OSEC Reject Comment
-                //if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_RecallRejectComment]] != null)
-                //{
-                //    lbOSECRejectCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_RecallRejectComment]].ToString();
-                //}
-
-                //Recall Comment
-                //if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_RecallComment]] != null)
-                //{
-                //    tbRecallComment.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_RecallComment]].ToString();
-                //}
-
-                //OSEC Verification
-                //if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_OSECVerificationAction]] != null)
-                //{
-                //    lbOSECVerificationAction.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_OSECVerificationAction]].ToString();
-                //}
-
-                //if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_OSECVerificationComment]] != null)
-                //{
-                //    tbOSECVerificationComment.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_OSECVerificationComment]].ToString();
-                //}
-
-                //Pre-Publication Review
-                //if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrePublicationReviewAction]] != null)
-                //{
-                //    lbPrePublicationReviewAction.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrePublicationReviewAction]].ToString();
-                //}
-
-                //if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrePublicationReviewComment]] != null)
-                //{
-                //    tbPrePublicationComment.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrePublicationReviewComment]].ToString();
-                //}
 
                 //Citation Number
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_CitationNumber]] != null)

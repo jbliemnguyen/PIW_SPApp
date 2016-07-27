@@ -9,10 +9,10 @@
   <Properties>
     <Title>PIW_SPApp</Title>
     <!--DEV-->
-    <StartPage>https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>
+    <!--<StartPage>https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>-->
     
     <!--Test-->
-    <!--<StartPage>https://test.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>-->
+    <StartPage>https://test.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>
   </Properties>
 
   <AppPrincipal>

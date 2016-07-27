@@ -1376,7 +1376,93 @@ namespace PIW_SPAppWeb.Helper
             return SharePointContextProvider.Current.GetSharePointContext(context).CreateUserClientContextForSPHost();
         }
 
-        
+        public User[] getUsersFromField(ClientContext clientContext,FieldUserValue[] fuv)
+        {
+            User[] users = new User[fuv.Length];
+            for (int i = 0; i < users.Length; i++)
+            {
+                User user = clientContext.Web.GetUserById(fuv[i].LookupId);
+                clientContext.Load(user);
+                clientContext.ExecuteQuery();
+                users[i] = user;
+            }
+
+            return users;
+        }
+
+        /// <summary>
+        /// this method prepare the html code to display the document list in report or in email.
+        /// If report, it display using bootstrap icon, if email it display using the html list item
+        /// </summary>
+        /// <param name="publicDocsURLs"></param>
+        /// <param name="CEIIDocsURLs"></param>
+        /// <param name="PriviledgedDocsURLs"></param>
+        /// <param name="forEmail"></param>
+        /// <returns></returns>
+        public string getDocumentURLsHTML(string publicDocsURLs, string CEIIDocsURLs, string PriviledgedDocsURLs,bool forEmail)
+        {
+            //build seperator array
+            StringBuilder result = new StringBuilder();
+            string pattern = "<span class='glyphicon glyphicon-menu-right' style='font-size:0.7em; color:#337ab7'></span> <a href='{0}'>{1}</a>";
+            if (forEmail)
+            {
+                pattern = "<li>{1}</li>";
+            }
+            
+
+            //Public
+            var urlArray = publicDocsURLs.Split(new string[] { Constants.DocumentURLsSeparator }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var url in urlArray)
+            {
+                if (string.IsNullOrEmpty(result.ToString()))
+                {
+                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (Public)"));
+                }
+                else
+                {
+                    result.Append(string.Format(pattern, "</br>", url, getFileNameFromURL(url) + " (Public)"));
+                }
+
+            }
+
+            //CEII
+            urlArray = CEIIDocsURLs.Split(new string[] { Constants.DocumentURLsSeparator }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var url in urlArray)
+            {
+                if (string.IsNullOrEmpty(result.ToString()))
+                {
+                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (CEII)"));
+                }
+                else
+                {
+                    result.Append(string.Format(pattern, "</br>", url, getFileNameFromURL(url) + " (CEII)"));
+                }
+
+            }
+
+            //Priviledge
+            urlArray = PriviledgedDocsURLs.Split(new string[] { Constants.DocumentURLsSeparator }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var url in urlArray)
+            {
+                if (string.IsNullOrEmpty(result.ToString()))
+                {
+                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (Priviledged)"));
+                }
+                else
+                {
+                    result.Append(string.Format(pattern, "</br>", url, getFileNameFromURL(url) + " (Priviledged)"));
+                }
+
+            }
+
+            if (forEmail)
+            {
+                result.Insert(0, "<ul>");
+                result.Append("</ul>");
+            }
+            
+            return result.ToString();
+        }
         
         #endregion
 
