@@ -313,12 +313,16 @@ namespace PIW_SPAppWeb.Pages
                 {
                     ListItem listItem = null;
 
+                    //get current user
+                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
 
                     if ((!PrintJobCompleted) && (cbPrintJobCompleted.Checked))
                     {
                         FormStatus = Constants.PrintReq_FormStatus_PrintJobCompleted;
                         helper.CreatePIWListHistory(clientContext, ListItemID, "Print Job marked as Completed on " + tbPrintJobCompletedDate.Text, FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_PrintReq,CurrentUserLogInID);
+                            Constants.PIWListHistory_FormTypeOption_PrintReq,currentUser);
                     }
 
                     //Create list history
@@ -326,7 +330,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         FormStatus = Constants.PrintReq_FormStatus_MailJobCompleted;
                         helper.CreatePIWListHistory(clientContext, ListItemID, "Mail Job marked as Completed on " + tbMailJobCompletedDate.Text, FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_PrintReq,CurrentUserLogInID);
+                            Constants.PIWListHistory_FormTypeOption_PrintReq,currentUser);
                     }
 
                     SaveData(clientContext, ref listItem);
@@ -440,8 +444,13 @@ namespace PIW_SPAppWeb.Pages
 
                     SaveData(clientContext, ref listItem);
 
+                    //get current user
+                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
+
                     helper.CreatePIWListHistory(clientContext, ListItemID, "Print Job Rejected", 
-                        FormStatus, Constants.PIWListHistory_FormTypeOption_PrintReq,CurrentUserLogInID);
+                        FormStatus, Constants.PIWListHistory_FormTypeOption_PrintReq,currentUser);
                     helper.RefreshPage(Request,Response);
                     
                     //TODO: send email

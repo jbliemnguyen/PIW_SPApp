@@ -250,6 +250,9 @@ namespace PIW_SPAppWeb
         //CurrentLoginID key
         public const string CurrentLoginIDKey = "CurrentLoginIDKey";
 
+        //current User
+        public const string CurrentUser = "CurrentUser";
+
         //ListItemID
         public const string ListItemIDKey = "ListItemIDKey";
 
@@ -317,7 +320,9 @@ namespace PIW_SPAppWeb
         Edit,
         Complete,
         ReOpen,
-        Delete
+        Delete,
+        PrintJobComplete,
+        PublishedToElibrary,
     }
 }
 

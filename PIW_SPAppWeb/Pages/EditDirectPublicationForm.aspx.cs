@@ -211,12 +211,17 @@ namespace PIW_SPAppWeb.Pages
                             //Create subfolder in piwdocuments and mailing list
                             helper.CreatePIWDocumentsSubFolder(clientContext, ListItemID);
 
+                            //get current user
+                            User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                            clientContext.Load(currentUser);
+                            clientContext.ExecuteQuery();
+
                             //history list
                             if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                             {
                                 //Form status must be specified becuae the viewstate hasn't have value
                                 helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item created", Constants.PIWList_FormStatus_Pending, 
-                                    Constants.PIWListHistory_FormTypeOption_EditForm,CurrentUserLogInID);
+                                    Constants.PIWListHistory_FormTypeOption_EditForm,currentUser);
                             }
                         }
 
@@ -248,18 +253,23 @@ namespace PIW_SPAppWeb.Pages
 
                         //TODO: Change document and list permission
 
+                        //get current user
+                        User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                        clientContext.Load(currentUser);
+                        clientContext.ExecuteQuery();
+
                         //TODO: send email
 
                         //Create list history
                         if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
                             helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item created", FormStatus,
-                                Constants.PIWListHistory_FormTypeOption_EditForm, CurrentUserLogInID);
+                                Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
                         else
                         {
                             helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item saved", FormStatus,
-                                Constants.PIWListHistory_FormTypeOption_EditForm, CurrentUserLogInID);
+                                Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
 
                         //TODO: create list history for Mailing Date and FERC Report Completed.
@@ -327,6 +337,11 @@ namespace PIW_SPAppWeb.Pages
 
                     //TODO: Change document and list permission
 
+                    //get current user
+                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
+
                     //TODO: send email
 
                     //Create list history - must create new client context because current client context is system account
@@ -334,7 +349,7 @@ namespace PIW_SPAppWeb.Pages
                     //But we must use normal client context so we can capture current user in History List
                     
                     helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item publication to eLibrary Data Entry initiated",
-                            FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, CurrentUserLogInID);
+                            FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                     
 
                     //Refresh
@@ -363,11 +378,16 @@ namespace PIW_SPAppWeb.Pages
 
                     //TODO: Change document and list permission
 
+                    //get current user
+                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
+
                     //TODO: send email
 
                     //Create list history
                     helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item deleted", FormStatus,
-                        Constants.PIWListHistory_FormTypeOption_EditForm, CurrentUserLogInID);
+                        Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
                     //Redirect
                     helper.RedirectToSourcePage(Page.Request, Page.Response);
@@ -400,9 +420,14 @@ namespace PIW_SPAppWeb.Pages
                                 out publicDocumentURLs,out cEiiDocumentUrLs,out priviledgedDocumentURLs);
                             SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,priviledgedDocumentURLs  );
 
+                            //get current user
+                            User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                            clientContext.Load(currentUser);
+                            clientContext.ExecuteQuery();
+
                             //history list
                             helper.CreatePIWListHistory(clientContext, ListItemID, string.Format("Document file {0} removed", removedFileName), FormStatus,
-                                Constants.PIWListHistory_FormTypeOption_EditForm, CurrentUserLogInID);
+                                Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
 
                     }
@@ -429,9 +454,14 @@ namespace PIW_SPAppWeb.Pages
                             string removedFileName = helper.RemoveDocument(clientContext, ListItemID, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
                             helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
 
+                            //get current user
+                            User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                            clientContext.Load(currentUser);
+                            clientContext.ExecuteQuery();
+
                             //history list
                             helper.CreatePIWListHistory(clientContext, ListItemID, string.Format("Supplemental Mailing List file {0} removed", removedFileName),
-                                FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, CurrentUserLogInID);
+                                FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
 
                     }
@@ -547,9 +577,14 @@ namespace PIW_SPAppWeb.Pages
                     }
                     //TODO: Change document and list permission
 
+                    //get current user
+                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
+
                     //Create list history
                     helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item Re-Opened", FormStatus,
-                        Constants.PIWListHistory_FormTypeOption_EditForm, CurrentUserLogInID);
+                        Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
                     //Redirect or Refresh page
                     helper.RefreshPage(Page.Request, Page.Response);

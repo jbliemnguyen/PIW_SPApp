@@ -40,7 +40,7 @@ namespace PIW_SPAppWeb.Helper
         //when item first created, it should have IsActive set to false
         //this flag will turn to true after it is first Saved/Submitted
         //We have to create ListItem first to accommodate Upload multiple documents right away
-        public ListItem createNewPIWListItem(ClientContext elevatedClientContext, string formType,string currentUserLoginID)
+        public ListItem createNewPIWListItem(ClientContext elevatedClientContext, string formType, string currentUserLoginID)
         {
             List piwList = elevatedClientContext.Web.Lists.GetByTitle(Constants.PIWListName);
             var internalNameList = getInternalColumnNamesFromCache(elevatedClientContext, Constants.PIWListName);
@@ -368,8 +368,8 @@ namespace PIW_SPAppWeb.Helper
             return issuanceFiles;
         }
 
-        public System.Data.DataTable getDocumentsTableByDocType(ClientContext clientContext, string subFoder, string libraryName, 
-            out string PublicDocumentURLs,out string CEIIDocumentURLs,out string  PriviledgedDocumentURLs, string docType)
+        public System.Data.DataTable getDocumentsTableByDocType(ClientContext clientContext, string subFoder, string libraryName,
+            out string PublicDocumentURLs, out string CEIIDocumentURLs, out string PriviledgedDocumentURLs, string docType)
         {
             PublicDocumentURLs = string.Empty;
             CEIIDocumentURLs = string.Empty;
@@ -473,17 +473,45 @@ namespace PIW_SPAppWeb.Helper
         #endregion
 
         #region PIWListHistory
-        public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus, string FormType, string currentUserLogInID)
+        //public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus, string FormType, string currentUserLogInID)
+        //{
+        //    List piwlisthistory = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
+        //    var piwlistHistoryInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
+
+        //    var currentUser = clientContext.Web.EnsureUser(currentUserLogInID);
+        //    clientContext.ExecuteQuery();
+
+        //    ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
+        //    ListItem newItem = piwlisthistory.AddItem(itemCreateInfo);
+
+        //    newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_User]] = currentUser;
+
+        //    newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_Action]] = action;
+        //    newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_FormStatus]] = FormStatus;
+        //    newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_FormType]] = FormType;
+
+        //    newItem.Update();
+        //    clientContext.ExecuteQuery();//we need to create item first before set lookup field.
+
+        //    if (!string.IsNullOrEmpty(listItemID))
+        //    {
+        //        //get piwListItem reference
+        //        FieldLookupValue lv = new FieldLookupValue { LookupId = int.Parse(listItemID) };
+        //        newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_PIWList]] = lv;
+        //        newItem.Update();
+        //        clientContext.ExecuteQuery();
+        //    }
+
+        //}
+
+        public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus, string FormType, User currentUser)
         {
             List piwlisthistory = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
             var piwlistHistoryInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
 
-            var currentUser = clientContext.Web.EnsureUser(currentUserLogInID);
-            clientContext.ExecuteQuery();
-
             ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
             ListItem newItem = piwlisthistory.AddItem(itemCreateInfo);
-            
+
             newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_User]] = currentUser;
 
             newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_Action]] = action;
@@ -689,10 +717,10 @@ namespace PIW_SPAppWeb.Helper
                     Constants.PIWDocuments_DocumentLibraryName, listItemID);
         }
 
-        public string getDocumentServerRelativeURLFromURL(ClientContext clientContext,string listItemID,string fileURL)
+        public string getDocumentServerRelativeURLFromURL(ClientContext clientContext, string listItemID, string fileURL)
         {
             string fileName = getFileNameFromURL(fileURL);
-            return getDocumentServerRelativeURL(clientContext, listItemID,fileName);
+            return getDocumentServerRelativeURL(clientContext, listItemID, fileName);
         }
 
         /// <summary>
@@ -759,8 +787,8 @@ namespace PIW_SPAppWeb.Helper
             return paragraph1;
         }
 
-        public string UploadIssuanceDocument(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError, 
-            Label lbRequiredUploadedDocumentError, string FormStatus, string securityControlValue, string docType,string currentloginID)
+        public string UploadIssuanceDocument(ClientContext clientContext, FileUpload fileUpload, string listItemId, Repeater rpDocumentList, Label lbUploadedDocumentError,
+            Label lbRequiredUploadedDocumentError, string FormStatus, string securityControlValue, string docType, string currentloginID)
         {
             var uploadedFileURL = string.Empty;
             using (var fileStream = fileUpload.PostedFile.InputStream)
@@ -799,7 +827,7 @@ namespace PIW_SPAppWeb.Helper
                             listItemId, fileName, securityControlValue, docType, false);
 
                         //set permission if CEII or Priviledged
-                        AssignPermissionForCEIIOrPriviledgedDocument(clientContext, listItemId, uploadedFileURL,securityControlValue);
+                        AssignPermissionForCEIIOrPriviledgedDocument(clientContext, listItemId, uploadedFileURL, securityControlValue);
 
 
                         //clear validation error
@@ -807,16 +835,21 @@ namespace PIW_SPAppWeb.Helper
                         lbUploadedDocumentError.Visible = false;
                         lbUploadedDocumentError.Text = string.Empty;
 
+                        //get current user
+                        User currentUser = clientContext.Web.EnsureUser(currentloginID);
+                        clientContext.Load(currentUser);
+                        clientContext.ExecuteQuery();
+
                         //history list
                         if (getHistoryListByPIWListID(clientContext, listItemId, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
-                            CreatePIWListHistory(clientContext, listItemId, "Workflow Item created.", FormStatus, 
-                                Constants.PIWListHistory_FormTypeOption_EditForm,currentloginID);
+                            CreatePIWListHistory(clientContext, listItemId, "Workflow Item created.", FormStatus,
+                                Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
 
                         CreatePIWListHistory(clientContext, listItemId,
-                            string.Format("Document file {0} uploaded/associated with Workflow Item.", fileName), FormStatus, 
-                            Constants.PIWListHistory_FormTypeOption_EditForm, currentloginID);
+                            string.Format("Document file {0} uploaded/associated with Workflow Item.", fileName), FormStatus,
+                            Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
                     }
                 }
@@ -826,7 +859,7 @@ namespace PIW_SPAppWeb.Helper
         }
 
         public bool UploadSupplementalMailingListDocument(ClientContext clientContext, FileUpload fileUpload, string listItemId,
-            Repeater rpDocumentList, Label lbUploadedDocumentError,string FormStatus, string securityControlValue, string docType,string currentLoginID)
+            Repeater rpDocumentList, Label lbUploadedDocumentError, string FormStatus, string securityControlValue, string docType, string currentLoginID)
         {
             bool result = false;
             using (var fileStream = fileUpload.PostedFile.InputStream)
@@ -846,14 +879,19 @@ namespace PIW_SPAppWeb.Helper
                     lbUploadedDocumentError.Visible = false;
                     lbUploadedDocumentError.Text = string.Empty;
 
+                    //get current user
+                    User currentUser = clientContext.Web.EnsureUser(currentLoginID);
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
+
                     //history list
                     if (getHistoryListByPIWListID(clientContext, listItemId, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                     {
-                        CreatePIWListHistory(clientContext, listItemId, "Workflow Item created.", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm,currentLoginID);
+                        CreatePIWListHistory(clientContext, listItemId, "Workflow Item created.", FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                     }
 
                     CreatePIWListHistory(clientContext, listItemId,
-                        string.Format("Supplemental Mailing List file {0} uploaded/associated with Workflow Item.", fileName), FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm,currentLoginID);
+                        string.Format("Supplemental Mailing List file {0} uploaded/associated with Workflow Item.", fileName), FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                     result = true;
                 }
             }
@@ -864,8 +902,8 @@ namespace PIW_SPAppWeb.Helper
         public void PopulateIssuanceDocumentList(ClientContext clientContext, string listItemId, Repeater rpDocumentList,
             out string publicDocumentURLs, out string cEIIDocumentURLs, out string PriviledgeDocumentURLs)
         {
-            System.Data.DataTable table = getDocumentsTableByDocType(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, 
-                out publicDocumentURLs,out cEIIDocumentURLs,out PriviledgeDocumentURLs ,Constants.PIWDocuments_DocTypeOption_Issuance);
+            System.Data.DataTable table = getDocumentsTableByDocType(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName,
+                out publicDocumentURLs, out cEIIDocumentURLs, out PriviledgeDocumentURLs, Constants.PIWDocuments_DocTypeOption_Issuance);
             rpDocumentList.DataSource = table;
             rpDocumentList.DataBind();
         }
@@ -874,8 +912,8 @@ namespace PIW_SPAppWeb.Helper
             string publicDocumentUrLs;
             string CEIIDocumentURLs;
             string PriviledgedDocumentURLs;
-            System.Data.DataTable table = getDocumentsTableByDocType(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName, 
-                out publicDocumentUrLs, out CEIIDocumentURLs,out PriviledgedDocumentURLs,Constants.PIWDocuments_DocTypeOption_SupplementalMailingList);
+            System.Data.DataTable table = getDocumentsTableByDocType(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName,
+                out publicDocumentUrLs, out CEIIDocumentURLs, out PriviledgedDocumentURLs, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList);
             rpDocumentList.DataSource = table;
             rpDocumentList.DataBind();
 
@@ -1366,8 +1404,8 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public ClientContext getElevatedClientContext(HttpContext context,HttpRequest request)
-        {            
+        public ClientContext getElevatedClientContext(HttpContext context, HttpRequest request)
+        {
             return new ClientContext(request.QueryString["SPHostUrl"]);
         }
 
@@ -1376,7 +1414,7 @@ namespace PIW_SPAppWeb.Helper
             return SharePointContextProvider.Current.GetSharePointContext(context).CreateUserClientContextForSPHost();
         }
 
-        public User[] getUsersFromField(ClientContext clientContext,FieldUserValue[] fuv)
+        public User[] getUsersFromField(ClientContext clientContext, FieldUserValue[] fuv)
         {
             User[] users = new User[fuv.Length];
             for (int i = 0; i < users.Length; i++)
@@ -1399,16 +1437,18 @@ namespace PIW_SPAppWeb.Helper
         /// <param name="PriviledgedDocsURLs"></param>
         /// <param name="forEmail"></param>
         /// <returns></returns>
-        public string getDocumentURLsHTML(string publicDocsURLs, string CEIIDocsURLs, string PriviledgedDocsURLs,bool forEmail)
+        public string getDocumentURLsHTML(string publicDocsURLs, string CEIIDocsURLs, string PriviledgedDocsURLs, bool forEmail)
         {
             //build seperator array
             StringBuilder result = new StringBuilder();
-            string pattern = "<span class='glyphicon glyphicon-menu-right' style='font-size:0.7em; color:#337ab7'></span> <a href='{0}'>{1}</a>";
+            //string pattern = "<span class='glyphicon glyphicon-menu-right' style='font-size:0.7em; color:#337ab7'></span> <a href='{0}'>{1}</a>";
+            string pattern = "<li><a href='{0}'>{1}</a></li>";
             if (forEmail)
             {
                 pattern = "<li>{1}</li>";
             }
-            
+
+
 
             //Public
             var urlArray = publicDocsURLs.Split(new string[] { Constants.DocumentURLsSeparator }, StringSplitOptions.RemoveEmptyEntries);
@@ -1420,7 +1460,7 @@ namespace PIW_SPAppWeb.Helper
                 }
                 else
                 {
-                    result.Append(string.Format(pattern, "</br>", url, getFileNameFromURL(url) + " (Public)"));
+                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (Public)"));
                 }
 
             }
@@ -1435,7 +1475,7 @@ namespace PIW_SPAppWeb.Helper
                 }
                 else
                 {
-                    result.Append(string.Format(pattern, "</br>", url, getFileNameFromURL(url) + " (CEII)"));
+                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (CEII)"));
                 }
 
             }
@@ -1450,20 +1490,20 @@ namespace PIW_SPAppWeb.Helper
                 }
                 else
                 {
-                    result.Append(string.Format(pattern, "</br>", url, getFileNameFromURL(url) + " (Priviledged)"));
+                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (Priviledged)"));
                 }
 
             }
 
+            //for report, it is cleaner (more condense) if we don't use <ul> tag
             if (forEmail)
             {
                 result.Insert(0, "<ul>");
                 result.Append("</ul>");
             }
-            
             return result.ToString();
         }
-        
+
         #endregion
 
         #region Permission for Document List Item
@@ -1478,7 +1518,7 @@ namespace PIW_SPAppWeb.Helper
                 case Constants.PIWList_FormStatus_ReOpen:
                     if (formType.Equals(Constants.PIWList_FormType_StandardForm))
                     {
-                        AssignUniqueRoles(clientContext, listitemID, Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete, 
+                        AssignUniqueRoles(clientContext, listitemID, Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete,
                             Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read);
                     }
                     else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
@@ -1585,7 +1625,7 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public void AssignPermissionForCEIIOrPriviledgedDocument(ClientContext clientContext, string listItemID,string fileURL,string securityControl)
+        public void AssignPermissionForCEIIOrPriviledgedDocument(ClientContext clientContext, string listItemID, string fileURL, string securityControl)
         {
             Group group = null;
 
@@ -1625,7 +1665,7 @@ namespace PIW_SPAppWeb.Helper
             File document = web.GetFileByServerRelativeUrl(documentServerRelativeUrlUrl);
             //remove existing group role
             //folder.ListItemAllFields.RoleAssignments.Groups.Remove(group);
-            document.ListItemAllFields.BreakRoleInheritance(false,true);//clear all permission from parent
+            document.ListItemAllFields.BreakRoleInheritance(false, true);//clear all permission from parent
 
             var rolebindingCol = new RoleDefinitionBindingCollection(clientContext);
             rolebindingCol.Add(web.RoleDefinitions.GetByName(role));
@@ -1633,7 +1673,7 @@ namespace PIW_SPAppWeb.Helper
             document.ListItemAllFields.RoleAssignments.Add(group, rolebindingCol);
 
         }
-        
+
         #endregion
 
         #region FOLA and eLibrary connection
