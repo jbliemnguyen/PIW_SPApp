@@ -1215,15 +1215,6 @@ namespace PIW_SPAppWeb.Helper
                         break;
                     case Constants.PIWList_DocCat_NoticeErrata:
                     case Constants.PIWList_DocCat_Notice:
-                        //Agenda
-                        //case Constants.PIWList_DocCat_NotationalOrder:
-                        //case Constants.PIWList_DocCat_NotationalNotice:
-                        //case Constants.PIWList_DocCat_CommissionOrder:
-                        //case Constants.PIWList_DocCat_Consent:
-                        //case Constants.PIWList_DocCat_Errata:
-                        //case Constants.PIWList_DocCat_TollingOrder:
-                        //case Constants.PIWList_DocCat_SunshineNotice:
-                        //case Constants.PIWList_DocCat_NoticeofActionTaken:
                         documentCategoryNumber = 61;
                         break;
                     default:

@@ -18,6 +18,35 @@ namespace PIW_SPAppWeb.Helper
     public class Email
     {
         SharePointHelper helper = new SharePointHelper();
+
+        
+        /// <summary>
+        /// Call from Scheduler or system service
+        /// </summary>
+        /// <param name="clientContext"></param>
+        /// <param name="listItem"></param>
+        /// <param name="action"></param>
+        /// <param name="currentUser"></param>
+        public void SendEmail(ClientContext clientContext, ListItem listItem, enumAction action, User currentUser)
+        {
+            
+        }
+        
+        
+        /// <summary>
+        /// called from the Edit Form
+        /// </summary>
+        /// <param name="clientContext"></param>
+        /// <param name="listItem"></param>
+        /// <param name="action"></param>
+        /// <param name="CurrentFormStatus"></param>
+        /// <param name="previousFormStatus"></param>
+        /// <param name="currentUser"></param>
+        /// <param name="formURL"></param>
+        /// <param name="hdnWorkflowInitiator"></param>
+        /// <param name="hdnDocumentOwner"></param>
+        /// <param name="hdnNotificationRecipient"></param>
+        /// <param name="comment"></param>
         public void SendEmail(ClientContext clientContext, ListItem listItem, enumAction action, string CurrentFormStatus, string previousFormStatus,
             User currentUser, string formURL, HiddenField hdnWorkflowInitiator, 
             HiddenField hdnDocumentOwner, HiddenField hdnNotificationRecipient,string comment)
@@ -41,6 +70,14 @@ namespace PIW_SPAppWeb.Helper
             var formType = listItem[piwListInteralColumnNames[Constants.PIWList_colName_FormType]] != null
                 ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_FormType]].ToString() : string.Empty;
 
+            SendEmail(clientContext, listItem, action, CurrentFormStatus, previousFormStatus, currentUser, formURL, comment, formType, docket, initiatorEmails, documentOwnerEmails, notificationRecipientEmails);
+
+        }
+
+        private void SendEmail(ClientContext clientContext, ListItem listItem, enumAction action, string CurrentFormStatus,
+            string previousFormStatus, User currentUser, string formURL, string comment, string formType, string docket,
+            IEnumerable<string> initiatorEmails, IEnumerable<string> documentOwnerEmails, IEnumerable<string> notificationRecipientEmails)
+        {
             switch (CurrentFormStatus)
             {
                 case Constants.PIWList_FormStatus_Pending:
@@ -63,7 +100,7 @@ namespace PIW_SPAppWeb.Helper
                             To = AddEmailAddress(To, notificationRecipientEmails);
 
 
-                            SendEmail(To,subject,htmlContent);
+                            SendEmail(To, subject, htmlContent);
                         }
                         else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
                         {
@@ -88,7 +125,7 @@ namespace PIW_SPAppWeb.Helper
                             string subject = "PIW - OSEC Took Ownership of Workflow Item";
                             string message = String.Format
                                 (@"OSEC has taken ownership of the following Workflow Item in Publish Issuance Workflow: 
-                                            <a href='{0}'>{1}</a>.",formURL, docket);
+                                            <a href='{0}'>{1}</a>.", formURL, docket);
 
 
                             string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
@@ -102,33 +139,19 @@ namespace PIW_SPAppWeb.Helper
                         {
                             throw new NotImplementedException();
                         }
-
                     }
-                    else if (action.Equals(enumAction.Recall))
-                    {
-                        if (formType.Equals(Constants.PIWList_FormType_StandardForm))
-                        {
-                            throw new NotImplementedException();
-                            //string subject = "PIW - Workflow Item Submitted for Processing";
-                            //string message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> has been submitted for processing in Publish Issuance Workflow by {2}",
-                            //    formURL, docket, currentUser.Title);
-                            //string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
-                            //String To = string.Empty;
+                    //else if (action.Equals(enumAction.Recall))
+                    //{
+                    //    if (formType.Equals(Constants.PIWList_FormType_StandardForm))
+                    //    {
+                    //        throw new NotImplementedException();
+                    //    }
+                    //    else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
+                    //    {
+                    //        throw new NotImplementedException();
+                    //    }
+                    //}
 
-                            ////email to initiator, document owner and notification recipient
-                            //To = AddEmailAddress(To, initiatorEmails);
-                            //To = AddEmailAddress(To, documentOwnerEmails);
-                            //To = AddEmailAddress(To, notificationRecipientEmails);
-
-
-                            //SendEmail(To, subject, htmlContent);
-                        }
-                        else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
-                        {
-                            throw new NotImplementedException();
-                        }
-                    }
-                    
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
                     if (action.Equals(enumAction.Reject))
@@ -138,8 +161,8 @@ namespace PIW_SPAppWeb.Helper
                             string subject = "PIW – Workflow Item  Rejected by OSEC Verifier";
                             string message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
                                     submitted through Publish Issuance Workflow has been rejected by OSEC Verifier {2}.",
-                                    formURL, docket, currentUser.Title);
-                            string htmlContent = getRejectHTMLFullMessageContent(message,comment);
+                                formURL, docket, currentUser.Title);
+                            string htmlContent = getRejectHTMLFullMessageContent(message, comment);
                             String To = string.Empty;
 
                             //email to initiator, document owner and notification recipient
@@ -169,15 +192,15 @@ namespace PIW_SPAppWeb.Helper
                             string subject = "PIW – Workflow Item  Rejected by Pre-Publication Reviewer";
                             string message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
                                     submitted through Publish Issuance Workflow has been rejected by Pre-Publication Reviewer {2}.",
-                                    formURL, docket, currentUser.Title);
-                            string htmlContent = getRejectHTMLFullMessageContent(message,comment);
+                                formURL, docket, currentUser.Title);
+                            string htmlContent = getRejectHTMLFullMessageContent(message, comment);
                             String To = string.Empty;
 
                             //email to initiator, document owner and notification recipient
                             To = AddEmailAddress(To, initiatorEmails);
                             To = AddEmailAddress(To, documentOwnerEmails);
                             To = AddEmailAddress(To, notificationRecipientEmails);
-                            
+
                             SendEmail(To, subject, htmlContent);
                         }
                     }
@@ -190,7 +213,7 @@ namespace PIW_SPAppWeb.Helper
                         string subject = "PIW – Publication of Workflow Item was Initiated";
                         string message = String.Format(@"Publication of Workflow Item <a href='{0}'>{1}</a> 
                                     has been initiated (i.e. routed to the eLibrary Data Entry group).",
-                                formURL, docket);
+                            formURL, docket);
                         string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
                         String To = string.Empty;
 
@@ -203,11 +226,9 @@ namespace PIW_SPAppWeb.Helper
                         }
                         else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
                         {
-                            
                         }
                         else if (formType.Equals(Constants.PIWList_FormType_DirectPublicationForm))
                         {
-
                         }
 
                         SendEmail(To, subject, htmlContent);
@@ -219,10 +240,10 @@ namespace PIW_SPAppWeb.Helper
                     {
                         string subject = "PIW - Issuance Document Mailed";
                         string message = String.Format(@"The issuance associated with Workflow Item <a href='{0}'>{1}</a> 
-                                has been mailed via the USPS.",formURL, docket);
+                                has been mailed via the USPS.", formURL, docket);
                         string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
                         String To = string.Empty;
-                        
+
                         //email to initiator
                         To = AddEmailAddress(To, initiatorEmails);
                         SendEmail(To, subject, htmlContent);
@@ -261,7 +282,6 @@ namespace PIW_SPAppWeb.Helper
                 default:
                     break;
             }
-
         }
 
         /// <summary>
@@ -324,7 +344,8 @@ namespace PIW_SPAppWeb.Helper
                 ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentCategory]].ToString() : string.Empty;
 
             var createdDate = listItem[piwListInteralColumnNames["Created"]] != null
-                ? listItem[piwListInteralColumnNames["Created"]].ToString() : string.Empty;
+                ? System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Parse(listItem["Created"].ToString())).ToString() : string.Empty;
+
 
             var PublicDocsURL = listItem[piwListInteralColumnNames[Constants.PIWList_colName_PublicDocumentURLs]] != null
                 ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_PublicDocumentURLs]].ToString() : string.Empty;
@@ -339,16 +360,6 @@ namespace PIW_SPAppWeb.Helper
             string fileNameListHTML = helper.getDocumentURLsHTML(PublicDocsURL, CEIIDocsURL, PriviledgedDocsURL, true);
 
             string[] args = new string[] { message, fileNameListHTML, description, initiatorOffice, documentCategory, createdDate };
-//            string htmlContent = string.Format(@"<html>
-//                                                    <body> 
-//                                                            {0}<br/>
-//                                                            - File Name: {1}                                                            
-//                                                            - Description: {2}<br/>
-//                                                            - Initiator Office: {3}<br/>
-//                                                            - Document Category: {4}<br/> 
-//                                                            - Created Date: {5}                                                       
-//                                                    </body>
-//                                                 </html>", args);
             string htmlContent = string.Format(@" 
                                                             {0}<br/><br/>
                                                             - File Name: {1}<br/>                                                            

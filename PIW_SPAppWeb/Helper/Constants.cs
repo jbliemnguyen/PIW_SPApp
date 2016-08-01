@@ -48,7 +48,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_IsNonDocket = "Is NonDocket";
         public const string PIWList_colName_IsRequireOSECVerification = "Is Require OSEC Verification";
         public const string PIWList_colName_NotificationRecipient = "Notification Recipient";
-        //public const string PIWList_colName_OSECVerificationAction = "OSEC Verification Action";
+        //public const string PIWList_colName_OSECVerificationAction = "OSEC Verification Action";dd
         //public const string PIWList_colName_OSECVerificationComment = "OSEC Verification Comment";
         //public const string PIWList_colName_PrePublicationReviewAction = "PrePublication Review Action";
         //public const string PIWList_colName_PrePublicationReviewComment = "PrePublication Review Comment";
@@ -166,6 +166,10 @@ namespace PIW_SPAppWeb
         public const string ddlSecurityControl_Option_Public = "Public";
         public const string ddlSecurityControl_Option_CEII = "CEII";
         public const string ddlSecurityControl_Option_Priviledged = "Priviledged";
+
+        public const string ddProgramOfficeWorkflowInitiator_Option_OSEC = "OSEC";
+        public const string ddDocumentCategory_Option_Notice = "Notice";
+        public const string ddDocumentCategory_Option_NoticeErrata = "Notice Errata";
 
         //ErrorLog list
         public const string ErrorLogListName = "ErrorLog";

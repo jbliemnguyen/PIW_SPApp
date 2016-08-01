@@ -7,7 +7,8 @@ namespace PIW_SPAppWeb.Helper
 {
     public class StandardFormWorkflow
     {
-        public string Execute(string previousStatus, string currentStatus, enumAction action, bool isRequireOSECVerification, bool isRequiredPrePublication)
+        public string Execute(string previousStatus, string currentStatus, enumAction action, bool isRequireOSECVerification,
+            string initiatorOffice,string documentCategory)
         {
             string nextStatus = currentStatus;
             switch (currentStatus)
@@ -19,7 +20,20 @@ namespace PIW_SPAppWeb.Helper
                     //user can only perform Submit action
                     if (action == enumAction.Submit)
                     {
-                        nextStatus = Constants.PIWList_FormStatus_Submitted;
+                        //bypass OSEC Take OwnerShip
+                        if (initiatorOffice.Equals(Constants.ddProgramOfficeWorkflowInitiator_Option_OSEC) &&
+                            (documentCategory.Equals(Constants.ddDocumentCategory_Option_Notice) ||
+                             documentCategory.Equals(Constants.ddDocumentCategory_Option_NoticeErrata)))
+                        {
+                            nextStatus = Constants.PIWList_FormStatus_OSECVerification;
+                        }
+                        else
+                        {
+                            nextStatus = Constants.PIWList_FormStatus_Submitted;    
+                        }
+
+                        
+                        
                     }
                     else if (action == enumAction.Save)
                     {
@@ -82,14 +96,7 @@ namespace PIW_SPAppWeb.Helper
                         }
                         else
                         {
-                            if (isRequiredPrePublication)
-                            {
-                                nextStatus = Constants.PIWList_FormStatus_PrePublication;
-                            }
-                            else
-                            {
-                                nextStatus = Constants.PIWList_FormStatus_ReadyForPublishing;
-                            }
+                            nextStatus = Constants.PIWList_FormStatus_PrePublication;
                         }
                     }
                     else
@@ -106,14 +113,7 @@ namespace PIW_SPAppWeb.Helper
                     }
                     else if (action == enumAction.Accept)
                     {
-                        if (isRequiredPrePublication)
-                        {
-                            nextStatus = Constants.PIWList_FormStatus_PrePublication;
-                        }
-                        else
-                        {
-                            nextStatus = Constants.PIWList_FormStatus_ReadyForPublishing;
-                        }
+                        nextStatus = Constants.PIWList_FormStatus_PrePublication;
                     }
                     else if (action == enumAction.Edit)
                     {

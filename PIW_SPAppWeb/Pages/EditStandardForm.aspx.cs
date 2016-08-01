@@ -1174,7 +1174,7 @@ namespace PIW_SPAppWeb.Pages
             var currentFormStatus = FormStatus;
             StandardFormWorkflow wf = new StandardFormWorkflow();
             FormStatus = wf.Execute(PreviousFormStatus, FormStatus, action,
-                isRequiredOSECVerificationStep(ddDocumentCategory.SelectedValue), true);
+                isRequiredOSECVerificationStep(ddDocumentCategory.SelectedValue),ddProgramOfficeWorkflowInitiator.SelectedValue,ddDocumentCategory.SelectedValue);
             PreviousFormStatus = currentFormStatus;
 
             UpdateFormDataToList(clientContext, listItem, action);
@@ -1625,31 +1625,28 @@ namespace PIW_SPAppWeb.Pages
         {
             bool isValid = true;
 
-            //Check if there is a uploaded document
-            if (rpDocumentList.Items.Count < 1)//validation fails
+            //Check if there is a uploaded Public document
+            if (rpDocumentList.Items.Count > 0)//there is uploaded document,
+            {
+                //check if atleast one public document
+                foreach (RepeaterItem i in rpDocumentList.Items)
+                {
+
+                    Label lbSecuriLevel = (Label)i.FindControl("lbSecurityLevel");
+                    isValid = lbSecuriLevel.Text.Equals(Constants.ddlSecurityControl_Option_Public);
+                    
+                    if (isValid)//stop checking if found one public document
+                    {
+                        break;
+                    }
+                }
+                
+                lbRequiredUploadedDocumentError.Visible = !isValid;
+            }
+            else//no uploaded document
             {
                 isValid = false;
                 lbRequiredUploadedDocumentError.Visible = true;
-            }
-            else
-            {
-                //check if at least 1 public item is 
-                isValid = true;
-                lbRequiredUploadedDocumentError.Visible = false;
-            }
-
-            if (action == enumAction.Recall || action == enumAction.Reject)//if recall or reject, comment is required
-            {
-                if (string.IsNullOrEmpty(tbComment.Text))
-                {
-                    isValid = false;
-                    lbCommentValidation.Visible = true;
-                }
-                else
-                {
-                    isValid = isValid & true;
-                    lbCommentValidation.Visible = false;
-                }
             }
 
             //Check docket validation

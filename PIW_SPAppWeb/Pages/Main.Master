@@ -130,6 +130,10 @@
 
             jQueryValidationMasterPage();
 
+
+            CommonPageClient();
+            
+
             PageClient(spHostUrl, spAppWebUrl, SPLanguage);
 
         });
@@ -196,9 +200,7 @@
                 }
             }, 'This field is required in Non-Docketed or CNF');
 
-
-
-
+            
             $("#mainForm").validate({
                 rules: {
                     // no quoting necessary
@@ -225,10 +227,30 @@
             });
 
 
-            //docket number 
+            //comment is required only when reject/recall button is clicked
+            //ctl00$MainContentPlaceHolder$tbComment
+            $("#btnReject,#btnRecall").on("click", function () {
+                $("#tbComment").rules("add", {
+                    required: true,
+                });
+                $("#mainForm").valid();  // trigger the validation
+            });
+
+            $("[id^=btn]").on("click", function () {
+                if ((this.id != "btnReject") && (this.id != "btnRecall")) {
+                    $("#tbComment").rules("remove");
+                }
+            });
         }
 
-        
+        function CommonPageClient() {
+
+            //Initiator Program office dirves the value of document owner program office
+            $("#ddProgramOfficeWorkflowInitiator").change(function () {
+                var documentOwner = $("#ddProgramOfficeDocumentOwner");
+                documentOwner.val($(this).val());
+            });
+        }
     </script>
 </body>
 </html>
