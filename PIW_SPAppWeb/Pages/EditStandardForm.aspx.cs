@@ -193,12 +193,14 @@ namespace PIW_SPAppWeb.Pages
                                 //display form visiblility based on form status
                                 ControlsVisiblitilyBasedOnStatus(clientContext, PreviousFormStatus, FormStatus, listItem);
 
-                                //todo: open documents if status is ready for published
-                                ////above method get formStatus from list, store it in viewstate                       
-                                //if (FormStatus == enumFormStatus.ReadyForPublishing)
-                                //{
-                                //    helper.OpenDocument(Page, documentURL);
-                                //}
+                                //Populate first public document if status is readyforpublishing
+                                if ((FormStatus == Constants.PIWList_FormStatus_ReadyForPublishing) ||
+                                    (FormStatus == Constants.PIWList_FormStatus_Edited && PreviousFormStatus == Constants.PIWList_FormStatus_ReadyForPublishing))
+                                {
+                                    var PublicDocumentURLs = PublicDocumentURLsFromViewState.Split(new string[] { Constants.DocumentURLsSeparator },
+                                        StringSplitOptions.RemoveEmptyEntries);
+                                    helper.OpenDocument(Page, PublicDocumentURLs[0]);
+                                }
                             }
 
 
@@ -243,7 +245,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, Page.Request.Url.OriginalString);
+                helper.LogError(Context, Request, exc, ListItemID, Page.Request.Url.OriginalString);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -316,7 +318,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -345,12 +347,12 @@ namespace PIW_SPAppWeb.Pages
                         User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                         clientContext.Load(currentUser);
                         clientContext.ExecuteQuery();
-                        
+
                         Email emailHelper = new Email();
-                        
-                        emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun, 
-                            currentUser, Request.Url.ToString(), hdnWorkflowInitiator,hdnDocumentOwner,hdnNotificationRecipient,tbComment.Text);
-                        
+
+                        emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
+                            currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
+
                         //Create list history
                         if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
@@ -394,7 +396,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -441,7 +443,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -492,7 +494,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -530,19 +532,20 @@ namespace PIW_SPAppWeb.Pages
                     if (rpSupplementalMailingListDocumentList.Items.Count > 0)
                     {
                         RepeaterItem row = rpSupplementalMailingListDocumentList.Items[0];
-                        supplementalMailingListFileName = ((HyperLink)row.FindControl("hyperlinkFileURL")).Text;
+                        supplementalMailingListFileName = helper.getFileNameFromURL(((HyperLink)row.FindControl("hyperlinkFileURL")).NavigateUrl);
                     }
 
 
                     EPSPublicationHelper epsHelper = new EPSPublicationHelper();
                     epsHelper.Publish(clientContext, issuanceDocuments, supplementalMailingListFileName, listItem);
 
+                    //Change document permission
+                    helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
+
                     //get current user
                     User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                     clientContext.Load(currentUser);
                     clientContext.ExecuteQuery();
-
-                    //todo: Change document and list permission
 
                     //send email
                     Email emailHelper = new Email();
@@ -568,7 +571,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -610,7 +613,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -659,7 +662,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -707,7 +710,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -745,7 +748,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -764,7 +767,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -815,7 +818,7 @@ namespace PIW_SPAppWeb.Pages
                                 var fileName = helper.getFileNameFromURL(documentURLs[0]);
                                 helper.AddCitationNumberToDocument(clientContext, tbCitationNumber.Text.Trim(),
                                     ListItemID, fileName);
-                                
+
                             }
                             catch (Exception exc)
                             {
@@ -838,7 +841,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -898,7 +901,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -930,7 +933,7 @@ namespace PIW_SPAppWeb.Pages
                             User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                             clientContext.Load(currentUser);
                             clientContext.ExecuteQuery();
-                            
+
                             //history list
                             helper.CreatePIWListHistory(clientContext, ListItemID, string.Format("Document file {0} removed.", removedFileName),
                                 FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
@@ -941,7 +944,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -976,7 +979,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -1030,7 +1033,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception ex)
             {
-                helper.LogError(Context, ex, ListItemID, string.Empty);
+                helper.LogError(Context, Request, ex, ListItemID, string.Empty);
                 lbUploadedDocumentError.Text = ex.Message;
                 lbUploadedDocumentError.Visible = true;
             }
@@ -1065,7 +1068,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception ex)
             {
-                helper.LogError(Context, ex, ListItemID, string.Empty);
+                helper.LogError(Context, Request, ex, ListItemID, string.Empty);
                 lbSupplementalMailingListUploadError.Text = ex.Message;
                 lbSupplementalMailingListUploadError.Visible = true;
             }
@@ -1076,6 +1079,8 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
+                string currentStatusBeforeWFRun = FormStatus;
+                string previousStatusBeforeWFRun = PreviousFormStatus;
                 const enumAction action = enumAction.ReOpen;
                 using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
@@ -1093,6 +1098,11 @@ namespace PIW_SPAppWeb.Pages
                     clientContext.Load(currentUser);
                     clientContext.ExecuteQuery();
 
+                    Email emailHelper = new Email();
+
+                    emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
+                        currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
+
                     //Create list history
                     string message = "Workflow Item Re-Opened.";
                     if (!string.IsNullOrEmpty(tbComment.Text))
@@ -1108,7 +1118,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -1174,7 +1184,7 @@ namespace PIW_SPAppWeb.Pages
             var currentFormStatus = FormStatus;
             StandardFormWorkflow wf = new StandardFormWorkflow();
             FormStatus = wf.Execute(PreviousFormStatus, FormStatus, action,
-                isRequiredOSECVerificationStep(ddDocumentCategory.SelectedValue),ddProgramOfficeWorkflowInitiator.SelectedValue,ddDocumentCategory.SelectedValue);
+                isRequiredOSECVerificationStep(ddDocumentCategory.SelectedValue), ddProgramOfficeWorkflowInitiator.SelectedValue, ddDocumentCategory.SelectedValue);
             PreviousFormStatus = currentFormStatus;
 
             UpdateFormDataToList(clientContext, listItem, action);
@@ -1185,6 +1195,7 @@ namespace PIW_SPAppWeb.Pages
 
         private void UpdateFormDataToList(ClientContext clientContext, ListItem listItem, enumAction action)
         {
+            string errorMessage = "UpdateFormDataToList method: Unknown Status and Previous status combination. Status:{0}, Previous Status: {1}";
             switch (FormStatus)//this is the next status after action is performed
             {
                 case Constants.PIWList_FormStatus_Pending:
@@ -1194,7 +1205,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_Recalled:
@@ -1208,7 +1219,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_Rejected:
@@ -1222,17 +1233,15 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else if (PreviousFormStatus == Constants.PIWList_FormStatus_OSECVerification)//reject from osecverification
                     {
-                        //SaveOsecVerificationInfoAndStatus(clientContext, listItem, action);
                         SaveFormStatusAndRecallRejectComment(clientContext, listItem, action);
                     }
                     else if (PreviousFormStatus == Constants.PIWList_FormStatus_PrePublication)//reject from prepublication
                     {
-                        //SavePrePublicationInfoAndStatus(clientContext, listItem, action);
                         SaveFormStatusAndRecallRejectComment(clientContext, listItem, action);
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_Submitted:
@@ -1244,12 +1253,10 @@ namespace PIW_SPAppWeb.Pages
                     else if (PreviousFormStatus == Constants.PIWList_FormStatus_Rejected)
                     {
                         SaveMainPanelAndStatus(clientContext, listItem, action);
-                        //clear OSECVerification and PrePublication action when a rejected item is re-submit
-                        //ClearOSECActionsAndCommentsBeforeReSubmit(clientContext, listItem);
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
 
                     break;
@@ -1262,7 +1269,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_Deleted:
@@ -1271,7 +1278,10 @@ namespace PIW_SPAppWeb.Pages
                     helper.ReleaseCitationNumberForDeletedListItem(clientContext, ListItemID);
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
-                    if (PreviousFormStatus == Constants.PIWList_FormStatus_Edited)
+                    if ((PreviousFormStatus == Constants.PIWList_FormStatus_Edited) ||
+                        (PreviousFormStatus == Constants.PIWList_FormStatus_Pending) ||//this is scenario of OSEC submit Notice, bypass osec take ownership
+                        (PreviousFormStatus == Constants.PIWList_FormStatus_Rejected) ||
+                        (PreviousFormStatus == Constants.PIWList_FormStatus_Recalled))
                     {
                         SaveMainPanelAndStatus(clientContext, listItem, action);
                     }
@@ -1281,7 +1291,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
 
                     break;
@@ -1305,7 +1315,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_ReadyForPublishing:
@@ -1321,7 +1331,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
 
                     break;
@@ -1337,7 +1347,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
@@ -1348,12 +1358,12 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
                     break;
 
                 default:
-                    throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                    throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
 
             }
         }
@@ -1605,6 +1615,10 @@ namespace PIW_SPAppWeb.Pages
                 }
             }
 
+            //edit form url
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_EditFormURL]] = Request.Url.ToString();
+
+
             //execute query
             listItem.Update();
             clientContext.ExecuteQuery();
@@ -1634,13 +1648,13 @@ namespace PIW_SPAppWeb.Pages
 
                     Label lbSecuriLevel = (Label)i.FindControl("lbSecurityLevel");
                     isValid = lbSecuriLevel.Text.Equals(Constants.ddlSecurityControl_Option_Public);
-                    
+
                     if (isValid)//stop checking if found one public document
                     {
                         break;
                     }
                 }
-                
+
                 lbRequiredUploadedDocumentError.Visible = !isValid;
             }
             else//no uploaded document
@@ -2012,7 +2026,7 @@ namespace PIW_SPAppWeb.Pages
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
-                    btnOSECTakeOwnership.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID, new string[]{Constants.Grp_OSEC,Constants.Grp_SecReview});;
+                    btnOSECTakeOwnership.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID, new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview }); ;
                     btnRecall.Visible = true;
                     btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
@@ -2054,8 +2068,8 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetLegalResourcesReview.Visible = false;
 
                     //Button
-                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext,CurrentUserLogInID,
-                        new string[]{Constants.Grp_OSEC,Constants.Grp_SecReview});
+                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                        new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview });
                     btnSubmit.Visible = false;
                     btnEdit.Visible = false;
 
@@ -2069,7 +2083,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         btnAccept.Visible = false;
                     }
-                    
+
                     btnReject.Visible = btnAccept.Visible;
 
                     btnOSECTakeOwnership.Visible = false;
@@ -2083,7 +2097,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         btnInitiatePublication.Visible = false;
                     }
-                    
+
 
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
@@ -2113,8 +2127,8 @@ namespace PIW_SPAppWeb.Pages
                     //Buttons
                     btnSave.Visible = false;
                     btnSubmit.Visible = btnSave.Visible;
-                    btnEdit.Visible = helper.IsUserMemberOfGroup(clientContext,CurrentUserLogInID,
-                        new string[]{Constants.Grp_OSEC,Constants.Grp_SecReview});;
+                    btnEdit.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                        new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview }); ;
                     btnAccept.Visible = btnEdit.Visible;
                     btnReject.Visible = btnEdit.Visible;
                     btnOSECTakeOwnership.Visible = false;
@@ -2131,14 +2145,11 @@ namespace PIW_SPAppWeb.Pages
                     EnableMainPanel(false, formStatus);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
-                    //fieldsetRecall.Visible = false;
 
-                    //OSEC section
                     //OSEC verification
                     if (isRequireOSECVerification)
                     {
                         fieldsetOSECVerification.Visible = true;
-                        //tbOSECVerificationComment.Enabled = false;
                     }
 
                     //PrePublication
@@ -2153,10 +2164,23 @@ namespace PIW_SPAppWeb.Pages
                     //button
                     btnSave.Visible = false;
                     btnSubmit.Visible = btnSave.Visible;
-                    btnEdit.Visible = helper.IsUserMemberOfGroup(clientContext,CurrentUserLogInID,
-                        new string[]{Constants.Grp_OSEC,Constants.Grp_SecReview});;
+                    
+                    if (helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                        new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview }))//OSEC user
+                    {
+                        btnEdit.Visible = true;
+                        //don't need to worry about citation button bc it is handles above in InitiallyEnableCitationNumberControls()
+                    }
+                    else
+                    {
+                        btnEdit.Visible = false;
+                        //this will prevent user who is not osec generate/remove or accept citation
+                        EnableCitationNumberControls(false,false);
+                    }
+
                     btnAccept.Visible = btnEdit.Visible;
                     btnReject.Visible = btnEdit.Visible;
+
                     btnOSECTakeOwnership.Visible = false;
                     btnRecall.Visible = false;
                     btnInitiatePublication.Visible = false;
@@ -2193,8 +2217,19 @@ namespace PIW_SPAppWeb.Pages
                     //buttons
                     btnSave.Visible = false;
                     btnSubmit.Visible = btnSave.Visible;
-                    btnEdit.Visible = helper.IsUserMemberOfGroup(clientContext,CurrentUserLogInID,
-                        new string[]{Constants.Grp_OSEC,Constants.Grp_SecReview});;
+                    if (helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                        new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview }))//OSEC user
+                    {
+                        btnEdit.Visible = true;
+                        //don't need to worry about citation button bc it is handles above in InitiallyEnableCitationNumberControls()
+                    }
+                    else
+                    {
+                        btnEdit.Visible = false;
+                        //this will prevent user who is not osec generate/remove or accept citation
+                        EnableCitationNumberControls(false, false);
+                    }
+
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
                     btnOSECTakeOwnership.Visible = false;
@@ -2242,8 +2277,8 @@ namespace PIW_SPAppWeb.Pages
                     btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
-                    btnReopen.Visible = helper.IsUserMemberOfGroup(clientContext,CurrentUserLogInID,
-                        new string[]{Constants.Grp_PIWAdmin,Constants.Grp_PIWSystemAdmin});
+                    btnReopen.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                        new string[] { Constants.Grp_PIWAdmin, Constants.Grp_PIWSystemAdmin });
                     btnGenerateMailingList.Visible = false;
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
@@ -2271,8 +2306,8 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetLegalResourcesReview.Visible = true;
 
                     //buttons
-                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext,CurrentUserLogInID,
-                        new string[]{Constants.Grp_PIWLegalResourcesReview});;
+                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                        new string[] { Constants.Grp_PIWLegalResourcesReview }); ;
                     btnSubmit.Visible = false;
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
@@ -2303,7 +2338,7 @@ namespace PIW_SPAppWeb.Pages
 
                     break;
                 default:
-                    throw new Exception("UnKnown Form Status: " + formStatus);
+                    throw new Exception("ControlsVisibilityBasedOnStatus method - UnKnown Form Status: " + formStatus);
 
             }
         }

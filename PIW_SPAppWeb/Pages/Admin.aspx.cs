@@ -17,7 +17,7 @@ using PIW_SPAppWeb.Helper;
 using File = Microsoft.SharePoint.Client.File;
 using List = Microsoft.SharePoint.Client.List;
 using ListItem = System.Web.UI.WebControls.ListItem;
-using Email_Service.Entity;
+
 
 
 namespace PIW_SPAppWeb
@@ -366,21 +366,13 @@ namespace PIW_SPAppWeb
 
         protected void btnEmail_Click(object sender, EventArgs e)
         {
-            Email_Job msg = new Email_Job();
+            using (var clientContext = helper.getElevatedClientContext(Context,Request))
+            {
+                Email emailHelper = new Email();
 
-            msg.From = "piw@ferc.gov";
-            
-            var To = new List<string>();
-            To.Add("liem.nguyen@ferc.gov");
+                emailHelper.SendEmail(clientContext,"liem.nguyen@ferc.gov", "PIW Test Email", "PIW Test");
+            }
 
-            msg.To = To;
-
-            msg.Subject = "TEst Email";
-            msg.Body = "Test";
-
-            string jobqueue = ConfigurationManager.AppSettings["eMailqueue"].ToString();
-            QueueSender<QueueMessage<Email_Job>> qs = new QueueSender<QueueMessage<Email_Job>>(jobqueue);
-            qs.Send(new QueueMessage<Email_Job>("", 1, msg));
         }
 
         //protected void Button2_Click(object sender, EventArgs e)

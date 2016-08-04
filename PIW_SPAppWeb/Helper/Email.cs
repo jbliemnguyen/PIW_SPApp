@@ -7,7 +7,6 @@ using System.Security;
 using System.ServiceModel.Channels;
 using System.Web;
 using System.Web.UI.WebControls;
-using Email_Service.Entity;
 using FERC.Common.Queues;
 using Microsoft.SharePoint.Client;
 using Org.BouncyCastle.Asn1.X509;
@@ -100,7 +99,7 @@ namespace PIW_SPAppWeb.Helper
                             To = AddEmailAddress(To, notificationRecipientEmails);
 
 
-                            SendEmail(To, subject, htmlContent);
+                            SendEmail(clientContext,To, subject, htmlContent);
                         }
                         else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
                         {
@@ -133,25 +132,13 @@ namespace PIW_SPAppWeb.Helper
 
                             //email to initiator
                             To = AddEmailAddress(To, initiatorEmails);
-                            SendEmail(To, subject, htmlContent);
+                            SendEmail(clientContext, To, subject, htmlContent);
                         }
                         else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
                         {
                             throw new NotImplementedException();
                         }
                     }
-                    //else if (action.Equals(enumAction.Recall))
-                    //{
-                    //    if (formType.Equals(Constants.PIWList_FormType_StandardForm))
-                    //    {
-                    //        throw new NotImplementedException();
-                    //    }
-                    //    else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
-                    //    {
-                    //        throw new NotImplementedException();
-                    //    }
-                    //}
-
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
                     if (action.Equals(enumAction.Reject))
@@ -170,7 +157,7 @@ namespace PIW_SPAppWeb.Helper
                             To = AddEmailAddress(To, documentOwnerEmails);
                             To = AddEmailAddress(To, notificationRecipientEmails);
 
-                            SendEmail(To, subject, htmlContent);
+                            SendEmail(clientContext, To, subject, htmlContent);
                         }
                     }
                     break;
@@ -182,6 +169,10 @@ namespace PIW_SPAppWeb.Helper
                     else if (previousFormStatus.Equals(Constants.PIWList_FormStatus_PrePublication))
                     {
                         goto case Constants.PIWList_FormStatus_PrePublication;
+                    }
+                    else if (previousFormStatus.Equals(Constants.PIWList_FormStatus_ReadyForPublishing))
+                    {
+                        goto case Constants.PIWList_FormStatus_ReadyForPublishing;
                     }
                     break;
                 case Constants.PIWList_FormStatus_PrePublication:
@@ -201,7 +192,7 @@ namespace PIW_SPAppWeb.Helper
                             To = AddEmailAddress(To, documentOwnerEmails);
                             To = AddEmailAddress(To, notificationRecipientEmails);
 
-                            SendEmail(To, subject, htmlContent);
+                            SendEmail(clientContext, To, subject, htmlContent);
                         }
                     }
                     break;
@@ -231,7 +222,7 @@ namespace PIW_SPAppWeb.Helper
                         {
                         }
 
-                        SendEmail(To, subject, htmlContent);
+                        SendEmail(clientContext, To, subject, htmlContent);
                     }
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
@@ -246,7 +237,7 @@ namespace PIW_SPAppWeb.Helper
 
                         //email to initiator
                         To = AddEmailAddress(To, initiatorEmails);
-                        SendEmail(To, subject, htmlContent);
+                        SendEmail(clientContext, To, subject, htmlContent);
                     }
                     else if (action.Equals(enumAction.ReOpen))
                     {
@@ -261,7 +252,7 @@ namespace PIW_SPAppWeb.Helper
                         To = AddEmailAddress(To, documentOwnerEmails);
                         To = AddEmailAddress(To, notificationRecipientEmails);
 
-                        SendEmail(To, subject, htmlContent);
+                        SendEmail(clientContext, To, subject, htmlContent);
                     }
                     else if (action.Equals(enumAction.PublishedToElibrary))
                     {
@@ -276,7 +267,7 @@ namespace PIW_SPAppWeb.Helper
                         To = AddEmailAddress(To, documentOwnerEmails);
                         To = AddEmailAddress(To, notificationRecipientEmails);
 
-                        SendEmail(To, subject, htmlContent);
+                        SendEmail(clientContext, To, subject, htmlContent);
                     }
                     break;
                 default:
@@ -302,7 +293,10 @@ namespace PIW_SPAppWeb.Helper
                     }
                     else
                     {
-                        ToAddress = ToAddress + "," + email;
+                        if (ToAddress.IndexOf(email) < 0)//avoid duplicate email
+                        {
+                            ToAddress = ToAddress + "," + email;
+                        }
                     }
                 }
             }
@@ -310,10 +304,9 @@ namespace PIW_SPAppWeb.Helper
             return ToAddress;
         }
 
-        private void SendEmail(string ToAddress, string subject, string htmlContent)
+        public void SendEmail(ClientContext clientContext,string ToAddress, string subject, string htmlContent)
         {
-            //TODO: Insert email into List before send it
-            string mailrelay = ConfigurationManager.AppSettings["mailrelay"].ToString();
+            string mailrelay = ConfigurationManager.AppSettings["mailrelay"];
             MailMessage mailMessage = new MailMessage();
             mailMessage.From = new MailAddress("piw@ferc.gov");
             
@@ -327,6 +320,9 @@ namespace PIW_SPAppWeb.Helper
 
             SmtpClient smtpClient = new SmtpClient(mailrelay, 25);
             smtpClient.Send(mailMessage);
+
+            //insert email into Log
+            helper.CreateLog(clientContext,"Email",string.Format("To:{0} - Subject: {1} - {2}",ToAddress,subject,htmlContent));
 
         }
 

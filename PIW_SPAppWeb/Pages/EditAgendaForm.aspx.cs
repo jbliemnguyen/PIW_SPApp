@@ -184,12 +184,14 @@ namespace PIW_SPAppWeb.Pages
                                 //display form visiblility based on form status
                                 ControlsVisiblitilyBasedOnStatus(clientContext, PreviousFormStatus, FormStatus, listItem);
 
-                                //todo: open documents if status is ready for published
-                                ////above method get formStatus from list, store it in viewstate                       
-                                //if (FormStatus == enumFormStatus.ReadyForPublishing)
-                                //{
-                                //    helper.OpenDocument(Page, documentURL);
-                                //}
+                                //Populate first public document if status is readyforpublishing
+                                if ((FormStatus == Constants.PIWList_FormStatus_ReadyForPublishing) ||
+                                    (FormStatus == Constants.PIWList_FormStatus_Edited && PreviousFormStatus == Constants.PIWList_FormStatus_ReadyForPublishing))
+                                {
+                                    var PublicDocumentURLs = PublicDocumentURLsFromViewState.Split(new string[] { Constants.DocumentURLsSeparator },
+                                        StringSplitOptions.RemoveEmptyEntries);
+                                    helper.OpenDocument(Page, PublicDocumentURLs[0]);
+                                }
                             }
 
 
@@ -234,7 +236,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, Page.Request.Url.OriginalString);
+                helper.LogError(Context, Request, exc, ListItemID, Page.Request.Url.OriginalString);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
@@ -291,7 +293,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
@@ -345,7 +347,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
@@ -379,7 +381,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
@@ -416,7 +418,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
@@ -467,7 +469,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
@@ -476,6 +478,8 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
+                string currentStatusBeforeWFRun = FormStatus;
+                string previousStatusBeforeWFRun = PreviousFormStatus;
                 const enumAction action = enumAction.Publish;
                 using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
@@ -502,21 +506,26 @@ namespace PIW_SPAppWeb.Pages
                     if (rpSupplementalMailingListDocumentList.Items.Count > 0)
                     {
                         RepeaterItem row = rpSupplementalMailingListDocumentList.Items[0];
-                        supplementalMailingListFileName = ((HyperLink)row.FindControl("hyperlinkFileURL")).Text;
+                        supplementalMailingListFileName = helper.getFileNameFromURL(((HyperLink)row.FindControl("hyperlinkFileURL")).NavigateUrl);
                     }
 
                     //publish
                     EPSPublicationHelper epsHelper = new EPSPublicationHelper();
                     epsHelper.Publish(clientContext, files, supplementalMailingListFileName, listItem);
 
-                    //TODO: Change document and list permission
+                    //Change document permission
+                    helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
 
                     //get current user
                     User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                     clientContext.Load(currentUser);
                     clientContext.ExecuteQuery();
 
-                    //TODO: send email
+                    //send email
+                    Email emailHelper = new Email();
+
+                    emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
+                        currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
 
                     //Create list history
                     helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item publication to eLibrary Data Entry initiated",
@@ -528,7 +537,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
@@ -565,7 +574,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
@@ -574,6 +583,8 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
+                string currentStatusBeforeWFRun = FormStatus;
+                string previousStatusBeforeWFRun = PreviousFormStatus;
                 const enumAction action = enumAction.ReOpen;
                 using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
@@ -583,14 +594,18 @@ namespace PIW_SPAppWeb.Pages
                         return;
                     }
 
-                    //TODO: Change document and list permission
+                    //Change document and list permission
+                    helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
 
                     //get current user
                     User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                     clientContext.Load(currentUser);
                     clientContext.ExecuteQuery();
 
-                    //TODO: send email
+                    Email emailHelper = new Email();
+
+                    emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
+                        currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
 
                     //Create list history
                     helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item Re-Opened", FormStatus,
@@ -602,7 +617,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
@@ -654,7 +669,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception ex)
             {
-                helper.LogError(Context, ex, ListItemID, string.Empty);
+                helper.LogError(Context, Request, ex, ListItemID, string.Empty);
                 lbUploadedDocumentError.Text = ex.Message;
                 lbUploadedDocumentError.Visible = true;
             }
@@ -688,7 +703,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception ex)
             {
-                helper.LogError(Context, ex, ListItemID, string.Empty);
+                helper.LogError(Context, Request, ex, ListItemID, string.Empty);
                 lbSupplementalMailingListUploadError.Text = ex.Message;
                 lbSupplementalMailingListUploadError.Visible = true;
             }
@@ -728,7 +743,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
@@ -761,7 +776,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -780,7 +795,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
@@ -862,7 +877,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
@@ -921,7 +936,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
             }
         }
@@ -959,6 +974,7 @@ namespace PIW_SPAppWeb.Pages
 
         private void UpdateFormDataToList(ClientContext clientContext, ListItem listItem, enumAction action)
         {
+            string errorMessage = "UpdateFormDataToList method: Unknown Status and Previous status combination. Status:{0}, Previous Status: {1}";
             switch (FormStatus)//this is the next status after action is performed
             {
                 case Constants.PIWList_FormStatus_Pending:
@@ -968,7 +984,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
                     break;
                 
@@ -983,7 +999,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_SecretaryReview:
@@ -1001,7 +1017,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
 
                     break;
@@ -1013,7 +1029,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_Deleted:
@@ -1033,7 +1049,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
 
                     break;
@@ -1044,7 +1060,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
@@ -1055,14 +1071,14 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
                     break;
                 case Constants.PIWList_FormStatus_ReOpen:
                     helper.SaveReOpenInfoAndStatus(clientContext,listItem,FormStatus,PreviousFormStatus);
                     break;
                 default:
-                    throw new Exception(string.Format("Unknown Status:{0}, Previous Status: {1}", FormStatus, PreviousFormStatus));
+                    throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
 
             }
         }
@@ -1270,6 +1286,9 @@ namespace PIW_SPAppWeb.Pages
             {
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_PriviledgedDocumentURLs]] = PriviledgedDocumentURLsFromViewState;
             }
+
+            //edit form url
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_EditFormURL]] = Request.Url.ToString();
 
             //execute query
             listItem.Update();
@@ -1771,7 +1790,7 @@ namespace PIW_SPAppWeb.Pages
                     EnableSecReviewControls(false);
                     break;
                 default:
-                    throw new Exception("Unknown Form Status: " + formStatus);
+                    throw new Exception("ControlVisibilityBasedOnFormStatus - Unknown Form Status: " + formStatus);
                     
             }
         }

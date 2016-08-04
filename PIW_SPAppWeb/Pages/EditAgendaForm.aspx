@@ -227,7 +227,7 @@
 
                     <asp:Label ID="lbFileName" runat="server" Text="File Name" AssociatedControlID="fileUpload" CssClass="col-md-2 control-label"></asp:Label>
 
-                    <div class="col-md-7">
+                    <div class="col-md-6">
                         <asp:FileUpload ID="fileUpload" runat="server" Width="100%" placeholder="Click here to browse the file" />
                     </div>
                     <div class="col-md-3">
@@ -470,7 +470,7 @@
                 <div class="form-group">
                     <asp:Label ID="lbSupplementalMailingListFileName" runat="server" Text="Supplemental Mailing List" AssociatedControlID="supplementalMailingListFileUpload" CssClass="col-md-2 control-label"></asp:Label>
 
-                    <div class="col-md-7">
+                    <div class="col-md-6">
                         <asp:FileUpload ID="supplementalMailingListFileUpload" runat="server" Width="100%" placeholder="Click here to browse the file" />
                     </div>
 

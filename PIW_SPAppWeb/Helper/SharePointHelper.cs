@@ -341,10 +341,13 @@ namespace PIW_SPAppWeb.Helper
             var internalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWDocuments_DocumentLibraryName);
             Folder folder = clientContext.Web.GetFolderByServerRelativeUrl(uploadSubFolderURL);
 
-            FileCollection files = folder.Files;
-            clientContext.Load(files);
-            clientContext.Load(files, includes => includes.Include(i => i.ListItemAllFields));
+            FileCollection fileCol = folder.Files;
+            clientContext.Load(fileCol);
+            clientContext.Load(fileCol, includes => includes.Include(i => i.ListItemAllFields));
             clientContext.ExecuteQuery();//file not found exception if the folder is not exist, let it crash because it is totally wrong somewhere
+
+            //Sort
+            var files = fileCol.OrderBy(f => f.TimeCreated);
 
             var issuanceFiles = new List<File>();
 
@@ -473,36 +476,6 @@ namespace PIW_SPAppWeb.Helper
         #endregion
 
         #region PIWListHistory
-        //public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus, string FormType, string currentUserLogInID)
-        //{
-        //    List piwlisthistory = clientContext.Web.Lists.GetByTitle(Constants.PIWListHistory_ListName);
-        //    var piwlistHistoryInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListHistory_ListName);
-
-        //    var currentUser = clientContext.Web.EnsureUser(currentUserLogInID);
-        //    clientContext.ExecuteQuery();
-
-        //    ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
-        //    ListItem newItem = piwlisthistory.AddItem(itemCreateInfo);
-
-        //    newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_User]] = currentUser;
-
-        //    newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_Action]] = action;
-        //    newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_FormStatus]] = FormStatus;
-        //    newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_FormType]] = FormType;
-
-        //    newItem.Update();
-        //    clientContext.ExecuteQuery();//we need to create item first before set lookup field.
-
-        //    if (!string.IsNullOrEmpty(listItemID))
-        //    {
-        //        //get piwListItem reference
-        //        FieldLookupValue lv = new FieldLookupValue { LookupId = int.Parse(listItemID) };
-        //        newItem[piwlistHistoryInternalNameList[Constants.PIWListHistory_colName_PIWList]] = lv;
-        //        newItem.Update();
-        //        clientContext.ExecuteQuery();
-        //    }
-
-        //}
 
         public void CreatePIWListHistory(ClientContext clientContext, string listItemID, string action, string FormStatus, string FormType, User currentUser)
         {
@@ -1082,7 +1055,7 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public void LogError(HttpContext httpContext, Exception exc, string listItemID, string pageName)
+        public void LogError(HttpContext httpContext, HttpRequest httpRequest,Exception exc, string listItemID, string pageName)
         {
             //This is expected exception after Page.Redirect --> ignore it??? TEst it
             if (exc is System.Threading.ThreadAbortException)
@@ -1091,7 +1064,7 @@ namespace PIW_SPAppWeb.Helper
             }
 
             //create new log error - this should have its own clientContext
-            using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(httpContext).CreateUserClientContextForSPHost())
+            using (var clientContext = getElevatedClientContext(httpContext, httpRequest))
             {
                 List errorLogList = clientContext.Web.Lists.GetByTitle(Constants.ErrorLogListName);
                 var errorLogInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.ErrorLogListName);
@@ -1218,7 +1191,7 @@ namespace PIW_SPAppWeb.Helper
                         documentCategoryNumber = 61;
                         break;
                     default:
-                        throw new Exception("Unknown document category: " + documentCategory);
+                        throw new Exception("getDocumentCategoryNumber - Unknown document category: " + documentCategory);
                 }
             }
 
@@ -1495,13 +1468,29 @@ namespace PIW_SPAppWeb.Helper
             return result.ToString();
         }
 
+        public void CreateLog(ClientContext clientContext, string Title, string Message)
+        {
+            List log = clientContext.Web.Lists.GetByTitle(Constants.LogListName);
+            var logInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.LogListName);
+
+            ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
+            ListItem newItem = log.AddItem(itemCreateInfo);
+
+            newItem[logInternalNameList[Constants.Log_colName_Title]] = Title;
+
+            newItem[logInternalNameList[Constants.Log_colName_Message]] = Message;
+
+            newItem.Update();
+            clientContext.ExecuteQuery();//we need to create item first before set lookup field.
+        }
+
         #endregion
 
         #region Permission for Document List Item
 
         public void UpdatePermissionBaseOnFormStatus(ClientContext clientContext, string listitemID, string formStatus, string formType)
         {
-            switch (formStatus)
+            switch (formStatus)//this is the nextformstatus after wf is executed
             {
                 case Constants.PIWList_FormStatus_Pending:
                 case Constants.PIWList_FormStatus_Recalled:
@@ -1558,7 +1547,7 @@ namespace PIW_SPAppWeb.Helper
                             Constants.Role_Read, Constants.Role_Read, Constants.Role_Read);
                     break;
                 default:
-                    throw new Exception("UnKnown Form Status: " + formStatus);
+                    throw new Exception("UpdatePermissionBasedOnFormStatus method - UnKnown Form Status: " + formStatus);
 
             }
         }

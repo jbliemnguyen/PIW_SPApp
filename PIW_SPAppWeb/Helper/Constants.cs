@@ -18,6 +18,7 @@ namespace PIW_SPAppWeb
 
         public const string PIWListName = "PIWList";
 
+
         public const string PIWList_colName_AccessionNumber = "Accession Number";
         public const string PIWList_colName_AlternateIdentifier = "Alternate Identifier";
         public const string PIWList_colName_WorkflowInitiator = "Workflow Initiator";
@@ -68,6 +69,9 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_NumberOfFOLAMailingListAddress = "Number Of FOLA Mailing List Address";
         public const string PIWList_colName_NumberOfSupplementalMailingListAddress = "Number Of Supplemental Mailing List Address";
         public const string PIWList_colName_NumberOfPublicPages = "Number Of Public Pages";
+        public const string PIWList_colName_EditFormURL = "Edit Form URL";
+
+
 
         public const string PIWList_colName_PrintReqDateRequested = "PrintReq Date Requested";
         public const string PIWList_colName_PrintReqDateRequired = "PrintReq Date Required";
@@ -149,7 +153,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_FormType_PrintReqForm = "PrintReq Form";
 
         //PIWDocument list
-        public const string PIWDocuments_DocumentLibraryName = "PIW Documents";
+        public const string PIWDocuments_DocumentLibraryName = "PIWDocuments";
         public const string PIWDocuments_colName_SecurityLevel = "Security Level";
         public const string PIWDocuments_colName_NumberOfPages = "Number Of Pages";
         public const string PIWDocuments_colName_DocType = "DocType";
@@ -178,6 +182,11 @@ namespace PIW_SPAppWeb
         public const string ErrorLog_colName_ErrorMessage = "ErrorMessage";
         public const string ErrorLog_colName_ErrorPageName = "ErrorPageName";
 
+        //Log list
+        public const string LogListName = "Log";
+        public const string Log_colName_Title = "Title";
+        public const string Log_colName_Message = "Message";
+
         //PIWListHistory list
         public const string PIWListHistory_ListName = "PIWListHistory";
         public const string PIWListHistory_colName_Title = "Title";
@@ -188,6 +197,8 @@ namespace PIW_SPAppWeb
         public const string PIWListHistory_colName_FormType = "Form Type";
         public const string PIWListHistory_colName_Created = "Created";
         public const string PIWListHistory_colName_CreatedBy = "Created By";
+
+
 
         public const string PIWListHistory_FormTypeOption_EditForm = "EditForm";
         public const string PIWListHistory_FormTypeOption_PrintReq = "PrintReq";

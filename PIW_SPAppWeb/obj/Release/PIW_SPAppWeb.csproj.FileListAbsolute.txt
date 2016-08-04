@@ -11,7 +11,6 @@ C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\FERC.FOL.ATMS.Structure.
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.SharePoint.Client.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.SharePoint.Client.Runtime.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.SharePoint.Client.UserProfiles.dll
-C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Email_Service_Entity.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\FERC.Common.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\FERC.eLibrary.Common.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\FERC.eLibrary.Eps.Common.dll

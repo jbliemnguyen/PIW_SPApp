@@ -107,7 +107,7 @@ namespace PIW_SPAppWeb.Pages
                 {
                     if (!string.IsNullOrEmpty(ListItemID))
                     {
-                        using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                        using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
                             string publicDocumentURLs;
                             string cEiiDocumentUrLs;
@@ -145,7 +145,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, Page.Request.Url.OriginalString);
+                helper.LogError(Context, Request,exc, ListItemID, Page.Request.Url.OriginalString);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
 
@@ -309,7 +309,7 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     ListItem listItem = null;
 
@@ -341,7 +341,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request,exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
@@ -435,7 +435,7 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                using (var clientContext = (SharePointContextProvider.Current.GetSharePointContext(Context)).CreateUserClientContextForSPHost())
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     ListItem listItem = null;
 
@@ -458,7 +458,7 @@ namespace PIW_SPAppWeb.Pages
             }
             catch (Exception exc)
             {
-                helper.LogError(Context, exc, ListItemID, string.Empty);
+                helper.LogError(Context, Request,exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
