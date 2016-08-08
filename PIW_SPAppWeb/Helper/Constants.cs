@@ -169,7 +169,7 @@ namespace PIW_SPAppWeb
 
         public const string ddlSecurityControl_Option_Public = "Public";
         public const string ddlSecurityControl_Option_CEII = "CEII";
-        public const string ddlSecurityControl_Option_Priviledged = "Priviledged";
+        public const string ddlSecurityControl_Option_Priviledged = "Privileged";
 
         public const string ddProgramOfficeWorkflowInitiator_Option_OSEC = "OSEC";
         public const string ddDocumentCategory_Option_Notice = "Notice";

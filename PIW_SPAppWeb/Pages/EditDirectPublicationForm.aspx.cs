@@ -990,6 +990,7 @@ namespace PIW_SPAppWeb.Pages
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]] != null)
                 {
                     tbDocketNumber.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
+                    lbheaderDocketNumber.Text = tbDocketNumber.Text;
                 }
 
                 //Is Non-Docketed

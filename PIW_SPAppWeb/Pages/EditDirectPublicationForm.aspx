@@ -74,66 +74,54 @@
             });
 
             //Confirm of deletion
-            $("#btnDelete").click(function (event) {
-                event.preventDefault();
-                $("#deleteDialogConfirmation").dialog({
-                    buttons: {
-                        "No": function (e) {
-                            $(this).dialog("close");
+            //$("#btnDelete").click(function (event) {
+            //    event.preventDefault();
+            //    $("#deleteDialogConfirmation").dialog({
+            //        buttons: {
+            //            "No": function (e) {
+            //                $(this).dialog("close");
 
-                        },
-                        "Yes": function (e) {
-                            $("#btnDeleteConfirm").click();
-                        }
-                    }
-                }, { width: 500 });
-            });
+            //            },
+            //            "Yes": function (e) {
+            //                $("#btnDeleteConfirm").click();
+            //            }
+            //        }
+            //    }, { width: 500 });
+            //});
 
-            //Confirm of Publish
-            $("#btnInitiatePublication").click(function (event) {
-                event.preventDefault();
-                //run validator
-                if ($("#mainForm").valid()) {
-                    var modalHeight = 100;
-                    //dialog
-                    $("#publishDialogConfirmation").dialog({
-                        buttons: {
-                            "No": function (e) {
-                                $(this).dialog("close");
+            ////Confirm of Publish
+            //$("#btnInitiatePublication").click(function (event) {
+            //    event.preventDefault();
+            //    //run validator
+            //    if ($("#mainForm").valid()) {
+            //        var modalHeight = 100;
+            //        //dialog
+            //        $("#publishDialogConfirmation").dialog({
+            //            buttons: {
+            //                "No": function (e) {
+            //                    $(this).dialog("close");
 
-                            },
-                            "Yes": function (e) {
-                                $("#btnPublishConfirm").click();
-                                $(this).dialog("close");
-                            }
-                        }
-                    }, { width: 600, height: modalHeight });
-                }
+            //                },
+            //                "Yes": function (e) {
+            //                    $("#btnPublishConfirm").click();
+            //                    $(this).dialog("close");
+            //                }
+            //            }
+            //        }, { width: 600, height: modalHeight });
+            //    }
                 
                 
-            });
+            //});
 
             //spinner
-            $("#btnPublishConfirm").click(function (event) {
-                var btnInitiatePublication = $("#btnInitiatePublication");
-                var opt = {
-                    img: '../Scripts/spinner/spinner-large.gif',
-                    position: 'center',
-                    height: 48,
-                    width: 48
-                };
+            //$("#btnPublishConfirm").click(function (event) {
+            //    var btnInitiatePublication = $("#btnInitiatePublication");
+            //    setSpinIcon(btnInitiatePublication, true);
+            //});
 
-                btnInitiatePublication.spinner(opt);
-                //disable Publish, Delete,Save, Supplemental Upload button - avoid use clicking when long-process printing
-                $("#btnInitiatePublication").attr("disabled", "disabled");
-                $("#btnDelete").attr("disabled", "disabled");
-                $("#btnSave").attr("disabled", "disabled");
-                $("#btnSupplementalMailingListUpload").attr("disabled", "disabled");
-            });
-
-            $(".historyhead").click(function () {
-                $(".historylist").slideToggle(100);
-            });
+            //$(".historyhead").click(function () {
+            //    $(".historylist").slideToggle(100);
+            //});
         }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
@@ -186,8 +174,7 @@
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
 
         <fieldset id="mainFieldSet">
-            <legend>Direct Publication Form</legend>
-
+            <legend><asp:Label ID="lbheaderDocketNumber" runat="server"></asp:Label> - Direct Publication Form</legend>
             <asp:Label ID="lbMainMessage" runat="server" CssClass="error" Visible="false"></asp:Label>
 
             <fieldset runat="server" id="fieldsetUpload">
@@ -210,7 +197,7 @@
                             <%--Note:Update the Constants.cs if change this value--%>
                             <asp:ListItem>CEII</asp:ListItem>
                             <%--Note:Update the Constants.cs if change this value--%>
-                            <asp:ListItem>Priviledged</asp:ListItem>
+                            <asp:ListItem>Privileged</asp:ListItem>
                             <%--Note:Update the Constants.cs if change this value--%>
                         </asp:DropDownList>
                     </div>

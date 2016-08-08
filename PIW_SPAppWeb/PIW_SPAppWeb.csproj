@@ -224,6 +224,7 @@
     <None Include="Scripts\_references.js" />
     <Content Include="Scripts\MicrosoftAjax.js" />
     <Content Include="Scripts\peoplepickercontrol.js" />
+    <Content Include="Scripts\spin.min.js" />
     <Content Include="Scripts\spinner\index.html" />
     <Content Include="Scripts\spinner\jquery.spinner.js" />
     <Content Include="Scripts\spinner\spinner-large.gif" />

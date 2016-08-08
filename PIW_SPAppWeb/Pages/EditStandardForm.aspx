@@ -85,74 +85,61 @@
             });
 
             //Confirm of deletion
-            $("#btnDelete").click(function (event) {
-                event.preventDefault();
-                $("#deleteDialogConfirmation").dialog({
-                    buttons: {
-                        "No": function (e) {
-                            $(this).dialog("close");
+            //$("#btnDelete").click(function (event) {
+            //    event.preventDefault();
+            //    $("#deleteDialogConfirmation").dialog({
+            //        buttons: {
+            //            "No": function (e) {
+            //                $(this).dialog("close");
 
-                        },
-                        "Yes": function (e) {
-                            $("#btnDeleteConfirm").click();
-                        }
-                    }
-                }, { width: 600 });
-            });
+            //            },
+            //            "Yes": function (e) {
+            //                $("#btnDeleteConfirm").click();
+            //            }
+            //        }
+            //    }, { width: 600 });
+            //});
 
             //Confirm of Publish
-            $("#btnInitiatePublication").click(function (event) {
-                event.preventDefault();
+            //$("#btnInitiatePublication").click(function (event) {
+            //    event.preventDefault();
 
-                //display warning if due date is future date
-                var modalHeight = 100;
-                var dueDate = new Date($("#tbDueDate").attr('value'));
-                var today = new Date();
-                if (dueDate > today) {
-                    modalHeight = 250;
-                    $("#publishDialogConfirmation").html("<span style='color:green'>Warning: Due Date is a future date</span>");
-                }
-                else {
-                    $("#publishDialogConfirmation").html("");
-                }
+            //    //display warning if due date is future date
+            //    var modalHeight = 100;
+            //    var dueDate = new Date($("#tbDueDate").attr('value'));
+            //    var today = new Date();
+            //    if (dueDate > today) {
+            //        modalHeight = 250;
+            //        $("#publishDialogConfirmation").html("<span style='color:green'>Warning: Due Date is a future date</span>");
+            //    }
+            //    else {
+            //        $("#publishDialogConfirmation").html("");
+            //    }
 
-                //dialog
-                $("#publishDialogConfirmation").dialog({
-                    buttons: {
-                        "No": function (e) {
-                            $(this).dialog("close");
+            //    //dialog
+            //    $("#publishDialogConfirmation").dialog({
+            //        buttons: {
+            //            "No": function (e) {
+            //                $(this).dialog("close");
 
-                        },
-                        "Yes": function (e) {
-                            $("#btnPublishConfirm").click();
-                            $(this).dialog("close");
-                        }
-                    }
-                }, { width: 600, height: modalHeight });
-            });
+            //            },
+            //            "Yes": function (e) {
+            //                $("#btnPublishConfirm").click();
+            //                $(this).dialog("close");
+            //            }
+            //        }
+            //    }, { width: 600, height: modalHeight });
+            //});
 
-            //spinner
-            $("#btnPublishConfirm").click(function (event) {
-                var btnInitiatePublication = $("#btnInitiatePublication");
-                var opt = {
-                    img: '../Scripts/spinner/spinner-large.gif',
-                    position: 'center',
-                    height: 48,
-                    width: 48
-                };
+            ////spinner
+            //$("#btnPublishConfirm").click(function (event) {
+            //    var btnInitiatePublication = $("#btnInitiatePublication");
+            //    setSpinIcon(btnInitiatePublication,true);
+            //});
 
-                btnInitiatePublication.spinner(opt);
-                //disable Publish and Edit button - avoid use clicking when long-process printing
-                $("#btnInitiatePublication").attr("disabled", "disabled");
-                $("#btnEdit").attr("disabled", "disabled");
-                $("#btnAcceptCitationNumber").attr("disabled", "disabled");
-                $("#btnRemoveCitationNumber").attr("disabled", "disabled");
-
-            });
-
-            $(".historyhead").click(function () {
-                $(".historylist").slideToggle(100);
-            });
+            //$(".historyhead").click(function () {
+            //    $(".historylist").slideToggle(100);
+            //});
         }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
@@ -200,14 +187,36 @@
                 $("#inputNotificationRecipient").parent().find("a").remove();
             }
         }
+
+        
+
     </script>
     <form id="mainForm" runat="server" class="form-horizontal">
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
 
         <fieldset id="mainFieldSet">
-            <legend>Standard Form</legend>
+            <legend>
+                <asp:Label ID="lbheaderDocketNumber" runat="server"></asp:Label>
+                - Standard Form</legend>
 
             <asp:Label ID="lbMainMessage" runat="server" CssClass="error" Visible="false"></asp:Label>
+            <div class="form-group">
+                <div class="col-md-2"></div>
+                <div class="col-md-6">
+                    <asp:Button ID="btnSave1" runat="server" Text="Save" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnSubmit1" runat="server" Text="Submit" CssClass="btn-sm btn-primary active" lientIDMode="Static" />
+                    <asp:Button ID="btnOSECTakeOwnership1" runat="server" Text="OSEC Take Ownership" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnRecall1" runat="server" Text="Recall" CssClass="btn-sm btn-primary" ClientIDMode="Static" />
+                    <asp:Button ID="btnEdit1" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnAccept1" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnReject1" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnInitiatePublication1" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnDelete1" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnReopen1" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnGenerateMailingList1" runat="server" Text="Generate Mailing List" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                </div>
+            </div>
+
 
             <fieldset runat="server" id="fieldsetUpload">
                 <div class="form-group">
@@ -229,7 +238,7 @@
                             <%--Note:Update the Constants.cs if change this value--%>
                             <asp:ListItem>CEII</asp:ListItem>
                             <%--Note:Update the Constants.cs if change this value--%>
-                            <asp:ListItem>Priviledged</asp:ListItem>
+                            <asp:ListItem>Privileged</asp:ListItem>
                             <%--Note:Update the Constants.cs if change this value--%>
                         </asp:DropDownList>
                     </div>
@@ -377,7 +386,7 @@
             <div class="form-group">
                 <asp:Label ID="lbProgramOfficeDocumentOwner" runat="server" Text="Program Office (Document Owner)" AssociatedControlID="ddProgramOfficeDocumentOwner" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
-                    <asp:DropDownList ID="ddProgramOfficeDocumentOwner" CssClass="form-control" runat="server"  ClientIDMode="Static">
+                    <asp:DropDownList ID="ddProgramOfficeDocumentOwner" CssClass="form-control" runat="server" ClientIDMode="Static">
                         <asp:ListItem Value="">Please Select</asp:ListItem>
                         <asp:ListItem>OAL</asp:ListItem>
                         <asp:ListItem>OALJ</asp:ListItem>
@@ -433,21 +442,7 @@
                     </div>
                 </div>
             </fieldset>
-            <%--<fieldset runat="server" id="fieldsetRecall" visible="true">
-                <div class="form-group">
-                    <asp:Label ID="lbRecallComment" runat="server" Text="Recall Comment" AssociatedControlID="tbRecallComment" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-6">
-                        <asp:TextBox ID="tbRecallComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
-                        <asp:Label ID="lbCommentValidation" runat="server" ForeColor="Red" Visible="false" Text="Recall Comment is required" ClientIDMode="Static"></asp:Label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-2"></div>
-                    <div class="col-md-2">
-                        <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" OnClick="btnRecall_Click" />
-                    </div>
-                </div>
-            </fieldset>--%>
+            
             <fieldset runat="server" id="fieldSetSupplementalMailingList">
                 <div class="form-group">
                     <asp:Label ID="lbSupplementalMailingListFileName" runat="server" Text="Supplemental Mailing List" AssociatedControlID="supplementalMailingListFileUpload" CssClass="col-md-2 control-label"></asp:Label>
@@ -498,25 +493,14 @@
                     <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
                     <asp:Label ID="lbCommentValidation" runat="server" ForeColor="Red" Visible="false" Text="Comment is required" ClientIDMode="Static"></asp:Label>
                 </div>
-                
+
             </div>
 
             <%--End of Main Panel--%>
-            
         </fieldset>
-
 
         <fieldset runat="server" id="fieldsetOSECVerification" visible="false">
             <legend>OSEC Verification</legend>
-            <%--<div class="form-group">
-                <div class="col-md-2"></div>                
-            </div>
-            <div class="form-group">
-                <asp:Label ID="lbOSECVerificationComment" runat="server" Text="Comment" AssociatedControlID="tbOSECVerificationComment" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-6">
-                    <asp:TextBox ID="tbOSECVerificationComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
-                </div>
-            </div>--%>
         </fieldset>
 
         <fieldset runat="server" id="fieldsetPrePublication" visible="false" clientidmode="Static">
@@ -526,7 +510,7 @@
                     <div class="form-group">
                         <div class="col-md-2"></div>
                         <div class="col-md-2">
-                            <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary active" OnClick="btnGenerateCitationNumber_Click" />
+                            <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary active"  ClientIDMode="Static" OnClick="btnGenerateCitationNumber_Click" />
                         </div>
 
                     </div>
@@ -556,19 +540,6 @@
                     <asp:AsyncPostBackTrigger ControlID="ddAvailableCitationNumbers" EventName="SelectedIndexChanged" />
                 </Triggers>
             </asp:UpdatePanel>
-
-            <%--<div class="form-group">
-                <div class="col-md-2"></div>
-                <div class="col-md-2">
-                    <asp:Label ID="lbPrePublicationReviewAction" runat="server" CssClass="control-label"></asp:Label>
-                </div>
-            </div>
-            <div class="form-group">
-                <asp:Label ID="lbPrePublicationComment" runat="server" Text="Comment" AssociatedControlID="tbPrePublicationComment" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-6">
-                    <asp:TextBox ID="tbPrePublicationComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
-                </div>
-            </div>--%>
         </fieldset>
 
         <fieldset runat="server" id="fieldsetMailedRoom" visible="false">
@@ -615,19 +586,19 @@
         <div class="form-group">
             <div class="col-md-2"></div>
             <div class="col-md-6">
-                <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary active" OnClick="btnSave_Click" ClientIDMode="Static"/>
-                <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary active" OnClick="btnSubmit_Click" ClientIDMode="Static"/>
-                <asp:Button ID="btnOSECTakeOwnership" runat="server" Text="OSEC Take Ownership" CssClass="btn-sm btn-primary active" OnClick="btnOSECTakeOwnership_Click" ClientIDMode="Static"/>
-                <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" OnClick="btnRecall_Click" ClientIDMode="Static"/>
+                <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary active" OnClick="btnSave_Click" ClientIDMode="Static" />
+                <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary active" OnClick="btnSubmit_Click" ClientIDMode="Static" />
+                <asp:Button ID="btnOSECTakeOwnership" runat="server" Text="OSEC Take Ownership" CssClass="btn-sm btn-primary active" OnClick="btnOSECTakeOwnership_Click" ClientIDMode="Static" />
+                <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" OnClick="btnRecall_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" OnClick="btnEdit_Click" ClientIDMode="Static" />
-                <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" OnClick="btnAccept_Click" ClientIDMode="Static"/>
+                <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" OnClick="btnAccept_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" OnClick="btnReject_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnInitiatePublication" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnPublishConfirm" runat="server" Text="Publish" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnInitiatePublication_Click" />
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
-                <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" OnClick="btnDeleteConfirm_Click" ClientIDMode="Static"/>
-                <asp:Button ID="btnReopen" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" OnClick="btnReopen_Click" ClientIDMode="Static"/>
-                <asp:Button ID="btnGenerateMailingList" runat="server" Text="Generate Mailing List" CssClass="btn-sm btn-primary active" OnClick="btnGenerateMailingList_Click" ClientIDMode="Static"/>
+                <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" OnClick="btnDeleteConfirm_Click" ClientIDMode="Static" />
+                <asp:Button ID="btnReopen" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" OnClick="btnReopen_Click" ClientIDMode="Static" />
+                <asp:Button ID="btnGenerateMailingList" runat="server" Text="Generate Mailing List" CssClass="btn-sm btn-primary active" OnClick="btnGenerateMailingList_Click" ClientIDMode="Static" />
             </div>
         </div>
         <div class="form-group">

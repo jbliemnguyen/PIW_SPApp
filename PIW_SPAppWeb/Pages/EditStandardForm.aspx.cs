@@ -1736,6 +1736,7 @@ namespace PIW_SPAppWeb.Pages
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]] != null)
                 {
                     tbDocketNumber.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
+                    lbheaderDocketNumber.Text = tbDocketNumber.Text;
                 }
 
                 //Is Non-Docketed
@@ -1916,7 +1917,20 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-
+        public void SetVisiblePropertyInTopButtons()
+        {
+            btnSave1.Visible = btnSave.Visible;
+            btnSubmit1.Visible = btnSubmit.Visible;
+            btnOSECTakeOwnership1.Visible = btnOSECTakeOwnership.Visible;
+            btnRecall1.Visible = btnRecall.Visible;
+            btnEdit1.Visible = btnEdit.Visible;
+            btnAccept1.Visible = btnAccept.Visible;
+            btnReject1.Visible = btnReject.Visible;
+            btnInitiatePublication1.Visible = btnInitiatePublication.Visible;
+            btnDelete1.Visible = btnDelete.Visible;
+            btnReopen1.Visible = btnReopen.Visible;
+            btnGenerateMailingList1.Visible = btnGenerateMailingList.Visible;
+        }
         #endregion
 
         #region Visibility
@@ -2341,6 +2355,9 @@ namespace PIW_SPAppWeb.Pages
                     throw new Exception("ControlsVisibilityBasedOnStatus method - UnKnown Form Status: " + formStatus);
 
             }
+
+            //set the top buttons
+            SetVisiblePropertyInTopButtons();
         }
 
         //private void EnablePrePublicationControls(bool enabled)
