@@ -77,51 +77,51 @@
                 }
             });
 
-            //Confirm of deletion
-            $("#btnDelete").click(function (event) {
-                event.preventDefault();
-                $("#deleteDialogConfirmation").dialog({
-                    buttons: {
-                        "No": function (e) {
-                            $(this).dialog("close");
+            ////Confirm of deletion
+            //$("#btnDelete").click(function (event) {
+            //    event.preventDefault();
+            //    $("#deleteDialogConfirmation").dialog({
+            //        buttons: {
+            //            "No": function (e) {
+            //                $(this).dialog("close");
 
-                        },
-                        "Yes": function (e) {
-                            $("#btnDeleteConfirm").click();
-                        }
-                    }
-                }, { width: 600 });
-            });
+            //            },
+            //            "Yes": function (e) {
+            //                $("#btnDeleteConfirm").click();
+            //            }
+            //        }
+            //    }, { width: 600 });
+            //});
 
-            //Confirm of publish
-            $("#btnInitiatePublication").click(function (event) {
-                event.preventDefault();
+            ////Confirm of publish
+            //$("#btnInitiatePublication").click(function (event) {
+            //    event.preventDefault();
 
-                //display warning if due date is future date
-                var modalHeight = 100;
-                var dueDate = new Date($("#tbDueDate").attr('value'));
-                var today = new Date();
-                if (dueDate > today) {
-                    modalHeight = 250;
-                    $("#publishDialogConfirmation").html("<span style='color:green'>Warning: Due Date is a future date</span>");
-                } else {
-                    $("#publishDialogConfirmation").html("");
-                }
+            //    //display warning if due date is future date
+            //    var modalHeight = 100;
+            //    var dueDate = new Date($("#tbDueDate").attr('value'));
+            //    var today = new Date();
+            //    if (dueDate > today) {
+            //        modalHeight = 250;
+            //        $("#publishDialogConfirmation").html("<span style='color:green'>Warning: Due Date is a future date</span>");
+            //    } else {
+            //        $("#publishDialogConfirmation").html("");
+            //    }
 
-                //dialog
-                $("#publishDialogConfirmation").dialog({
-                    buttons: {
-                        "No": function (e) {
-                            $(this).dialog("close");
+            //    //dialog
+            //    $("#publishDialogConfirmation").dialog({
+            //        buttons: {
+            //            "No": function (e) {
+            //                $(this).dialog("close");
 
-                        },
-                        "Yes": function (e) {
-                            $("#btnPublishConfirm").click();
-                            $(this).dialog("close");
-                        }
-                    }
-                }, { width: 600, height: modalHeight });
-            });
+            //            },
+            //            "Yes": function (e) {
+            //                $("#btnPublishConfirm").click();
+            //                $(this).dialog("close");
+            //            }
+            //        }
+            //    }, { width: 600, height: modalHeight });
+            //});
 
             //confirm Submit to Secretary Review
             $("#btnSubmitToSecReview").click(function (event) {
@@ -141,28 +141,15 @@
                 }
             });
 
-            //spinner
-            $("#btnPublishConfirm").click(function (event) {
-                var btnInitiatePublication = $("#btnInitiatePublication");
-                var opt = {
-                    img: '../Scripts/spinner/spinner-large.gif',
-                    position: 'center',
-                    height: 48,
-                    width: 48
-                };
+            ////spinner
+            //$("#btnPublishConfirm").click(function (event) {
+            //    var btnInitiatePublication = $("#btnInitiatePublication");
+            //    setSpinIcon(btnInitiatePublication, true);
+            //});
 
-                btnInitiatePublication.spinner(opt);
-                //disable Publish and Edit button - avoid use clicking when long-process printing
-                $("#btnInitiatePublication").attr("disabled", "disabled");
-                $("#btnEdit").attr("disabled", "disabled");
-                $("#btnAcceptCitationNumber").attr("disabled", "disabled");
-                $("#btnRemoveCitationNumber").attr("disabled", "disabled");
-
-            });
-
-            $(".historyhead").click(function () {
-                $(".historylist").slideToggle(100);
-            });
+            //$(".historyhead").click(function () {
+            //    $(".historylist").slideToggle(100);
+            //});
         }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
@@ -218,8 +205,7 @@
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
 
         <fieldset id="mainFieldSet">
-            <legend>Agenda Form</legend>
-
+            <legend><asp:Label ID="lbheaderDocketNumber" runat="server"></asp:Label> - Agenda Form</legend>
             <asp:Label ID="lbMainMessage" runat="server" CssClass="error" Visible="false"></asp:Label>
 
             <fieldset runat="server" id="fieldsetUpload">
@@ -240,7 +226,7 @@
                         <asp:DropDownList ID="ddlSecurityControl" CssClass="form-control" runat="server">
                             <asp:ListItem>Public</asp:ListItem>
                             <asp:ListItem>CEII</asp:ListItem>
-                            <asp:ListItem>Priviledged</asp:ListItem>
+                            <asp:ListItem>Privileged</asp:ListItem>
                         </asp:DropDownList>
                     </div>
                     <div class="col-md-2">

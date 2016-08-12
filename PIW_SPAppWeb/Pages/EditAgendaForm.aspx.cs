@@ -80,16 +80,16 @@ namespace PIW_SPAppWeb.Pages
         }
 
 
-        public string PriviledgedDocumentURLsFromViewState
+        public string PrivilegedDocumentURLsFromViewState
         {
             get
             {
-                return ViewState[Constants.PriviledgedDocumentURLsKey] != null ? ViewState[Constants.PriviledgedDocumentURLsKey].ToString() : string.Empty;
+                return ViewState[Constants.PrivilegedDocumentURLsKey] != null ? ViewState[Constants.PrivilegedDocumentURLsKey].ToString() : string.Empty;
 
             }
             set
             {
-                ViewState.Add(Constants.PriviledgedDocumentURLsKey, value);
+                ViewState.Add(Constants.PrivilegedDocumentURLsKey, value);
             }
         }
 
@@ -160,10 +160,10 @@ namespace PIW_SPAppWeb.Pages
                         {
                             string publicDocumentURLs;
                             string cEiiDocumentUrLs;
-                            string priviledgedDocumentURLs;
+                            string privilegedDocumentURLs;
                             helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
-                                out publicDocumentURLs,out cEiiDocumentUrLs,out priviledgedDocumentURLs);
-                            SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,priviledgedDocumentURLs);
+                                out publicDocumentURLs,out cEiiDocumentUrLs,out privilegedDocumentURLs);
+                            SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,privilegedDocumentURLs);
                             helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
 
                             var isCurrentUserAdmin = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
@@ -639,10 +639,10 @@ namespace PIW_SPAppWeb.Pages
                             {
                                 string publicDocumentURLs;
                                 string cEiiDocumentUrLs;
-                                string priviledgedDocumentURLs;
+                                string privilegedDocumentURLs;
                                 helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList, 
-                                    out publicDocumentURLs, out cEiiDocumentUrLs, out priviledgedDocumentURLs);
-                                SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,priviledgedDocumentURLs);
+                                    out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
+                                SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,privilegedDocumentURLs);
                                 //Extract docket numner
                                 if (rpDocumentList.Items.Count == 1)
                                     //only extract docket number if first document uploaded
@@ -723,10 +723,10 @@ namespace PIW_SPAppWeb.Pages
                             string removedFileName = helper.RemoveDocument(clientContext, ListItemID, Constants.PIWDocuments_DocumentLibraryName, e.CommandArgument.ToString());
                             string publicDocumentURLs;
                             string cEiiDocumentUrLs;
-                            string priviledgedDocumentURLs;
+                            string privilegedDocumentURLs;
                             helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
-                                out publicDocumentURLs,out cEiiDocumentUrLs,out priviledgedDocumentURLs );
-                            SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,priviledgedDocumentURLs);
+                                out publicDocumentURLs,out cEiiDocumentUrLs,out privilegedDocumentURLs );
+                            SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,privilegedDocumentURLs);
 
                             //get current user
                             User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
@@ -1281,10 +1281,10 @@ namespace PIW_SPAppWeb.Pages
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_CEIIDocumentURLs]] = CEIIDocumentURLsFromViewState;
             }
 
-            //Priviledged Document URLs
-            if (!string.IsNullOrEmpty(PriviledgedDocumentURLsFromViewState))
+            //Privileged Document URLs
+            if (!string.IsNullOrEmpty(PrivilegedDocumentURLsFromViewState))
             {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PriviledgedDocumentURLs]] = PriviledgedDocumentURLsFromViewState;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrivilegedDocumentURLs]] = PrivilegedDocumentURLsFromViewState;
             }
 
             //edit form url
@@ -1569,7 +1569,7 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        public void SaveDocumentURLsToPageProperty(string publicDocumentURLs, string cEIIDocumentURLs, string priviledgedDocumentURLs)
+        public void SaveDocumentURLsToPageProperty(string publicDocumentURLs, string cEIIDocumentURLs, string privilegedDocumentURLs)
         {
             if (!string.IsNullOrEmpty(publicDocumentURLs))
             {
@@ -1581,9 +1581,9 @@ namespace PIW_SPAppWeb.Pages
                 CEIIDocumentURLsFromViewState = cEIIDocumentURLs;
             }
 
-            if (!string.IsNullOrEmpty(priviledgedDocumentURLs))
+            if (!string.IsNullOrEmpty(privilegedDocumentURLs))
             {
-                PriviledgedDocumentURLsFromViewState = priviledgedDocumentURLs;
+                PrivilegedDocumentURLsFromViewState = privilegedDocumentURLs;
             }
         }
         #endregion

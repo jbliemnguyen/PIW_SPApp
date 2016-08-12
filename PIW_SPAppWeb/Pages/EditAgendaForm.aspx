@@ -273,7 +273,7 @@
             <div class="form-group">
                 <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
-                    <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server">
+                    <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server" ClientIDMode="Static">
                         <asp:ListItem Value="">Please Select</asp:ListItem>
                         <asp:ListItem>Notational Order</asp:ListItem>
                         <asp:ListItem>Notational Notice</asp:ListItem>
@@ -315,7 +315,7 @@
             <div class="form-group">
                 <asp:Label ID="lbDescription" runat="server" Text="Description<span class='accentText'> *</span>" AssociatedControlID="tbDescription" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-6">
-                    <asp:TextBox ID="tbDescription" runat="server" TextMode="MultiLine" Rows="4" CssClass="form-control"></asp:TextBox>
+                    <asp:TextBox ID="tbDescription" runat="server" TextMode="MultiLine" Rows="4" CssClass="form-control" ClientIDMode="Static"></asp:TextBox>
                 </div>
             </div>
             <asp:UpdatePanel runat="server">

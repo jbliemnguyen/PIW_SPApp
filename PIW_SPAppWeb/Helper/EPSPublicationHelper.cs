@@ -164,7 +164,7 @@ namespace PIW_SPAppWeb.Helper
                 case Constants.ddlSecurityControl_Option_CEII:
                     result = Constants.PIWDocuments_EPSSecurityLevel_Option_CEII;
                     break;
-                case Constants.ddlSecurityControl_Option_Priviledged:
+                case Constants.ddlSecurityControl_Option_Privileged:
                     result = Constants.PIWDocuments_EPSSecurityLevel_Option_NonPublic;
                     break;
                 default:

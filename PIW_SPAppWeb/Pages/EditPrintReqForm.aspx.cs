@@ -111,9 +111,9 @@ namespace PIW_SPAppWeb.Pages
                         {
                             string publicDocumentURLs;
                             string cEiiDocumentUrLs;
-                            string priviledgedDocumentURLs;
+                            string privilegedDocumentURLs;
                             helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
-                                out publicDocumentURLs,out cEiiDocumentUrLs,out priviledgedDocumentURLs);
+                                out publicDocumentURLs,out cEiiDocumentUrLs,out privilegedDocumentURLs);
 
                             PopulateFOLAAndSupplementalMailingListURL(clientContext);
 

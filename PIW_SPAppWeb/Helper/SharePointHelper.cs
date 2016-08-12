@@ -372,11 +372,11 @@ namespace PIW_SPAppWeb.Helper
         }
 
         public System.Data.DataTable getDocumentsTableByDocType(ClientContext clientContext, string subFoder, string libraryName,
-            out string PublicDocumentURLs, out string CEIIDocumentURLs, out string PriviledgedDocumentURLs, string docType)
+            out string PublicDocumentURLs, out string CEIIDocumentURLs, out string PrivilegedDocumentURLs, string docType)
         {
             PublicDocumentURLs = string.Empty;
             CEIIDocumentURLs = string.Empty;
-            PriviledgedDocumentURLs = string.Empty;
+            PrivilegedDocumentURLs = string.Empty;
 
             var result = new System.Data.DataTable();
             result.Columns.Add("ID");
@@ -433,15 +433,15 @@ namespace PIW_SPAppWeb.Helper
                         CEIIDocumentURLs = CEIIDocumentURLs + Constants.DocumentURLsSeparator + row["URL"];
                     }
                 }
-                else if (row["Security Level"].ToString().Equals(Constants.ddlSecurityControl_Option_Priviledged))
+                else if (row["Security Level"].ToString().Equals(Constants.ddlSecurityControl_Option_Privileged))
                 {
-                    if (string.IsNullOrEmpty(PriviledgedDocumentURLs))
+                    if (string.IsNullOrEmpty(PrivilegedDocumentURLs))
                     {
-                        PriviledgedDocumentURLs = row["URL"].ToString();
+                        PrivilegedDocumentURLs = row["URL"].ToString();
                     }
                     else
                     {
-                        PriviledgedDocumentURLs = PriviledgedDocumentURLs + Constants.DocumentURLsSeparator + row["URL"];
+                        PrivilegedDocumentURLs = PrivilegedDocumentURLs + Constants.DocumentURLsSeparator + row["URL"];
                     }
                 }
 
@@ -799,8 +799,8 @@ namespace PIW_SPAppWeb.Helper
                         uploadedFileURL = UploadDocumentContentStream(clientContext, fileStream, Constants.PIWDocuments_DocumentLibraryName,
                             listItemId, fileName, securityControlValue, docType, false);
 
-                        //set permission if CEII or Priviledged
-                        AssignPermissionForCEIIOrPriviledgedDocument(clientContext, listItemId, uploadedFileURL, securityControlValue);
+                        //set permission if CEII or Privileged
+                        AssignPermissionForCEIIOrPrivilegedDocument(clientContext, listItemId, uploadedFileURL, securityControlValue);
 
 
                         //clear validation error
@@ -873,10 +873,10 @@ namespace PIW_SPAppWeb.Helper
         }
 
         public void PopulateIssuanceDocumentList(ClientContext clientContext, string listItemId, Repeater rpDocumentList,
-            out string publicDocumentURLs, out string cEIIDocumentURLs, out string PriviledgeDocumentURLs)
+            out string publicDocumentURLs, out string cEIIDocumentURLs, out string PrivilegeDocumentURLs)
         {
             System.Data.DataTable table = getDocumentsTableByDocType(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName,
-                out publicDocumentURLs, out cEIIDocumentURLs, out PriviledgeDocumentURLs, Constants.PIWDocuments_DocTypeOption_Issuance);
+                out publicDocumentURLs, out cEIIDocumentURLs, out PrivilegeDocumentURLs, Constants.PIWDocuments_DocTypeOption_Issuance);
             rpDocumentList.DataSource = table;
             rpDocumentList.DataBind();
         }
@@ -884,9 +884,9 @@ namespace PIW_SPAppWeb.Helper
         {
             string publicDocumentUrLs;
             string CEIIDocumentURLs;
-            string PriviledgedDocumentURLs;
+            string PrivilegedDocumentURLs;
             System.Data.DataTable table = getDocumentsTableByDocType(clientContext, listItemId, Constants.PIWDocuments_DocumentLibraryName,
-                out publicDocumentUrLs, out CEIIDocumentURLs, out PriviledgedDocumentURLs, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList);
+                out publicDocumentUrLs, out CEIIDocumentURLs, out PrivilegedDocumentURLs, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList);
             rpDocumentList.DataSource = table;
             rpDocumentList.DataBind();
 
@@ -1398,10 +1398,10 @@ namespace PIW_SPAppWeb.Helper
         /// </summary>
         /// <param name="publicDocsURLs"></param>
         /// <param name="CEIIDocsURLs"></param>
-        /// <param name="PriviledgedDocsURLs"></param>
+        /// <param name="PrivilegedDocsURLs"></param>
         /// <param name="forEmail"></param>
         /// <returns></returns>
-        public string getDocumentURLsHTML(string publicDocsURLs, string CEIIDocsURLs, string PriviledgedDocsURLs, bool forEmail)
+        public string getDocumentURLsHTML(string publicDocsURLs, string CEIIDocsURLs, string PrivilegedDocsURLs, bool forEmail)
         {
             //build seperator array
             StringBuilder result = new StringBuilder();
@@ -1445,16 +1445,16 @@ namespace PIW_SPAppWeb.Helper
             }
 
             //Priviledge
-            urlArray = PriviledgedDocsURLs.Split(new string[] { Constants.DocumentURLsSeparator }, StringSplitOptions.RemoveEmptyEntries);
+            urlArray = PrivilegedDocsURLs.Split(new string[] { Constants.DocumentURLsSeparator }, StringSplitOptions.RemoveEmptyEntries);
             foreach (var url in urlArray)
             {
                 if (string.IsNullOrEmpty(result.ToString()))
                 {
-                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (Priviledged)"));
+                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (Privileged)"));
                 }
                 else
                 {
-                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (Priviledged)"));
+                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (Privileged)"));
                 }
 
             }
@@ -1479,6 +1479,22 @@ namespace PIW_SPAppWeb.Helper
             newItem[logInternalNameList[Constants.Log_colName_Title]] = Title;
 
             newItem[logInternalNameList[Constants.Log_colName_Message]] = Message;
+
+            newItem.Update();
+            clientContext.ExecuteQuery();//we need to create item first before set lookup field.
+        }
+
+
+        public void CreateEmailLog(ClientContext clientContext, string toAddress,string subject, string content)
+        {
+            List emailLog = clientContext.Web.Lists.GetByTitle(Constants.EmailLogListName);
+            var logInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.EmailLogListName);
+
+            ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
+            ListItem newItem = emailLog.AddItem(itemCreateInfo);
+            newItem[logInternalNameList[Constants.EmailLog_colName_To]] = toAddress;
+            newItem[logInternalNameList[Constants.EmailLog_colName_Title]] = subject;
+            newItem[logInternalNameList[Constants.EmailLog_colName_Content]] = content;
 
             newItem.Update();
             clientContext.ExecuteQuery();//we need to create item first before set lookup field.
@@ -1605,7 +1621,7 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public void AssignPermissionForCEIIOrPriviledgedDocument(ClientContext clientContext, string listItemID, string fileURL, string securityControl)
+        public void AssignPermissionForCEIIOrPrivilegedDocument(ClientContext clientContext, string listItemID, string fileURL, string securityControl)
         {
             Group group = null;
 
@@ -1613,7 +1629,7 @@ namespace PIW_SPAppWeb.Helper
             {
                 group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIW_FOL_Submission_CEII_ReadOnly);
             }
-            else if (securityControl.Equals(Constants.ddlSecurityControl_Option_Priviledged))
+            else if (securityControl.Equals(Constants.ddlSecurityControl_Option_Privileged))
             {
                 group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIW_FOL_Submission_Privileged_ReadOnly);
             }

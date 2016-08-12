@@ -23,6 +23,15 @@
             $("#tbDueDate").keydown(function (event) { event.preventDefault(); });
             $("#tbLegalResourcesReviewCompletionDate").datepicker();
 
+
+            //event for file upload
+            //$(document).on("change", ":file", function () {
+            //    var fileupload = $(this);
+            //    //var input = $(this).parent().parent().parent().find(":text")[0];
+            //    var input = fileupload.closest("input");
+            //    input.val(fileupload.val());
+            //});
+
             //disabled Docket Number textbox is IsNonDocket ischecked
             if ($("#cbIsNonDocket").is(':checked')) {
                 $("#tbDocketNumber").prop("readonly", "readonly");
@@ -84,62 +93,7 @@
                 }
             });
 
-            //Confirm of deletion
-            //$("#btnDelete").click(function (event) {
-            //    event.preventDefault();
-            //    $("#deleteDialogConfirmation").dialog({
-            //        buttons: {
-            //            "No": function (e) {
-            //                $(this).dialog("close");
-
-            //            },
-            //            "Yes": function (e) {
-            //                $("#btnDeleteConfirm").click();
-            //            }
-            //        }
-            //    }, { width: 600 });
-            //});
-
-            //Confirm of Publish
-            //$("#btnInitiatePublication").click(function (event) {
-            //    event.preventDefault();
-
-            //    //display warning if due date is future date
-            //    var modalHeight = 100;
-            //    var dueDate = new Date($("#tbDueDate").attr('value'));
-            //    var today = new Date();
-            //    if (dueDate > today) {
-            //        modalHeight = 250;
-            //        $("#publishDialogConfirmation").html("<span style='color:green'>Warning: Due Date is a future date</span>");
-            //    }
-            //    else {
-            //        $("#publishDialogConfirmation").html("");
-            //    }
-
-            //    //dialog
-            //    $("#publishDialogConfirmation").dialog({
-            //        buttons: {
-            //            "No": function (e) {
-            //                $(this).dialog("close");
-
-            //            },
-            //            "Yes": function (e) {
-            //                $("#btnPublishConfirm").click();
-            //                $(this).dialog("close");
-            //            }
-            //        }
-            //    }, { width: 600, height: modalHeight });
-            //});
-
-            ////spinner
-            //$("#btnPublishConfirm").click(function (event) {
-            //    var btnInitiatePublication = $("#btnInitiatePublication");
-            //    setSpinIcon(btnInitiatePublication,true);
-            //});
-
-            //$(".historyhead").click(function () {
-            //    $(".historylist").slideToggle(100);
-            //});
+            
         }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
@@ -188,7 +142,7 @@
             }
         }
 
-        
+
 
     </script>
     <form id="mainForm" runat="server" class="form-horizontal">
@@ -204,7 +158,7 @@
                 <div class="col-md-2"></div>
                 <div class="col-md-6">
                     <asp:Button ID="btnSave1" runat="server" Text="Save" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
-                    <asp:Button ID="btnSubmit1" runat="server" Text="Submit" CssClass="btn-sm btn-primary active" lientIDMode="Static" />
+                    <asp:Button ID="btnSubmit1" runat="server" Text="Submit" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                     <asp:Button ID="btnOSECTakeOwnership1" runat="server" Text="OSEC Take Ownership" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                     <asp:Button ID="btnRecall1" runat="server" Text="Recall" CssClass="btn-sm btn-primary" ClientIDMode="Static" />
                     <asp:Button ID="btnEdit1" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
@@ -225,6 +179,13 @@
 
                     <div class="col-md-6">
                         <asp:FileUpload ID="fileUpload" runat="server" Width="100%" placeholder="Click here to browse the file" />
+                        
+
+                        <%--<label class="input-group-btn">
+                            <span class="btn btn-primary">Browse&hellip;<asp:FileUpload ID="fileUpload" runat="server" Style="display: none;" />
+                            </span>
+                        </label>
+                        <input type="text" class="form-control" readonly="readonly"/>--%>
                     </div>
                     <div class="col-md-3">
                         <asp:Label ID="lbUploadedDocumentError" runat="server" ForeColor="Red" Visible="false"></asp:Label>
@@ -286,7 +247,7 @@
             <div class="form-group">
                 <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
-                    <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server">
+                    <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server" ClientIDMode="Static">
                         <asp:ListItem Value="">Please Select</asp:ListItem>
                         <asp:ListItem disabled="true">----------</asp:ListItem>
                         <asp:ListItem>Delegated Letter</asp:ListItem>
@@ -334,7 +295,7 @@
             <div class="form-group">
                 <asp:Label ID="lbDescription" runat="server" Text="Description<span class='accentText'> *</span>" AssociatedControlID="tbDescription" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-6">
-                    <asp:TextBox ID="tbDescription" runat="server" TextMode="MultiLine" Rows="4" CssClass="form-control"></asp:TextBox>
+                    <asp:TextBox ID="tbDescription" runat="server" TextMode="MultiLine" Rows="4" CssClass="form-control" ClientIDMode="Static"></asp:TextBox>
                 </div>
             </div>
 
@@ -442,7 +403,7 @@
                     </div>
                 </div>
             </fieldset>
-            
+
             <fieldset runat="server" id="fieldSetSupplementalMailingList">
                 <div class="form-group">
                     <asp:Label ID="lbSupplementalMailingListFileName" runat="server" Text="Supplemental Mailing List" AssociatedControlID="supplementalMailingListFileUpload" CssClass="col-md-2 control-label"></asp:Label>
@@ -510,7 +471,7 @@
                     <div class="form-group">
                         <div class="col-md-2"></div>
                         <div class="col-md-2">
-                            <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary active"  ClientIDMode="Static" OnClick="btnGenerateCitationNumber_Click" />
+                            <asp:Button ID="btnGenerateCitationNumber" runat="server" Text="Generate Citation Number" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnGenerateCitationNumber_Click" />
                         </div>
 
                     </div>
@@ -643,6 +604,10 @@
         </div>
         <div id="deleteDialogConfirmation" title="Are you sure you wish to delete this workflow item?"></div>
         <div id="publishDialogConfirmation" title="Are you sure you wish to publish this issuance?"></div>
+        <div id="skm_LockBackground" class="LockOff"></div>
+        <div id="skm_LockPane" class="LockOff">
+            <div id="skm_LockPaneText">&nbsp;</div>
+        </div>
 
     </form>
 </asp:Content>

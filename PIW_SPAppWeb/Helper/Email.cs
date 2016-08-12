@@ -307,6 +307,13 @@ namespace PIW_SPAppWeb.Helper
         public void SendEmail(ClientContext clientContext,string ToAddress, string subject, string htmlContent)
         {
             string mailrelay = ConfigurationManager.AppSettings["mailrelay"];
+            string env = ConfigurationManager.AppSettings["Env"];
+
+            if (!env.ToLower().Equals("prod"))//if not prod, concat the Env before the subject
+            {
+                subject = string.Format("!!! {0} !!! {1}", env, subject);
+            }
+
             MailMessage mailMessage = new MailMessage();
             mailMessage.From = new MailAddress("piw@ferc.gov");
             
@@ -318,11 +325,20 @@ namespace PIW_SPAppWeb.Helper
             mailMessage.ReplyToList.Add("sharepointteam@ferc.gov");
             mailMessage.IsBodyHtml = true;
 
-            SmtpClient smtpClient = new SmtpClient(mailrelay, 25);
-            smtpClient.Send(mailMessage);
+            try
+            {
+                SmtpClient smtpClient = new SmtpClient(mailrelay, 25);
+                smtpClient.Send(mailMessage);    
+            }
+            catch (Exception exc)
+            {
+                //TODO: Suppress exception for now
+                helper.CreateLog(clientContext,"Cannot send email",exc.InnerException.Message);
+            }
+            
 
-            //insert email into Log
-            helper.CreateLog(clientContext,"Email",string.Format("To:{0} - Subject: {1} - {2}",ToAddress,subject,htmlContent));
+            //insert email into email Log list // it can be resent by designer wf in case the mail relay fails to send 
+            helper.CreateEmailLog(clientContext,ToAddress,subject,htmlContent);
 
         }
 
@@ -349,11 +365,11 @@ namespace PIW_SPAppWeb.Helper
             var CEIIDocsURL = listItem[piwListInteralColumnNames[Constants.PIWList_colName_CEIIDocumentURLs]] != null
                 ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_CEIIDocumentURLs]].ToString() : string.Empty;
 
-            var PriviledgedDocsURL = listItem[piwListInteralColumnNames[Constants.PIWList_colName_PriviledgedDocumentURLs]] != null
-                ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_PriviledgedDocumentURLs]].ToString() : string.Empty;
+            var PrivilegedDocsURL = listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrivilegedDocumentURLs]] != null
+                ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrivilegedDocumentURLs]].ToString() : string.Empty;
 
             
-            string fileNameListHTML = helper.getDocumentURLsHTML(PublicDocsURL, CEIIDocsURL, PriviledgedDocsURL, true);
+            string fileNameListHTML = helper.getDocumentURLsHTML(PublicDocsURL, CEIIDocsURL, PrivilegedDocsURL, true);
 
             string[] args = new string[] { message, fileNameListHTML, description, initiatorOffice, documentCategory, createdDate };
             string htmlContent = string.Format(@" 

@@ -30,7 +30,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_DocketNumber = "Docket Number";
         public const string PIWList_colName_PublicDocumentURLs = "Public Document URLs";
         public const string PIWList_colName_CEIIDocumentURLs = "CEII Document URLs";
-        public const string PIWList_colName_PriviledgedDocumentURLs = "Previledged Document URLs";
+        public const string PIWList_colName_PrivilegedDocumentURLs = "Privileged Document URLs";
         public const string PIWList_colName_DocumentOwner = "Document Owner";
         public const string PIWList_colName_DueDate = "Due Date";
         public const string PIWList_colName_FederalRegister = "Federal Register";
@@ -169,7 +169,7 @@ namespace PIW_SPAppWeb
 
         public const string ddlSecurityControl_Option_Public = "Public";
         public const string ddlSecurityControl_Option_CEII = "CEII";
-        public const string ddlSecurityControl_Option_Priviledged = "Privileged";
+        public const string ddlSecurityControl_Option_Privileged = "Privileged";
 
         public const string ddProgramOfficeWorkflowInitiator_Option_OSEC = "OSEC";
         public const string ddDocumentCategory_Option_Notice = "Notice";
@@ -186,6 +186,12 @@ namespace PIW_SPAppWeb
         public const string LogListName = "Log";
         public const string Log_colName_Title = "Title";
         public const string Log_colName_Message = "Message";
+
+        //Email Log list
+        public const string EmailLogListName = "Email Log";
+        public const string EmailLog_colName_Title = "Title";
+        public const string EmailLog_colName_Content = "Content";
+        public const string EmailLog_colName_To = "To";
 
         //PIWListHistory list
         public const string PIWListHistory_ListName = "PIWListHistory";
@@ -257,7 +263,7 @@ namespace PIW_SPAppWeb
         //PublicDocumentURLsFromViewState key
         public const string PublicDocumentURLsKey = "PublicDocumentURLsKey";
         public const string CEIIDocumentURLsKey = "CEIIDocumentURLsKey";
-        public const string PriviledgedDocumentURLsKey = "PriviledgedDocumentURLsKey";
+        public const string PrivilegedDocumentURLsKey = "PrivilegedDocumentURLsKey";
 
         //FormTypeViewState key
         public const string FormTypeKey = "FormTypeKey";

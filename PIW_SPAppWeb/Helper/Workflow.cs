@@ -23,11 +23,16 @@ namespace PIW_SPAppWeb.Helper
                     if (action == enumAction.Submit)
                     {
                         //bypass OSEC Take OwnerShip
-                        if (initiatorOffice.Equals(Constants.ddProgramOfficeWorkflowInitiator_Option_OSEC) &&
-                            (documentCategory.Equals(Constants.ddDocumentCategory_Option_Notice) ||
-                             documentCategory.Equals(Constants.ddDocumentCategory_Option_NoticeErrata)))
+                        if (initiatorOffice.Equals(Constants.ddProgramOfficeWorkflowInitiator_Option_OSEC))
                         {
-                            nextStatus = Constants.PIWList_FormStatus_OSECVerification;
+                            if (isRequireOSECVerification)
+                            {
+                                nextStatus = Constants.PIWList_FormStatus_OSECVerification;
+                            }
+                            else
+                            {
+                                nextStatus = Constants.PIWList_FormStatus_PrePublication;
+                            }
                         }
                         else
                         {
