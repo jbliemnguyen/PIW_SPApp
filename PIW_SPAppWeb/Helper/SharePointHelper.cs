@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Remoting.Channels;
@@ -29,38 +30,53 @@ using Run = DocumentFormat.OpenXml.Wordprocessing.Run;
 using RunProperties = DocumentFormat.OpenXml.Wordprocessing.RunProperties;
 using Text = DocumentFormat.OpenXml.Wordprocessing.Text;
 
-//using FERC.FOL.ATMS.Structure;
+//using FERC.eLibrary.Dvvo.Facade;
+//using FERC.eLibrary.Dvvo.Common;
 
 namespace PIW_SPAppWeb.Helper
 {
     public class SharePointHelper
     {
+        //FERC.eLibrary.Dvvo.Common.IDvvoRemoteBusiness dvvoProxy = null;
 
         #region PIW List
         //when item first created, it should have IsActive set to false
         //this flag will turn to true after it is first Saved/Submitted
         //We have to create ListItem first to accommodate Upload multiple documents right away
-        public ListItem createNewPIWListItem(ClientContext elevatedClientContext, string formType, string currentUserLoginID)
+        public ListItem createNewPIWListItem(ClientContext clientContext, string formType, string currentUserLoginID)
         {
-            List piwList = elevatedClientContext.Web.Lists.GetByTitle(Constants.PIWListName);
-            var internalNameList = getInternalColumnNamesFromCache(elevatedClientContext, Constants.PIWListName);
+            List piwList = clientContext.Web.Lists.GetByTitle(Constants.PIWListName);
+            var internalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
             ListItem newItem = piwList.AddItem(itemCreateInfo);
 
 
-            User user = elevatedClientContext.Web.EnsureUser(currentUserLoginID);
-            elevatedClientContext.Load(user);
-            elevatedClientContext.ExecuteQuery();
+            User user = clientContext.Web.EnsureUser(currentUserLoginID);
+            clientContext.Load(user);
+
+            PeopleManager peopleManager = new PeopleManager(clientContext);
+            PersonProperties currentUserProperties = peopleManager.GetPropertiesFor(currentUserLoginID);
+            clientContext.Load(currentUserProperties, p => p.Title);
+
+            clientContext.ExecuteQuery();
 
             newItem[internalNameList[Constants.PIWList_colName_WorkflowInitiator]] = user;
             newItem[internalNameList[Constants.PIWList_colName_DocumentOwner]] = user;
+
+            //set the program office initiator to the value from user profile 
+            if (!string.IsNullOrEmpty(currentUserProperties.Title))
+            {
+                string department = currentUserProperties.Title;
+                newItem[internalNameList[Constants.PIWList_colName_ProgramOfficeWFInitator]] = department;
+                newItem[internalNameList[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] = newItem[internalNameList[Constants.PIWList_colName_ProgramOfficeWFInitator]];
+            }
 
             //set FormType
             newItem[internalNameList[Constants.PIWList_colName_FormType]] = formType;
 
             newItem.Update();
-            elevatedClientContext.ExecuteQuery();
+            clientContext.ExecuteQuery();
 
             return newItem;
         }
@@ -925,7 +941,7 @@ namespace PIW_SPAppWeb.Helper
         }
 
         /// <summary>
-        /// check if a docket is existing in P8 
+        /// check if a docket is existing in ATMS
         /// result is set back it its corresponding docket inside the dictionary parameter
         /// </summary>
         public void CheckDocketNumber(string strdocket, ref string errorMessage, bool isCNF, bool isByPass)
@@ -1011,6 +1027,19 @@ namespace PIW_SPAppWeb.Helper
             return m_RemoteObject;
         }
 
+        //public IDvvoRemoteBusiness DvvoProxy
+        //{
+        //    get
+        //    {
+        //        if (dvvoProxy == null)
+        //        {
+        //            dvvoProxy =
+        //                (IDvvoRemoteBusiness)Activator.GetObject(typeof(IDvvoRemoteBusiness),
+        //                ConfigurationManager.AppSettings["eLibRemoteServiceDvvoURI"].ToString());
+        //        }
+        //        return dvvoProxy;
+        //    }
+        //}
         public bool DocketExist(string docket, string subdocket, IWorkSetOps m_RemoteObject)
         {
             var atmsDocket = m_RemoteObject.GetWorkSetsByLabel(docket, subdocket, false, true);
@@ -1055,7 +1084,7 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public void LogError(HttpContext httpContext, HttpRequest httpRequest,Exception exc, string listItemID, string pageName)
+        public void LogError(HttpContext httpContext, HttpRequest httpRequest, Exception exc, string listItemID, string pageName)
         {
             //This is expected exception after Page.Redirect --> ignore it??? TEst it
             if (exc is System.Threading.ThreadAbortException)
@@ -1079,14 +1108,22 @@ namespace PIW_SPAppWeb.Helper
 
                 newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorPageName]] = pageName;
 
+                string message = string.Empty;
                 if (exc.InnerException != null)
                 {
-                    newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorMessage]] = exc.Message + " - Inner Exception: " + exc.InnerException.Message;
+                    message = exc.Message + " - Inner Exception: " + exc.InnerException.Message;
                 }
                 else
                 {
-                    newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorMessage]] = exc.Message;
+                    message = exc.Message;
                 }
+                
+                if (exc.StackTrace != null)
+                {
+                    message = message + "Stack Trace: " + exc.StackTrace;
+                }
+
+                newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorMessage]] = message;
 
                 newItem.Update();
                 clientContext.ExecuteQuery();//we need to create item first before set lookup field.
@@ -1485,7 +1522,7 @@ namespace PIW_SPAppWeb.Helper
         }
 
 
-        public void CreateEmailLog(ClientContext clientContext, string toAddress,string subject, string content)
+        public void CreateEmailLog(ClientContext clientContext, string toAddress, string subject, string content)
         {
             List emailLog = clientContext.Web.Lists.GetByTitle(Constants.EmailLogListName);
             var logInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.EmailLogListName);
@@ -1498,6 +1535,31 @@ namespace PIW_SPAppWeb.Helper
 
             newItem.Update();
             clientContext.ExecuteQuery();//we need to create item first before set lookup field.
+        }
+
+        public string RemoveDuplicateDocket(string docketInput)
+        {
+            string[] dockets = docketInput.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            string finalDocket = string.Empty;
+            foreach (string fullDocket in dockets)
+            {
+                string docketTrimmed = fullDocket.Trim();
+                if (string.IsNullOrEmpty(finalDocket))
+                {
+                    finalDocket = docketTrimmed;
+                }
+                else
+                {
+                    if (finalDocket.IndexOf(docketTrimmed,StringComparison.OrdinalIgnoreCase) < 0)//no duplicated
+                    {
+                        finalDocket = finalDocket + "," + docketTrimmed;
+                    }
+                }
+                
+
+            }
+            return finalDocket;
         }
 
         #endregion

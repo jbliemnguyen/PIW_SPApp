@@ -306,6 +306,13 @@ namespace PIW_SPAppWeb.Helper
 
         public void SendEmail(ClientContext clientContext,string ToAddress, string subject, string htmlContent)
         {
+            if (string.IsNullOrEmpty(ToAddress))
+            {
+                helper.CreateLog(clientContext, "Cannot send email", "Email Address is empty");
+                return;
+            }
+
+
             string mailrelay = ConfigurationManager.AppSettings["mailrelay"];
             string env = ConfigurationManager.AppSettings["Env"];
 

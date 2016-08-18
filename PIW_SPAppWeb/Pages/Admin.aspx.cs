@@ -11,12 +11,16 @@ using System.Web.UI;
 using DocumentFormat.OpenXml.Office.CustomUI;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using FERC.Common;
 using FERC.Common.Queues;
 using Microsoft.SharePoint.Client;
 using PIW_SPAppWeb.Helper;
 using File = Microsoft.SharePoint.Client.File;
 using List = Microsoft.SharePoint.Client.List;
 using ListItem = System.Web.UI.WebControls.ListItem;
+
+//using FERC.eLibrary.Dvvo.Facade;
+//using FERC.eLibrary.Dvvo.Common;
 
 
 
@@ -374,6 +378,12 @@ namespace PIW_SPAppWeb
             }
 
         }
+
+        //protected void btnTestDvvo_Click(object sender, EventArgs e)
+        //{
+        //    string filePath = @"E:\PIWDocuments\SharePoint2016Features.pdf";
+        //    FERC.Common.Result result = helper.DvvoProxy.ValidateFile(filePath);
+        //}
 
         //protected void Button2_Click(object sender, EventArgs e)
         //{

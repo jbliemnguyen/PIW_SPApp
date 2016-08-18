@@ -352,7 +352,7 @@ namespace PIW_SPAppWeb.Pages
 
             if (helper.CheckIfListItemChanged(clientContext, listItem, DateTime.Parse(ModifiedDateTime)))
             {
-                lbMainMessage.Text = "The form has been changed, please refresh the page";
+                lbMainMessage.Text = "Form has been modified by other User - Please Refresh by highlighting URL and hitting the ENTER key";
                 lbMainMessage.Visible = true;
                 return false;
             }

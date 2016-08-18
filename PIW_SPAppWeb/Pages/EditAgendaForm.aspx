@@ -123,23 +123,7 @@
             //    }, { width: 600, height: modalHeight });
             //});
 
-            //confirm Submit to Secretary Review
-            $("#btnSubmitToSecReview").click(function (event) {
-                event.preventDefault();
-                if ($("#mainForm").valid()) {
-                    $("#submitDialogConfirmation").dialog({
-                        buttons: {
-                            "No": function(e) {
-                                $(this).dialog("close");
-
-                            },
-                            "Yes": function(e) {
-                                $("#btnSubmitToSecReviewConfirm").click();
-                            }
-                        }
-                    }, { width: 750 });
-                }
-            });
+            
 
             ////spinner
             //$("#btnPublishConfirm").click(function (event) {
@@ -205,7 +189,7 @@
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
 
         <fieldset id="mainFieldSet">
-            <legend><asp:Label ID="lbheaderDocketNumber" runat="server"></asp:Label> - Agenda Form</legend>
+            <legend><asp:Label ID="lbheaderDocketNumber" runat="server"></asp:Label>Agenda Form</legend>
             <asp:Label ID="lbMainMessage" runat="server" CssClass="error" Visible="false"></asp:Label>
 
             <fieldset runat="server" id="fieldsetUpload">
@@ -221,17 +205,18 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <asp:Label ID="lbSecurityLevel" runat="server" Text="Security Level" AssociatedControlID="ddlSecurityControl" CssClass="col-md-2 control-label"></asp:Label>
+                    <asp:Label ID="lbSecurityLevel" runat="server" Text="Security Level<span class='accentText'> *</span>" AssociatedControlID="ddlSecurityControl" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-2">
-                        <asp:DropDownList ID="ddlSecurityControl" CssClass="form-control" runat="server">
+                        <asp:DropDownList ID="ddlSecurityControl" CssClass="form-control" runat="server" ClientIDMode="Static">
+                            <asp:ListItem Value="">Please Select</asp:ListItem>
                             <asp:ListItem>Public</asp:ListItem>
                             <asp:ListItem>CEII</asp:ListItem>
                             <asp:ListItem>Privileged</asp:ListItem>
                         </asp:DropDownList>
                     </div>
                     <div class="col-md-2">
-                        <asp:Button ID="btnUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary cancel" OnClick="btnUpload_Click" />
-                        <%--Note: "cancel" in CssClass is to bypass the jquery validation when user upload file--%>
+                        <asp:Button ID="btnUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary" OnClick="btnUpload_Click" ClientIDMode="Static" />
+                        <%--Note: "cancel" in CssClass is to bypass the jquery validation when user upload file--- not used any more --%>
                     </div>
                 </div>
             </fieldset>
@@ -247,13 +232,13 @@
                                 <asp:HyperLink ID="hyperlinkFileURL" runat="server" Text='<%#DataBinder.Eval(Container.DataItem,"Name")%>'
                                     NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"DownloadURL")%>'>
                                 </asp:HyperLink>
-                                &nbsp;&nbsp;|&nbsp;&nbsp;
-                            <asp:LinkButton ID="btnRemoveDocument" runat="server" Text="Remove" CommandName="RemoveDocument"
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <asp:Label runat="server" ID="lbSecurityLevel" Text='<%#DataBinder.Eval(Container.DataItem,"Security Level")%>'></asp:Label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <asp:LinkButton ID="btnRemoveDocument" runat="server" Text="Remove" CommandName="RemoveDocument"
                                 CommandArgument='<%#DataBinder.Eval(Container.DataItem,"ID")%>' />
-                                &nbsp;&nbsp;|&nbsp;&nbsp;
-                                        <asp:Label runat="server" ID="lbSecurityLevel" Text='<%#DataBinder.Eval(Container.DataItem,"Security Level")%>'></asp:Label>
-                                &nbsp;&nbsp;|&nbsp;&nbsp;
-                                <asp:HyperLink ID="hyperlink1" runat="server" Text="Edit"
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <asp:HyperLink ID="hplEdit" runat="server" Text="Edit"
                                     NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"URL")%>'>
                                 </asp:HyperLink>
                             </li>
@@ -308,7 +293,7 @@
             <div class="form-group">
                 <asp:Label ID="lbAlternateIdentifier" runat="server" Text="Alternate Identifier" AssociatedControlID="tbAlternateIdentifier" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-6">
-                    <asp:TextBox ID="tbAlternateIdentifier" runat="server" CssClass="form-control" MaxLength="255" TextMode="MultiLine" placeholder="Additional Information To Further Identify A Workflow Item"></asp:TextBox>
+                    <asp:TextBox ID="tbAlternateIdentifier" runat="server" CssClass="form-control" MaxLength="255" TextMode="MultiLine" placeholder="Additional Information To Further Identify A Workflow Item" ClientIDMode="Static"></asp:TextBox>
                 </div>
             </div>
 
@@ -354,7 +339,7 @@
                 </Triggers>
             </asp:UpdatePanel>
             <div class="form-group">
-                <asp:Label ID="lbInstructionForOSEC" runat="server" Text="Instructions for OSEC" AssociatedControlID="tbInstruction" CssClass="col-md-2 control-label"></asp:Label>
+                <asp:Label ID="lbInstructionForOSEC" runat="server" Text="Instructions for OSEC" AssociatedControlID="tbInstruction" CssClass="col-md-2 control-label" ClientIDMode="Static"></asp:Label>
                 <div class="col-md-6">
                     <asp:TextBox ID="tbInstruction" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" MaxLength="255"></asp:TextBox>
                 </div>
@@ -444,14 +429,14 @@
                     <asp:TextBox ID="tbDueDate" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
                 </div>
             </div>
-            <fieldset runat="server" id="fieldsetOSECRejectComment" visible="true">
+            <%--<fieldset runat="server" id="fieldsetOSECRejectComment" visible="true">
                 <div class="form-group">
                     <asp:Label ID="lbOSECRejectComment" runat="server" Text="OSEC Reject Comment" AssociatedControlID="lbOSECRejectCommentValue" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-6">
                         <asp:Label runat="server" ID="lbOSECRejectCommentValue"></asp:Label>
                     </div>
                 </div>
-            </fieldset>
+            </fieldset>--%>
             <fieldset runat="server" id="fieldSetSupplementalMailingList">
                 <div class="form-group">
                     <asp:Label ID="lbSupplementalMailingListFileName" runat="server" Text="Supplemental Mailing List" AssociatedControlID="supplementalMailingListFileUpload" CssClass="col-md-2 control-label"></asp:Label>
@@ -497,20 +482,17 @@
             </div>
             <div class="form-group">
                 <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
                 </div>
-                <div class="col-md-1"></div>
-                <div class="col-md-5">
-                    <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
-                </div>
+                
             </div>
 
             <%--End of Main Panel--%>
 
             <fieldset runat="server" id="fieldsetSecReview" visible="false">
                 <legend>Secretary Review</legend>
-                <div class="form-group">
+                <%--<div class="form-group">
                     <div class="col-md-2"></div>
                     <div class="col-md-2">
                         <asp:Label ID="lbSecReviewAction" runat="server"></asp:Label>
@@ -522,23 +504,29 @@
                         <asp:TextBox ID="tbSecReviewComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
                         <asp:Label runat="server" ID="lbSecReviewCommentError" Visible="false" ForeColor="Red"></asp:Label>
                     </div>
-                </div>
+                </div>--%>
             </fieldset>
 
             <fieldset runat="server" id="fieldsetMailedRoom" visible="false">
-                <legend>Mail Room</legend>
+                <legend>Print Requisition</legend>
                 <div class="form-group">
-                    <asp:Label ID="lbMailedDate" runat="server" Text="Mailed Date" AssociatedControlID="lbMailedDateValue" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-2">
-                        <asp:Label ID="lbMailedDateValue" runat="server"></asp:Label>
-                    </div>
+                <div class="col-md-2"></div>
+                <div class="col-md-2">
+                    <asp:HyperLink ID="hyperlinkPrintReq" runat="server" Text="Print Requisition Form" Target="_blank"></asp:HyperLink>
                 </div>
-                <div class="form-group">
-                    <asp:Label ID="lbMailedRoomNote" runat="server" Text="Note" AssociatedControlID="lbMailedRoomNoteValue" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-2">
-                        <asp:Label ID="lbMailedRoomNoteValue" runat="server"></asp:Label>
-                    </div>
+            </div>
+            <div class="form-group">
+                <asp:Label ID="lbPrintDate" runat="server" Text="Print Date" AssociatedControlID="tbPrintDate" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-2">
+                    <asp:TextBox runat="server" ID="tbPrintDate" Enabled="False" ClientIDMode="Static"></asp:TextBox>
                 </div>
+            </div>
+            <div class="form-group">
+                <asp:Label ID="lbMailedDate" runat="server" Text="Mail Date" AssociatedControlID="tbMailDate" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-2">
+                    <asp:TextBox runat="server" ID="tbMailDate" Enabled="False" ClientIDMode="Static"></asp:TextBox>
+                </div>
+            </div>
             </fieldset>
 
             <fieldset runat="server" id="fieldsetLegalResourcesReview" visible="false">
@@ -621,7 +609,10 @@
         </div>
         <div id="deleteDialogConfirmation" title="Are you sure you wish to delete this workflow item?"></div>
         <div id="publishDialogConfirmation" title="Are you sure you wish to publish this issuance?"></div>
-        <div id="submitDialogConfirmation" title="Are you sure you wish to submit this issuance for Secrectary Review?"></div>
+        <div id="skm_LockBackground" class="LockOff"></div>
+        <div id="skm_LockPane" class="LockOff">
+            <div id="skm_LockPaneText">&nbsp;</div>
+        </div>
     </form>
 
 

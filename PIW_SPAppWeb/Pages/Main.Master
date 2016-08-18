@@ -31,7 +31,7 @@
             <div id="navbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
                     <li><a href="EditStandardForm.aspx" id="EditStandardFormURL" style="color: white">New Standard Form</a></li>
-                    <li><a href="EditAgendaForm.aspxa" id="EditAgendaFormURL" style="color: white">New Agenda Form</a></li>
+                    <li><a href="EditAgendaForm.aspx" id="EditAgendaFormURL" style="color: white">New Agenda Form</a></li>
                     <li><a href="EditDirectPublicationForm.aspxa" id="EditDirectPublicationFormURL" style="color: white">New Direct Publication Form</a></li>
                 </ul>
                 <form class="navbar-form navbar-right">
@@ -130,7 +130,7 @@
             //Call to method in each page to do further client side programming
             //NOTE: each page must have this method in Main Content Place Holder
 
-            jQueryValidationMasterPage();
+            jQueryValidation();
 
 
             SharedEditPageClientCode();
@@ -188,7 +188,7 @@
             return newPicker;
         }
 
-        function jQueryValidationMasterPage() {
+        function jQueryValidation() {
             $.validator.addMethod("requiredWhenNonDocketed", function (value, element) {
                 if ($("#cbIsNonDocket").is(':checked') || $("#cbIsCNF").is(':checked')) {
                     if (!value) {
@@ -201,25 +201,26 @@
                 }
             }, 'This field is required in Non-Docketed or CNF');
 
-            $.validator.addMethod("TextBoxRequiredAfterTrim", function (value, element) {//a required textbox must have value other than only space
-                if (value.trim().length == 0) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }, 'This field is required');
+            //$.validator.addMethod("TextBoxRequiredAfterTrim", function (value, element) {//a required textbox must have value other than only space
+            //    if (value.trim().length == 0) {
+            //        return false;
+            //    } else {
+            //        return true;
+            //    }
+            //}, 'This field is required');
 
 
             $("#mainForm").validate({
                 rules: {
                     // no quoting necessary
-                    ctl00$MainContentPlaceHolder$tbDocketNumber: { TextBoxRequiredAfterTrim: true },
-                    ctl00$MainContentPlaceHolder$tbDescription: { TextBoxRequiredAfterTrim: true },
+                    ctl00$MainContentPlaceHolder$tbDocketNumber: "required",
+                    ctl00$MainContentPlaceHolder$tbDescription: "required",
                     ctl00$MainContentPlaceHolder$ddDocumentCategory: "required",
                     ctl00$MainContentPlaceHolder$ddFolaServiceRequired: "required",
                     ctl00$MainContentPlaceHolder$ddProgramOfficeWorkflowInitiator: "required",
-                    ctl00$MainContentPlaceHolder$tbDueDate: { TextBoxRequiredAfterTrim: true },
-                    ctl00$MainContentPlaceHolder$tbAlternateIdentifier: { requiredWhenNonDocketed: true },
+                    ctl00$MainContentPlaceHolder$tbDueDate: "required",
+                    ctl00$MainContentPlaceHolder$tbAlternateIdentifier: {requiredWhenNonDocketed: true, maxlength: 255 },
+                    ctl00$MainContentPlaceHolder$tbInstruction: {maxlength: 255},
 
                     //print req validation
                     ctl00$MainContentPlaceHolder$tbNumberofPages: {
@@ -240,8 +241,7 @@
             //ctl00$MainContentPlaceHolder$tbComment
             $("#btnReject,#btnRecall").on("click", function () {
                 $("#tbComment").rules("add", {
-                    //required: true,
-                    TextBoxRequiredAfterTrim: true,
+                    required: true,
                 });
                 $("#mainForm").valid();  // trigger the validation
             });
@@ -257,7 +257,18 @@
                 if (this.id == "btnDeleteConfirm") {
                     RemoveValidationRulesInForm();
                 }
+
+                //when upload, remove all validation rules, only SecurityControl is required 
+                if (this.id == "btnUpload") {
+                    RemoveValidationRulesInForm();
+                    $("#ddlSecurityControl").rules("add", {
+                        required: true,
+                    });
+                    $("#mainForm").valid();  // trigger the validation
+                }
             });
+
+            TrimValueBeforeValidatorApplied();
         }
 
         function SharedEditPageClientCode() {
@@ -270,6 +281,17 @@
 
             //top button event, call to appropriate buttons in the bottom.
             RegisterEventForButtons();
+
+
+            var prm = Sys.WebForms.PageRequestManager.getInstance();
+            prm.add_endRequest(function () {
+                RemoveLockScreenForAjaxUpdate();//ajax request completed, remove the lock screen
+            });
+
+            prm.add_beginRequest(function () {
+                LockScreenForAjaxUpdate();
+            });
+            
 
             $("#btnDelete").click(function (event) {
                 event.preventDefault();
@@ -426,13 +448,11 @@
             });
 
             //Note: accept ciation number and remove citation number can not used here 
-            //becuase they are part of AJAX Panel.
-
-            
-
+            //becuase they are part of AJAX Panel. we handle them in ajax event
 
         }
 
+        //used when delete button clicked or upload
         function RemoveValidationRulesInForm() {
             $("#tbDocketNumber").rules("remove");
             $("#tbDescription").rules("remove");
@@ -442,6 +462,7 @@
             $("#tbDueDate").rules("remove");
             $("#tbComment").rules("remove");
             $("#tbAlternateIdentifier").rules("remove");
+            $("#tbInstruction").rules("remove");
             $("#tbNumberofPages").rules("remove");
             $("#tbNumberofCopies").rules("remove");
         }
@@ -465,6 +486,60 @@
                 }
             }
             
+        }
+
+        function LockScreenForAjaxUpdate() {
+            if ($("#mainForm").valid()) {
+                var back = $("#skm_LockBackground");
+                var pane = $("#skm_LockPane");
+                var text = $("#skm_LockPaneText");
+
+                if (back) {
+                    back.addClass("LockBackground");
+                }
+                if (pane) {
+                    pane.addClass("LockPane");
+                }
+                if (text) {
+                    text.text("");
+                }
+            }
+
+        }
+
+        function RemoveLockScreenForAjaxUpdate() {
+            if ($("#mainForm").valid()) {
+                var back = $("#skm_LockBackground");
+                var pane = $("#skm_LockPane");
+                var text = $("#skm_LockPaneText");
+
+                if (back) {
+                    back.removeClass("LockBackground");
+                }
+                if (pane) {
+                    pane.removeClass("LockPane");
+                }
+                if (text) {
+                    text.text("");
+                }
+            }
+
+        }
+
+
+
+        function TrimValueBeforeValidatorApplied() {
+            $.each($.validator.methods, function (key, value) {
+                $.validator.methods[key] = function () {
+                    if (arguments.length > 0) {
+                        arguments[0] = $.trim(arguments[0]);
+                        //var el = $(arguments[1]); 
+                        //el.val($.trim(el.val‌​()));
+                    }
+
+                    return value.apply(this, arguments);
+                };
+            });
         }
 
         

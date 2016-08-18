@@ -128,7 +128,7 @@ namespace PIW_SPAppWeb.Pages
                 ViewState.Add(Constants.ListItemIDKey, value);
             }
         }
-        
+
 
         //fuction
         static SharePointHelper helper = null;
@@ -162,8 +162,8 @@ namespace PIW_SPAppWeb.Pages
                             string cEiiDocumentUrLs;
                             string privilegedDocumentURLs;
                             helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
-                                out publicDocumentURLs,out cEiiDocumentUrLs,out privilegedDocumentURLs);
-                            SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,privilegedDocumentURLs);
+                                out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
+                            SaveDocumentURLsToPageProperty(publicDocumentURLs, cEiiDocumentUrLs, privilegedDocumentURLs);
                             helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
 
                             var isCurrentUserAdmin = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
@@ -180,7 +180,7 @@ namespace PIW_SPAppWeb.Pages
                                 PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
                                 DisplayListItemInForm(clientContext, listItem);
                                 helper.PopulateHistoryList(clientContext, ListItemID, rpHistoryList, Constants.PIWListHistory_FormTypeOption_EditForm);
-                                
+
                                 //display form visiblility based on form status
                                 ControlsVisiblitilyBasedOnStatus(clientContext, PreviousFormStatus, FormStatus, listItem);
 
@@ -208,7 +208,7 @@ namespace PIW_SPAppWeb.Pages
 
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
-                            ListItem newItem = helper.createNewPIWListItem(clientContext, Constants.PIWList_FormType_AgendaForm,CurrentUserLogInID);
+                            ListItem newItem = helper.createNewPIWListItem(clientContext, Constants.PIWList_FormType_AgendaForm, CurrentUserLogInID);
                             ListItemID = newItem.Id.ToString();
 
                             //Create subfolder in piwdocuments and mailing list
@@ -229,15 +229,15 @@ namespace PIW_SPAppWeb.Pages
                         }
 
                         //forward to Edit
-                        Response.Redirect(Request.Url + "&ID=" + ListItemID,false);
-                        
+                        Response.Redirect(Request.Url + "&ID=" + ListItemID, false);
+
                     }
                 }
             }
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, Page.Request.Url.OriginalString);
-                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
@@ -268,12 +268,22 @@ namespace PIW_SPAppWeb.Pages
                         //Create list history
                         if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
-                            helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item created", FormStatus,
+                            string message = "Workflow Item created.";
+                            if (!string.IsNullOrEmpty(tbComment.Text))
+                            {
+                                message = message + "</br>Comment: " + tbComment.Text.Trim();
+                            }
+                            helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
                                 Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
                         else
                         {
-                            helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item saved", FormStatus,
+                            string message = "Workflow Item saved.";
+                            if (!string.IsNullOrEmpty(tbComment.Text))
+                            {
+                                message = message + "</br>Comment: " + tbComment.Text.Trim();
+                            }
+                            helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
                                 Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
 
@@ -294,7 +304,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
@@ -325,19 +335,34 @@ namespace PIW_SPAppWeb.Pages
                         //Create list history
                         if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
-                            helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item created", FormStatus,
+                            string message = "Workflow Item created.";
+                            if (!string.IsNullOrEmpty(tbComment.Text))
+                            {
+                                message = message + "</br>Comment: " + tbComment.Text.Trim();
+                            }
+                            helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
                                 Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
 
                         if ((FormStatus == Constants.PIWList_FormStatus_Rejected) || (FormStatus == Constants.PIWList_FormStatus_Recalled))
                         {
-                            helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item resubmitted for Secretary Review",
-                                FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+                            string message = "Workflow Item resubmitted for Secretary Review.";
+                            if (!string.IsNullOrEmpty(tbComment.Text))
+                            {
+                                message = message + "</br>Comment: " + tbComment.Text.Trim();
+                            }
+                            helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
+                                Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
                         else
                         {
-                            helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item submitted for Secretary Review",
-                                FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+                            string message = "Workflow Item submitted for Secretary Review.";
+                            if (!string.IsNullOrEmpty(tbComment.Text))
+                            {
+                                message = message + "</br>Comment: " + tbComment.Text.Trim();
+                            }
+                            helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
+                                Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
 
                         //Redirect
@@ -348,7 +373,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
@@ -372,9 +397,14 @@ namespace PIW_SPAppWeb.Pages
                     clientContext.ExecuteQuery();
 
                     //Create list history
-                    helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item edited", FormStatus,
+                    string message = "Workflow Item edited.";
+                    if (!string.IsNullOrEmpty(tbComment.Text))
+                    {
+                        message = message + "</br>Comment: " + tbComment.Text.Trim();
+                    }
+                    helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
                         Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
-
+                    
                     //Redirect or Refresh page
                     helper.RefreshPage(Page.Request, Page.Response);
                 }
@@ -382,7 +412,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
@@ -409,7 +439,12 @@ namespace PIW_SPAppWeb.Pages
                     //TODO: send email
 
                     //Create list history
-                    helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item accepted", FormStatus,
+                    string message = "Workflow Item accepted.";
+                    if (!string.IsNullOrEmpty(tbComment.Text))
+                    {
+                        message = message + "</br>Comment: " + tbComment.Text.Trim();
+                    }
+                    helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
                         Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
                     //Refresh the page
@@ -419,7 +454,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
@@ -427,50 +462,44 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                if (string.IsNullOrEmpty(tbSecReviewComment.Text))
+                const enumAction action = enumAction.Reject;
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
-                    lbSecReviewCommentError.Visible = true;
-                    lbSecReviewCommentError.Text = "Please provide comment";
-                    return;
-                }
-                else
-                {
-                    lbSecReviewCommentError.Visible = false;
-                    lbSecReviewCommentError.Text = string.Empty;
-
-                    const enumAction action = enumAction.Reject;
-                    using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
                     {
-                        ListItem listItem = null;
-                        if (!SaveData(clientContext, action, ref listItem))
-                        {
-                            return;
-                        }
-
-                        //TODO: Change document and list permission
-
-                        //get current user
-                        User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
-                        clientContext.Load(currentUser);
-                        clientContext.ExecuteQuery();
-
-                        //TODO: send email
-
-                        //Create list history
-                        helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item rejected", FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
-
-                        //Redirect
-                        helper.RedirectToSourcePage(Page.Request, Page.Response);
+                        return;
                     }
+
+                    //TODO: Change document and list permission
+
+                    //get current user
+                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
+
+                    //TODO: send email
+
+                    //Create list history
+                    string message = "Workflow Item rejected.";
+                    if (!string.IsNullOrEmpty(tbComment.Text))
+                    {
+                        message = message + "</br>Comment: " + tbComment.Text.Trim();
+                    }
+                    helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
+                        Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+                    
+                    //Redirect
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
                 }
 
-                
+
+
             }
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
@@ -490,14 +519,14 @@ namespace PIW_SPAppWeb.Pages
                     }
 
                     //issuance documents
-                    Dictionary<string, string> files = new Dictionary<string, string>();
+                    Dictionary<string, string> issuanceDocuments = new Dictionary<string, string>();
                     foreach (RepeaterItem row in rpDocumentList.Items)
                     {
                         var url = ((HyperLink)row.FindControl("hyperlinkFileURL")).NavigateUrl;
                         var securityLevel = ((Label)row.FindControl("lbSecurityLevel")).Text;
-                        if (!files.ContainsKey(url))
+                        if (!issuanceDocuments.ContainsKey(url))
                         {
-                            files.Add(url, securityLevel);
+                            issuanceDocuments.Add(url, securityLevel);
                         }
                     }
 
@@ -511,7 +540,7 @@ namespace PIW_SPAppWeb.Pages
 
                     //publish
                     EPSPublicationHelper epsHelper = new EPSPublicationHelper();
-                    epsHelper.Publish(clientContext, files, supplementalMailingListFileName, listItem);
+                    epsHelper.Publish(clientContext, issuanceDocuments, supplementalMailingListFileName, listItem);
 
                     //Change document permission
                     helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
@@ -523,13 +552,18 @@ namespace PIW_SPAppWeb.Pages
 
                     //send email
                     Email emailHelper = new Email();
-
                     emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
                         currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
 
                     //Create list history
-                    helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item publication to eLibrary Data Entry initiated",
-                        FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+                    string message = "Workflow Item publication to eLibrary Data Entry initiated.";
+                    if (!string.IsNullOrEmpty(tbComment.Text))
+                    {
+                        message = message + "</br>Comment: " + tbComment.Text.Trim();
+                    }
+
+                    helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
+                        Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
                     //Refresh
                     helper.RefreshPage(Page.Request, Page.Response);
@@ -538,7 +572,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
@@ -555,17 +589,21 @@ namespace PIW_SPAppWeb.Pages
                         return;
                     }
 
-                    //TODO: Change document and list permission
+                    //Change document and list permission
+                    helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
 
                     //get current user
                     User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                     clientContext.Load(currentUser);
                     clientContext.ExecuteQuery();
-
-                    //TODO: send email
-
+                    
                     //Create list history
-                    helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item deleted", FormStatus,
+                    string message = "Workflow Item deleted.";
+                    if (!string.IsNullOrEmpty(tbComment.Text))
+                    {
+                        message = message + "</br>Comment: " + tbComment.Text.Trim();
+                    }
+                    helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
                         Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
                     //Redirect
@@ -575,7 +613,104 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+            }
+        }
+
+        protected void btnRecall_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                const enumAction action = enumAction.Recall;
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    if (ValidFormData(action))
+                    {
+                        ListItem listItem = null;
+                        if (!SaveData(clientContext, action, ref listItem))
+                        {
+                            return;
+                        }
+
+
+                        //Change document and list permission
+                        helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
+
+                        //get current user
+                        User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                        clientContext.Load(currentUser);
+                        clientContext.ExecuteQuery();
+
+                        //TODO: send email
+
+                        //Create list history
+                        string message = "Workflow Item recalled.";
+                        if (!string.IsNullOrEmpty(tbComment.Text))
+                        {
+                            message = message + "</br>Comment: " + tbComment.Text.Trim();
+                        }
+                        helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
+                            Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+
+                        //Redirect
+                        helper.RedirectToSourcePage(Page.Request, Page.Response);
+
+
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+            }
+        }
+
+        protected void btnSecReviewerTakeOwnership_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                const enumAction action = enumAction.SecReviewTakeOwnerShip;
+                string currentStatusBeforeWFRun = FormStatus;
+                string previousStatusBeforeWFRun = PreviousFormStatus;
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
+
+                    //Change document and list permission
+                    helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
+
+                    //get current user
+                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
+
+                    Email emailHelper = new Email();
+
+                    emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
+                        currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
+
+                    //Create list history
+                    string message = "Secretary Reviewer took ownership of Workflow Item.";
+                    if (!string.IsNullOrEmpty(tbComment.Text))
+                    {
+                        message = message + "</br>Comment: " + tbComment.Text.Trim();
+                    }
+                    helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
+                        Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+
+                    //refresh
+                    helper.RefreshPage(Page.Request, Page.Response);
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
@@ -608,7 +743,12 @@ namespace PIW_SPAppWeb.Pages
                         currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
 
                     //Create list history
-                    helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item Re-Opened", FormStatus,
+                    string message = "Workflow Item Re-Opened.";
+                    if (!string.IsNullOrEmpty(tbComment.Text))
+                    {
+                        message = message + "</br>Comment: " + tbComment.Text.Trim();
+                    }
+                    helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
                         Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
                     //Refresh
@@ -618,7 +758,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
@@ -628,24 +768,24 @@ namespace PIW_SPAppWeb.Pages
             {
                 if (fileUpload.HasFiles)
                 {
-                    if (fileUpload.PostedFile.ContentLength < 52428800)
+                    if (fileUpload.PostedFile.ContentLength <= 52428800)
                     {
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
                             var uploadedFileURL = helper.UploadIssuanceDocument(clientContext, fileUpload, ListItemID, rpDocumentList,
                                 lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus,
-                                ddlSecurityControl.SelectedValue,Constants.PIWDocuments_DocTypeOption_Issuance,CurrentUserLogInID);
+                                ddlSecurityControl.SelectedValue, Constants.PIWDocuments_DocTypeOption_Issuance, CurrentUserLogInID);
                             if (!string.IsNullOrEmpty(uploadedFileURL)) //only save the document url if the upload is good
                             {
                                 string publicDocumentURLs;
                                 string cEiiDocumentUrLs;
                                 string privilegedDocumentURLs;
-                                helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList, 
+                                helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
                                     out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
-                                SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,privilegedDocumentURLs);
+                                SaveDocumentURLsToPageProperty(publicDocumentURLs, cEiiDocumentUrLs, privilegedDocumentURLs);
                                 //Extract docket numner
                                 if (rpDocumentList.Items.Count == 1)
-                                    //only extract docket number if first document uploaded
+                                //only extract docket number if first document uploaded
                                 {
                                     if (!cbIsNonDocket.Checked)
                                     {
@@ -653,17 +793,22 @@ namespace PIW_SPAppWeb.Pages
                                     }
 
                                 }
-
+                                
                                 //pop-up upload document 
-                                helper.OpenDocument(Page,uploadedFileURL);
+                                helper.OpenDocument(Page, uploadedFileURL);
+
+                                
                             }
                         }
                     }
                     else
                     {
-                        lbUploadedDocumentError.Text = "file cannot bigger than 52MB";
+                        lbUploadedDocumentError.Text = "file size limits to 50 MB";
                         lbUploadedDocumentError.Visible = true;
                     }
+
+                    //reset security level
+                    ddlSecurityControl.SelectedIndex = 0;
                 }
 
             }
@@ -681,12 +826,12 @@ namespace PIW_SPAppWeb.Pages
             {
                 if (supplementalMailingListFileUpload.HasFiles)
                 {
-                    if (supplementalMailingListFileUpload.PostedFile.ContentLength < 52428800)
+                    if (supplementalMailingListFileUpload.PostedFile.ContentLength <= 52428800)
                     {
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
                             var uploadResult = helper.UploadSupplementalMailingListDocument(clientContext, supplementalMailingListFileUpload, ListItemID, rpSupplementalMailingListDocumentList,
-                                lbSupplementalMailingListUploadError, FormStatus, Constants.ddlSecurityControl_Option_Public, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList,CurrentUserLogInID);
+                                lbSupplementalMailingListUploadError, FormStatus, Constants.ddlSecurityControl_Option_Public, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList, CurrentUserLogInID);
                             if (uploadResult) //only save the document url if the upload is good
                             {
                                 helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
@@ -695,7 +840,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        lbSupplementalMailingListUploadError.Text = "file cannot bigger than 52MB";
+                        lbSupplementalMailingListUploadError.Text = "file size limits to 50 MB";
                         lbSupplementalMailingListUploadError.Visible = true;
                     }
                 }
@@ -725,8 +870,8 @@ namespace PIW_SPAppWeb.Pages
                             string cEiiDocumentUrLs;
                             string privilegedDocumentURLs;
                             helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
-                                out publicDocumentURLs,out cEiiDocumentUrLs,out privilegedDocumentURLs );
-                            SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,privilegedDocumentURLs);
+                                out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
+                            SaveDocumentURLsToPageProperty(publicDocumentURLs, cEiiDocumentUrLs, privilegedDocumentURLs);
 
                             //get current user
                             User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
@@ -744,7 +889,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
@@ -789,14 +934,14 @@ namespace PIW_SPAppWeb.Pages
                 lbCitationNumberError.Visible = false;
                 using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
-                    helper.GenerateCitation(clientContext, ddDocumentCategory, tbCitationNumber, ddAvailableCitationNumbers,true);
+                    helper.GenerateCitation(clientContext, ddDocumentCategory, tbCitationNumber, ddAvailableCitationNumbers, true);
 
                 }
             }
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
@@ -842,19 +987,12 @@ namespace PIW_SPAppWeb.Pages
                                 //it will not able to finish all actions
                                 var documentURLs = PublicDocumentURLsFromViewState.Split(new string[] { Constants.DocumentURLsSeparator },
                                         StringSplitOptions.RemoveEmptyEntries);
-                                
+
                                 var documentURL = documentURLs[0];
                                 var fileName = helper.getFileNameFromURL(documentURL);
                                 helper.AddCitationNumberToDocument(clientContext, tbCitationNumber.Text.Trim(),
                                     ListItemID, fileName);
-
-                                //foreach (var documentURL in documentURLs)//add citation to first public document
-                                //{
-                                //    var fileName = helper.getFileNameFromURL(documentURL);
-                                //    helper.AddCitationNumberToDocument(clientContext, tbCitationNumber.Text.Trim(),
-                                //        ListItemID, fileName);
-
-                                //}
+                                
                             }
                             catch (Exception exc)
                             {
@@ -878,7 +1016,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
@@ -918,12 +1056,6 @@ namespace PIW_SPAppWeb.Pages
                         var documentURL = documentURLs[0];
                         var fileName = helper.getFileNameFromURL(documentURL);
                         helper.RemoveCitationNumberFromDocument(clientContext, citationNumber, ListItemID, fileName);
-                        //foreach (var documentURL in documentURLs)//add citation to all documents
-                        //{
-                        //    var fileName = helper.getFileNameFromURL(documentURL);
-                        //    helper.RemoveCitationNumberFromDocument(clientContext, citationNumber, ListItemID, fileName);
-
-                        //}
                     }
                     catch (Exception exc)
                     {
@@ -937,7 +1069,7 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request,Page.Response,"Error.aspx");
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
 
@@ -945,7 +1077,7 @@ namespace PIW_SPAppWeb.Pages
         {
             tbCitationNumber.Text = ddAvailableCitationNumbers.SelectedValue;
         }
-        
+
         #endregion
 
         #region Save Data
@@ -955,7 +1087,7 @@ namespace PIW_SPAppWeb.Pages
 
             if (helper.CheckIfListItemChanged(clientContext, listItem, DateTime.Parse(ModifiedDateTime)))
             {
-                lbMainMessage.Text = "The form has been changed, please refresh the page";
+                lbMainMessage.Text = "Form has been modified by other User - Please Refresh by highlighting URL and hitting the ENTER key";
                 lbMainMessage.Visible = true;
                 return false;
             }
@@ -987,7 +1119,7 @@ namespace PIW_SPAppWeb.Pages
                         throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
                     }
                     break;
-                
+
                 case Constants.PIWList_FormStatus_Rejected:
                     if (FormStatus == PreviousFormStatus)//save action
                     {
@@ -1004,7 +1136,8 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_SecretaryReview:
                     if ((PreviousFormStatus == Constants.PIWList_FormStatus_Pending) ||
-                        (PreviousFormStatus == Constants.PIWList_FormStatus_Edited) || (PreviousFormStatus == Constants.PIWList_FormStatus_ReOpen))
+                        (PreviousFormStatus == Constants.PIWList_FormStatus_Edited) ||
+                        (PreviousFormStatus == Constants.PIWList_FormStatus_ReOpen))
                     {
                         SaveMainPanelAndStatus(clientContext, listItem);
                     }
@@ -1022,7 +1155,7 @@ namespace PIW_SPAppWeb.Pages
 
                     break;
                 case Constants.PIWList_FormStatus_Edited:
-                    if ((PreviousFormStatus == Constants.PIWList_FormStatus_SecretaryReview) || 
+                    if ((PreviousFormStatus == Constants.PIWList_FormStatus_SecretaryReview) ||
                         (PreviousFormStatus == Constants.PIWList_FormStatus_ReadyForPublishing))
                     {
                         helper.SaveFormStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
@@ -1075,7 +1208,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     break;
                 case Constants.PIWList_FormStatus_ReOpen:
-                    helper.SaveReOpenInfoAndStatus(clientContext,listItem,FormStatus,PreviousFormStatus);
+                    helper.SaveReOpenInfoAndStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
                     break;
                 default:
                     throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
@@ -1091,16 +1224,6 @@ namespace PIW_SPAppWeb.Pages
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewAction]] = action.ToString();
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_RecallRejectComment]] = tbSecReviewComment.Text.Trim();
-
-            if (action == enumAction.Reject)
-            {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_RecallRejectComment]] = tbSecReviewComment.Text.Trim();
-            }
-            else//accept
-            {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewComment]] = tbSecReviewComment.Text.Trim();
-            }
 
             listItem.Update();
             clientContext.ExecuteQuery();
@@ -1169,8 +1292,8 @@ namespace PIW_SPAppWeb.Pages
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsActive]] = true;
 
             //Save Docket Number
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]] = tbDocketNumber.Text.Trim();
-            
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]] = helper.RemoveDuplicateDocket(tbDocketNumber.Text.Trim());
+
             //Non-Docketed
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsNonDocket]] = cbIsNonDocket.Checked;
 
@@ -1183,11 +1306,11 @@ namespace PIW_SPAppWeb.Pages
 
             //alternate identifier
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_AlternateIdentifier]] = tbAlternateIdentifier.Text.Trim();
-            
+
 
             //instruction for osec
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_InstructionForOSEC]] = tbInstruction.Text.Trim();
-            
+
             //Federal register
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_FederalRegister]] = cbFederalRegister.Checked;
 
@@ -1401,7 +1524,7 @@ namespace PIW_SPAppWeb.Pages
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]] != null)
                 {
                     tbDocketNumber.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
-                    lbheaderDocketNumber.Text = tbDocketNumber.Text;
+                    lbheaderDocketNumber.Text = tbDocketNumber.Text + " - ";
                 }
 
                 //Is Non-Docketed
@@ -1486,16 +1609,7 @@ namespace PIW_SPAppWeb.Pages
                     clientContext.ExecuteQuery();
                     PeoplePickerHelper.FillPeoplePickerValue(hdnWorkflowInitiator, initiator);
                 }
-                else
-                {
-                    //this is the new form, use current user value to set the people picker
-                    //we cannot set the default value, the ensure user fails when get people field from list
-                    User initiator = clientContext.Web.CurrentUser;
-                    clientContext.Load(initiator);
-                    clientContext.ExecuteQuery();
-                    PeoplePickerHelper.FillPeoplePickerValue(hdnWorkflowInitiator, initiator);
-                }
-
+                
                 //Program Office (Document Owner)
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] != null)
                 {
@@ -1533,28 +1647,28 @@ namespace PIW_SPAppWeb.Pages
                 }
 
                 //OSEC Reject Comment
-                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_RecallRejectComment]] != null)
-                {
-                    lbOSECRejectCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_RecallRejectComment]].ToString();
-                }
-                
-                //Sec review 
-                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_SecReviewAction]] != null)
-                {
-                    lbSecReviewAction.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_SecReviewAction]].ToString();
-                }
+                //if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_RecallRejectComment]] != null)
+                //{
+                //    lbOSECRejectCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_RecallRejectComment]].ToString();
+                //}
 
-                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_SecReviewComment]] != null)
-                {
-                    tbSecReviewComment.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_SecReviewComment]].ToString();
-                }
+                //Sec review 
+                //if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_SecReviewAction]] != null)
+                //{
+                //    lbSecReviewAction.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_SecReviewAction]].ToString();
+                //}
+
+                //if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_SecReviewComment]] != null)
+                //{
+                //    tbSecReviewComment.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_SecReviewComment]].ToString();
+                //}
 
                 //Citation Number
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_CitationNumber]] != null)
                 {
                     tbCitationNumber.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_CitationNumber]].ToString();
                 }
-                
+
                 //Legal resources and review
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]] != null)
                 {
@@ -1593,7 +1707,13 @@ namespace PIW_SPAppWeb.Pages
         {
             var piwlistInternalColumnName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
-            //SPUser checkoutUser = null;
+            bool isCurrentUserOSEC = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                            new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview });
+
+            bool isCurrentUserSecReviewer = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                            new string[] { Constants.Grp_SecReview });
+
+
             var currentUser = clientContext.Web.CurrentUser;
             clientContext.Load(currentUser);
 
@@ -1606,16 +1726,8 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_Rejected:
                 case Constants.PIWList_FormStatus_ReOpen:
                     //submit section    
-                    EnableMainPanel(true);
+                    EnableMainPanel(true,true);
                     lbMainMessage.Visible = false;
-                    if (formStatus.Equals(Constants.PIWList_FormStatus_Rejected))
-                    {
-                        fieldsetOSECRejectComment.Visible = true;
-                    }
-                    else//pending
-                    {
-                        fieldsetOSECRejectComment.Visible = false;
-                    }
 
                     InitiallyEnableCitationNumberControls(clientContext, listItem);
                     //OSEC section
@@ -1626,8 +1738,7 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetLegalResourcesReview.Visible = false;
 
                     //buttons
-                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                        new[] {Constants.Grp_OSEC, Constants.Grp_SecReview});
+                    btnSave.Visible = isCurrentUserOSEC;
 
                     btnSubmitToSecReview.Visible = btnSave.Visible;
 
@@ -1636,7 +1747,7 @@ namespace PIW_SPAppWeb.Pages
                     btnAccept.Visible = false;
 
                     btnReject.Visible = false;
-                    
+
 
                     btnInitiatePublication.Visible = false;
 
@@ -1648,9 +1759,8 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_SecretaryReview:
                     //submit section   
-                    EnableMainPanel(false);
+                    EnableMainPanel(false,isCurrentUserSecReviewer);
                     lbMainMessage.Visible = false;
-                    fieldsetOSECRejectComment.Visible = false;
 
                     InitiallyEnableCitationNumberControls(clientContext, listItem);
                     //OSEC section
@@ -1674,9 +1784,9 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Edited:
                     //submitter
-                    EnableMainPanel(true);
+                    EnableMainPanel(true,isCurrentUserSecReviewer);
                     lbMainMessage.Visible = false;
-                    fieldsetOSECRejectComment.Visible = false;
+                    
                     InitiallyEnableCitationNumberControls(clientContext, listItem);
 
                     //Sec review section
@@ -1684,7 +1794,6 @@ namespace PIW_SPAppWeb.Pages
                         previousFormStatus.Equals(Constants.PIWList_FormStatus_ReadyForPublishing))
                     {
                         fieldsetSecReview.Visible = true;
-                        EnableSecReviewControls(false);
                     }
 
                     //Mailed Room and Legal Resources and Review
@@ -1692,7 +1801,7 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetLegalResourcesReview.Visible = false;
 
                     //Button
-                    btnSave.Visible = true;
+                    btnSave.Visible = isCurrentUserSecReviewer;
                     btnSubmitToSecReview.Visible = false;
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
@@ -1705,14 +1814,14 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_ReadyForPublishing:
                     //submitter
-                    EnableMainPanel(false);
+                    EnableMainPanel(false,isCurrentUserSecReviewer);
                     lbMainMessage.Visible = false;
-                    fieldsetOSECRejectComment.Visible = false;
+                    
 
                     InitiallyEnableCitationNumberControls(clientContext, listItem);
                     //Secretary Review
                     fieldsetSecReview.Visible = true;
-                    EnableSecReviewControls(false);
+                    
 
                     //Mailed Room and Legal Resources and Review
                     fieldsetMailedRoom.Visible = false;
@@ -1732,15 +1841,15 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
                     //submitter
-                    EnableMainPanel(false);
+                    EnableMainPanel(false,false);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "Publication has been initiated for this issuance.";
-                    fieldsetOSECRejectComment.Visible = false;
+                    
                     EnableCitationNumberControls(false, false);
 
                     //Sec Review
                     fieldsetSecReview.Visible = true;
-                    EnableSecReviewControls(false);
+                    
 
                     //Mailed Room and Legal Resources and Review
                     fieldsetMailedRoom.Visible = false;
@@ -1758,15 +1867,15 @@ namespace PIW_SPAppWeb.Pages
                     btnReopen.Visible = true;
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    EnableMainPanel(false);
+                    EnableMainPanel(false,false);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "This issuance is available in eLibrary.";
-                    fieldsetOSECRejectComment.Visible = false;
+                    
                     EnableCitationNumberControls(false, false);
 
                     //Sec Review
                     fieldsetSecReview.Visible = true;
-                    EnableSecReviewControls(false);
+                    
 
                     //Mailed Room and Legal Resources and Review
                     fieldsetMailedRoom.Visible = true;
@@ -1784,26 +1893,21 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Deleted:
                     //this status is only viewable by admin
-                    EnableMainPanel(false);
+                    EnableMainPanel(false,false);
 
                     //PrePublication
                     fieldsetSecReview.Visible = true;
-                    EnableSecReviewControls(false);
+                    
                     break;
                 default:
                     throw new Exception("ControlVisibilityBasedOnFormStatus - Unknown Form Status: " + formStatus);
-                    
+
             }
         }
 
-        private void EnableSecReviewControls(bool enabled)
+        private void EnableMainPanel(bool enabled,bool canEditUploadedDocument)
         {
-            tbSecReviewComment.Enabled = enabled;
-        }
-
-        private void EnableMainPanel(bool enabled)
-        {
-            EnableFileUploadComponent(enabled);
+            EnableFileUploadComponent(enabled, canEditUploadedDocument);
             tbDocketNumber.Enabled = enabled;
             cbIsNonDocket.Enabled = enabled;
             tbAlternateIdentifier.Enabled = enabled;
@@ -1823,12 +1927,12 @@ namespace PIW_SPAppWeb.Pages
 
             //notification receiver
             inputNotificationRecipient.Enabled = enabled;
-            
+
             tbDueDate.Enabled = enabled;
-            tbComment.Enabled = enabled;
+            //tbComment.Enabled = enabled;
         }
 
-        private void EnableFileUploadComponent(bool enabled)
+        private void EnableFileUploadComponent(bool enabled, bool canEditUploadedDocument)
         {
             //disable/enable fileupload            
             fieldsetUpload.Visible = enabled;
@@ -1846,13 +1950,19 @@ namespace PIW_SPAppWeb.Pages
             foreach (RepeaterItem row in rpDocumentList.Items)
             {
                 var btnRemoveDocument = (LinkButton)row.FindControl("btnRemoveDocument");
-                btnRemoveDocument.Enabled = enabled;
+                if (btnRemoveDocument != null) btnRemoveDocument.Visible = enabled;
+
+                var hplEdit = (HyperLink)row.FindControl("hplEdit");
+                if (hplEdit != null) hplEdit.Visible = canEditUploadedDocument;
             }
 
             foreach (RepeaterItem row in rpSupplementalMailingListDocumentList.Items)
             {
                 var btnRemoveDocument = (LinkButton)row.FindControl("btnRemoveDocument");
-                btnRemoveDocument.Enabled = enabled;
+                if (btnRemoveDocument != null) btnRemoveDocument.Visible = enabled;
+
+                var hplEdit = (HyperLink)row.FindControl("hplEdit");
+                if (hplEdit != null) hplEdit.Visible = canEditUploadedDocument;
             }
         }
 

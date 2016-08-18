@@ -3,7 +3,6 @@ C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\PIW_SPAppWeb.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\PIW_SPAppWeb.pdb
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.IdentityModel.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.IdentityModel.Extensions.dll
-C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Release\PIW_SPAppWeb.csprojResolveAssemblyReference.cache
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Release\PIW_SPAppWeb.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Release\PIW_SPAppWeb.pdb
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\FERC.FOL.ATMS.Remote.Interfaces.dll
@@ -25,3 +24,4 @@ C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.Office.Interop
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\Microsoft.Vbe.Interop.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\DocumentFormat.OpenXml.dll
 C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\bin\DocumentFormat.OpenXml.xml
+C:\Users\lnguyen\Desktop\Lab\PIW_SPApp\PIW_SPAppWeb\obj\Release\PIW_SPAppWeb.csprojResolveAssemblyReference.cache

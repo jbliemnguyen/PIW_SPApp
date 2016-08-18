@@ -336,6 +336,7 @@ namespace PIW_SPAppWeb
         Accept,
         OSECTakeOwnerShip,
         SubmitToSecReview,
+        SecReviewTakeOwnerShip,
         Publish,
         Save,
         Edit,

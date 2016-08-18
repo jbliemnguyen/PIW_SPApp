@@ -488,7 +488,7 @@ namespace PIW_SPAppWeb.Pages
             {
                 if (fileUpload.HasFiles)
                 {
-                    if (fileUpload.PostedFile.ContentLength < 52428800)
+                    if (fileUpload.PostedFile.ContentLength <= 52428800)
                     {
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
@@ -513,7 +513,7 @@ namespace PIW_SPAppWeb.Pages
                                         tbDocketNumber.Text = helper.ExtractDocket(fileUpload.FileName);
                                     }
                                 }
-                                
+
                                 //pop-up upload document 
                                 helper.OpenDocument(Page, uploadedFileURL);
                             }
@@ -521,9 +521,12 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        lbUploadedDocumentError.Text = "file cannot bigger than 52MB";
+                        lbUploadedDocumentError.Text = "file size limits to 50 MB";
                         lbUploadedDocumentError.Visible = true;
                     }
+
+                    //reset security level
+                    ddlSecurityControl.SelectedIndex = 0;
                 }
 
             }
@@ -542,7 +545,7 @@ namespace PIW_SPAppWeb.Pages
             {
                 if (supplementalMailingListFileUpload.HasFiles)
                 {
-                    if (supplementalMailingListFileUpload.PostedFile.ContentLength < 52428800)
+                    if (supplementalMailingListFileUpload.PostedFile.ContentLength <= 52428800)
                     {
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
@@ -556,7 +559,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        lbSupplementalMailingListUploadError.Text = "file cannot bigger than 52MB";
+                        lbSupplementalMailingListUploadError.Text = "file size limits to 50 MB";
                         lbSupplementalMailingListUploadError.Visible = true;
                     }
                 }
@@ -622,7 +625,7 @@ namespace PIW_SPAppWeb.Pages
 
             if (helper.CheckIfListItemChanged(clientContext, listItem, DateTime.Parse(ModifiedDateTime)))
             {
-                lbMainMessage.Text = "The form has been changed, please refresh the page";
+                lbMainMessage.Text = "Form has been modified by other User - Please Refresh by highlighting URL and hitting the ENTER key";
                 lbMainMessage.Visible = true;
                 return false;
             }
@@ -763,7 +766,7 @@ namespace PIW_SPAppWeb.Pages
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsActive]] = true;
 
             //Save Docket Number
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]] = tbDocketNumber.Text.Trim();
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]] = helper.RemoveDuplicateDocket(tbDocketNumber.Text.Trim());
 
             //Non-Docketed
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsNonDocket]] = cbIsNonDocket.Checked;
@@ -990,7 +993,7 @@ namespace PIW_SPAppWeb.Pages
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]] != null)
                 {
                     tbDocketNumber.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
-                    lbheaderDocketNumber.Text = tbDocketNumber.Text;
+                    lbheaderDocketNumber.Text = tbDocketNumber.Text + " - ";
                 }
 
                 //Is Non-Docketed
@@ -1162,7 +1165,7 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_Pending:
                 case Constants.PIWList_FormStatus_ReOpen:
                     //submit section    
-                    EnableMainPanel(true, formStatus);
+                    EnableMainPanel(true, formStatus,true);
                     lbMainMessage.Visible = false;
 
                     //Mailed Room and Legal Resources and Review
@@ -1185,7 +1188,7 @@ namespace PIW_SPAppWeb.Pages
 
                 case Constants.PIWList_FormStatus_PublishInitiated:
                     //submitter
-                    EnableMainPanel(false, formStatus);
+                    EnableMainPanel(false, formStatus,false);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "Publication has been initiated for this issuance.";
 
@@ -1201,7 +1204,7 @@ namespace PIW_SPAppWeb.Pages
                     btnReopen.Visible = true;
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    EnableMainPanel(false, formStatus);
+                    EnableMainPanel(false, formStatus,false);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "This issuance is available in eLibrary.";
 
@@ -1218,7 +1221,7 @@ namespace PIW_SPAppWeb.Pages
 
                 case Constants.PIWList_FormStatus_Deleted:
                     //this status is only viewable by admin
-                    EnableMainPanel(false, formStatus);
+                    EnableMainPanel(false, formStatus,false);
                     break;
                 default:
                     throw new Exception("UnRecognized Form Status: " + formStatus);
@@ -1227,9 +1230,9 @@ namespace PIW_SPAppWeb.Pages
         }
 
 
-        private void EnableMainPanel(bool enabled, string FormStatus)
+        private void EnableMainPanel(bool enabled, string FormStatus, bool canEditUploadedDocument)
         {
-            EnableFileUploadComponent(enabled);
+            EnableFileUploadComponent(enabled, canEditUploadedDocument);
             tbDocketNumber.Enabled = enabled;
             cbIsNonDocket.Enabled = enabled;
             tbAlternateIdentifier.Enabled = enabled;
@@ -1261,7 +1264,7 @@ namespace PIW_SPAppWeb.Pages
             ddFolaServiceRequired.Enabled = enabled;
         }
 
-        private void EnableFileUploadComponent(bool enabled)
+        private void EnableFileUploadComponent(bool enabled, bool canEditUploadedDocument)
         {
             //disable/enable fileupload            
             fieldsetUpload.Visible = enabled;
@@ -1279,13 +1282,19 @@ namespace PIW_SPAppWeb.Pages
             foreach (RepeaterItem row in rpDocumentList.Items)
             {
                 var btnRemoveDocument = (LinkButton)row.FindControl("btnRemoveDocument");
-                btnRemoveDocument.Enabled = enabled;
+                if (btnRemoveDocument != null) btnRemoveDocument.Visible = enabled;
+
+                var hplEdit = (HyperLink)row.FindControl("hplEdit");
+                if (hplEdit != null) hplEdit.Visible = canEditUploadedDocument;
             }
 
             foreach (RepeaterItem row in rpSupplementalMailingListDocumentList.Items)
             {
                 var btnRemoveDocument = (LinkButton)row.FindControl("btnRemoveDocument");
-                btnRemoveDocument.Enabled = enabled;
+                if (btnRemoveDocument != null) btnRemoveDocument.Visible = enabled;
+
+                var hplEdit = (HyperLink)row.FindControl("hplEdit");
+                if (hplEdit != null) hplEdit.Visible = canEditUploadedDocument;
             }
         }
 

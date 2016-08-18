@@ -150,8 +150,7 @@
 
         <fieldset id="mainFieldSet">
             <legend>
-                <asp:Label ID="lbheaderDocketNumber" runat="server"></asp:Label>
-                - Standard Form</legend>
+                <asp:Label ID="lbheaderDocketNumber" runat="server"></asp:Label>Standard Form</legend>
 
             <asp:Label ID="lbMainMessage" runat="server" CssClass="error" Visible="false"></asp:Label>
             <div class="form-group">
@@ -192,9 +191,10 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <asp:Label ID="lbSecurityLevel" runat="server" Text="Security Level" AssociatedControlID="ddlSecurityControl" CssClass="col-md-2 control-label"></asp:Label>
+                    <asp:Label ID="lbSecurityLevel" runat="server" Text="Security Level<span class='accentText'> *</span>" AssociatedControlID="ddlSecurityControl" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-2">
-                        <asp:DropDownList ID="ddlSecurityControl" CssClass="form-control" runat="server">
+                        <asp:DropDownList ID="ddlSecurityControl" CssClass="form-control" runat="server" ClientIDMode="Static">
+                            <asp:ListItem Value="">Please Select</asp:ListItem>
                             <asp:ListItem>Public</asp:ListItem>
                             <%--Note:Update the Constants.cs if change this value--%>
                             <asp:ListItem>CEII</asp:ListItem>
@@ -204,8 +204,8 @@
                         </asp:DropDownList>
                     </div>
                     <div class="col-md-2">
-                        <asp:Button ID="btnUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary cancel" OnClick="btnUpload_Click" />
-                        <%--Note: "cancel" in CssClass is to bypass the jquery validation when user upload file--%>
+                        <asp:Button ID="btnUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary" OnClick="btnUpload_Click" ClientIDMode="Static"/>
+                        <%--Note: "cancel" in CssClass is to bypass the jquery validation when user upload file- not used any more--%>
                     </div>
                 </div>
             </fieldset>
@@ -221,13 +221,13 @@
                                 <asp:HyperLink ID="hyperlinkFileURL" runat="server" Text='<%#DataBinder.Eval(Container.DataItem,"Name")%>'
                                     NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"DownloadURL")%>'>
                                 </asp:HyperLink>
-                                &nbsp;&nbsp;|&nbsp;&nbsp;
-                            <asp:LinkButton ID="btnRemoveDocument" runat="server" Text="Remove" CommandName="RemoveDocument"
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <asp:Label runat="server" ID="lbSecurityLevel" Text='<%#DataBinder.Eval(Container.DataItem,"Security Level")%>'></asp:Label>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <asp:LinkButton ID="btnRemoveDocument" runat="server" Text="Remove" CommandName="RemoveDocument"
                                 CommandArgument='<%#DataBinder.Eval(Container.DataItem,"ID")%>' />
-                                &nbsp;&nbsp;|&nbsp;&nbsp;
-                                        <asp:Label runat="server" ID="lbSecurityLevel" Text='<%#DataBinder.Eval(Container.DataItem,"Security Level")%>'></asp:Label>
-                                &nbsp;&nbsp;|&nbsp;&nbsp;
-                                <asp:HyperLink ID="hyperlink1" runat="server" Text="Edit"
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <asp:HyperLink ID="hplEdit" runat="server" Text="Edit"
                                     NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"URL")%>'>
                                 </asp:HyperLink>
                             </li>
@@ -288,7 +288,7 @@
             <div class="form-group">
                 <asp:Label ID="lbAlternateIdentifier" runat="server" Text="Alternate Identifier" AssociatedControlID="tbAlternateIdentifier" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-6">
-                    <asp:TextBox ID="tbAlternateIdentifier" runat="server" CssClass="form-control" MaxLength="255" TextMode="MultiLine" placeholder="Additional Information To Further Identify A Workflow Item"></asp:TextBox>
+                    <asp:TextBox ID="tbAlternateIdentifier" runat="server" CssClass="form-control" MaxLength="255" TextMode="MultiLine" placeholder="Additional Information To Further Identify A Workflow Item" ClientIDMode="Static"></asp:TextBox>
                 </div>
             </div>
 
@@ -300,7 +300,7 @@
             </div>
 
             <div class="form-group">
-                <asp:Label ID="lbInstructionForOSEC" runat="server" Text="Instructions for OSEC" AssociatedControlID="tbInstruction" CssClass="col-md-2 control-label"></asp:Label>
+                <asp:Label ID="lbInstructionForOSEC" runat="server" Text="Instructions for OSEC" AssociatedControlID="tbInstruction" CssClass="col-md-2 control-label" ClientIDMode="Static"></asp:Label>
                 <div class="col-md-6">
                     <asp:TextBox ID="tbInstruction" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" MaxLength="255"></asp:TextBox>
                 </div>

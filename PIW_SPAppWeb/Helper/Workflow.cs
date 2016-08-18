@@ -205,7 +205,7 @@ namespace PIW_SPAppWeb.Helper
                 case Constants.PIWList_FormStatus_ReOpen:
                 case Constants.PIWList_FormStatus_Rejected:
                     //in Pending, Recall, Reject
-                    //user can dubmit, save and delete
+                    //user can submit, save and delete
                     if (action == enumAction.SubmitToSecReview)
                     {
                         nextStatus = Constants.PIWList_FormStatus_SecretaryReview;
@@ -232,6 +232,18 @@ namespace PIW_SPAppWeb.Helper
                     else if (action == enumAction.Delete)
                     {
                         nextStatus = Constants.PIWList_FormStatus_Deleted;
+                    }
+                    else if (action == enumAction.Accept)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_ReadyForPublishing;
+                    }
+                    else if (action == enumAction.Reject)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_Rejected;
+                    }
+                    else if (action == enumAction.Publish)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_PublishInitiated;
                     }
                     else
                     {

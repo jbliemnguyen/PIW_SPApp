@@ -490,33 +490,6 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.TextBox tbDueDate;
         
         /// <summary>
-        /// fieldsetOSECRejectComment control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetOSECRejectComment;
-        
-        /// <summary>
-        /// lbOSECRejectComment control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbOSECRejectComment;
-        
-        /// <summary>
-        /// lbOSECRejectCommentValue control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbOSECRejectCommentValue;
-        
-        /// <summary>
         /// fieldSetSupplementalMailingList control.
         /// </summary>
         /// <remarks>
@@ -598,15 +571,6 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.TextBox tbComment;
         
         /// <summary>
-        /// lbCommentValue control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbCommentValue;
-        
-        /// <summary>
         /// fieldsetSecReview control.
         /// </summary>
         /// <remarks>
@@ -614,42 +578,6 @@ namespace PIW_SPAppWeb.Pages {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetSecReview;
-        
-        /// <summary>
-        /// lbSecReviewAction control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbSecReviewAction;
-        
-        /// <summary>
-        /// lbSecReviewComment control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbSecReviewComment;
-        
-        /// <summary>
-        /// tbSecReviewComment control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox tbSecReviewComment;
-        
-        /// <summary>
-        /// lbSecReviewCommentError control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbSecReviewCommentError;
         
         /// <summary>
         /// fieldsetMailedRoom control.
@@ -661,6 +589,33 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetMailedRoom;
         
         /// <summary>
+        /// hyperlinkPrintReq control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HyperLink hyperlinkPrintReq;
+        
+        /// <summary>
+        /// lbPrintDate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbPrintDate;
+        
+        /// <summary>
+        /// tbPrintDate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox tbPrintDate;
+        
+        /// <summary>
         /// lbMailedDate control.
         /// </summary>
         /// <remarks>
@@ -670,31 +625,13 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Label lbMailedDate;
         
         /// <summary>
-        /// lbMailedDateValue control.
+        /// tbMailDate control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbMailedDateValue;
-        
-        /// <summary>
-        /// lbMailedRoomNote control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbMailedRoomNote;
-        
-        /// <summary>
-        /// lbMailedRoomNoteValue control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbMailedRoomNoteValue;
+        protected global::System.Web.UI.WebControls.TextBox tbMailDate;
         
         /// <summary>
         /// fieldsetLegalResourcesReview control.

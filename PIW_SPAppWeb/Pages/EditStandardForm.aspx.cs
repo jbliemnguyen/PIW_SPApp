@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Web.Services;
 using System.Web.UI.WebControls;
 using Microsoft.SharePoint.Client;
+using Microsoft.SharePoint.Client.UserProfiles;
 using PIW_SPAppWeb.Helper;
 using ListItem = Microsoft.SharePoint.Client.ListItem;
 
@@ -234,7 +235,6 @@ namespace PIW_SPAppWeb.Pages
                                 //Form status must be specified becuae the viewstate hasn't have value
                                 helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item created.", Constants.PIWList_FormStatus_Pending,
                                     Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
-
                             }
                         }
 
@@ -596,7 +596,6 @@ namespace PIW_SPAppWeb.Pages
                     User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                     clientContext.Load(currentUser);
                     clientContext.ExecuteQuery();
-                    //TODO: send email
 
                     //Create list history
                     string message = "Workflow Item deleted.";
@@ -761,7 +760,8 @@ namespace PIW_SPAppWeb.Pages
                 lbCitationNumberError.Visible = false;
                 using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
-                    helper.GenerateCitation(clientContext, ddDocumentCategory, tbCitationNumber, ddAvailableCitationNumbers, false);
+                    helper.GenerateCitation(clientContext, ddDocumentCategory, tbCitationNumber,
+                        ddAvailableCitationNumbers, false);
 
                 }
             }
@@ -770,6 +770,7 @@ namespace PIW_SPAppWeb.Pages
                 helper.LogError(Context, Request, exc, ListItemID, string.Empty);
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
+
         }
 
         protected void btnAcceptCitationNumber_Click(object sender, EventArgs e)
@@ -990,7 +991,7 @@ namespace PIW_SPAppWeb.Pages
             {
                 if (fileUpload.HasFiles)
                 {
-                    if (fileUpload.PostedFile.ContentLength < 52428800)
+                    if (fileUpload.PostedFile.ContentLength <= 52428800)
                     {
                         var spContext = SharePointContextProvider.Current.GetSharePointContext(Context);
 
@@ -1020,14 +1021,18 @@ namespace PIW_SPAppWeb.Pages
 
                                 //pop-up upload document 
                                 helper.OpenDocument(Page, uploadedFileURL);
+
                             }
                         }
                     }
                     else
                     {
-                        lbUploadedDocumentError.Text = "file cannot bigger than 52MB";
+                        lbUploadedDocumentError.Text = "file size limits to 50 MB";
                         lbUploadedDocumentError.Visible = true;
                     }
+
+                    //reset security level
+                    ddlSecurityControl.SelectedIndex = 0;
                 }
 
             }
@@ -1046,7 +1051,7 @@ namespace PIW_SPAppWeb.Pages
             {
                 if (supplementalMailingListFileUpload.HasFiles)
                 {
-                    if (supplementalMailingListFileUpload.PostedFile.ContentLength < 52428800)
+                    if (supplementalMailingListFileUpload.PostedFile.ContentLength <= 52428800)
                     {
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
@@ -1060,7 +1065,7 @@ namespace PIW_SPAppWeb.Pages
                     }
                     else
                     {
-                        lbSupplementalMailingListUploadError.Text = "file cannot bigger than 52MB";
+                        lbSupplementalMailingListUploadError.Text = "file size limits to 50 MB";
                         lbSupplementalMailingListUploadError.Visible = true;
                     }
                 }
@@ -1175,7 +1180,7 @@ namespace PIW_SPAppWeb.Pages
 
             if (helper.CheckIfListItemChanged(clientContext, listItem, DateTime.Parse(ModifiedDateTime)))
             {
-                lbMainMessage.Text = "The form has been changed, please refresh the page";
+                lbMainMessage.Text = "Form has been modified by other User - Please Refresh by highlighting URL and hitting the ENTER key";
                 lbMainMessage.Visible = true;
                 return false;
             }
@@ -1510,7 +1515,7 @@ namespace PIW_SPAppWeb.Pages
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsActive]] = true;
 
             //Save Docket Number
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]] = tbDocketNumber.Text.Trim();
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]] = helper.RemoveDuplicateDocket(tbDocketNumber.Text.Trim());
 
             //IsCNF
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsCNF]] = cbIsCNF.Checked;
@@ -1732,14 +1737,13 @@ namespace PIW_SPAppWeb.Pages
             if (listItem != null)
             {
                 var piwListInteralColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-
-
+                
                 //Main Panel
                 //Docket
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]] != null)
                 {
                     tbDocketNumber.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
-                    lbheaderDocketNumber.Text = tbDocketNumber.Text;
+                    lbheaderDocketNumber.Text = tbDocketNumber.Text + " - ";
                 }
 
                 //Is Non-Docketed
@@ -1817,14 +1821,6 @@ namespace PIW_SPAppWeb.Pages
                     clientContext.ExecuteQuery();
                     PeoplePickerHelper.FillPeoplePickerValue(hdnWorkflowInitiator, initiator);
                 }
-                else
-                {
-                    //this is the new form, use current user value to set the people picker
-                    //we cannot set the default value, the ensure user fails when get people field from list
-                    var currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
-                    clientContext.ExecuteQuery();
-                    PeoplePickerHelper.FillPeoplePickerValue(hdnWorkflowInitiator, currentUser);
-                }
 
                 //Program Office (Document Owner)
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] != null)
@@ -1846,6 +1842,7 @@ namespace PIW_SPAppWeb.Pages
                     FieldUserValue[] fuv = (FieldUserValue[])listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentOwner]];
                     var users = helper.getUsersFromField(clientContext, fuv);
                     PeoplePickerHelper.FillPeoplePickerValue(hdnDocumentOwner, users);
+
                 }
 
                 //Notification Recipient
@@ -1940,6 +1937,11 @@ namespace PIW_SPAppWeb.Pages
         public void ControlsVisiblitilyBasedOnStatus(ClientContext clientContext, string previousFormStatus, string formStatus, ListItem listItem)
         {
             var piwlistInternalColumnName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            bool isCurrentUserOSEC = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                            new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview });
+
+            //document category
             var documentCategory = string.Empty;
             if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_DocumentCategory]] != null)
             {
@@ -1966,7 +1968,7 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_Recalled:
                 case Constants.PIWList_FormStatus_Rejected:
                     //submit section    
-                    EnableMainPanel(true, formStatus);
+                    EnableMainPanel(true, formStatus, true);
                     lbMainMessage.Visible = false;
                     if (formStatus.Equals(Constants.PIWList_FormStatus_Recalled))
                     {
@@ -2024,7 +2026,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Submitted:
                     //submit section   
-                    EnableMainPanel(false, formStatus);
+                    EnableMainPanel(false, formStatus, false);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
                     //fieldsetRecall.Visible = true;
@@ -2043,7 +2045,7 @@ namespace PIW_SPAppWeb.Pages
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
-                    btnOSECTakeOwnership.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID, new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview }); ;
+                    btnOSECTakeOwnership.Visible = isCurrentUserOSEC;
                     btnRecall.Visible = true;
                     btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
@@ -2054,7 +2056,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Edited:
                     //submitter
-                    EnableMainPanel(true, formStatus);
+                    EnableMainPanel(true, formStatus,isCurrentUserOSEC);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
                     //fieldsetRecall.Visible = false;
@@ -2084,9 +2086,9 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetMailedRoom.Visible = false;
                     fieldsetLegalResourcesReview.Visible = false;
 
+
                     //Button
-                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                        new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview });
+                    btnSave.Visible = isCurrentUserOSEC;
                     btnSubmit.Visible = false;
                     btnEdit.Visible = false;
 
@@ -2124,7 +2126,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
                     //submitter
-                    EnableMainPanel(false, formStatus);
+                    EnableMainPanel(false, formStatus,isCurrentUserOSEC);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
                     //fieldsetRecall.Visible = false;
@@ -2144,8 +2146,7 @@ namespace PIW_SPAppWeb.Pages
                     //Buttons
                     btnSave.Visible = false;
                     btnSubmit.Visible = btnSave.Visible;
-                    btnEdit.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                        new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview }); ;
+                    btnEdit.Visible = isCurrentUserOSEC;
                     btnAccept.Visible = btnEdit.Visible;
                     btnReject.Visible = btnEdit.Visible;
                     btnOSECTakeOwnership.Visible = false;
@@ -2159,7 +2160,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_PrePublication:
                     //submitter
-                    EnableMainPanel(false, formStatus);
+                    EnableMainPanel(false, formStatus,isCurrentUserOSEC);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
 
@@ -2181,9 +2182,8 @@ namespace PIW_SPAppWeb.Pages
                     //button
                     btnSave.Visible = false;
                     btnSubmit.Visible = btnSave.Visible;
-                    
-                    if (helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                        new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview }))//OSEC user
+
+                    if (isCurrentUserOSEC)//OSEC user
                     {
                         btnEdit.Visible = true;
                         //don't need to worry about citation button bc it is handles above in InitiallyEnableCitationNumberControls()
@@ -2192,7 +2192,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         btnEdit.Visible = false;
                         //this will prevent user who is not osec generate/remove or accept citation
-                        EnableCitationNumberControls(false,false);
+                        EnableCitationNumberControls(false, false);
                     }
 
                     btnAccept.Visible = btnEdit.Visible;
@@ -2209,7 +2209,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_ReadyForPublishing:
                     //submitter
-                    EnableMainPanel(false, formStatus);
+                    EnableMainPanel(false, formStatus,isCurrentUserOSEC);
                     lbMainMessage.Visible = false;
                     fieldsetOSECRejectComment.Visible = false;
                     //fieldsetRecall.Visible = false;
@@ -2234,8 +2234,7 @@ namespace PIW_SPAppWeb.Pages
                     //buttons
                     btnSave.Visible = false;
                     btnSubmit.Visible = btnSave.Visible;
-                    if (helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                        new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview }))//OSEC user
+                    if (isCurrentUserOSEC)//OSEC user
                     {
                         btnEdit.Visible = true;
                         //don't need to worry about citation button bc it is handles above in InitiallyEnableCitationNumberControls()
@@ -2260,7 +2259,7 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
                     //submitter
-                    EnableMainPanel(false, formStatus);
+                    EnableMainPanel(false, formStatus,false);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "Publication has been initiated for this issuance.";
                     fieldsetOSECRejectComment.Visible = false;
@@ -2299,7 +2298,7 @@ namespace PIW_SPAppWeb.Pages
                     btnGenerateMailingList.Visible = false;
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    EnableMainPanel(false, formStatus);
+                    EnableMainPanel(false, formStatus,false);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "This issuance is available in eLibrary.";
                     fieldsetOSECRejectComment.Visible = false;
@@ -2341,7 +2340,7 @@ namespace PIW_SPAppWeb.Pages
                     throw new Exception("Not Implemented");
                 case Constants.PIWList_FormStatus_Deleted:
                     //this status is only viewable by admin
-                    EnableMainPanel(false, formStatus);
+                    EnableMainPanel(false, formStatus,false);
                     if (isRequireOSECVerification)
                     {
                         fieldsetOSECVerification.Visible = true;
@@ -2363,14 +2362,11 @@ namespace PIW_SPAppWeb.Pages
             SetVisiblePropertyInTopButtons();
         }
 
-        //private void EnablePrePublicationControls(bool enabled)
-        //{
-        //    tbPrePublicationComment.Enabled = enabled;
-        //}
 
-        private void EnableMainPanel(bool enabled, string FormStatus)
+
+        private void EnableMainPanel(bool enabled, string FormStatus, bool canEditUploadedDocument)
         {
-            EnableFileUploadComponent(enabled);
+            EnableFileUploadComponent(enabled, canEditUploadedDocument);
             tbDocketNumber.Enabled = enabled;
             cbIsCNF.Enabled = enabled;
             cbIsNonDocket.Enabled = enabled;
@@ -2379,7 +2375,7 @@ namespace PIW_SPAppWeb.Pages
             tbInstruction.Enabled = enabled;
             cbFederalRegister.Enabled = enabled;
 
-            //only allow document category to be changed if Status is not Edited
+            //only allow document category to be changed if Status is not Edited --> Pending, recalled or rejected or reOpen
             if (FormStatus.Equals(Constants.PIWList_FormStatus_Edited))
             {
                 ddDocumentCategory.Enabled = false;
@@ -2406,7 +2402,7 @@ namespace PIW_SPAppWeb.Pages
             //tbComment.Enabled = enabled;
         }
 
-        private void EnableFileUploadComponent(bool enabled)
+        private void EnableFileUploadComponent(bool enabled, bool canEditUploadedDocument)
         {
             //disable/enable fileupload            
             fieldsetUpload.Visible = enabled;
@@ -2424,13 +2420,23 @@ namespace PIW_SPAppWeb.Pages
             foreach (RepeaterItem row in rpDocumentList.Items)
             {
                 var btnRemoveDocument = (LinkButton)row.FindControl("btnRemoveDocument");
-                btnRemoveDocument.Enabled = enabled;
+                if (btnRemoveDocument != null) btnRemoveDocument.Visible = enabled;
+
+                var hplEdit = (HyperLink)row.FindControl("hplEdit");
+                if (hplEdit != null) hplEdit.Visible = canEditUploadedDocument;
             }
 
             foreach (RepeaterItem row in rpSupplementalMailingListDocumentList.Items)
             {
                 var btnRemoveDocument = (LinkButton)row.FindControl("btnRemoveDocument");
-                btnRemoveDocument.Enabled = enabled;
+                if (btnRemoveDocument != null)
+                {
+                    btnRemoveDocument.Visible = enabled;    
+                }
+                
+
+                var hplEdit = (HyperLink)row.FindControl("hplEdit");
+                if (hplEdit != null) hplEdit.Visible = canEditUploadedDocument;
             }
         }
 
