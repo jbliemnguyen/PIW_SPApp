@@ -395,14 +395,14 @@
                     <asp:TextBox ID="tbDueDate" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
                 </div>
             </div>
-            <fieldset runat="server" id="fieldsetOSECRejectComment" visible="true">
+            <%--<fieldset runat="server" id="fieldsetOSECRejectComment" visible="true">
                 <div class="form-group">
                     <asp:Label ID="lbOSECRejectComment" runat="server" Text="OSEC Reject Comment" AssociatedControlID="lbOSECRejectCommentValue" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-6">
                         <asp:Label runat="server" ID="lbOSECRejectCommentValue"></asp:Label>
                     </div>
                 </div>
-            </fieldset>
+            </fieldset>--%>
 
             <fieldset runat="server" id="fieldSetSupplementalMailingList">
                 <div class="form-group">

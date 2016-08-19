@@ -51,7 +51,9 @@
 	text-align: center;
 	width: 100%;
 }
-.LockPane div {
+
+.LockPane div
+{
 	width: 55%;
 	/*background-color: #969;*/
     background-color: #337ab7;

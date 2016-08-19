@@ -1251,11 +1251,8 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Submitted:
                     if ((PreviousFormStatus == Constants.PIWList_FormStatus_Pending) ||
-                        (PreviousFormStatus == Constants.PIWList_FormStatus_Recalled))
-                    {
-                        SaveMainPanelAndStatus(clientContext, listItem, action);
-                    }
-                    else if (PreviousFormStatus == Constants.PIWList_FormStatus_Rejected)
+                        (PreviousFormStatus == Constants.PIWList_FormStatus_Recalled) ||
+                        (PreviousFormStatus == Constants.PIWList_FormStatus_Rejected))
                     {
                         SaveMainPanelAndStatus(clientContext, listItem, action);
                     }
@@ -1303,8 +1300,8 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_PrePublication:
                     if ((PreviousFormStatus == Constants.PIWList_FormStatus_Edited) ||
                         (PreviousFormStatus == Constants.PIWList_FormStatus_Pending) ||//this is scenario of OSEC submit Not Notice, bypass osec take ownership
-                        (PreviousFormStatus == Constants.PIWList_FormStatus_Rejected) ||
-                        (PreviousFormStatus == Constants.PIWList_FormStatus_Recalled))
+                        (PreviousFormStatus == Constants.PIWList_FormStatus_Rejected) ||//OSEC submits Notices
+                        (PreviousFormStatus == Constants.PIWList_FormStatus_Recalled))//OSEC submits Notices
                     {
                         SaveMainPanelAndStatus(clientContext, listItem, action);
                     }
@@ -1446,9 +1443,20 @@ namespace PIW_SPAppWeb.Pages
             //recall/reject comment
             if ((action == enumAction.Recall) || (action == enumAction.Reject))
             {
-                if (!string.IsNullOrEmpty(tbComment.Text.Trim()))
+                string comment = tbComment.Text.Trim();
+                if (!string.IsNullOrEmpty(comment))
                 {
-                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_RecallRejectComment]] = tbComment.Text.Trim();
+                    if (comment.Length <= 255)
+                    {
+                        listItem[piwListInternalColumnNames[Constants.PIWList_colName_RecallRejectComment]] = comment;
+                    }
+                    else
+                    {
+                        listItem[piwListInternalColumnNames[Constants.PIWList_colName_RecallRejectComment]] =
+                            comment.Substring(0, 255);
+
+                    }
+
                 }
             }
 
@@ -1940,6 +1948,8 @@ namespace PIW_SPAppWeb.Pages
 
             bool isCurrentUserOSEC = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                             new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview });
+            bool isCurrentUserLegalResouceTeam = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                            new string[] { Constants.Grp_PIWLegalResourcesReview});
 
             //document category
             var documentCategory = string.Empty;
@@ -1970,25 +1980,6 @@ namespace PIW_SPAppWeb.Pages
                     //submit section    
                     EnableMainPanel(true, formStatus, true);
                     lbMainMessage.Visible = false;
-                    if (formStatus.Equals(Constants.PIWList_FormStatus_Recalled))
-                    {
-                        fieldsetOSECRejectComment.Visible = false;
-                        //fieldsetRecall.Visible = true;
-                        btnRecall.Visible = false;
-                        //tbRecallComment.Enabled = false;//prevent user from update the recall comment
-                    }
-                    else if (formStatus.Equals(Constants.PIWList_FormStatus_Rejected))
-                    {
-                        fieldsetOSECRejectComment.Visible = true;
-                        //fieldsetRecall.Visible = false;
-                    }
-                    else//pending
-                    {
-                        fieldsetOSECRejectComment.Visible = false;
-                        //fieldsetRecall.Visible = false;
-                        btnRecall.Visible = false;
-                    }
-
 
                     //OSEC section
                     fieldsetOSECVerification.Visible = false;
@@ -2028,9 +2019,7 @@ namespace PIW_SPAppWeb.Pages
                     //submit section   
                     EnableMainPanel(false, formStatus, false);
                     lbMainMessage.Visible = false;
-                    fieldsetOSECRejectComment.Visible = false;
-                    //fieldsetRecall.Visible = true;
-
+                    
                     //OSEC section
                     fieldsetOSECVerification.Visible = false;
                     fieldsetPrePublication.Visible = false;
@@ -2058,14 +2047,13 @@ namespace PIW_SPAppWeb.Pages
                     //submitter
                     EnableMainPanel(true, formStatus,isCurrentUserOSEC);
                     lbMainMessage.Visible = false;
-                    fieldsetOSECRejectComment.Visible = false;
+                    
                     //fieldsetRecall.Visible = false;
 
                     //OSEC section
                     if (previousFormStatus.Equals(Constants.PIWList_FormStatus_OSECVerification))
                     {
                         fieldsetOSECVerification.Visible = true;
-                        //tbOSECVerificationComment.Enabled = false;
                     }
                     else if (previousFormStatus.Equals(Constants.PIWList_FormStatus_PrePublication) ||
                         previousFormStatus.Equals(Constants.PIWList_FormStatus_ReadyForPublishing))
@@ -2076,7 +2064,6 @@ namespace PIW_SPAppWeb.Pages
 
                         }
                         fieldsetPrePublication.Visible = true;
-                        //EnablePrePublicationControls(false);
                         EnableCitationNumberControls(false, false);
                     }
 
@@ -2128,9 +2115,7 @@ namespace PIW_SPAppWeb.Pages
                     //submitter
                     EnableMainPanel(false, formStatus,isCurrentUserOSEC);
                     lbMainMessage.Visible = false;
-                    fieldsetOSECRejectComment.Visible = false;
-                    //fieldsetRecall.Visible = false;
-
+                    
                     //OSEC section
                     //osec verification
                     fieldsetOSECVerification.Visible = true;
@@ -2162,7 +2147,6 @@ namespace PIW_SPAppWeb.Pages
                     //submitter
                     EnableMainPanel(false, formStatus,isCurrentUserOSEC);
                     lbMainMessage.Visible = false;
-                    fieldsetOSECRejectComment.Visible = false;
 
                     //OSEC verification
                     if (isRequireOSECVerification)
@@ -2211,9 +2195,7 @@ namespace PIW_SPAppWeb.Pages
                     //submitter
                     EnableMainPanel(false, formStatus,isCurrentUserOSEC);
                     lbMainMessage.Visible = false;
-                    fieldsetOSECRejectComment.Visible = false;
-                    //fieldsetRecall.Visible = false;
-
+                    
                     //OSEC section
                     //OSEC verification
                     if (isRequireOSECVerification)
@@ -2262,9 +2244,7 @@ namespace PIW_SPAppWeb.Pages
                     EnableMainPanel(false, formStatus,false);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "Publication has been initiated for this issuance.";
-                    fieldsetOSECRejectComment.Visible = false;
-                    //fieldsetRecall.Visible = false;
-
+                    
                     //OSEC section
                     //OSEC verification
                     if (isRequireOSECVerification)
@@ -2280,10 +2260,10 @@ namespace PIW_SPAppWeb.Pages
 
                     //Mailed Room and Legal Resources and Review
                     fieldsetMailedRoom.Visible = false;
-                    fieldsetLegalResourcesReview.Visible = false;
+                    fieldsetLegalResourcesReview.Visible = true;
 
                     //buttons
-                    btnSave.Visible = false;
+                    btnSave.Visible = isCurrentUserLegalResouceTeam;
                     btnSubmit.Visible = btnSave.Visible;
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
@@ -2301,9 +2281,7 @@ namespace PIW_SPAppWeb.Pages
                     EnableMainPanel(false, formStatus,false);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "This issuance is available in eLibrary.";
-                    fieldsetOSECRejectComment.Visible = false;
-                    //fieldsetRecall.Visible = false;
-
+                    
                     //OSEC section
                     //OSEC verification
                     if (isRequireOSECVerification)
@@ -2322,8 +2300,7 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetLegalResourcesReview.Visible = true;
 
                     //buttons
-                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                        new string[] { Constants.Grp_PIWLegalResourcesReview }); ;
+                    btnSave.Visible = isCurrentUserLegalResouceTeam; ;
                     btnSubmit.Visible = false;
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
@@ -2423,7 +2400,10 @@ namespace PIW_SPAppWeb.Pages
                 if (btnRemoveDocument != null) btnRemoveDocument.Visible = enabled;
 
                 var hplEdit = (HyperLink)row.FindControl("hplEdit");
-                if (hplEdit != null) hplEdit.Visible = canEditUploadedDocument;
+                if (hplEdit != null)
+                {
+                    hplEdit.Visible = canEditUploadedDocument;
+                }
             }
 
             foreach (RepeaterItem row in rpSupplementalMailingListDocumentList.Items)

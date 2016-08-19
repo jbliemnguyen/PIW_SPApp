@@ -556,7 +556,8 @@
             <div class="col-md-6">
                 <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary active" OnClick="btnSave_Click" ClientIDMode="Static"/>
                 <asp:Button ID="btnSubmitToSecReview" runat="server" Text="Submit to Secretary Review" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnSubmitToSecReview_Click" />
-                <asp:Button ID="btnSubmitToSecReviewConfirm" runat="server" Text="Submit to Secretary Review" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnSubmitToSecReview_Click" />
+                <asp:Button ID="btnSECReviewTakeOwnership" runat="server" Text="Secretary Review Take Ownership" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnSECReviewTakeOwnership_Click" />
+                <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" ClientIDMode="Static" OnClick="btnRecall_Click1" />
                 <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" OnClick="btnEdit_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" OnClick="btnAccept_Click" ClientIDMode="Static"/>
                 <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" OnClick="btnReject_Click" ClientIDMode="Static"/>

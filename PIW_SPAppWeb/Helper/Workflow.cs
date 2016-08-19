@@ -203,12 +203,13 @@ namespace PIW_SPAppWeb.Helper
             {
                 case Constants.PIWList_FormStatus_Pending:
                 case Constants.PIWList_FormStatus_ReOpen:
+                case Constants.PIWList_FormStatus_Recalled:
                 case Constants.PIWList_FormStatus_Rejected:
                     //in Pending, Recall, Reject
                     //user can submit, save and delete
                     if (action == enumAction.SubmitToSecReview)
                     {
-                        nextStatus = Constants.PIWList_FormStatus_SecretaryReview;
+                        nextStatus = Constants.PIWList_FormStatus_Submitted;
                     }
                     else if (action == enumAction.Save)
                     {
@@ -244,6 +245,22 @@ namespace PIW_SPAppWeb.Helper
                     else if (action == enumAction.Publish)
                     {
                         nextStatus = Constants.PIWList_FormStatus_PublishInitiated;
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format(errorMessage, action, currentStatus));
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_Submitted:
+                    //In Submitted status
+                    //user can only perform Recall and Sec Review take ownership action
+                    if (action == enumAction.Recall)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_Recalled;
+                    }
+                    else if (action == enumAction.SecReviewTakeOwnerShip)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_SecretaryReview;
                     }
                     else
                     {

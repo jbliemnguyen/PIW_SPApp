@@ -201,14 +201,6 @@
                 }
             }, 'This field is required in Non-Docketed or CNF');
 
-            //$.validator.addMethod("TextBoxRequiredAfterTrim", function (value, element) {//a required textbox must have value other than only space
-            //    if (value.trim().length == 0) {
-            //        return false;
-            //    } else {
-            //        return true;
-            //    }
-            //}, 'This field is required');
-
 
             $("#mainForm").validate({
                 rules: {
@@ -282,16 +274,18 @@
             //top button event, call to appropriate buttons in the bottom.
             RegisterEventForButtons();
 
+            if (typeof (Sys) != "undefined")//Sys is created in Edit Form becuase of Ajax control only, in report, it is undefined
+            {
+                var prm = Sys.WebForms.PageRequestManager.getInstance();
+                prm.add_endRequest(function() {
+                    RemoveLockScreenForAjaxUpdate(); //ajax request completed, remove the lock screen
+                });
 
-            var prm = Sys.WebForms.PageRequestManager.getInstance();
-            prm.add_endRequest(function () {
-                RemoveLockScreenForAjaxUpdate();//ajax request completed, remove the lock screen
-            });
+                prm.add_beginRequest(function() {
+                    LockScreenForAjaxUpdate();
+                });
+            }
 
-            prm.add_beginRequest(function () {
-                LockScreenForAjaxUpdate();
-            });
-            
 
             $("#btnDelete").click(function (event) {
                 event.preventDefault();
@@ -415,6 +409,11 @@
                 skm_LockScreen("Submitting ... ");
             });
 
+            $("#btnSubmitToSecReview").click(function (event) {
+                skm_LockScreen("Submitting To Secretary Review ... ");
+            });
+            
+
             $("#btnOSECTakeOwnership").click(function (event) {
                 skm_LockScreen("Taking Ownership ... ");
             });
@@ -499,10 +498,14 @@
                 }
                 if (pane) {
                     pane.addClass("LockPane");
+                    var citationNumberPositionTop = $("#tbCitationNumber").offset().top;
+                    pane.css("padding-top", citationNumberPositionTop + "px");//display message by citation number box instead of top
                 }
                 if (text) {
-                    text.text("");
+                    text.text("Please wait ...");
                 }
+
+                
             }
 
         }
@@ -518,16 +521,12 @@
                 }
                 if (pane) {
                     pane.removeClass("LockPane");
-                }
-                if (text) {
-                    text.text("");
+                    pane.css("padding-top", "");//remove manuall set location to the citation number textbox
                 }
             }
 
         }
-
-
-
+        
         function TrimValueBeforeValidatorApplied() {
             $.each($.validator.methods, function (key, value) {
                 $.validator.methods[key] = function () {
@@ -541,7 +540,6 @@
                 };
             });
         }
-
         
     </script>
 </body>

@@ -508,33 +508,6 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.TextBox tbDueDate;
         
         /// <summary>
-        /// fieldsetOSECRejectComment control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetOSECRejectComment;
-        
-        /// <summary>
-        /// lbOSECRejectComment control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbOSECRejectComment;
-        
-        /// <summary>
-        /// lbOSECRejectCommentValue control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbOSECRejectCommentValue;
-        
-        /// <summary>
         /// fieldSetSupplementalMailingList control.
         /// </summary>
         /// <remarks>

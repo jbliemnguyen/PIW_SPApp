@@ -34,7 +34,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_DocumentOwner = "Document Owner";
         public const string PIWList_colName_DueDate = "Due Date";
         public const string PIWList_colName_FederalRegister = "Federal Register";
-
+        public const string PIWList_colName_Re_Opened = "Re-Opened";
         public const string PIWList_colName_LegalResourcesAndReviewGroupCompleteDate =
             "Legal Resources And Review Group Complete Date";
 
@@ -57,8 +57,8 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_PublishedDate = "Published Date";
         public const string PIWList_colName_PublishedError = "Published Error";
         public const string PIWList_colName_PublishedBy = "Published By";
-        public const string PIWList_colName_SecReviewAction = "Sec Review Action";
-        public const string PIWList_colName_SecReviewComment = "Sec Review Comment";
+        //public const string PIWList_colName_SecReviewAction = "Sec Review Action";
+        //public const string PIWList_colName_SecReviewComment = "Sec Review Comment";
         public const string PIWList_colName_CitationNumber = "Citation Number";
         //public const string PIWList_colName_RecallComment = "Recall Comment";
         public const string PIWList_colName_RecallRejectComment = "Recall / Reject Comment";

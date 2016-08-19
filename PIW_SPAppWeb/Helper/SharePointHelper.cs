@@ -187,11 +187,14 @@ namespace PIW_SPAppWeb.Helper
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
 
             //clear secreview action and comment
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewAction]] = string.Empty;
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewComment]] = string.Empty;
+            //listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewAction]] = string.Empty;
+            //listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewComment]] = string.Empty;
 
             //clear accession number
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
+
+            //set ReOpen flag
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_Re_Opened]] = true;
 
             listItem.Update();
             clientContext.ExecuteQuery();
