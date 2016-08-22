@@ -83,5 +83,43 @@ namespace PIW_SPAppWeb
         {
             return JsonHelper.Deserialize<List<PeoplePickerUser>>(peoplePickerHiddenField.Value);
         }
+
+        /// <summary>
+        /// Written by Liem Nguyen to extend the function of People Picker Helper
+        /// Add users to existing People Picker which has values in it
+        /// </summary>
+        /// <param name="peoplePickerHiddenField"></param>
+        /// <param name="users"></param>
+        public static void AddPeoplePickerValues(HiddenField peoplePickerHiddenField,Microsoft.SharePoint.Client.User[] users)
+        {
+            List<PeoplePickerUser> existingPeoples = null;
+            if (!string.IsNullOrEmpty(peoplePickerHiddenField.Value))
+            {
+                existingPeoples =
+                    PeoplePickerHelper.GetValuesFromPeoplePicker(peoplePickerHiddenField);
+            }
+            else
+            {
+                existingPeoples = new List<PeoplePickerUser>();
+            }
+
+            foreach (var user in users)
+            {
+                if (existingPeoples.Any(g => g.Login == user.LoginName))
+                {
+                    //duplicate - dont add
+                }
+                else
+                {
+                    existingPeoples.Add(new PeoplePickerUser()
+                    {
+                        Name = user.Title,
+                        Email = user.Email,
+                        Login = user.LoginName
+                    });
+                }
+            }
+            peoplePickerHiddenField.Value = JsonHelper.Serialize<List<PeoplePickerUser>>(existingPeoples);
+        }
     }
 }

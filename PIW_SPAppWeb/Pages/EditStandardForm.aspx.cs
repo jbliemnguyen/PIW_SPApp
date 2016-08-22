@@ -162,6 +162,15 @@ namespace PIW_SPAppWeb.Pages
                     {
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
+                            //check if user is can submit form - redirect to "Access Denied" if not
+                            var CanUserSubmitStdForm = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                                new[] { Constants.Grp_PIWUsers, Constants.Grp_OSEC, Constants.Grp_SecReview });
+                            if (!CanUserSubmitStdForm)
+                            {
+                                helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
+                                return;
+                            }
+
                             string publicDocumentURLs;
                             string cEiiDocumentUrLs;
                             string privilegedDocumentURLs;
@@ -218,6 +227,16 @@ namespace PIW_SPAppWeb.Pages
 
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
+                            //check if user is can submit form - redirect to "Access Denied" if not
+                            var CanUserSubmitStdForm = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                                new[] { Constants.Grp_PIWUsers, Constants.Grp_OSEC, Constants.Grp_SecReview });
+                            if (!CanUserSubmitStdForm)
+                            {
+                                helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
+                                return;
+                            }
+
+
                             ListItem newItem = helper.createNewPIWListItem(clientContext, Constants.PIWList_FormType_StandardForm, CurrentUserLogInID);
                             ListItemID = newItem.Id.ToString();
 
@@ -423,8 +442,7 @@ namespace PIW_SPAppWeb.Pages
                         User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                         clientContext.Load(currentUser);
                         clientContext.ExecuteQuery();
-
-                        //TODO: send email
+                        
 
                         //Create list history
                         string message = "Workflow Item accepted.";
@@ -437,7 +455,15 @@ namespace PIW_SPAppWeb.Pages
                             Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
                         //Redirect
-                        helper.RedirectToSourcePage(Page.Request, Page.Response);
+                        if (FormStatus.Equals(Constants.PIWList_FormStatus_ReadyForPublishing))
+                        {
+                            helper.RefreshPage(Request,Response);
+                        }
+                        else
+                        {
+                            helper.RedirectToSourcePage(Page.Request, Page.Response);    
+                        }
+                        
                     }
                 }
             }
@@ -1373,19 +1399,19 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        private void SaveReOpenInfoAndStatus(ClientContext clientContext, ListItem listItem)
-        {
-            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+        //private void SaveReOpenInfoAndStatus(ClientContext clientContext, ListItem listItem)
+        //{
+        //    var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
+        //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
+        //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
 
-            //clear accession number
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
+        //    //clear accession number
+        //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
 
-            listItem.Update();
-            clientContext.ExecuteQuery();
-        }
+        //    listItem.Update();
+        //    clientContext.ExecuteQuery();
+        //}
 
         //private void SavePrePublicationInfoAndStatus(ClientContext clientContext, ListItem listItem, enumAction action)
         //{
@@ -2264,7 +2290,7 @@ namespace PIW_SPAppWeb.Pages
 
                     //buttons
                     btnSave.Visible = isCurrentUserLegalResouceTeam;
-                    btnSubmit.Visible = btnSave.Visible;
+                    btnSubmit.Visible = false;
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
@@ -2272,7 +2298,7 @@ namespace PIW_SPAppWeb.Pages
                     btnRecall.Visible = false;
                     btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
-                    btnDelete.Visible = btnSave.Visible;
+                    btnDelete.Visible = false;
                     btnReopen.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                         new string[] { Constants.Grp_PIWAdmin, Constants.Grp_PIWSystemAdmin });
                     btnGenerateMailingList.Visible = false;

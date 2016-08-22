@@ -10,7 +10,8 @@
     </script>
     <div class="container">
         <div class="jumbotron">
-            <h1>An error has occured.</h1>
+            <h1>An error has occurred.</h1>
+            <h2>SharePoint team has been notified of the error.</h2>
         </div>
     </div>
     

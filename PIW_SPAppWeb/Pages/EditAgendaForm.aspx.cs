@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web.Services;
 using System.Web.UI.WebControls;
 using DocumentFormat.OpenXml.Wordprocessing;
@@ -158,6 +159,16 @@ namespace PIW_SPAppWeb.Pages
                     {
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
+                            //check if user is OSEC - redirect to "Access Denied" if not
+                            var isCurrentUserOSEC = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                                new[] { Constants.Grp_OSEC,Constants.Grp_SecReview });
+                            if (!isCurrentUserOSEC)
+                            {
+                                helper.RedirectToAPage(Request,Response,Constants.Page_AccessDenied);
+                                return;
+                            }
+
+
                             string publicDocumentURLs;
                             string cEiiDocumentUrLs;
                             string privilegedDocumentURLs;
@@ -208,6 +219,16 @@ namespace PIW_SPAppWeb.Pages
 
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
+
+                            //check if user is OSEC - redirect to "Access Denied" if not
+                            var isCurrentUserOSEC = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                                new[] { Constants.Grp_OSEC, Constants.Grp_SecReview });
+                            if (!isCurrentUserOSEC)
+                            {
+                                helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
+                                return;
+                            }
+
                             ListItem newItem = helper.createNewPIWListItem(clientContext, Constants.PIWList_FormType_AgendaForm, CurrentUserLogInID);
                             ListItemID = newItem.Id.ToString();
 
@@ -634,7 +655,7 @@ namespace PIW_SPAppWeb.Pages
 
 
                         //Change document and list permission
-                        helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
+                        //helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
 
                         //get current user
                         User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
@@ -666,13 +687,11 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        protected void btnSecReviewerTakeOwnership_Click(object sender, EventArgs e)
+        protected void btnSECReviewTakeOwnership_Click(object sender, EventArgs e)
         {
             try
             {
                 const enumAction action = enumAction.SecReviewTakeOwnerShip;
-                string currentStatusBeforeWFRun = FormStatus;
-                string previousStatusBeforeWFRun = PreviousFormStatus;
                 using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
                     ListItem listItem = null;
@@ -689,10 +708,10 @@ namespace PIW_SPAppWeb.Pages
                     clientContext.Load(currentUser);
                     clientContext.ExecuteQuery();
 
-                    Email emailHelper = new Email();
+                    //Email emailHelper = new Email();
 
-                    emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
-                        currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
+                    //emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
+                    //    currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
 
                     //Create list history
                     string message = "Secretary Reviewer took ownership of Workflow Item.";
@@ -1078,6 +1097,84 @@ namespace PIW_SPAppWeb.Pages
             tbCitationNumber.Text = ddAvailableCitationNumbers.SelectedValue;
         }
 
+        protected void cbSection206Notice_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    lbNotificationRecipientError.Visible = false;
+
+                    if (cbSection206Notice.Checked)
+                    {
+                        Group section206Notice = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIWSection206Notice);
+                        clientContext.Load(section206Notice.Users);
+                        clientContext.ExecuteQuery();
+                        User[] users = section206Notice.Users.ToArray();
+                        PeoplePickerHelper.AddPeoplePickerValues(hdnNotificationRecipient,users);
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
+                lbNotificationRecipientError.Visible = true;
+                lbNotificationRecipientError.Text = "cannot populate users for Section 206 Notice group";
+            }
+        }
+
+        protected void cbFederalRegister_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    lbNotificationRecipientError.Visible = false;
+
+                    if (cbFederalRegister.Checked)
+                    {
+                        Group Grp = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIWFederalResister);
+                        clientContext.Load(Grp.Users);
+                        clientContext.ExecuteQuery();
+                        User[] users = Grp.Users.ToArray();
+                        PeoplePickerHelper.AddPeoplePickerValues(hdnNotificationRecipient, users);
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
+                lbNotificationRecipientError.Visible = true;
+                lbNotificationRecipientError.Text = "cannot populate users for Federal Register group";
+            }
+        }
+
+        protected void cbHearingOrder_CheckedChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    lbNotificationRecipientError.Visible = false;
+
+                    if (cbFederalRegister.Checked)
+                    {
+                        Group Grp = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIWHearingOrder);
+                        clientContext.Load(Grp.Users);
+                        clientContext.ExecuteQuery();
+                        User[] users = Grp.Users.ToArray();
+                        PeoplePickerHelper.AddPeoplePickerValues(hdnNotificationRecipient, users);
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
+                lbNotificationRecipientError.Visible = true;
+                lbNotificationRecipientError.Text = "cannot populate users for Hearing Order group";
+            }
+        }
+
         #endregion
 
         #region Save Data
@@ -1313,20 +1410,9 @@ namespace PIW_SPAppWeb.Pages
             }
 
             //Populate notification recipient 
-            FieldUserValue[] notificationRecipients = null;
-            if (!string.IsNullOrEmpty(hdnNotificationRecipient.Value))
-            {
-                List<PeoplePickerUser> users = PeoplePickerHelper.GetValuesFromPeoplePicker(hdnNotificationRecipient);
+            //FieldUserValue[] notificationRecipients = null;
+            var notificationRecipients = PopulateNotificationRecipients(clientContext,listItem,piwListInternalColumnNames);
 
-                notificationRecipients = new FieldUserValue[users.Count];
-                for (var i = 0; i < users.Count; i++)
-                {
-                    var newUser = clientContext.Web.EnsureUser(users[i].Login);//ensure user so usr can be added to site if they are not --> receive email
-                    clientContext.Load(newUser);
-                    clientContext.ExecuteQuery();
-                    notificationRecipients[i] = new FieldUserValue { LookupId = newUser.Id };
-                }
-            }
 
             //Populate current user title
             clientContext.Load(clientContext.Web.CurrentUser, user => user.Title);
@@ -1463,6 +1549,53 @@ namespace PIW_SPAppWeb.Pages
             listItem.Update();
             clientContext.ExecuteQuery();
         }
+
+        private FieldUserValue[] PopulateNotificationRecipients(ClientContext clientContext,ListItem listItem,Dictionary<string,string> piwListInternalColumnNames)
+        {
+            List<FieldUserValue> notificationRecipients = new List<FieldUserValue>();
+            
+            //value specidifed from control
+            if (!string.IsNullOrEmpty(hdnNotificationRecipient.Value))
+            {
+                List<PeoplePickerUser> users = PeoplePickerHelper.GetValuesFromPeoplePicker(hdnNotificationRecipient);
+
+                //notificationRecipients = new FieldUserValue[users.Count];
+                for (var i = 0; i < users.Count; i++)
+                {
+                    var newUser = clientContext.Web.EnsureUser(users[i].Login);
+                        //ensure user so usr can be added to site if they are not --> receive email
+                    clientContext.Load(newUser);
+                    clientContext.ExecuteQuery();
+                    notificationRecipients.Add(new FieldUserValue {LookupId = newUser.Id});
+                }
+            }
+
+            //value populated if checbox "Section 206 Notice" or "Hearing Order" are checked
+            //bool Section206NoticePreviouslyChecked = bool.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_Section206Notice]].ToString());
+            //bool HearingOrderPreviouslyChecked = bool.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_HearingOrder]].ToString());
+
+            ////populate users if "section 206 notice" is first checked
+            //if (cbSection206Notice.Checked)
+            //{
+            //    if (!Section206NoticePreviouslyChecked)
+            //    {
+            //        clientContext.Web.SiteGroups.GetByName(Constants.Grp_206)
+            //    }
+            //}
+
+            ////populate users if "Hearing Order" is first checked
+            //if (cbHearingOrder.Checked)
+            //{
+            //    if (!HearingOrderPreviouslyChecked)
+            //    {
+
+            //    }
+            //}
+
+
+            return notificationRecipients.ToArray();
+        }
+
         #endregion
 
         #region Utils
@@ -1898,6 +2031,8 @@ namespace PIW_SPAppWeb.Pages
                     btnEdit.Visible = false;
                     btnAccept.Visible = isCurrentUserSecReviewer;
                     btnReject.Visible = isCurrentUserSecReviewer;
+                    btnSECReviewTakeOwnership.Visible = false;
+                    btnRecall.Visible = false;
                     btnInitiatePublication.Visible = isCurrentUserSecReviewer;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
@@ -1925,6 +2060,8 @@ namespace PIW_SPAppWeb.Pages
                     btnEdit.Visible = isCurrentUserSecReviewer;
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
+                    btnSECReviewTakeOwnership.Visible = false;
+                    btnRecall.Visible = false;
                     btnInitiatePublication.Visible = isCurrentUserSecReviewer;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
@@ -1953,6 +2090,8 @@ namespace PIW_SPAppWeb.Pages
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
+                    btnSECReviewTakeOwnership.Visible = false;
+                    btnRecall.Visible = false;
                     btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
@@ -1980,6 +2119,8 @@ namespace PIW_SPAppWeb.Pages
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
+                    btnSECReviewTakeOwnership.Visible = false;
+                    btnRecall.Visible = false;
                     btnInitiatePublication.Visible = false;
                     btnDelete.Visible = false;
                     btnReopen.Visible = false;
@@ -2101,101 +2242,105 @@ namespace PIW_SPAppWeb.Pages
         }
         #endregion
 
-        protected void btnRecall_Click1(object sender, EventArgs e)
-        {
-            try
-            {
-                const enumAction action = enumAction.Recall;
-                using (var clientContext = helper.getElevatedClientContext(Context, Request))
-                {
-                    if (ValidFormData(action))
-                    {
-                        ListItem listItem = null;
-                        if (!SaveData(clientContext, action, ref listItem))
-                        {
-                            return;
-                        }
+        
+
+        //protected void btnRecall_Click1(object sender, EventArgs e)
+        //{
+        //    try
+        //    {
+        //        const enumAction action = enumAction.Recall;
+        //        using (var clientContext = helper.getElevatedClientContext(Context, Request))
+        //        {
+        //            if (ValidFormData(action))
+        //            {
+        //                ListItem listItem = null;
+        //                if (!SaveData(clientContext, action, ref listItem))
+        //                {
+        //                    return;
+        //                }
 
 
-                        //todo: Change document and list permission
-                        //helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
+        //                //todo: Change document and list permission
+        //                //helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
 
-                        //get current user
-                        User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
-                        clientContext.Load(currentUser);
-                        clientContext.ExecuteQuery();
+        //                //get current user
+        //                User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+        //                clientContext.Load(currentUser);
+        //                clientContext.ExecuteQuery();
 
-                        //TODO: send email
+        //                //TODO: send email
 
-                        //Create list history
-                        string message = "Workflow Item recalled.";
-                        if (!string.IsNullOrEmpty(tbComment.Text))
-                        {
-                            message = message + "</br>Comment: " + tbComment.Text.Trim();
-                        }
-                        helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+        //                //Create list history
+        //                string message = "Workflow Item recalled.";
+        //                if (!string.IsNullOrEmpty(tbComment.Text))
+        //                {
+        //                    message = message + "</br>Comment: " + tbComment.Text.Trim();
+        //                }
+        //                helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
+        //                    Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
-                        //Redirect
-                        helper.RedirectToSourcePage(Page.Request, Page.Response);
+        //                //Redirect
+        //                helper.RedirectToSourcePage(Page.Request, Page.Response);
 
 
-                    }
-                }
-            }
-            catch (Exception exc)
-            {
-                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
-            }
-        }
+        //            }
+        //        }
+        //    }
+        //    catch (Exception exc)
+        //    {
+        //        helper.LogError(Context, Request, exc, ListItemID, string.Empty);
+        //        helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+        //    }
+        //}
 
-        protected void btnSECReviewTakeOwnership_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                const enumAction action = enumAction.SecReviewTakeOwnerShip;
-                string currentStatusBeforeWFRun = FormStatus;
-                string previousStatusBeforeWFRun = PreviousFormStatus;
-                using (var clientContext = helper.getElevatedClientContext(Context, Request))
-                {
-                    ListItem listItem = null;
-                    if (!SaveData(clientContext, action, ref listItem))
-                    {
-                        return;
-                    }
+        //protected void btnSECReviewTakeOwnership_Click(object sender, EventArgs e)
+        //{
+        //    try
+        //    {
+        //        const enumAction action = enumAction.SecReviewTakeOwnerShip;
+        //        string currentStatusBeforeWFRun = FormStatus;
+        //        string previousStatusBeforeWFRun = PreviousFormStatus;
+        //        using (var clientContext = helper.getElevatedClientContext(Context, Request))
+        //        {
+        //            ListItem listItem = null;
+        //            if (!SaveData(clientContext, action, ref listItem))
+        //            {
+        //                return;
+        //            }
 
-                    //todo: Change document and list permission
-                    //helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
+        //            //todo: Change document and list permission
+        //            //helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
 
-                    //get current user
-                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
-                    clientContext.Load(currentUser);
-                    clientContext.ExecuteQuery();
+        //            //get current user
+        //            User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+        //            clientContext.Load(currentUser);
+        //            clientContext.ExecuteQuery();
 
-                    //Email emailHelper = new Email();
+        //            //Email emailHelper = new Email();
 
-                    //emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
-                    //    currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
+        //            //emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
+        //            //    currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
 
-                    //Create list history
-                    string message = "OSEC took ownership of Workflow Item.";
-                    if (!string.IsNullOrEmpty(tbComment.Text))
-                    {
-                        message = message + "</br>Comment: " + tbComment.Text.Trim();
-                    }
-                    helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
-                        Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+        //            //Create list history
+        //            string message = "OSEC took ownership of Workflow Item.";
+        //            if (!string.IsNullOrEmpty(tbComment.Text))
+        //            {
+        //                message = message + "</br>Comment: " + tbComment.Text.Trim();
+        //            }
+        //            helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
+        //                Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
-                    //refresh
-                    helper.RefreshPage(Page.Request, Page.Response);
-                }
-            }
-            catch (Exception exc)
-            {
-                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
-            }
-        }
+        //            //refresh
+        //            helper.RefreshPage(Page.Request, Page.Response);
+        //        }
+        //    }
+        //    catch (Exception exc)
+        //    {
+        //        helper.LogError(Context, Request, exc, ListItemID, string.Empty);
+        //        helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+        //    }
+        //}
+
+        
     }
 }

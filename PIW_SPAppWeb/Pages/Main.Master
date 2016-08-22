@@ -414,9 +414,11 @@
             });
             
 
-            $("#btnOSECTakeOwnership").click(function (event) {
+            $("#btnOSECTakeOwnership,#btnSECReviewTakeOwnership").click(function (event) {
                 skm_LockScreen("Taking Ownership ... ");
             });
+
+            
 
             $("#btnRecall").click(function (event) {
                 skm_LockScreen("Recalling ... ");

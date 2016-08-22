@@ -1172,16 +1172,7 @@ namespace PIW_SPAppWeb.Helper
             //user.Groups.Cast<Group>().Any()
             return result;
         }
-
-        //public bool IsCurrentUserMemberOfGroup(ClientContext clientContext,,string groupName)
-        //{
-        //    var currentUser = clientContext.Web.CurrentUser;
-        //    clientContext.Load(currentUser);
-        //    clientContext.ExecuteQuery();
-
-        //    return IsUserMemberOfGroup(clientContext, currentUser, new string[]{groupName});
-        //}
-
+        
         /// <summary>
         /// Return the first docket number found in input
         /// If no docket found, return the whole input

@@ -244,6 +244,12 @@ namespace PIW_SPAppWeb
         public const string Grp_PIWLegalResourcesReview = "PIWLegalResourcesReview";
         public const string Grp_PIW_FOL_Submission_CEII_ReadOnly = "PIW–FOL-Submission-CEII-ReadOnly";
         public const string Grp_PIW_FOL_Submission_Privileged_ReadOnly = "PIW–FOL-Submission-Privileged–ReadOnly";
+        public const string Grp_PIWSection206Notice = "PIWSection206Notice";
+        public const string Grp_PIWHearingOrder = "PIWHearingOrder";
+        public const string Grp_PIWFederalResister = "PIWFederalResister";
+        
+ 
+        
 
 
         //role
