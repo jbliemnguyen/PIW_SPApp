@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
@@ -1120,7 +1121,7 @@ namespace PIW_SPAppWeb.Helper
                 {
                     message = exc.Message;
                 }
-                
+
                 if (exc.StackTrace != null)
                 {
                     message = message + "Stack Trace: " + exc.StackTrace;
@@ -1172,7 +1173,31 @@ namespace PIW_SPAppWeb.Helper
             //user.Groups.Cast<Group>().Any()
             return result;
         }
-        
+
+        /// <summary>
+        /// If user is not belong to specific group authozied for submit and approve the form,
+        /// They can only view the form after it is initiated publication.
+        /// </summary>
+        /// <param name="clientContext"></param>
+        /// <param name="CurrentUserLogInID"></param>
+        /// <param name="groups">authorized group to submit and approve the form</param>
+        /// <param name="formStatus"></param>
+        /// <returns></returns>
+        public bool CanUserViewForm(ClientContext clientContext, string CurrentUserLogInID, string[] groups, string formStatus)
+        {
+            bool result = IsUserMemberOfGroup(clientContext, CurrentUserLogInID, groups);
+            if (!result)
+            {
+                if (!string.IsNullOrEmpty(formStatus))
+                {
+                    //if user is not member of viewable group, they can only view form after it is initiated publication
+                    result = (formStatus.Equals(Constants.PIWList_FormStatus_PublishInitiated) ||
+                              formStatus.Equals(Constants.PIWList_FormStatus_PublishedToeLibrary));
+                }
+            }
+
+            return result;
+        }
         /// <summary>
         /// Return the first docket number found in input
         /// If no docket found, return the whole input
@@ -1545,12 +1570,12 @@ namespace PIW_SPAppWeb.Helper
                 }
                 else
                 {
-                    if (finalDocket.IndexOf(docketTrimmed,StringComparison.OrdinalIgnoreCase) < 0)//no duplicated
+                    if (finalDocket.IndexOf(docketTrimmed, StringComparison.OrdinalIgnoreCase) < 0)//no duplicated
                     {
                         finalDocket = finalDocket + "," + docketTrimmed;
                     }
                 }
-                
+
 
             }
             return finalDocket;

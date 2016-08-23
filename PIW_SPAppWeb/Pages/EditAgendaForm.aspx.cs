@@ -155,28 +155,10 @@ namespace PIW_SPAppWeb.Pages
 
                 if (!Page.IsPostBack)
                 {
-                    if (!string.IsNullOrEmpty(ListItemID))
+                    if (!string.IsNullOrEmpty(ListItemID))//Edit
                     {
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
-                            //check if user is OSEC - redirect to "Access Denied" if not
-                            var isCurrentUserOSEC = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                                new[] { Constants.Grp_OSEC,Constants.Grp_SecReview });
-                            if (!isCurrentUserOSEC)
-                            {
-                                helper.RedirectToAPage(Request,Response,Constants.Page_AccessDenied);
-                                return;
-                            }
-
-
-                            string publicDocumentURLs;
-                            string cEiiDocumentUrLs;
-                            string privilegedDocumentURLs;
-                            helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
-                                out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
-                            SaveDocumentURLsToPageProperty(publicDocumentURLs, cEiiDocumentUrLs, privilegedDocumentURLs);
-                            helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
-
                             var isCurrentUserAdmin = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                                 new[] { Constants.Grp_PIWSystemAdmin });
 
@@ -189,6 +171,20 @@ namespace PIW_SPAppWeb.Pages
                             else
                             {
                                 PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
+                                if (!helper.CanUserViewForm(clientContext, CurrentUserLogInID,
+                                    new[] { Constants.Grp_OSEC, Constants.Grp_SecReview },FormStatus))
+                                {
+                                    helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
+                                    return;
+                                }
+                                //populate document
+                                string publicDocumentURLs;
+                                string cEiiDocumentUrLs;
+                                string privilegedDocumentURLs;
+                                helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
+                                    out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
+                                SaveDocumentURLsToPageProperty(publicDocumentURLs, cEiiDocumentUrLs, privilegedDocumentURLs);
+                                helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
                                 DisplayListItemInForm(clientContext, listItem);
                                 helper.PopulateHistoryList(clientContext, ListItemID, rpHistoryList, Constants.PIWListHistory_FormTypeOption_EditForm);
 
@@ -221,9 +217,8 @@ namespace PIW_SPAppWeb.Pages
                         {
 
                             //check if user is OSEC - redirect to "Access Denied" if not
-                            var isCurrentUserOSEC = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                                new[] { Constants.Grp_OSEC, Constants.Grp_SecReview });
-                            if (!isCurrentUserOSEC)
+                            if (!helper.CanUserViewForm(clientContext, CurrentUserLogInID,
+                                    new[] { Constants.Grp_OSEC, Constants.Grp_SecReview }, string.Empty))
                             {
                                 helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
                                 return;
@@ -1947,7 +1942,7 @@ namespace PIW_SPAppWeb.Pages
                     EnableMainPanel(false, false);
                     lbMainMessage.Visible = false;
 
-                    //InitiallyEnableCitationNumberControls(clientContext, listItem);
+                    //citation number controls
                     EnableCitationNumberControls(false,false);
 
                     //SEC Review section
@@ -1985,7 +1980,7 @@ namespace PIW_SPAppWeb.Pages
                     EnableMainPanel(false, isCurrentUserSecReviewer);
                     lbMainMessage.Visible = false;
 
-                    InitiallyEnableCitationNumberControls(clientContext, listItem);
+                    EnableCitationNumberControls(false, false);
                     //OSEC section
                     fieldsetSecReview.Visible = true;
 
@@ -2009,10 +2004,18 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Edited:
                     //submitter
-                    EnableMainPanel(true, isCurrentUserSecReviewer);
                     lbMainMessage.Visible = false;
 
-                    InitiallyEnableCitationNumberControls(clientContext, listItem);
+                    if (isCurrentUserSecReviewer)
+                    {
+                        EnableMainPanel(true,true);
+                        InitiallyEnableCitationNumberControls(clientContext, listItem);
+                    }
+                    else if (isCurrentUserOSEC)
+                    {
+                        EnableMainPanel(false,false);
+                        EnableCitationNumberControls(false, false);
+                    }
 
                     //Sec review section
                     if (previousFormStatus.Equals(Constants.PIWList_FormStatus_PrePublication) ||
@@ -2041,11 +2044,18 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_ReadyForPublishing:
                     //submitter
-                    EnableMainPanel(false, isCurrentUserSecReviewer);
                     lbMainMessage.Visible = false;
 
-
-                    InitiallyEnableCitationNumberControls(clientContext, listItem);
+                    if (isCurrentUserSecReviewer)
+                    {
+                        EnableMainPanel(false, true);
+                        InitiallyEnableCitationNumberControls(clientContext, listItem);
+                    }
+                    else if (isCurrentUserOSEC)
+                    {
+                        EnableMainPanel(false, false);
+                        EnableCitationNumberControls(false, false);                        
+                    }
                     //Secretary Review
                     fieldsetSecReview.Visible = true;
 
@@ -2074,7 +2084,7 @@ namespace PIW_SPAppWeb.Pages
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "Publication has been initiated for this issuance.";
 
-                    InitiallyEnableCitationNumberControls(clientContext, listItem);
+                    EnableCitationNumberControls(false,false);
 
                     //Sec Review
                     fieldsetSecReview.Visible = true;
@@ -2179,7 +2189,7 @@ namespace PIW_SPAppWeb.Pages
                 fieldSetSupplementalMailingList.Visible = enabled;
             }
 
-            //disable/enable the Remove button
+            //disable/enable the Remove and Edit button
             //the link always be enable so user can open document
             foreach (RepeaterItem row in rpDocumentList.Items)
             {

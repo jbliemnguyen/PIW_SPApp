@@ -158,34 +158,10 @@ namespace PIW_SPAppWeb.Pages
 
                 if (!Page.IsPostBack)
                 {
-                    if (!string.IsNullOrEmpty(ListItemID))
+                    if (!string.IsNullOrEmpty(ListItemID))//Edit
                     {
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
-                            //check if user is can submit form - redirect to "Access Denied" if not
-                            var CanUserSubmitStdForm = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                                new[] { Constants.Grp_PIWUsers, Constants.Grp_OSEC, Constants.Grp_SecReview });
-                            if (!CanUserSubmitStdForm)
-                            {
-                                helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
-                                return;
-                            }
-
-                            string publicDocumentURLs;
-                            string cEiiDocumentUrLs;
-                            string privilegedDocumentURLs;
-
-                            helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
-                               out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
-                            SaveDocumentURLsToPageProperty(publicDocumentURLs, cEiiDocumentUrLs, privilegedDocumentURLs);
-
-                            if (!string.IsNullOrEmpty(publicDocumentURLs))
-                            {
-                                PublicDocumentURLsFromViewState = publicDocumentURLs;
-                            }
-
-                            helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
-
                             var isCurrentUserAdmin = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                                 new[] { Constants.Grp_PIWSystemAdmin });
 
@@ -195,9 +171,34 @@ namespace PIW_SPAppWeb.Pages
                             {
                                 helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_ItemNotFound);
                             }
-                            else
+                            else//there is list item
                             {
-                                PopulateFormStatusAndProperties(clientContext, listItem);
+                                PopulateFormStatusAndProperties(clientContext, listItem);//because we need to use FormStatus 
+                                if (!helper.CanUserViewForm(clientContext, CurrentUserLogInID,
+                                    new[] {Constants.Grp_PIWUsers, Constants.Grp_OSEC, Constants.Grp_SecReview},
+                                    FormStatus))
+                                {
+                                    helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
+                                    return;    
+                                }
+                                
+                                //populate documents
+                                string publicDocumentURLs;
+                                string cEiiDocumentUrLs;
+                                string privilegedDocumentURLs;
+                                helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
+                                   out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
+                                SaveDocumentURLsToPageProperty(publicDocumentURLs, cEiiDocumentUrLs, privilegedDocumentURLs);
+
+                                if (!string.IsNullOrEmpty(publicDocumentURLs))
+                                {
+                                    PublicDocumentURLsFromViewState = publicDocumentURLs;
+                                }
+
+                                helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
+
+
+                                
                                 DisplayListItemInForm(clientContext, listItem);
                                 helper.PopulateHistoryList(clientContext, ListItemID, rpHistoryList, Constants.PIWListHistory_FormTypeOption_EditForm);
                                 //display form visiblility based on form status
@@ -227,10 +228,9 @@ namespace PIW_SPAppWeb.Pages
 
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
-                            //check if user is can submit form - redirect to "Access Denied" if not
-                            var CanUserSubmitStdForm = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                                new[] { Constants.Grp_PIWUsers, Constants.Grp_OSEC, Constants.Grp_SecReview });
-                            if (!CanUserSubmitStdForm)
+                            //check if user can create form - redirect to "Access Denied" if not
+                            if (!helper.CanUserViewForm(clientContext, CurrentUserLogInID,
+                                    new[] { Constants.Grp_PIWUsers, Constants.Grp_OSEC, Constants.Grp_SecReview },string.Empty))
                             {
                                 helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
                                 return;

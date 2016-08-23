@@ -345,27 +345,18 @@
                     <asp:TextBox ID="tbInstruction" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" MaxLength="255"></asp:TextBox>
                 </div>
             </div>
-            <asp:UpdatePanel runat="server">
-                <ContentTemplate>
-                    <div class="form-group">
-                        <div class="col-md-2"></div>
-                        <div class="col-md-2">
-                            <asp:CheckBox ID="cbFederalRegister" runat="server" CssClass="checkbox" Text="Federal Register" AutoPostBack="True" OnCheckedChanged="cbFederalRegister_CheckedChanged" />
-                        </div>
-                        <div class="col-md-2">
-                            <asp:CheckBox ID="cbSection206Notice" runat="server" CssClass="checkbox" Text="Section 206 Notice" AutoPostBack="True" OnCheckedChanged="cbSection206Notice_CheckedChanged" />
-                        </div>
-                        <div class="col-md-2">
-                            <asp:CheckBox ID="cbHearingOrder" runat="server" CssClass="checkbox" Text="Hearing Order" AutoPostBack="True" OnCheckedChanged="cbHearingOrder_CheckedChanged" />
-                        </div>
-                    </div>
-                </ContentTemplate>
-                <Triggers>
-                    <asp:AsyncPostBackTrigger ControlID="cbFederalRegister" EventName="CheckedChanged" />
-                    <asp:AsyncPostBackTrigger ControlID="cbSection206Notice" EventName="CheckedChanged" />
-                    <asp:AsyncPostBackTrigger ControlID="cbHearingOrder" EventName="CheckedChanged" />
-                </Triggers>
-            </asp:UpdatePanel>
+            <div class="form-group">
+                <div class="col-md-2"></div>
+                <div class="col-md-2">
+                    <asp:CheckBox ID="cbFederalRegister" runat="server" CssClass="checkbox" Text="Federal Register" AutoPostBack="True" OnCheckedChanged="cbFederalRegister_CheckedChanged" />
+                </div>
+                <div class="col-md-2">
+                    <asp:CheckBox ID="cbSection206Notice" runat="server" CssClass="checkbox" Text="Section 206 Notice" AutoPostBack="True" OnCheckedChanged="cbSection206Notice_CheckedChanged" />
+                </div>
+                <div class="col-md-2">
+                    <asp:CheckBox ID="cbHearingOrder" runat="server" CssClass="checkbox" Text="Hearing Order" AutoPostBack="True" OnCheckedChanged="cbHearingOrder_CheckedChanged" />
+                </div>
+            </div>
             <div class="form-group">
                 <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)<span class='accentText'> *</span>" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">

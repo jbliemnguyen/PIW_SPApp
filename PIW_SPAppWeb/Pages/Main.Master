@@ -93,7 +93,7 @@
         var hostWebURL;
         var link;
         var qs;
-        $(document).ready(function () {
+        $(document).ready(function() {
             qs = "?" + document.URL.split("?")[1];
             var spAppWebUrl = decodeURIComponent(
                 getQueryStringParameter("SPAppWebUrl")
@@ -116,26 +116,28 @@
             );
 
             //append the sharepoint current context info into the URL
-            $("#sidebar a").each(function () {
+            $("#sidebar a").each(function() {
                 //append the hostURL and appWebURL to the link
                 $(this).prop("href", $(this).prop("href") + "?SPHostUrl=" + spHostUrl + "&SPLanguage=" + SPLanguage + "&SPClientTag=" + SPClientTag + "&SPProductNumber=" + SPProductNumber + "&SPAppWebUrl=" + spAppWebUrl);
             });
 
-            $("#navbar a").each(function () {
+            $("#navbar a").each(function() {
                 //append the hostURL and appWebURL to the link
                 $(this).prop("href", $(this).prop("href") + "?SPHostUrl=" + spHostUrl + "&SPLanguage=" + SPLanguage + "&SPClientTag=" + SPClientTag + "&SPProductNumber=" + SPProductNumber + "&SPAppWebUrl=" + spAppWebUrl);
             });
+
+
+            if ((document.URL.indexOf("EditStandardForm.aspx") > -1) ||
+            (document.URL.indexOf("EditStandardForm.aspx") > -1) ||
+            (document.URL.indexOf("EditStandardForm.aspx") > -1))
+            {
+                SharedEditPageClientCode();
+            }
 
 
             //Call to method in each page to do further client side programming
             //NOTE: each page must have this method in Main Content Place Holder
-
-            jQueryValidation();
-
-
-            SharedEditPageClientCode();
-
-
+            
             PageClient(spHostUrl, spAppWebUrl, SPLanguage);
 
         });
@@ -264,6 +266,8 @@
         }
 
         function SharedEditPageClientCode() {
+
+            jQueryValidation();
 
             //Initiator Program office dirves the value of document owner program office
             $("#ddProgramOfficeWorkflowInitiator").change(function () {

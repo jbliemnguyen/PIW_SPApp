@@ -153,19 +153,10 @@ namespace PIW_SPAppWeb.Pages
 
                 if (!Page.IsPostBack)
                 {
-                    if (!string.IsNullOrEmpty(ListItemID))
+                    if (!string.IsNullOrEmpty(ListItemID))//Edit
                     {
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
-                            string publicDocumentURLs;
-                            string cEiiDocumentUrLs;
-                            string privilegedDocumentURLs;
-                            helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
-                                out publicDocumentURLs,out cEiiDocumentUrLs,out privilegedDocumentURLs);
-                            SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,privilegedDocumentURLs);
-
-                            helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
-
                             var isCurrentUserAdmin = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                                 new[] { Constants.Grp_PIWSystemAdmin });
 
@@ -178,6 +169,23 @@ namespace PIW_SPAppWeb.Pages
                             else
                             {
                                 PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
+                                if (!helper.CanUserViewForm(clientContext, CurrentUserLogInID,
+                                    new[] { Constants.Grp_PIWDirectPublication, Constants.Grp_PIWDirectPublicationSubmitOnly}, FormStatus))
+                                {
+                                    helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
+                                    return;
+                                }
+
+                                //populate documents
+                                string publicDocumentURLs;
+                                string cEiiDocumentUrLs;
+                                string privilegedDocumentURLs;
+                                helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
+                                    out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
+                                SaveDocumentURLsToPageProperty(publicDocumentURLs, cEiiDocumentUrLs, privilegedDocumentURLs);
+                                helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
+
+
                                 DisplayListItemInForm(clientContext, listItem);
                                 helper.PopulateHistoryList(clientContext, ListItemID, rpHistoryList, Constants.PIWListHistory_FormTypeOption_EditForm);
                                 //display form visiblility based on form status
@@ -207,6 +215,14 @@ namespace PIW_SPAppWeb.Pages
 
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
+                            if (!helper.CanUserViewForm(clientContext, CurrentUserLogInID,
+                                    new[] { Constants.Grp_PIWDirectPublication, Constants.Grp_PIWDirectPublicationSubmitOnly }, string.Empty))
+                            {
+                                helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
+                                return;
+                            }
+
+
                             ListItem newItem = helper.createNewPIWListItem(clientContext, Constants.PIWList_FormType_DirectPublicationForm,CurrentUserLogInID);
                             ListItemID = newItem.Id.ToString();
 
