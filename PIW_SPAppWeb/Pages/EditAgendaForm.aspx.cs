@@ -172,7 +172,7 @@ namespace PIW_SPAppWeb.Pages
                             {
                                 PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
                                 if (!helper.CanUserViewForm(clientContext, CurrentUserLogInID,
-                                    new[] { Constants.Grp_OSEC, Constants.Grp_SecReview },FormStatus))
+                                    new[] { Constants.Grp_OSEC, Constants.Grp_SecReview }, FormStatus))
                                 {
                                     helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
                                     return;
@@ -581,8 +581,8 @@ namespace PIW_SPAppWeb.Pages
                     helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
                         Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
-                    //Refresh
-                    helper.RefreshPage(Page.Request, Page.Response);
+                    //Redirect
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -1106,7 +1106,7 @@ namespace PIW_SPAppWeb.Pages
                         clientContext.Load(section206Notice.Users);
                         clientContext.ExecuteQuery();
                         User[] users = section206Notice.Users.ToArray();
-                        PeoplePickerHelper.AddPeoplePickerValues(hdnNotificationRecipient,users);
+                        PeoplePickerHelper.AddPeoplePickerValues(hdnNotificationRecipient, users);
                     }
                 }
             }
@@ -1406,7 +1406,7 @@ namespace PIW_SPAppWeb.Pages
 
             //Populate notification recipient 
             //FieldUserValue[] notificationRecipients = null;
-            var notificationRecipients = PopulateNotificationRecipients(clientContext,listItem,piwListInternalColumnNames);
+            var notificationRecipients = PopulateNotificationRecipients(clientContext, listItem, piwListInternalColumnNames);
 
 
             //Populate current user title
@@ -1458,14 +1458,15 @@ namespace PIW_SPAppWeb.Pages
             }
 
             //program office(wokflow initiator)
-            if (ddProgramOfficeWorkflowInitiator.SelectedIndex != 0)
-            {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = ddProgramOfficeWorkflowInitiator.SelectedValue;
-            }
-            else
-            {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = string.Empty;
-            }
+            //if (ddProgramOfficeWorkflowInitiator.SelectedIndex != 0)
+            //{
+            //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = ddProgramOfficeWorkflowInitiator.SelectedValue;
+            //}
+            //else
+            //{
+            //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = string.Empty;
+            //}
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = ddProgramOfficeWorkflowInitiator.SelectedValue;
 
 
 
@@ -1545,10 +1546,10 @@ namespace PIW_SPAppWeb.Pages
             clientContext.ExecuteQuery();
         }
 
-        private FieldUserValue[] PopulateNotificationRecipients(ClientContext clientContext,ListItem listItem,Dictionary<string,string> piwListInternalColumnNames)
+        private FieldUserValue[] PopulateNotificationRecipients(ClientContext clientContext, ListItem listItem, Dictionary<string, string> piwListInternalColumnNames)
         {
             List<FieldUserValue> notificationRecipients = new List<FieldUserValue>();
-            
+
             //value specidifed from control
             if (!string.IsNullOrEmpty(hdnNotificationRecipient.Value))
             {
@@ -1558,10 +1559,10 @@ namespace PIW_SPAppWeb.Pages
                 for (var i = 0; i < users.Count; i++)
                 {
                     var newUser = clientContext.Web.EnsureUser(users[i].Login);
-                        //ensure user so usr can be added to site if they are not --> receive email
+                    //ensure user so usr can be added to site if they are not --> receive email
                     clientContext.Load(newUser);
                     clientContext.ExecuteQuery();
-                    notificationRecipients.Add(new FieldUserValue {LookupId = newUser.Id});
+                    notificationRecipients.Add(new FieldUserValue { LookupId = newUser.Id });
                 }
             }
 
@@ -1943,7 +1944,7 @@ namespace PIW_SPAppWeb.Pages
                     lbMainMessage.Visible = false;
 
                     //citation number controls
-                    EnableCitationNumberControls(false,false);
+                    EnableCitationNumberControls(false, false);
 
                     //SEC Review section
                     fieldsetSecReview.Visible = false;
@@ -2008,12 +2009,12 @@ namespace PIW_SPAppWeb.Pages
 
                     if (isCurrentUserSecReviewer)
                     {
-                        EnableMainPanel(true,true);
+                        EnableMainPanel(true, true);
                         InitiallyEnableCitationNumberControls(clientContext, listItem);
                     }
                     else if (isCurrentUserOSEC)
                     {
-                        EnableMainPanel(false,false);
+                        EnableMainPanel(false, false);
                         EnableCitationNumberControls(false, false);
                     }
 
@@ -2046,16 +2047,19 @@ namespace PIW_SPAppWeb.Pages
                     //submitter
                     lbMainMessage.Visible = false;
 
-                    if (isCurrentUserSecReviewer)
-                    {
-                        EnableMainPanel(false, true);
-                        InitiallyEnableCitationNumberControls(clientContext, listItem);
-                    }
-                    else if (isCurrentUserOSEC)
-                    {
-                        EnableMainPanel(false, false);
-                        EnableCitationNumberControls(false, false);                        
-                    }
+
+                    EnableMainPanel(false, false);
+                    EnableCitationNumberControls(false, false);
+                    //if (isCurrentUserSecReviewer)
+                    //{
+                    //    EnableMainPanel(false, true);
+                    //    InitiallyEnableCitationNumberControls(clientContext, listItem);
+                    //}
+                    //else if (isCurrentUserOSEC)
+                    //{
+                    //    EnableMainPanel(false, false);
+                    //    EnableCitationNumberControls(false, false);                        
+                    //}
                     //Secretary Review
                     fieldsetSecReview.Visible = true;
 
@@ -2084,7 +2088,7 @@ namespace PIW_SPAppWeb.Pages
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "Publication has been initiated for this issuance.";
 
-                    EnableCitationNumberControls(false,false);
+                    EnableCitationNumberControls(false, false);
 
                     //Sec Review
                     fieldsetSecReview.Visible = true;
@@ -2221,7 +2225,7 @@ namespace PIW_SPAppWeb.Pages
             btnAcceptCitationNumber.Visible = citationNumberCanBeChanged;
             btnRemoveCitationNumber.Visible = CitationNumberCanBeRemoved;
         }
-        
+
         /// <summary>
         /// if a citation is assigned, generate button should not displayed
         /// </summary>
@@ -2252,7 +2256,7 @@ namespace PIW_SPAppWeb.Pages
         }
         #endregion
 
-        
+
 
         //protected void btnRecall_Click1(object sender, EventArgs e)
         //{
@@ -2351,6 +2355,6 @@ namespace PIW_SPAppWeb.Pages
         //    }
         //}
 
-        
+
     }
 }

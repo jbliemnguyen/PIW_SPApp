@@ -63,14 +63,14 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
 
             newItem[internalNameList[Constants.PIWList_colName_WorkflowInitiator]] = user;
-            newItem[internalNameList[Constants.PIWList_colName_DocumentOwner]] = user;
+            //newItem[internalNameList[Constants.PIWList_colName_DocumentOwner]] = user;
 
             //set the program office initiator to the value from user profile 
             if (!string.IsNullOrEmpty(currentUserProperties.Title))
             {
                 string department = currentUserProperties.Title;
                 newItem[internalNameList[Constants.PIWList_colName_ProgramOfficeWFInitator]] = department;
-                newItem[internalNameList[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] = newItem[internalNameList[Constants.PIWList_colName_ProgramOfficeWFInitator]];
+                //newItem[internalNameList[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] = newItem[internalNameList[Constants.PIWList_colName_ProgramOfficeWFInitator]];
             }
 
             //set FormType
@@ -413,7 +413,8 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
 
             string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, libraryName, subFoder);
-            string downloadURL = string.Format("{0}/_layouts/download.aspx?SourceURL=", clientContext.Web.Url);
+            //string downloadURL = string.Format("{0}/_layouts/download.aspx?SourceURL=", clientContext.Web.Url);
+            
             var documentList = getDocumentsByDocType(clientContext, uploadSubFolderURL, docType);
 
             foreach (File file in documentList)
@@ -425,7 +426,8 @@ namespace PIW_SPAppWeb.Helper
                 row["ID"] = file.ListItemAllFields["ID"];
                 row["Name"] = file.Name + " (View Only)";
                 row["URL"] = url;
-                row["DownloadURL"] = downloadURL + url;
+                //row["DownloadURL"] = downloadURL + url;
+                row["DownloadURL"] = url + "?web=0";
                 row["Security Level"] =
                     file.ListItemAllFields[internalNameList[Constants.PIWDocuments_colName_SecurityLevel]];
 
@@ -1468,7 +1470,7 @@ namespace PIW_SPAppWeb.Helper
                 pattern = "<li>{1}</li>";
             }
 
-
+            string allowDownload = "?web=0";
 
             //Public
             var urlArray = publicDocsURLs.Split(new string[] { Constants.DocumentURLsSeparator }, StringSplitOptions.RemoveEmptyEntries);
@@ -1476,11 +1478,11 @@ namespace PIW_SPAppWeb.Helper
             {
                 if (string.IsNullOrEmpty(result.ToString()))
                 {
-                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (Public)"));
+                    result.Append(string.Format(pattern, url + allowDownload, getFileNameFromURL(url) + " (Public)"));
                 }
                 else
                 {
-                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (Public)"));
+                    result.Append(string.Format(pattern, url + allowDownload, getFileNameFromURL(url) + " (Public)"));
                 }
 
             }
@@ -1491,11 +1493,11 @@ namespace PIW_SPAppWeb.Helper
             {
                 if (string.IsNullOrEmpty(result.ToString()))
                 {
-                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (CEII)"));
+                    result.Append(string.Format(pattern, url + allowDownload, getFileNameFromURL(url) + " (CEII)"));
                 }
                 else
                 {
-                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (CEII)"));
+                    result.Append(string.Format(pattern, url + allowDownload, getFileNameFromURL(url) + " (CEII)"));
                 }
 
             }
@@ -1506,11 +1508,11 @@ namespace PIW_SPAppWeb.Helper
             {
                 if (string.IsNullOrEmpty(result.ToString()))
                 {
-                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (Privileged)"));
+                    result.Append(string.Format(pattern, url + allowDownload, getFileNameFromURL(url) + " (Privileged)"));
                 }
                 else
                 {
-                    result.Append(string.Format(pattern, url, getFileNameFromURL(url) + " (Privileged)"));
+                    result.Append(string.Format(pattern, url + allowDownload, getFileNameFromURL(url) + " (Privileged)"));
                 }
 
             }

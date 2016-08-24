@@ -591,8 +591,8 @@ namespace PIW_SPAppWeb.Pages
 
 
 
-                    //Refresh
-                    helper.RefreshPage(Page.Request, Page.Response);
+                    //Redirect
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)

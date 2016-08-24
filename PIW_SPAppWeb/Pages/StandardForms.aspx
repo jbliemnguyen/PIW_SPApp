@@ -15,11 +15,11 @@
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
         <asp:UpdatePanel runat="server">
             <ContentTemplate>
-                <asp:Timer ID="tmrRefresh" runat="server" Interval="30000" Enabled="true" OnTick="tmrRefresh_Tick">
+                <asp:Timer ID="tmrRefresh" runat="server" Interval="300000" Enabled="true" OnTick="tmrRefresh_Tick"><%--5 minutes delays--%>
                 </asp:Timer>
                 <div class="form-group">
                     <div class="col-md-8">
-                        <span style="font-size:large">Standard Form Queue</span>
+                        <span style="font-size:large">Standard Forms</span>
                     </div>
                     <div class="col-md-3">
                         <asp:Label runat="server" ID="lbLastUpdated" Font-Italic="True" Font-Bold="True"></asp:Label>

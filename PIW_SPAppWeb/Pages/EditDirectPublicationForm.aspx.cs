@@ -374,10 +374,10 @@ namespace PIW_SPAppWeb.Pages
                     
                     helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item publication to eLibrary Data Entry initiated",
                             FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
-                    
 
-                    //Refresh
-                    helper.RefreshPage(Page.Request, Page.Response);
+
+                    //Redirect
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
