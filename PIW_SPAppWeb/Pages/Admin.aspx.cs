@@ -379,11 +379,36 @@ namespace PIW_SPAppWeb
 
         }
 
-        //protected void btnTestDvvo_Click(object sender, EventArgs e)
-        //{
-        //    string filePath = @"E:\PIWDocuments\SharePoint2016Features.pdf";
-        //    FERC.Common.Result result = helper.DvvoProxy.ValidateFile(filePath);
-        //}
+        protected void btnTestDvvo_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                //string filePath = @"\\fdc1s-sp23wfed2\PIWDocuments\SharePoint2016Features.pdf";
+                string filePath = @"\\fdc1s-sp23wfed2\PIWDocuments\SharePoint2016Features.abcz";
+                //FERC.Common.Result result = helper.DvvoProxy.ValidateFile(filePath);
+                FERC.Common.Result result = helper.getDVVORemoteObject().ValidateFile(filePath);
+
+                if (result.ErrorList != null)
+                {
+                    foreach (var error in result.ErrorList)
+                    {
+                        lbDVVO.Text = error.Description + " -- ";
+                    }
+
+                }
+                else
+                {
+                    lbDVVO.Text = "File good";
+                }
+               
+            }
+            catch (Exception exc)
+            {
+                lbDVVO.Text = exc.Message;
+
+            }
+            
+        }
 
         //protected void Button2_Click(object sender, EventArgs e)
         //{

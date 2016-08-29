@@ -51,6 +51,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Assemblies\FERC.eLibrary.Common.dll</HintPath>
     </Reference>
+    <Reference Include="FERC.eLibrary.Dvvo.Common">
+      <HintPath>Assemblies\FERC.eLibrary.Dvvo.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="FERC.eLibrary.Dvvo.Facade">
+      <HintPath>Assemblies\FERC.eLibrary.Dvvo.Facade.dll</HintPath>
+    </Reference>
     <Reference Include="FERC.eLibrary.Eps.Common, Version=1.0.0.0, Culture=neutral, PublicKeyToken=712dc87bcff34e24, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Assemblies\FERC.eLibrary.Eps.Common.dll</HintPath>
@@ -235,7 +241,9 @@
     <Content Include="Styles\offcanvas.css" />
     <Content Include="Styles\peoplepickercontrol.css" />
     <Content Include="Styles\piw.css" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Services\Web.config" />
   </ItemGroup>
   <ItemGroup>

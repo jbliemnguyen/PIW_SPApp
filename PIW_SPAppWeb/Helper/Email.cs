@@ -7,6 +7,7 @@ using System.Security;
 using System.ServiceModel.Channels;
 using System.Web;
 using System.Web.UI.WebControls;
+using DocumentFormat.OpenXml.Office2010.PowerPoint;
 using FERC.Common.Queues;
 using Microsoft.SharePoint.Client;
 using Org.BouncyCastle.Asn1.X509;
@@ -18,7 +19,7 @@ namespace PIW_SPAppWeb.Helper
     {
         SharePointHelper helper = new SharePointHelper();
 
-        
+
         /// <summary>
         /// Call from Scheduler or system service
         /// </summary>
@@ -28,10 +29,10 @@ namespace PIW_SPAppWeb.Helper
         /// <param name="currentUser"></param>
         public void SendEmail(ClientContext clientContext, ListItem listItem, enumAction action, User currentUser)
         {
-            
+
         }
-        
-        
+
+
         /// <summary>
         /// called from the Edit Form
         /// </summary>
@@ -47,13 +48,13 @@ namespace PIW_SPAppWeb.Helper
         /// <param name="hdnNotificationRecipient"></param>
         /// <param name="comment"></param>
         public void SendEmail(ClientContext clientContext, ListItem listItem, enumAction action, string CurrentFormStatus, string previousFormStatus,
-            User currentUser, string formURL, HiddenField hdnWorkflowInitiator, 
-            HiddenField hdnDocumentOwner, HiddenField hdnNotificationRecipient,string comment)
+            User currentUser, string formURL, HiddenField hdnWorkflowInitiator,
+            HiddenField hdnDocumentOwner, HiddenField hdnNotificationRecipient, string comment)
         {
-            var piwListInteralColumnNames = helper.getInternalColumnNamesFromCache(clientContext,Constants.PIWListName);
-            
+            var piwListInteralColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
-            var initiatorEmails = string.IsNullOrEmpty(hdnWorkflowInitiator.Value) ? null : 
+
+            var initiatorEmails = string.IsNullOrEmpty(hdnWorkflowInitiator.Value) ? null :
                 PeoplePickerHelper.GetValuesFromPeoplePicker(hdnWorkflowInitiator).Select(t => t.Email);
 
             var documentOwnerEmails = string.IsNullOrEmpty(hdnDocumentOwner.Value) ? null :
@@ -61,7 +62,7 @@ namespace PIW_SPAppWeb.Helper
 
             var notificationRecipientEmails = string.IsNullOrEmpty(hdnNotificationRecipient.Value) ? null :
                 PeoplePickerHelper.GetValuesFromPeoplePicker(hdnNotificationRecipient).Select(t => t.Email);
-            
+
             var docket = listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]] != null
                 ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]].ToString()
                 : string.Empty;
@@ -69,11 +70,28 @@ namespace PIW_SPAppWeb.Helper
             var formType = listItem[piwListInteralColumnNames[Constants.PIWList_colName_FormType]] != null
                 ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_FormType]].ToString() : string.Empty;
 
-            SendEmail(clientContext, listItem, action, CurrentFormStatus, previousFormStatus, currentUser, formURL, comment, formType, docket, initiatorEmails, documentOwnerEmails, notificationRecipientEmails);
+            var federalRegister = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_FederalRegister]].ToString());
+            var section206Notice = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_Section206Notice]].ToString());
+            var hearingOrder = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_HearingOrder]].ToString());
+
+            if (formType.Equals(Constants.PIWList_FormType_StandardForm))
+            {
+                SendEmailForStandardForm(clientContext, listItem, action, CurrentFormStatus, previousFormStatus,
+                    currentUser, formURL, comment, formType, docket,
+                    initiatorEmails, documentOwnerEmails, notificationRecipientEmails);
+            }
+            else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
+            {
+                SendEmailForAgendaForm(clientContext, listItem, action, CurrentFormStatus, previousFormStatus,
+                    currentUser, formURL, comment, formType, docket,
+                    initiatorEmails, documentOwnerEmails, notificationRecipientEmails,federalRegister,section206Notice,hearingOrder);
+            }
 
         }
 
-        private void SendEmail(ClientContext clientContext, ListItem listItem, enumAction action, string CurrentFormStatus,
+
+
+        private void SendEmailForStandardForm(ClientContext clientContext, ListItem listItem, enumAction action, string CurrentFormStatus,
             string previousFormStatus, User currentUser, string formURL, string comment, string formType, string docket,
             IEnumerable<string> initiatorEmails, IEnumerable<string> documentOwnerEmails, IEnumerable<string> notificationRecipientEmails)
         {
@@ -84,81 +102,55 @@ namespace PIW_SPAppWeb.Helper
                 case Constants.PIWList_FormStatus_Rejected:
                     if (action.Equals(enumAction.Submit))
                     {
-                        if (formType.Equals(Constants.PIWList_FormType_StandardForm))
-                        {
-                            string subject = "PIW - Workflow Item Submitted for Processing";
-                            string message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
+                        string subject = "PIW - Workflow Item Submitted for Processing";
+                        string message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
                                             has been submitted for processing in Publish Issuance Workflow by {2}.",
-                                formURL, docket, currentUser.Title);
-                            string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
-                            String To = string.Empty;
+                            formURL, docket, currentUser.Title);
+                        string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                        String To = string.Empty;
 
-                            //email to initiator, document owner and notification recipient
-                            To = AddEmailAddress(To, initiatorEmails);
-                            To = AddEmailAddress(To, documentOwnerEmails);
-                            To = AddEmailAddress(To, notificationRecipientEmails);
+                        //email to initiator, document owner and notification recipient
+                        To = AddEmailAddress(To, initiatorEmails);
+                        To = AddEmailAddress(To, documentOwnerEmails);
+                        To = AddEmailAddress(To, notificationRecipientEmails);
+                        SendEmail(clientContext, To, subject, htmlContent);
 
-
-                            SendEmail(clientContext,To, subject, htmlContent);
-                        }
-                        else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
-                        {
-                            throw new NotImplementedException();
-                        }
                     }
-                    else if (action.Equals(enumAction.Publish))
-                    {
-                        if (formType.Equals(Constants.PIWList_FormType_DirectPublicationForm))
-                        {
-                            throw new NotImplementedException();
-                        }
-                    }
-
                     break;
                 case Constants.PIWList_FormStatus_Submitted:
                     if (action.Equals(enumAction.OSECTakeOwnerShip))
                     {
-                        if (formType.Equals(Constants.PIWList_FormType_StandardForm))
-                        {
-                            //PIW - OSEC Took Ownership of Workflow Item
-                            string subject = "PIW - OSEC Took Ownership of Workflow Item";
-                            string message = String.Format
-                                (@"OSEC has taken ownership of the following Workflow Item in Publish Issuance Workflow: 
+                        //PIW - OSEC Took Ownership of Workflow Item
+                        string subject = "PIW - OSEC Took Ownership of Workflow Item";
+                        string message = String.Format
+                            (@"OSEC has taken ownership of the following Workflow Item in Publish Issuance Workflow: 
                                             <a href='{0}'>{1}</a>.", formURL, docket);
 
 
-                            string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
-                            String To = string.Empty;
+                        string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                        String To = string.Empty;
 
-                            //email to initiator
-                            To = AddEmailAddress(To, initiatorEmails);
-                            SendEmail(clientContext, To, subject, htmlContent);
-                        }
-                        else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
-                        {
-                            throw new NotImplementedException();
-                        }
+                        //email to initiator
+                        To = AddEmailAddress(To, initiatorEmails);
+                        SendEmail(clientContext, To, subject, htmlContent);
                     }
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
                     if (action.Equals(enumAction.Reject))
                     {
-                        if (formType.Equals(Constants.PIWList_FormType_StandardForm))
-                        {
-                            string subject = "PIW – Workflow Item  Rejected by OSEC Verifier";
-                            string message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
+                        string subject = "PIW – Workflow Item  Rejected by OSEC Verifier";
+                        string message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
                                     submitted through Publish Issuance Workflow has been rejected by OSEC Verifier {2}.",
-                                formURL, docket, currentUser.Title);
-                            string htmlContent = getRejectHTMLFullMessageContent(message, comment);
-                            String To = string.Empty;
+                            formURL, docket, currentUser.Title);
+                        string htmlContent = getRejectHTMLFullMessageContent(message, comment);
+                        String To = string.Empty;
 
-                            //email to initiator, document owner and notification recipient
-                            To = AddEmailAddress(To, initiatorEmails);
-                            To = AddEmailAddress(To, documentOwnerEmails);
-                            To = AddEmailAddress(To, notificationRecipientEmails);
+                        //email to initiator, document owner and notification recipient
+                        To = AddEmailAddress(To, initiatorEmails);
+                        To = AddEmailAddress(To, documentOwnerEmails);
+                        To = AddEmailAddress(To, notificationRecipientEmails);
 
-                            SendEmail(clientContext, To, subject, htmlContent);
-                        }
+                        SendEmail(clientContext, To, subject, htmlContent);
                     }
                     break;
                 case Constants.PIWList_FormStatus_Edited:
@@ -178,22 +170,19 @@ namespace PIW_SPAppWeb.Helper
                 case Constants.PIWList_FormStatus_PrePublication:
                     if (action.Equals(enumAction.Reject))
                     {
-                        if (formType.Equals(Constants.PIWList_FormType_StandardForm))
-                        {
-                            string subject = "PIW – Workflow Item  Rejected by Pre-Publication Reviewer";
-                            string message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
+                        string subject = "PIW – Workflow Item  Rejected by Pre-Publication Reviewer";
+                        string message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
                                     submitted through Publish Issuance Workflow has been rejected by Pre-Publication Reviewer {2}.",
-                                formURL, docket, currentUser.Title);
-                            string htmlContent = getRejectHTMLFullMessageContent(message, comment);
-                            String To = string.Empty;
+                            formURL, docket, currentUser.Title);
+                        string htmlContent = getRejectHTMLFullMessageContent(message, comment);
+                        String To = string.Empty;
 
-                            //email to initiator, document owner and notification recipient
-                            To = AddEmailAddress(To, initiatorEmails);
-                            To = AddEmailAddress(To, documentOwnerEmails);
-                            To = AddEmailAddress(To, notificationRecipientEmails);
+                        //email to initiator, document owner and notification recipient
+                        To = AddEmailAddress(To, initiatorEmails);
+                        To = AddEmailAddress(To, documentOwnerEmails);
+                        To = AddEmailAddress(To, notificationRecipientEmails);
 
-                            SendEmail(clientContext, To, subject, htmlContent);
-                        }
+                        SendEmail(clientContext, To, subject, htmlContent);
                     }
                     break;
                 case Constants.PIWList_FormStatus_SecretaryReview:
@@ -207,20 +196,11 @@ namespace PIW_SPAppWeb.Helper
                             formURL, docket);
                         string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
                         String To = string.Empty;
+                        //email to initiator, document owner and notification recipient
+                        To = AddEmailAddress(To, initiatorEmails);
+                        To = AddEmailAddress(To, documentOwnerEmails);
+                        To = AddEmailAddress(To, notificationRecipientEmails);
 
-                        if (formType.Equals(Constants.PIWList_FormType_StandardForm))
-                        {
-                            //email to initiator, document owner and notification recipient
-                            To = AddEmailAddress(To, initiatorEmails);
-                            To = AddEmailAddress(To, documentOwnerEmails);
-                            To = AddEmailAddress(To, notificationRecipientEmails);
-                        }
-                        else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
-                        {
-                        }
-                        else if (formType.Equals(Constants.PIWList_FormType_DirectPublicationForm))
-                        {
-                        }
 
                         SendEmail(clientContext, To, subject, htmlContent);
                     }
@@ -275,13 +255,188 @@ namespace PIW_SPAppWeb.Helper
             }
         }
 
+        private void SendEmailForAgendaForm(ClientContext clientContext, ListItem listItem, enumAction action, string CurrentFormStatus,
+            string previousFormStatus, User currentUser, string formURL, string comment, string formType, string docket,
+            IEnumerable<string> initiatorEmails, IEnumerable<string> documentOwnerEmails, IEnumerable<string> notificationRecipientEmails,
+            bool federalRegister, bool section206Notice, bool hearingOrder)
+        {
+            switch (CurrentFormStatus)
+            {
+                case Constants.PIWList_FormStatus_Pending:
+                case Constants.PIWList_FormStatus_Recalled:
+                case Constants.PIWList_FormStatus_Rejected:
+                    if (action.Equals(enumAction.Submit))
+                    {
+                        string subject = "PIW - Workflow Item Submitted for Processing";
+                        string message = String.Format(@"Secretary Reviewer, Please review the following form and document: <a href='{0}'>{1}</a>.",
+                            formURL, docket);
+                        string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                        String To = string.Empty;
+
+                        //email to initiator, agenda non-management grp and secretary review grp
+                        To = AddEmailAddress(To, initiatorEmails);
+                        To = AddEmailAddress(To, getEmailListFromGrp(clientContext,Constants.Grp_PIWAgendaNonManagement));
+                        To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_SecReview));
+                        SendEmail(clientContext, To, subject, htmlContent);
+
+
+                        if (federalRegister)
+                        {
+                            //federal register
+                            subject = "PIW – Federal Register";
+                            message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
+                                                                    should be published in the Federal Register.", formURL, docket);
+                            htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                            //email to initiator, and federal register grp
+                            To = string.Empty;
+                            To = AddEmailAddress(To, initiatorEmails);
+                            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWFederalResister));
+                            SendEmail(clientContext, To, subject, htmlContent);
+                        }
+                        
+                        if (section206Notice)
+                        {
+                            subject = "PIW – Section 206 Notice";
+                            message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> - Notice of Institution of Section 206 Proceeding should prepared for Federal Register."
+                                                                    , formURL, docket);
+                            htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                            //email initiator and Section 206 notice grp
+                            To = string.Empty;
+                            To = AddEmailAddress(To, initiatorEmails);
+                            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWSection206Notice));
+                            SendEmail(clientContext, To, subject, htmlContent);
+                        }
+
+                        if (hearingOrder)
+                        {
+                            //federal register
+                            subject = "PIW – Hearing Proceedings";
+                            message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> - contains hearing proceedings.", formURL, docket);
+                            htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                            //email hearing order grp
+                            To = string.Empty;
+                            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWFederalResister));
+                            SendEmail(clientContext, To, subject, htmlContent);
+                        }
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_Submitted:
+                    if (action.Equals(enumAction.SecReviewTakeOwnerShip))
+                    {
+                        //PIW - Sec Review Took Ownership of Workflow Item
+                        string subject = "PIW – Secretary Reviewer Took Ownership of Workflow Item";
+                        string message = String.Format(@"Secretary Reviewer has taken ownership of the following Workflow Item in Publish Issuance Workflow: 
+                                    <a href='{0}'>{1}</a>.", formURL, docket);
+                        string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                        
+                        //email to initiator, secretary review and non-managmenet grp
+                        String To = string.Empty;
+                        To = AddEmailAddress(To, initiatorEmails);
+                        To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWAgendaNonManagement));
+                        To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_SecReview));
+                        SendEmail(clientContext, To, subject, htmlContent);
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_Edited:
+                    if (previousFormStatus.Equals(Constants.PIWList_FormStatus_ReadyForPublishing))
+                    {
+                        goto case Constants.PIWList_FormStatus_ReadyForPublishing;
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_SecretaryReview:
+                    if (action.Equals(enumAction.Reject))
+                    {
+                        //Sec review rejects 
+                        string subject = "PIW – Workflow Item Rejected by Secretary Reviewer";
+                        string message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
+                                    has been rejected by Secretary Review {2}.",
+                            formURL, docket, currentUser.Title);
+                        string htmlContent = getRejectHTMLFullMessageContent(message,comment);
+
+                        //email to initiator, secretary review and non-managmenet grp
+                        String To = string.Empty;
+                        To = AddEmailAddress(To, initiatorEmails);
+                        To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWAgendaNonManagement));
+                        To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_SecReview));
+                        SendEmail(clientContext, To, subject, htmlContent);
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_ReadyForPublishing:
+                    if (action.Equals(enumAction.Publish))
+                    {
+                        string subject = "PIW – Publication of Workflow Item was Initiated";
+                        string message = String.Format(@"Publication of Workflow Item <a href='{0}'>{1}</a> 
+                                    has been initiated (i.e. routed to the eLibrary Data Entry group).",formURL, docket);
+
+                        string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                        
+                        //email to initiator, notification recipient, secretary review grp, non-management agenda
+                        String To = string.Empty;
+                        To = AddEmailAddress(To, initiatorEmails);
+                        To = AddEmailAddress(To, notificationRecipientEmails);
+                        To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWAgendaNonManagement));
+                        To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_SecReview));
+                        SendEmail(clientContext, To, subject, htmlContent);
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_PublishInitiated:
+                case Constants.PIWList_FormStatus_PublishedToeLibrary:
+                    if (action.Equals(enumAction.PrintJobComplete))
+                    {
+                        string subject = "PIW - Issuance Document Mailed";
+                        string message = String.Format(@"The issuance associated with Workflow Item <a href='{0}'>{1}</a> 
+                                has been mailed via the USPS.", formURL, docket);
+                        string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                        String To = string.Empty;
+
+                        //email to initiator
+                        To = AddEmailAddress(To, initiatorEmails);
+                        SendEmail(clientContext, To, subject, htmlContent);
+                    }
+                    else if (action.Equals(enumAction.ReOpen))
+                    {
+                        string subject = "PIW Item has been reopened";
+                        string message = String.Format(@"Publication of Workflow Item <a href='{0}'>{1}</a> 
+                                        has been reopened.", formURL, docket);
+                        string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                        String To = string.Empty;
+
+                        //email to initiator, sec review and notification recipient
+                        To = AddEmailAddress(To, initiatorEmails);
+                        To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_SecReview));
+                        To = AddEmailAddress(To, notificationRecipientEmails);
+
+                        SendEmail(clientContext, To, subject, htmlContent);
+                    }
+                    else if (action.Equals(enumAction.PublishedToElibrary))
+                    {
+                        string subject = "PIW Item has been published to eLibrary";
+                        string message = String.Format(@"Publication of Workflow Item <a href='{0}'>{1}</a> 
+                                        has been published to eLibrary.", formURL, docket);
+                        string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                        String To = string.Empty;
+
+                        //email to initiator, sec review and notification recipient
+                        To = AddEmailAddress(To, initiatorEmails);
+                        To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_SecReview));
+                        To = AddEmailAddress(To, notificationRecipientEmails);
+
+                        SendEmail(clientContext, To, subject, htmlContent);
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
         /// <summary>
         /// Add Email address into comma seperated string
         /// </summary>
         /// <param name="ToAddress"></param>
         /// <param name="emailList"></param>
         /// <returns></returns>
-        private string AddEmailAddress(string ToAddress,IEnumerable<string> emailList)
+        private
+        string AddEmailAddress(string ToAddress, IEnumerable<string> emailList)
         {
             if (emailList != null)
             {
@@ -304,7 +459,15 @@ namespace PIW_SPAppWeb.Helper
             return ToAddress;
         }
 
-        public void SendEmail(ClientContext clientContext,string ToAddress, string subject, string htmlContent)
+        private IEnumerable<string> getEmailListFromGrp(ClientContext clientContext, string groupName)
+        {
+            Group Grp = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIWFederalResister);
+            clientContext.Load(Grp.Users, items => items.Include(item => item.Email));
+            clientContext.ExecuteQuery();
+            return Grp.Users.Select(u => u.Email).ToList();
+        }
+
+        public void SendEmail(ClientContext clientContext, string ToAddress, string subject, string htmlContent)
         {
             if (string.IsNullOrEmpty(ToAddress))
             {
@@ -323,7 +486,7 @@ namespace PIW_SPAppWeb.Helper
 
             MailMessage mailMessage = new MailMessage();
             mailMessage.From = new MailAddress("piw@ferc.gov");
-            
+
             mailMessage.To.Add(ToAddress);
 
             mailMessage.Subject = subject;
@@ -335,17 +498,17 @@ namespace PIW_SPAppWeb.Helper
             try
             {
                 SmtpClient smtpClient = new SmtpClient(mailrelay, 25);
-                smtpClient.Send(mailMessage);    
+                smtpClient.Send(mailMessage);
             }
             catch (Exception exc)
             {
                 //TODO: Suppress exception for now
-                helper.CreateLog(clientContext,"Cannot send email",exc.InnerException.Message);
+                helper.CreateLog(clientContext, "Cannot send email", exc.InnerException.Message);
             }
-            
+
 
             //insert email into email Log list // it can be resent by designer wf in case the mail relay fails to send 
-            helper.CreateEmailLog(clientContext,ToAddress,subject,htmlContent);
+            helper.CreateEmailLog(clientContext, ToAddress, subject, htmlContent);
 
         }
 
@@ -375,7 +538,7 @@ namespace PIW_SPAppWeb.Helper
             var PrivilegedDocsURL = listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrivilegedDocumentURLs]] != null
                 ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrivilegedDocumentURLs]].ToString() : string.Empty;
 
-            
+
             string fileNameListHTML = helper.getDocumentURLsHTML(PublicDocsURL, CEIIDocsURL, PrivilegedDocsURL, true);
 
             string[] args = new string[] { message, fileNameListHTML, description, initiatorOffice, documentCategory, createdDate };
@@ -390,7 +553,7 @@ namespace PIW_SPAppWeb.Helper
             return htmlContent;
         }
 
-        public string getRejectHTMLFullMessageContent(string message,string comment)
+        public string getRejectHTMLFullMessageContent(string message, string comment)
         {
             string[] args = new string[] { message, comment };
             string htmlContent = string.Format(@"{0}<br/><br/>

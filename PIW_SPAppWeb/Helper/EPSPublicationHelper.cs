@@ -208,10 +208,30 @@ namespace PIW_SPAppWeb.Helper
                 documentAvailability = "P";
             }
 
-            var publication = PopulatePublication(documentOfficialFlag.Value, documentAvailability, string.Empty,
-                string.Empty, fullPathFileName);
+            //DVVO validation
+            FERC.Common.Result result = helper.getDVVORemoteObject().ValidateFile(fullPathFileName);
 
-            return HasMSWordModifications(publication);
+            if (result.ErrorList.Count > 0)//dvvo fails
+            {
+                EpsResult dvvoResult = new EpsResult();
+                foreach (var error in result.ErrorList)//convert DVVOResult to EPS Result
+                {
+                    dvvoResult.ErrorList.Add(error.Description);
+
+                }
+
+                return dvvoResult;
+
+            }
+            else
+            {
+                var publication = PopulatePublication(documentOfficialFlag.Value, documentAvailability, string.Empty,
+                    string.Empty, fullPathFileName);
+
+                return HasMSWordModifications(publication);    
+            }
+
+            
         }
 
         private Publication PopulatePublication(int documentOfficialFlag, string documentAvailability,

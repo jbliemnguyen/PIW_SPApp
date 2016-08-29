@@ -60,7 +60,7 @@ namespace PIW_SPAppWeb
         //public const string PIWList_colName_SecReviewAction = "Sec Review Action";
         //public const string PIWList_colName_SecReviewComment = "Sec Review Comment";
         public const string PIWList_colName_CitationNumber = "Citation Number";
-        //public const string PIWList_colName_RecallComment = "Recall Comment";
+        public const string PIWList_colName_Comment = "Comment";
         public const string PIWList_colName_RecallRejectComment = "Recall / Reject Comment";
         public const string PIWList_colName_Modified = "Modified";
         public const string PIWList_colName_Section206Notice = "Section 206 Notice";
@@ -277,6 +277,9 @@ namespace PIW_SPAppWeb
         //CurrentLoginID key
         public const string CurrentLoginIDKey = "CurrentLoginIDKey";
 
+        //CurrentUserLoginName key
+        public const string CurrentLoginNameKey = "CurrentLoginNameKey";
+
         //current User
         public const string CurrentUser = "CurrentUser";
 
@@ -341,7 +344,6 @@ namespace PIW_SPAppWeb
         Reject,
         Accept,
         OSECTakeOwnerShip,
-        SubmitToSecReview,
         SecReviewTakeOwnerShip,
         Publish,
         Save,

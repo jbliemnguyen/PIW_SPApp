@@ -116,6 +116,18 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
+        public string CurrentUserLogInName
+        {
+            get
+            {
+                return ViewState[Constants.CurrentLoginNameKey] != null ? ViewState[Constants.CurrentLoginNameKey].ToString() : string.Empty;
+            }
+            set
+            {
+                ViewState.Add(Constants.CurrentLoginNameKey, value);
+            }
+        }
+
         public string ListItemID
         {
             get
@@ -146,6 +158,7 @@ namespace PIW_SPAppWeb.Pages
                     clientContext.Load(clientContext.Web.CurrentUser);
                     clientContext.ExecuteQuery();
                     CurrentUserLogInID = clientContext.Web.CurrentUser.LoginName;
+                    CurrentUserLogInName = clientContext.Web.CurrentUser.Title;
                 }
 
                 lbUploadedDocumentError.Visible = false;
@@ -229,6 +242,8 @@ namespace PIW_SPAppWeb.Pages
                             //Create subfolder in piwdocuments and mailing list
                             helper.CreatePIWDocumentsSubFolder(clientContext, ListItemID);
 
+                            helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, Constants.PIWList_FormStatus_Pending, Constants.PIWList_FormType_DirectPublicationForm);
+
                             //get current user
                             User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                             clientContext.Load(currentUser);
@@ -238,7 +253,7 @@ namespace PIW_SPAppWeb.Pages
                             if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                             {
                                 //Form status must be specified becuae the viewstate hasn't have value
-                                helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item created", Constants.PIWList_FormStatus_Pending, 
+                                helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item created.", Constants.PIWList_FormStatus_Pending, 
                                     Constants.PIWListHistory_FormTypeOption_EditForm,currentUser);
                             }
                         }
@@ -281,12 +296,12 @@ namespace PIW_SPAppWeb.Pages
                         //Create list history
                         if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
-                            helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item created", FormStatus,
+                            helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item created.", FormStatus,
                                 Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
                         else
                         {
-                            helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item saved", FormStatus,
+                            helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item saved.", FormStatus,
                                 Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
 
@@ -334,7 +349,7 @@ namespace PIW_SPAppWeb.Pages
                     Dictionary<string, string> files = new Dictionary<string, string>();
                     foreach (RepeaterItem row in rpDocumentList.Items)
                     {
-                        var url = ((HyperLink)row.FindControl("hyperlinkFileURL")).NavigateUrl;
+                        var url = ((HyperLink)row.FindControl("hplEdit")).NavigateUrl;
                         var securityLevel = ((Label)row.FindControl("lbSecurityLevel")).Text;
                         if (!files.ContainsKey(url))
                         {
@@ -410,7 +425,7 @@ namespace PIW_SPAppWeb.Pages
                     //TODO: send email
 
                     //Create list history
-                    helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item deleted", FormStatus,
+                    helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item deleted.", FormStatus,
                         Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
                     //Redirect
@@ -504,9 +519,7 @@ namespace PIW_SPAppWeb.Pages
             {
                 if (fileUpload.HasFiles)
                 {
-                    if (fileUpload.PostedFile.ContentLength <= 52428800)
-                    {
-                        using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                    using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
                             var uploadedFileURL = helper.UploadIssuanceDocument(clientContext, fileUpload, ListItemID, rpDocumentList,
                                 lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus,
@@ -534,13 +547,7 @@ namespace PIW_SPAppWeb.Pages
                                 helper.OpenDocument(Page, uploadedFileURL);
                             }
                         }
-                    }
-                    else
-                    {
-                        lbUploadedDocumentError.Text = "file size limits to 50 MB";
-                        lbUploadedDocumentError.Visible = true;
-                    }
-
+                    
                     //reset security level
                     ddlSecurityControl.SelectedIndex = 0;
                 }
@@ -676,7 +683,8 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_ReOpen:
                     if (PreviousFormStatus == Constants.PIWList_FormStatus_PublishInitiated)
                     {
-                        SaveReOpenInfoAndStatus(clientContext, listItem);
+                        helper.SaveReOpenInfoAndStatusAndComment(clientContext, listItem, FormStatus, PreviousFormStatus,
+                            tbComment.Text.Trim(), CurrentUserLogInName);
                     }
                     else
                     {
@@ -685,13 +693,15 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Deleted:
                     //delete item, need to set status 
-                    helper.SaveDeleteInfoAndStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
+                    helper.SaveDeleteInfoAndStatusAndComment(clientContext, listItem, FormStatus, PreviousFormStatus,
+                        tbComment.Text.Trim(), CurrentUserLogInName);
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
                     if ((PreviousFormStatus == Constants.PIWList_FormStatus_Pending) || (PreviousFormStatus == Constants.PIWList_FormStatus_ReOpen))
                     {
                         SaveMainPanelAndStatus(clientContext, listItem);
-                        helper.SavePublishingInfoAndStatus(clientContext, listItem, FormStatus, PreviousFormStatus);
+                        helper.SavePublishingInfoAndStatusAndComment(clientContext, listItem, FormStatus, PreviousFormStatus,
+                            tbComment.Text.Trim(),CurrentUserLogInName);
                     }
                     else
                     {
@@ -716,19 +726,19 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        private void SaveReOpenInfoAndStatus(ClientContext clientContext, ListItem listItem)
-        {
-            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+        //private void SaveReOpenInfoAndStatus(ClientContext clientContext, ListItem listItem)
+        //{
+        //    var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
+        //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
+        //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
 
-            //clear accession number
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
+        //    //clear accession number
+        //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
 
-            listItem.Update();
-            clientContext.ExecuteQuery();
-        }
+        //    listItem.Update();
+        //    clientContext.ExecuteQuery();
+        //}
 
         private void SaveMainPanelAndStatus(ClientContext clientContext, ListItem listItem)
         {
@@ -840,21 +850,10 @@ namespace PIW_SPAppWeb.Pages
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_NotificationRecipient]] = notificationRecipients;
 
             //comment
-            //if (!string.IsNullOrEmpty(tbComment.Text))
-            //{
-            //    if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] == null)
-            //    {
-            //        listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}", clientContext.Web.CurrentUser.Title,
-            //            DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text);
-            //    }
-            //    else
-            //    {
-            //        //append
-            //        listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("{0} ({1}): {2}<br>{3}",
-            //            clientContext.Web.CurrentUser.Title, DateTime.Now.ToString("MM/dd/yy H:mm:ss"), tbComment.Text, listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]]);
-            //    }
-
-            //}
+            if (!string.IsNullOrEmpty(tbComment.Text))
+            {
+                helper.SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, tbComment.Text.Trim());
+            }
 
             //FOLA Service Required
             if (ddFolaServiceRequired.SelectedIndex != 0)
@@ -1109,6 +1108,10 @@ namespace PIW_SPAppWeb.Pages
                     PeoplePickerHelper.FillPeoplePickerValue(hdnNotificationRecipient, users);
                 }
 
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]] != null)
+                {
+                    lbCommentValue.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_Comment]].ToString();
+                }
 
                 //FOLA Service Required
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_FOLAServiceRequired]] != null)

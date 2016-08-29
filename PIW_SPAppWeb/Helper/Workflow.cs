@@ -207,7 +207,7 @@ namespace PIW_SPAppWeb.Helper
                 case Constants.PIWList_FormStatus_Rejected:
                     //in Pending, Recall, Reject
                     //user can submit, save and delete
-                    if (action == enumAction.SubmitToSecReview)
+                    if (action == enumAction.Submit)
                     {
                         nextStatus = Constants.PIWList_FormStatus_Submitted;
                     }

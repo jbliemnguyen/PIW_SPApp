@@ -76,65 +76,7 @@
                     });
                 }
             });
-
-            ////Confirm of deletion
-            //$("#btnDelete").click(function (event) {
-            //    event.preventDefault();
-            //    $("#deleteDialogConfirmation").dialog({
-            //        buttons: {
-            //            "No": function (e) {
-            //                $(this).dialog("close");
-
-            //            },
-            //            "Yes": function (e) {
-            //                $("#btnDeleteConfirm").click();
-            //            }
-            //        }
-            //    }, { width: 600 });
-            //});
-
-            ////Confirm of publish
-            //$("#btnInitiatePublication").click(function (event) {
-            //    event.preventDefault();
-
-            //    //display warning if due date is future date
-            //    var modalHeight = 100;
-            //    var dueDate = new Date($("#tbDueDate").attr('value'));
-            //    var today = new Date();
-            //    if (dueDate > today) {
-            //        modalHeight = 250;
-            //        $("#publishDialogConfirmation").html("<span style='color:green'>Warning: Due Date is a future date</span>");
-            //    } else {
-            //        $("#publishDialogConfirmation").html("");
-            //    }
-
-            //    //dialog
-            //    $("#publishDialogConfirmation").dialog({
-            //        buttons: {
-            //            "No": function (e) {
-            //                $(this).dialog("close");
-
-            //            },
-            //            "Yes": function (e) {
-            //                $("#btnPublishConfirm").click();
-            //                $(this).dialog("close");
-            //            }
-            //        }
-            //    }, { width: 600, height: modalHeight });
-            //});
-
-
-
-            ////spinner
-            //$("#btnPublishConfirm").click(function (event) {
-            //    var btnInitiatePublication = $("#btnInitiatePublication");
-            //    setSpinIcon(btnInitiatePublication, true);
-            //});
-
-            //$(".historyhead").click(function () {
-            //    $(".historylist").slideToggle(100);
-            //});
-        }
+            }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
             //Build absolute path to the layouts root with the spHostUrl
@@ -484,10 +426,13 @@
             </div>
             <div class="form-group">
                 <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-6">
-                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+                <div class="col-md-4">
+                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="3" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+                    <asp:Label ID="lbCommentValidation" runat="server" ForeColor="Red" Visible="false" Text="Comment is required" ClientIDMode="Static"></asp:Label>
                 </div>
-
+                <div class="col-md-5">
+                        <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
+                </div>
             </div>
 
             <%--End of Main Panel--%>

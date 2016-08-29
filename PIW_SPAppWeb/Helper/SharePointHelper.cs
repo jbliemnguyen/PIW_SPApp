@@ -11,12 +11,10 @@ using System.Web.Caching;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using DocumentFormat.OpenXml;
-using DocumentFormat.OpenXml.Office.CustomUI;
 using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.Wordprocessing;
+using FERC.eLibrary.Dvvo.Common;
 using Microsoft.SharePoint.Client;
-using Microsoft.SharePoint.Client.Sharing;
 using Microsoft.SharePoint.Client.UserProfiles;
 using File = Microsoft.SharePoint.Client.File;
 using ListItem = Microsoft.SharePoint.Client.ListItem;
@@ -24,7 +22,6 @@ using FERC.FOL.ATMS.Remote.Interfaces;
 using ListItemCollection = Microsoft.SharePoint.Client.ListItemCollection;
 using System.Text;
 using Bold = DocumentFormat.OpenXml.Wordprocessing.Bold;
-using FontSize = System.Web.UI.WebControls.FontSize;
 using Group = Microsoft.SharePoint.Client.Group;
 using Page = System.Web.UI.Page;
 using Run = DocumentFormat.OpenXml.Wordprocessing.Run;
@@ -38,8 +35,6 @@ namespace PIW_SPAppWeb.Helper
 {
     public class SharePointHelper
     {
-        //FERC.eLibrary.Dvvo.Common.IDvvoRemoteBusiness dvvoProxy = null;
-
         #region PIW List
         //when item first created, it should have IsActive set to false
         //this flag will turn to true after it is first Saved/Submitted
@@ -180,16 +175,15 @@ namespace PIW_SPAppWeb.Helper
 
         }
 
-        public void SaveReOpenInfoAndStatus(ClientContext clientContext, ListItem listItem, string FormStatus, string PreviousFormStatus)
+        public void SaveReOpenInfoAndStatusAndComment(ClientContext clientContext, ListItem listItem, string FormStatus, string PreviousFormStatus, string comment, string CurrentUserLogInName)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
 
-            //clear secreview action and comment
-            //listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewAction]] = string.Empty;
-            //listItem[piwListInternalColumnNames[Constants.PIWList_colName_SecReviewComment]] = string.Empty;
+            //comment
+            SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
 
             //clear accession number
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
@@ -201,18 +195,39 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public void SaveFormStatus(ClientContext clientContext, ListItem listItem, string FormStatus, string PreviousFormStatus)
+        public void SaveFormStatusAndComment(ClientContext clientContext, ListItem listItem, string FormStatus, string PreviousFormStatus, enumAction action, string comment, string CurrentUserLogInName)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
 
+            if ((action == enumAction.Recall) || (action == enumAction.Reject))
+            {
+
+                if (!string.IsNullOrEmpty(comment))
+                {
+                    //recall / reject comment field-single line
+                    if (comment.Length <= 255)
+                    {
+                        listItem[piwListInternalColumnNames[Constants.PIWList_colName_RecallRejectComment]] = comment;
+                    }
+                    else
+                    {
+                        listItem[piwListInternalColumnNames[Constants.PIWList_colName_RecallRejectComment]] =
+                            comment.Substring(0, 255);
+                    }
+                }
+            }
+
+            //comment
+            SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+
             listItem.Update();
             clientContext.ExecuteQuery();
         }
 
-        public void SaveDeleteInfoAndStatus(ClientContext clientContext, ListItem listItem, string FormStatus, string PreviousFormStatus)
+        public void SaveDeleteInfoAndStatusAndComment(ClientContext clientContext, ListItem listItem, string FormStatus, string PreviousFormStatus, string comment, string CurrentUserLogInName)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
@@ -221,6 +236,9 @@ namespace PIW_SPAppWeb.Helper
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
+
+            //comment
+            SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsActive]] = false;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_CitationNumber]] = string.Empty;
@@ -230,7 +248,7 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public void SavePublishingInfoAndStatus(ClientContext clientContext, ListItem listItem, string FormStatus, string PreviousFormStatus)
+        public void SavePublishingInfoAndStatusAndComment(ClientContext clientContext, ListItem listItem, string FormStatus, string PreviousFormStatus, string comment, string CurrentUserLogInName)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
@@ -239,6 +257,9 @@ namespace PIW_SPAppWeb.Helper
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
+
+            //comment
+            SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
 
             //publisher
             FieldUserValue publisher = new FieldUserValue { LookupId = clientContext.Web.CurrentUser.Id };
@@ -1046,6 +1067,20 @@ namespace PIW_SPAppWeb.Helper
         //        return dvvoProxy;
         //    }
         //}
+        public IDvvoRemoteBusiness getDVVORemoteObject()
+        {
+            string configPath = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
+            IChannel[] myIChannelArray = ChannelServices.RegisteredChannels;
+            if (myIChannelArray.Length == 0)
+                System.Runtime.Remoting.RemotingConfiguration.Configure(configPath, true);
+
+            IDvvoRemoteBusiness m_RemoteObject = (IDvvoRemoteBusiness)
+                             Activator.GetObject(typeof(IDvvoRemoteBusiness),ConfigurationManager.AppSettings["eLibRemoteServiceDvvoURI"]);
+
+            return m_RemoteObject;
+        }
+
+
         public bool DocketExist(string docket, string subdocket, IWorkSetOps m_RemoteObject)
         {
             var atmsDocket = m_RemoteObject.GetWorkSetsByLabel(docket, subdocket, false, true);
@@ -1526,6 +1561,22 @@ namespace PIW_SPAppWeb.Helper
             return result.ToString();
         }
 
+        public void SetCommentURLHTML(ListItem listItem,Dictionary<string,string> piwListInternalColumnNames,string userName,string comment)
+        {
+            string pattern = "<li>{0} ({1}): {2}</li>";
+            if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] == null)
+                {
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("<li>{0} ({1}): {2}</li>", userName,
+                        DateTime.Now.ToString("G"), comment);
+                }
+                else
+                {
+                    //append
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("<li>{0} ({1}): {2}</li><br>{3}",
+                        userName, DateTime.Now.ToString("G"), comment, listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]]);
+                }
+        }
+
         public void CreateLog(ClientContext clientContext, string Title, string Message)
         {
             List log = clientContext.Web.Lists.GetByTitle(Constants.LogListName);
@@ -1615,7 +1666,7 @@ namespace PIW_SPAppWeb.Helper
                     AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_Read,
                             Constants.Role_Read, Constants.Role_Read, Constants.Role_Read);
                     break;
-                case Constants.PIWList_FormStatus_Edited:
+                case Constants.PIWList_FormStatus_Edited://no change when form moved to Edit mode
                     //Do nothings in Edit
                     break;
                 case Constants.PIWList_FormStatus_OSECVerification:
@@ -1752,10 +1803,6 @@ namespace PIW_SPAppWeb.Helper
             document.ListItemAllFields.RoleAssignments.Add(group, rolebindingCol);
 
         }
-
-        #endregion
-
-        #region FOLA and eLibrary connection
 
         #endregion
 

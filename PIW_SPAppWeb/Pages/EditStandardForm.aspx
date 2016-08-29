@@ -93,7 +93,7 @@
                 }
             });
 
-            
+
         }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
@@ -176,7 +176,7 @@
 
                     <div class="col-md-6">
                         <asp:FileUpload ID="fileUpload" runat="server" Width="100%" placeholder="Click here to browse the file" />
-                        
+
 
                         <%--<label class="input-group-btn">
                             <span class="btn btn-primary">Browse&hellip;<asp:FileUpload ID="fileUpload" runat="server" Style="display: none;" />
@@ -202,7 +202,7 @@
                         </asp:DropDownList>
                     </div>
                     <div class="col-md-2">
-                        <asp:Button ID="btnUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary" OnClick="btnUpload_Click" ClientIDMode="Static"/>
+                        <asp:Button ID="btnUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary" OnClick="btnUpload_Click" ClientIDMode="Static" />
                         <%--Note: "cancel" in CssClass is to bypass the jquery validation when user upload file- not used any more--%>
                     </div>
                 </div>
@@ -223,7 +223,7 @@
                                 <asp:Label runat="server" ID="lbSecurityLevel" Text='<%#DataBinder.Eval(Container.DataItem,"Security Level")%>'></asp:Label>
                                 &nbsp;&nbsp;&nbsp;&nbsp;
                                         <asp:LinkButton ID="btnRemoveDocument" runat="server" Text="Remove" CommandName="RemoveDocument"
-                                CommandArgument='<%#DataBinder.Eval(Container.DataItem,"ID")%>' />
+                                            CommandArgument='<%#DataBinder.Eval(Container.DataItem,"ID")%>' />
                                 &nbsp;&nbsp;&nbsp;&nbsp;
                                 <asp:HyperLink ID="hplEdit" runat="server" Text="Edit"
                                     NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"URL")%>'>
@@ -393,14 +393,6 @@
                     <asp:TextBox ID="tbDueDate" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
                 </div>
             </div>
-            <%--<fieldset runat="server" id="fieldsetOSECRejectComment" visible="true">
-                <div class="form-group">
-                    <asp:Label ID="lbOSECRejectComment" runat="server" Text="OSEC Reject Comment" AssociatedControlID="lbOSECRejectCommentValue" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-6">
-                        <asp:Label runat="server" ID="lbOSECRejectCommentValue"></asp:Label>
-                    </div>
-                </div>
-            </fieldset>--%>
 
             <fieldset runat="server" id="fieldSetSupplementalMailingList">
                 <div class="form-group">
@@ -448,12 +440,15 @@
 
             <div class="form-group">
                 <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-6">
-                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+                <div class="col-md-4">
+                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="3" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
                     <asp:Label ID="lbCommentValidation" runat="server" ForeColor="Red" Visible="false" Text="Comment is required" ClientIDMode="Static"></asp:Label>
                 </div>
-
+                <div class="col-md-5">
+                        <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
+                </div>
             </div>
+
 
             <%--End of Main Panel--%>
         </fieldset>

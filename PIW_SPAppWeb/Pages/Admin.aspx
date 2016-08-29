@@ -46,8 +46,9 @@
         <br />
         <asp:Button runat="server" ID="btnEmail" Text="Test Email" OnClick="btnEmail_Click" />
         <br />
-        <asp:Button runat="server" ID="btnTestDvvo" Text="Test DVVO" />
-
+        <asp:Button runat="server" ID="btnTestDvvo" Text="Test DVVO" OnClick="btnTestDvvo_Click"/>
+        <asp:Label runat="server" ID="lbDVVO"></asp:Label>
+        <br/>
         <%--<a href="" id="hypedit">This will open the file in edit mode</a>--%>
         <a href="https://fdc1s-sp23wfed2.ferc.gov/piw/PIWDocuments/4/ER15-1451-002.docx?web=0" id="hypedit1">Read Only</a>
         <a href="https://fdc1s-sp23wfed2.ferc.gov/piw/PIWDocuments/4/ER15-1451-002.docx?web=1" id="hypedit2">Edit mode</a>
