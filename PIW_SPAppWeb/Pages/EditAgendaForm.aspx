@@ -76,7 +76,7 @@
                     });
                 }
             });
-            }
+        }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
             //Build absolute path to the layouts root with the spHostUrl
@@ -134,6 +134,23 @@
             <legend>
                 <asp:Label ID="lbheaderDocketNumber" runat="server"></asp:Label>Agenda Form</legend>
             <asp:Label ID="lbMainMessage" runat="server" CssClass="error" Visible="false"></asp:Label>
+
+            <div class="form-group">
+                <div class="col-md-2"></div>
+                <div class="col-md-6">
+                    <asp:Button ID="btnSave1" runat="server" Text="Save" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnSubmit1" runat="server" Text="Submit to Secretary Review" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnSECReviewTakeOwnership1" runat="server" Text="Secretary Review Take Ownership" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnRecall1" runat="server" Text="Recall" CssClass="btn-sm btn-primary" ClientIDMode="Static" />
+                    <asp:Button ID="btnEdit1" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnAccept1" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnReject1" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnInitiatePublication1" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnDelete1" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnReopen1" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnGenerateMailingList1" runat="server" Text="Generate Mailing List" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                </div>
+            </div>
 
             <fieldset runat="server" id="fieldsetUpload">
                 <div class="form-group">
@@ -431,7 +448,7 @@
                     <asp:Label ID="lbCommentValidation" runat="server" ForeColor="Red" Visible="false" Text="Comment is required" ClientIDMode="Static"></asp:Label>
                 </div>
                 <div class="col-md-5">
-                        <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
+                    <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
                 </div>
             </div>
 
@@ -500,7 +517,7 @@
             <div class="col-md-2"></div>
             <div class="col-md-6">
                 <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary active" OnClick="btnSave_Click" ClientIDMode="Static" />
-                <asp:Button ID="btnSubmitToSecReview" runat="server" Text="Submit to Secretary Review" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnSubmitToSecReview_Click" />
+                <asp:Button ID="btnSubmit" runat="server" Text="Submit to Secretary Review" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnSubmitToSecReview_Click" />
                 <asp:Button ID="btnSECReviewTakeOwnership" runat="server" Text="Secretary Review Take Ownership" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnSECReviewTakeOwnership_Click" />
                 <asp:Button ID="btnRecall" runat="server" Text="Recall" CssClass="btn-sm btn-primary" ClientIDMode="Static" OnClick="btnRecall_Click" />
                 <asp:Button ID="btnEdit" runat="server" Text="Edit" CssClass="btn-sm btn-primary active" OnClick="btnEdit_Click" ClientIDMode="Static" />
@@ -511,6 +528,7 @@
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" OnClick="btnDelete_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnReopen" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" OnClick="btnReopen_Click" ClientIDMode="Static" />
+                <asp:Button ID="btnGenerateMailingList" runat="server" Text="Generate Mailing List" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnGenerateMailingList_Click" />
             </div>
         </div>
         <div class="form-group">

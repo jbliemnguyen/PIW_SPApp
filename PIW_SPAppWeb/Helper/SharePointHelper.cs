@@ -183,7 +183,10 @@ namespace PIW_SPAppWeb.Helper
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
 
             //comment
-            SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+            if (!string.IsNullOrEmpty(comment))
+            {
+                SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+            }
 
             //clear accession number
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
@@ -221,7 +224,10 @@ namespace PIW_SPAppWeb.Helper
             }
 
             //comment
-            SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+            if (!string.IsNullOrEmpty(comment))
+            {
+                SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+            }
 
             listItem.Update();
             clientContext.ExecuteQuery();
@@ -238,7 +244,10 @@ namespace PIW_SPAppWeb.Helper
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
 
             //comment
-            SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+            if (!string.IsNullOrEmpty(comment))
+            {
+                SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+            }
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsActive]] = false;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_CitationNumber]] = string.Empty;
@@ -259,7 +268,10 @@ namespace PIW_SPAppWeb.Helper
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
 
             //comment
-            SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+            if (!string.IsNullOrEmpty(comment))
+            {
+                SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+            }
 
             //publisher
             FieldUserValue publisher = new FieldUserValue { LookupId = clientContext.Web.CurrentUser.Id };

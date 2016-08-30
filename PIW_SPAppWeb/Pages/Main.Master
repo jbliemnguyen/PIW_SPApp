@@ -11,7 +11,7 @@
     <link href="../Styles/peoplepickercontrol.css" rel="stylesheet" />
     <link href="../Content/bootstrap.css" rel="stylesheet" />
     <link href="../Styles/offcanvas.css" rel="stylesheet" />
-    <link href="../Styles/piw.css?rev=1" rel="stylesheet" />
+    <link href="../Styles/piw.css?rev=2" rel="stylesheet" />
     <link href="../Styles/jquery-ui.css" rel="stylesheet" />
     <asp:ContentPlaceHolder ID="head" runat="server">
     </asp:ContentPlaceHolder>
@@ -318,7 +318,7 @@
                 var today = new Date();
                 if (dueDate > today) {
                     modalHeight = 250;
-                    $("#publishDialogConfirmation").html("<span style='color:green'>Warning: Due Date is a future date</span>");
+                    $("#publishDialogConfirmation").html("<span style='color:red'>Warning: Due Date is a future date</span>");
                 }
                 else {
                     $("#publishDialogConfirmation").html("");
@@ -361,6 +361,13 @@
                 event.preventDefault();
                 $("#btnOSECTakeOwnership").click();
             });
+
+            $("#btnSECReviewTakeOwnership1").click(function (event) {
+                event.preventDefault();
+                $("#btnSECReviewTakeOwnership").click();
+            });
+
+            
 
             $("#btnRecall1").click(function (event) {
                 event.preventDefault();
@@ -414,9 +421,9 @@
                 skm_LockScreen("Submitting ... ");
             });
 
-            $("#btnSubmitToSecReview").click(function (event) {
-                skm_LockScreen("Submitting To Secretary Review ... ");
-            });
+            //$("#btnSubmit").click(function (event) {
+            //    skm_LockScreen("Submitting To Secretary Review ... ");
+            //});
 
 
             $("#btnOSECTakeOwnership,#btnSECReviewTakeOwnership").click(function (event) {

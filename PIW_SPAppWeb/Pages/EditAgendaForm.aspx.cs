@@ -1473,7 +1473,7 @@ namespace PIW_SPAppWeb.Pages
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_DueDate]] = tbDueDate.Text;
 
             //comment
-            if (!string.IsNullOrEmpty(tbComment.Text))
+            if (!string.IsNullOrEmpty(tbComment.Text.Trim()))
             {
                 helper.SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, tbComment.Text.Trim());
             }
@@ -1846,6 +1846,21 @@ namespace PIW_SPAppWeb.Pages
                 PrivilegedDocumentURLsFromViewState = privilegedDocumentURLs;
             }
         }
+
+        public void SetVisiblePropertyInTopButtons()
+        {
+            btnSave1.Visible = btnSave.Visible;
+            btnSubmit1.Visible = btnSubmit.Visible;
+            btnSECReviewTakeOwnership1.Visible = btnSECReviewTakeOwnership.Visible;
+            btnRecall1.Visible = btnRecall.Visible;
+            btnEdit1.Visible = btnEdit.Visible;
+            btnAccept1.Visible = btnAccept.Visible;
+            btnReject1.Visible = btnReject.Visible;
+            btnInitiatePublication1.Visible = btnInitiatePublication.Visible;
+            btnDelete1.Visible = btnDelete.Visible;
+            btnReopen1.Visible = btnReopen.Visible;
+            btnGenerateMailingList1.Visible = btnGenerateMailingList.Visible;
+        }
         #endregion
 
         #region Visibility
@@ -1890,7 +1905,7 @@ namespace PIW_SPAppWeb.Pages
                     //buttons
                     btnSave.Visible = isCurrentUserOSEC;
 
-                    btnSubmitToSecReview.Visible = btnSave.Visible;
+                    btnSubmit.Visible = btnSave.Visible;
 
                     btnEdit.Visible = false;
 
@@ -1908,7 +1923,7 @@ namespace PIW_SPAppWeb.Pages
                     btnDelete.Visible = btnSave.Visible;
 
                     btnReopen.Visible = false;
-
+                    btnGenerateMailingList.Visible = false;
                     break;
                 case Constants.PIWList_FormStatus_Submitted:
                     EnableMainPanel(false, false);
@@ -1927,7 +1942,7 @@ namespace PIW_SPAppWeb.Pages
                     //buttons
                     btnSave.Visible = false;
 
-                    btnSubmitToSecReview.Visible = btnSave.Visible;
+                    btnSubmit.Visible = btnSave.Visible;
 
                     btnEdit.Visible = false;
 
@@ -1945,7 +1960,7 @@ namespace PIW_SPAppWeb.Pages
                     btnDelete.Visible = btnSave.Visible;
 
                     btnReopen.Visible = false;
-
+                    btnGenerateMailingList.Visible = false;
                     break;
                 case Constants.PIWList_FormStatus_SecretaryReview:
                     //submit section   
@@ -1962,7 +1977,7 @@ namespace PIW_SPAppWeb.Pages
 
                     //Button
                     btnSave.Visible = false;
-                    btnSubmitToSecReview.Visible = btnSave.Visible;
+                    btnSubmit.Visible = btnSave.Visible;
                     btnEdit.Visible = isCurrentUserSecReviewer;
                     btnAccept.Visible = isCurrentUserSecReviewer;
                     btnReject.Visible = isCurrentUserSecReviewer;
@@ -1972,7 +1987,7 @@ namespace PIW_SPAppWeb.Pages
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
-
+                    btnGenerateMailingList.Visible = false;
                     break;
                 case Constants.PIWList_FormStatus_Edited:
                     //submitter
@@ -1990,8 +2005,7 @@ namespace PIW_SPAppWeb.Pages
                     }
 
                     //Sec review section
-                    if (previousFormStatus.Equals(Constants.PIWList_FormStatus_PrePublication) ||
-                        previousFormStatus.Equals(Constants.PIWList_FormStatus_ReadyForPublishing))
+                    if (previousFormStatus.Equals(Constants.PIWList_FormStatus_ReadyForPublishing))
                     {
                         fieldsetSecReview.Visible = true;
                     }
@@ -2002,17 +2016,31 @@ namespace PIW_SPAppWeb.Pages
 
                     //Button
                     btnSave.Visible = isCurrentUserSecReviewer;
-                    btnSubmitToSecReview.Visible = false;
+                    btnSubmit.Visible = false;
                     btnEdit.Visible = false;
-                    btnAccept.Visible = isCurrentUserSecReviewer;
-                    btnReject.Visible = isCurrentUserSecReviewer;
+
+                    if (previousFormStatus.Equals(Constants.PIWList_FormStatus_ReadyForPublishing))
+                    {
+                        btnAccept.Visible = false;
+                        btnReject.Visible = false;
+                        btnInitiatePublication.Visible = isCurrentUserSecReviewer;
+                    }
+                    else
+                    {
+                        btnAccept.Visible = isCurrentUserSecReviewer;
+                        btnReject.Visible = isCurrentUserSecReviewer;
+                        btnInitiatePublication.Visible = false;
+                    }
+                    
+
+
                     btnSECReviewTakeOwnership.Visible = false;
                     btnRecall.Visible = false;
-                    btnInitiatePublication.Visible = isCurrentUserSecReviewer;
+                    
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
-
+                    btnGenerateMailingList.Visible = false;
                     break;
                 case Constants.PIWList_FormStatus_ReadyForPublishing:
                     //submitter
@@ -2032,7 +2060,7 @@ namespace PIW_SPAppWeb.Pages
 
                     //buttons
                     btnSave.Visible = false;
-                    btnSubmitToSecReview.Visible = btnSave.Visible;
+                    btnSubmit.Visible = btnSave.Visible;
                     btnEdit.Visible = isCurrentUserSecReviewer;
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
@@ -2042,7 +2070,7 @@ namespace PIW_SPAppWeb.Pages
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
-
+                    btnGenerateMailingList.Visible = false;
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
                     //submitter
@@ -2062,7 +2090,7 @@ namespace PIW_SPAppWeb.Pages
 
                     //buttons
                     btnSave.Visible = isCurrentUserLegalResouceTeam;
-                    btnSubmitToSecReview.Visible = btnSave.Visible;
+                    btnSubmit.Visible = btnSave.Visible;
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
@@ -2073,6 +2101,7 @@ namespace PIW_SPAppWeb.Pages
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                         new string[] { Constants.Grp_PIWAdmin, Constants.Grp_PIWSystemAdmin });
+                    btnGenerateMailingList.Visible = false;
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
                     EnableMainPanel(false, false);
@@ -2091,7 +2120,7 @@ namespace PIW_SPAppWeb.Pages
 
                     //buttons
                     btnSave.Visible = isCurrentUserLegalResouceTeam;
-                    btnSubmitToSecReview.Visible = false;
+                    btnSubmit.Visible = false;
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
@@ -2100,6 +2129,8 @@ namespace PIW_SPAppWeb.Pages
                     btnInitiatePublication.Visible = false;
                     btnDelete.Visible = false;
                     btnReopen.Visible = false;
+                    btnGenerateMailingList.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                        new string[] { Constants.Grp_PIWAdmin, Constants.Grp_PIWSystemAdmin });
                     break;
                 case Constants.PIWList_FormStatus_Deleted:
                     //this status is only viewable by admin
@@ -2112,6 +2143,46 @@ namespace PIW_SPAppWeb.Pages
                 default:
                     throw new Exception("ControlVisibilityBasedOnFormStatus - Unknown Form Status: " + formStatus);
 
+            }
+
+            SetVisiblePropertyInTopButtons();
+        }
+
+        protected void btnGenerateMailingList_Click(object sender, EventArgs e)
+        {
+            using (var clientContext = helper.getElevatedClientContext(Context, Request))
+            {
+                FOLAMailingList folaMailingList = new FOLAMailingList();
+                int numberOfFOLAAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, tbDocketNumber.Text.Trim(), ListItemID);
+
+                //save number of fola mailing list address
+                ListItem listItem = helper.GetPiwListItemById(clientContext, ListItemID, false);
+                string PrintReqStatus = Constants.PrintReq_FormStatus_PrintReqGenerated;
+
+                bool printReqGenerated = helper.InitiatePrintReqForm(clientContext, listItem, numberOfFOLAAddress, PrintReqStatus);
+
+                //create first history list
+                if (printReqGenerated)
+                {
+                    //get current user
+                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
+                    //add history list for the main form 
+                    helper.CreatePIWListHistory(clientContext, ListItemID, "Print Requisition Generated.",
+                            FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+
+                    //Add history list for the print req form
+                    if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_PrintReq).Count == 0)
+                    {
+                        string message = "Print Requisition Generated.";
+                        helper.CreatePIWListHistory(clientContext, ListItemID, message,
+                            PrintReqStatus, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+                    }
+
+                }
+
+                helper.RefreshPage(Request, Response);
             }
         }
 
@@ -2217,6 +2288,8 @@ namespace PIW_SPAppWeb.Pages
             }
         }
         #endregion
+
+        
 
     }
 }

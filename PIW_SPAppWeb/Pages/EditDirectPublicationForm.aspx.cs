@@ -850,7 +850,7 @@ namespace PIW_SPAppWeb.Pages
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_NotificationRecipient]] = notificationRecipients;
 
             //comment
-            if (!string.IsNullOrEmpty(tbComment.Text))
+            if (!string.IsNullOrEmpty(tbComment.Text.Trim()))
             {
                 helper.SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, tbComment.Text.Trim());
             }

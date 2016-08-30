@@ -23,15 +23,6 @@
             $("#tbDueDate").keydown(function (event) { event.preventDefault(); });
             $("#tbLegalResourcesReviewCompletionDate").datepicker();
 
-
-            //event for file upload
-            //$(document).on("change", ":file", function () {
-            //    var fileupload = $(this);
-            //    //var input = $(this).parent().parent().parent().find(":text")[0];
-            //    var input = fileupload.closest("input");
-            //    input.val(fileupload.val());
-            //});
-
             //disabled Docket Number textbox is IsNonDocket ischecked
             if ($("#cbIsNonDocket").is(':checked')) {
                 $("#tbDocketNumber").prop("readonly", "readonly");

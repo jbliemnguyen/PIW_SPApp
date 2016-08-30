@@ -870,10 +870,6 @@ namespace PIW_SPAppWeb.Pages
                     if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_PrintReq).Count == 0)
                     {
                         string message = "Print Requisition Generated.";
-                        //if (!string.IsNullOrEmpty(tbComment.Text))
-                        //{
-                        //    message = message + "</br>Comment: " + tbComment.Text.Trim();
-                        //}
                         helper.CreatePIWListHistory(clientContext, ListItemID, message,
                             PrintReqStatus, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
                     }
@@ -1645,7 +1641,7 @@ namespace PIW_SPAppWeb.Pages
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_DueDate]] = tbDueDate.Text;
 
             //comment
-            if (!string.IsNullOrEmpty(tbComment.Text))
+            if (!string.IsNullOrEmpty(tbComment.Text.Trim()))
             {
                 helper.SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, tbComment.Text.Trim());
 

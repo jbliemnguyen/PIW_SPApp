@@ -1,4 +1,9 @@
-﻿.btn-file {
+﻿/*override the dialog to have red font*/
+.ui-dialog-title {
+  color: red;
+}
+
+.btn-file {
     position: relative;
     overflow: hidden;
 }

@@ -315,7 +315,7 @@ namespace PIW_SPAppWeb.Helper
                             htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
                             //email hearing order grp
                             To = string.Empty;
-                            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWFederalResister));
+                            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWHearingOrder));
                             SendEmail(clientContext, To, subject, htmlContent);
                         }
                     }
@@ -461,7 +461,7 @@ namespace PIW_SPAppWeb.Helper
 
         private IEnumerable<string> getEmailListFromGrp(ClientContext clientContext, string groupName)
         {
-            Group Grp = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIWFederalResister);
+            Group Grp = clientContext.Web.SiteGroups.GetByName(groupName);
             clientContext.Load(Grp.Users, items => items.Include(item => item.Email));
             clientContext.ExecuteQuery();
             return Grp.Users.Select(u => u.Email).ToList();
