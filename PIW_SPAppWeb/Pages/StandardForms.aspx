@@ -15,7 +15,7 @@
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
         <asp:UpdatePanel runat="server">
             <ContentTemplate>
-                <asp:Timer ID="tmrRefresh" runat="server" Interval="300000" Enabled="true" OnTick="tmrRefresh_Tick">
+                <asp:Timer ID="tmrRefresh" runat="server" Interval="300000" Enabled="false" OnTick="tmrRefresh_Tick">
                     <%--5 minutes delays--%>
                 </asp:Timer>
                 <div class="form-group">
@@ -26,9 +26,11 @@
                         <asp:Label runat="server" ID="lbLastUpdated" Font-Italic="True" Font-Bold="True"></asp:Label>
                     </div>
                 </div>
-                <div id="gridDiv" style="overflow-y: scroll;">
-                    <asp:GridView runat="server" ID="standardFormsGridView" AutoGenerateColumns="false" CssClass="table-striped table-hover table-condensed piw-borderless" OnRowCreated="standardFormsGridView_RowCreated">
-                    </asp:GridView>
+                <div class="form-group">
+                    <div id="gridDiv" class="col-md-10" style="overflow-y: scroll;">
+                        <asp:GridView runat="server" ID="standardFormsGridView" AutoGenerateColumns="false" CssClass="table-striped table-hover table-condensed piw-borderless" OnRowCreated="standardFormsGridView_RowCreated">
+                        </asp:GridView>
+                    </div>
                 </div>
             </ContentTemplate>
             <Triggers>

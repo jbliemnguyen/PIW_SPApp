@@ -36,7 +36,7 @@ namespace PIW_SPAppWeb.Pages
             DataRow dataRow;
             //string filename = helper.getPageFileName(Page.Request);
             var piwListInternalName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-            standardFormsGridView.Columns.Clear();
+            gridView.Columns.Clear();
 
             var listItemCollection = getPIWListItem(clientContext);
             if (listItemCollection.Count > 0)
@@ -141,7 +141,7 @@ namespace PIW_SPAppWeb.Pages
             hyperlinkField.ControlStyle.Width = new Unit(200, UnitType.Pixel);
             hyperlinkField.DataNavigateUrlFields = urls;
             //hyperlinkField.Target = "_blank";
-            standardFormsGridView.Columns.Add(hyperlinkField);
+            gridView.Columns.Add(hyperlinkField);
 
 
             BoundField boundField = new BoundField
@@ -151,39 +151,39 @@ namespace PIW_SPAppWeb.Pages
                 HtmlEncode = false,
             };
             boundField.ControlStyle.Width = new Unit(400,UnitType.Pixel);
-            standardFormsGridView.Columns.Add(boundField);
+            gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Document Category", DataField = "DocumentCategory" };
-            standardFormsGridView.Columns.Add(boundField);
+            gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Form Status", DataField = "Status", Visible = false };
-            standardFormsGridView.Columns.Add(boundField);
+            gridView.Columns.Add(boundField);
             
 
             boundField = new BoundField { HeaderText = "Initiator Office", DataField = "InitiatorOffice" };
-            standardFormsGridView.Columns.Add(boundField);
+            gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Citation Number", DataField = "CitationNumber" };
-            standardFormsGridView.Columns.Add(boundField);
+            gridView.Columns.Add(boundField);
             
             boundField = new BoundField { HeaderText = "Due Date", DataField = "DueDate" };
-            standardFormsGridView.Columns.Add(boundField);
+            gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Created Date", DataField = "Created" };
-            standardFormsGridView.Columns.Add(boundField);
+            gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Recall/Reject Comment", DataField = "RecallRejectComment" };
-            standardFormsGridView.Columns.Add(boundField);
+            gridView.Columns.Add(boundField);
             
-            standardFormsGridView.AutoGenerateColumns = false;
+            gridView.AutoGenerateColumns = false;
             DataView view = dataTable.DefaultView;
             if (view.Count > 0) //without this check, exception happens if no row in the view
             {
                 view.Sort = "GroupOrder";
             }
 
-            standardFormsGridView.DataSource = view;
-            standardFormsGridView.DataBind();
+            gridView.DataSource = view;
+            gridView.DataBind();
         }
 
         private ListItemCollection getPIWListItem(ClientContext clientContext)
