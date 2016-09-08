@@ -574,7 +574,8 @@ namespace PIW_SPAppWeb.Pages
                     if (rpSupplementalMailingListDocumentList.Items.Count > 0)
                     {
                         RepeaterItem row = rpSupplementalMailingListDocumentList.Items[0];
-                        supplementalMailingListFileName = helper.getFileNameFromURL(((HyperLink)row.FindControl("hyperlinkFileURL")).NavigateUrl);
+                        var downloadedURL = helper.getFileNameFromURL(((HyperLink)row.FindControl("hyperlinkFileURL")).NavigateUrl);
+                        supplementalMailingListFileName = downloadedURL.Substring(0, downloadedURL.IndexOf("?web=0"));
                     }
 
 

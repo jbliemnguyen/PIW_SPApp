@@ -139,8 +139,7 @@ namespace PIW_SPAppWeb.Helper
                     if (action.Equals(enumAction.Reject))
                     {
                         string subject = "PIW – Workflow Item  Rejected by OSEC Verifier";
-                        string message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
-                                    submitted through Publish Issuance Workflow has been rejected by OSEC Verifier {2}.",
+                        string message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> has been rejected by OSEC Verifier {2}.",
                             formURL, docket, currentUser.Title);
                         string htmlContent = getRejectHTMLFullMessageContent(message, comment);
                         String To = string.Empty;
@@ -149,7 +148,6 @@ namespace PIW_SPAppWeb.Helper
                         To = AddEmailAddress(To, initiatorEmails);
                         To = AddEmailAddress(To, documentOwnerEmails);
                         To = AddEmailAddress(To, notificationRecipientEmails);
-
                         SendEmail(clientContext, To, subject, htmlContent);
                     }
                     break;
@@ -224,7 +222,7 @@ namespace PIW_SPAppWeb.Helper
                         string subject = "PIW Item has been reopened";
                         string message = String.Format(@"Publication of Workflow Item <a href='{0}'>{1}</a> 
                                         has been reopened.", formURL, docket);
-                        string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                        string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message,comment);
                         String To = string.Empty;
 
                         //email to initiator, document owner and notification recipient
@@ -280,44 +278,7 @@ namespace PIW_SPAppWeb.Helper
                         SendEmail(clientContext, To, subject, htmlContent);
 
 
-                        if (federalRegister)
-                        {
-                            //federal register
-                            subject = "PIW – Federal Register";
-                            message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
-                                                                    should be published in the Federal Register.", formURL, docket);
-                            htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
-                            //email to initiator, and federal register grp
-                            To = string.Empty;
-                            To = AddEmailAddress(To, initiatorEmails);
-                            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWFederalResister));
-                            SendEmail(clientContext, To, subject, htmlContent);
-                        }
                         
-                        if (section206Notice)
-                        {
-                            subject = "PIW – Section 206 Notice";
-                            message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> - Notice of Institution of Section 206 Proceeding should prepared for Federal Register."
-                                                                    , formURL, docket);
-                            htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
-                            //email initiator and Section 206 notice grp
-                            To = string.Empty;
-                            To = AddEmailAddress(To, initiatorEmails);
-                            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWSection206Notice));
-                            SendEmail(clientContext, To, subject, htmlContent);
-                        }
-
-                        if (hearingOrder)
-                        {
-                            //federal register
-                            subject = "PIW – Hearing Proceedings";
-                            message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> - contains hearing proceedings.", formURL, docket);
-                            htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
-                            //email hearing order grp
-                            To = string.Empty;
-                            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWHearingOrder));
-                            SendEmail(clientContext, To, subject, htmlContent);
-                        }
                     }
                     break;
                 case Constants.PIWList_FormStatus_Submitted:
@@ -377,6 +338,46 @@ namespace PIW_SPAppWeb.Helper
                         To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWAgendaNonManagement));
                         To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_SecReview));
                         SendEmail(clientContext, To, subject, htmlContent);
+
+                        if (federalRegister)
+                        {
+                            //federal register
+                            subject = "PIW – Federal Register";
+                            message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
+                                                                    should be published in the Federal Register.", formURL, docket);
+                            htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                            //email to initiator, and federal register grp
+                            To = string.Empty;
+                            To = AddEmailAddress(To, initiatorEmails);
+                            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWFederalResister));
+                            SendEmail(clientContext, To, subject, htmlContent);
+                        }
+
+                        if (section206Notice)
+                        {
+                            subject = "PIW – Section 206 Notice";
+                            message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> - Notice of Institution of Section 206 Proceeding should prepared for Federal Register."
+                                                                    , formURL, docket);
+                            htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                            //email initiator and Section 206 notice grp
+                            To = string.Empty;
+                            To = AddEmailAddress(To, initiatorEmails);
+                            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWSection206Notice));
+                            SendEmail(clientContext, To, subject, htmlContent);
+                        }
+
+                        if (hearingOrder)
+                        {
+                            //federal register
+                            subject = "PIW – Hearing Proceedings";
+                            message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> - contains hearing proceedings.", formURL, docket);
+                            htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                            //email hearing order grp
+                            To = string.Empty;
+                            To = AddEmailAddress(To, initiatorEmails);
+                            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWHearingOrder));
+                            SendEmail(clientContext, To, subject, htmlContent);
+                        }
                     }
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
@@ -398,7 +399,7 @@ namespace PIW_SPAppWeb.Helper
                         string subject = "PIW Item has been reopened";
                         string message = String.Format(@"Publication of Workflow Item <a href='{0}'>{1}</a> 
                                         has been reopened.", formURL, docket);
-                        string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                        string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message,comment);
                         String To = string.Empty;
 
                         //email to initiator, sec review and notification recipient
@@ -548,11 +549,24 @@ namespace PIW_SPAppWeb.Helper
                                                             - Description: {2}<br/>
                                                             - Initiator Office: {3}<br/>
                                                             - Document Category: {4}<br/> 
-                                                            - Created Date: {5}                                                       
+                                                            - Created Date: {5}<br/>                                                       
                                                  ", args);
             return htmlContent;
         }
 
+        public string getHTMLFullMessageContent(ClientContext clientContext, ListItem listItem, string message,string comment)
+        {
+            string emailContent = string.Format( "{0}{1}{2}",getHTMLFullMessageContent(clientContext, listItem, message),"- Reopen Comment: ",comment);
+            if (!string.IsNullOrEmpty(comment))
+            {
+                return string.Format("{0}{1}{2}", getHTMLFullMessageContent(clientContext, listItem, message),
+                    "- Reopen Comment: ", comment);
+            }
+            else
+            {
+                return getHTMLFullMessageContent(clientContext, listItem, message);
+            }
+        }
         public string getRejectHTMLFullMessageContent(string message, string comment)
         {
             string[] args = new string[] { message, comment };

@@ -10,7 +10,7 @@
             var documentOwner;
             var notificationRecipient;
 
-            //set active left navigation tab 
+            //set active left navigation tab summ
             $("#sidebar a").removeClass("active");
             //$("#EditAgendaFormURL").addClass("active");
 
@@ -208,7 +208,7 @@
                         </FooterTemplate>
                     </asp:Repeater>
                     <br />
-                    <asp:Label ID="lbRequiredUploadedDocumentError" runat="server" ForeColor="Red" Visible="false">Please upload at least one document</asp:Label>
+                    <asp:Label ID="lbRequiredUploadedDocumentError" runat="server" ForeColor="Red" Visible="false">Please upload at least one public document</asp:Label>
                 </div>
             </div>
 
@@ -430,7 +430,7 @@
                                 <asp:HyperLink ID="hyperlinkFileURL" runat="server" Text='<%#DataBinder.Eval(Container.DataItem,"Name")%>'
                                     NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"DownloadURL")%>'>
                                 </asp:HyperLink>
-                                &nbsp;&nbsp;|&nbsp;&nbsp;
+                                &nbsp;&nbsp;&nbsp;&nbsp;
                             <asp:LinkButton ID="btnRemoveDocument" runat="server" Text="Remove" CommandName="RemoveDocument"
                                 CommandArgument='<%#DataBinder.Eval(Container.DataItem,"ID")%>' />
                             </li>
@@ -448,27 +448,15 @@
                     <asp:Label ID="lbCommentValidation" runat="server" ForeColor="Red" Visible="false" Text="Comment is required" ClientIDMode="Static"></asp:Label>
                 </div>
                 <div class="col-md-5">
-                    <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
+                        <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
                 </div>
             </div>
+            
 
             <%--End of Main Panel--%>
 
             <fieldset runat="server" id="fieldsetSecReview" visible="false">
                 <legend>Secretary Review</legend>
-                <%--<div class="form-group">
-                    <div class="col-md-2"></div>
-                    <div class="col-md-2">
-                        <asp:Label ID="lbSecReviewAction" runat="server"></asp:Label>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <asp:Label ID="lbSecReviewComment" runat="server" Text="Comment" AssociatedControlID="tbSecReviewComment" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-6">
-                        <asp:TextBox ID="tbSecReviewComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
-                        <asp:Label runat="server" ID="lbSecReviewCommentError" Visible="false" ForeColor="Red"></asp:Label>
-                    </div>
-                </div>--%>
             </fieldset>
 
             <fieldset runat="server" id="fieldsetMailedRoom" visible="false">

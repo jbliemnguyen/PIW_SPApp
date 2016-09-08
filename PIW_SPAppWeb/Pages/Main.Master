@@ -467,6 +467,7 @@
 
         //used when delete button clicked or upload
         function RemoveValidationRulesInForm() {
+            $("#ddlSecurityControl").rules("remove");
             $("#tbDocketNumber").rules("remove");
             $("#tbDescription").rules("remove");
             $("#ddDocumentCategory").rules("remove");

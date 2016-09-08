@@ -1575,7 +1575,6 @@ namespace PIW_SPAppWeb.Helper
 
         public void SetCommentURLHTML(ListItem listItem,Dictionary<string,string> piwListInternalColumnNames,string userName,string comment)
         {
-            string pattern = "<li>{0} ({1}): {2}</li>";
             if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] == null)
                 {
                     listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("<li>{0} ({1}): {2}</li>", userName,

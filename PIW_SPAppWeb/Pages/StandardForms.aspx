@@ -27,7 +27,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <div id="gridDiv" class="col-md-10" style="overflow-y: scroll;">
+                    <div id="gridDiv" class="col-md-10" style="overflow-x: scroll;overflow-y: hidden">
                         <asp:GridView runat="server" ID="standardFormsGridView" AutoGenerateColumns="false" CssClass="table-striped table-hover table-condensed piw-borderless" OnRowCreated="standardFormsGridView_RowCreated">
                         </asp:GridView>
                     </div>
