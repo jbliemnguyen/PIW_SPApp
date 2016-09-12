@@ -2378,16 +2378,32 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_Deleted:
                     //this status is only viewable by admin
                     EnableMainPanel(false, formStatus, false);
-                    if (isRequireOSECVerification)
-                    {
-                        fieldsetOSECVerification.Visible = true;
-                        //tbOSECVerificationComment.Enabled = false;
-                    }
+                    lbMainMessage.Visible = true;
+                    lbMainMessage.Text = "This issuance has been deleted.";
 
-                    //PrePublication
+                    //OSEC section
+                    fieldsetOSECVerification.Visible = isRequireOSECVerification;
+                    
+                    
                     fieldsetPrePublication.Visible = true;
-                    //EnablePrePublicationControls(false);
                     EnableCitationNumberControls(false, false);
+
+                    //Mailed Room and Legal Resources and Review
+                    fieldsetMailedRoom.Visible = true;
+                    fieldsetLegalResourcesReview.Visible = true;
+
+                    //Button
+                    btnSave.Visible = false;
+                    btnSubmit.Visible = false;
+                    btnEdit.Visible = false;
+                    btnAccept.Visible = false;
+                    btnReject.Visible = false;
+                    btnOSECTakeOwnership.Visible = false;
+                    btnRecall.Visible = false;
+                    btnInitiatePublication.Visible = false;
+                    btnDelete.Visible = false;
+                    btnReopen.Visible = false;
+                    btnGenerateMailingList.Visible = false;
 
                     break;
                 default:

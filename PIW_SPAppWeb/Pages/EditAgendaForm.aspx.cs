@@ -1942,21 +1942,13 @@ namespace PIW_SPAppWeb.Pages
 
                     //buttons
                     btnSave.Visible = false;
-
                     btnSubmit.Visible = btnSave.Visible;
-
                     btnEdit.Visible = false;
-
                     btnAccept.Visible = false;
-
                     btnReject.Visible = false;
-
                     btnSECReviewTakeOwnership.Visible = isCurrentUserSecReviewer;
-
                     btnRecall.Visible = isCurrentUserOSEC;
-
                     btnInitiatePublication.Visible = false;
-
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
 
@@ -2135,10 +2127,35 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 case Constants.PIWList_FormStatus_Deleted:
                     //this status is only viewable by admin
+                    
                     EnableMainPanel(false, false);
+                    lbMainMessage.Visible = true;
+                    lbMainMessage.Text = "This issuance has been deleted.";
 
-                    //PrePublication
+                    //citation number controls
+                    EnableCitationNumberControls(false, false);
+
+                    //SEC Review section
                     fieldsetSecReview.Visible = true;
+
+                    //Mailed Room and Legal Resources and Review
+                    fieldsetMailedRoom.Visible = true;
+                    fieldsetLegalResourcesReview.Visible = true;
+
+                    //buttons
+                    btnSave.Visible = false;
+                    btnSubmit.Visible = false;
+                    btnEdit.Visible = false;
+                    btnAccept.Visible = false;
+                    btnReject.Visible = false;
+                    btnSECReviewTakeOwnership.Visible = false;
+                    btnRecall.Visible = false;
+                    btnInitiatePublication.Visible = false;
+                    //delete button has the same visibility as Save button
+                    btnDelete.Visible = false;
+                    btnReopen.Visible = false;
+                    btnGenerateMailingList.Visible = false;
+                    break;
 
                     break;
                 default:

@@ -263,6 +263,7 @@ namespace PIW_SPAppWeb.Helper
                 case Constants.PIWList_FormStatus_Pending:
                 case Constants.PIWList_FormStatus_Recalled:
                 case Constants.PIWList_FormStatus_Rejected:
+                case Constants.PIWList_FormStatus_ReOpen:
                     if (action.Equals(enumAction.Submit))
                     {
                         string subject = "PIW - Workflow Item Submitted for Processing";
@@ -276,9 +277,6 @@ namespace PIW_SPAppWeb.Helper
                         To = AddEmailAddress(To, getEmailListFromGrp(clientContext,Constants.Grp_PIWAgendaNonManagement));
                         To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_SecReview));
                         SendEmail(clientContext, To, subject, htmlContent);
-
-
-                        
                     }
                     break;
                 case Constants.PIWList_FormStatus_Submitted:

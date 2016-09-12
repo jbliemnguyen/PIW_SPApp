@@ -1242,6 +1242,18 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_Deleted:
                     //this status is only viewable by admin
                     EnableMainPanel(false, formStatus,false);
+                    lbMainMessage.Visible = true;
+                    lbMainMessage.Text = "This issuance has been deleted.";
+
+                    //Mailed Room and Legal Resources and Review
+                    fieldsetMailedRoom.Visible = true;
+                    fieldsetLegalResourcesReview.Visible = true;
+
+                    //buttons
+                    btnSave.Visible = false;
+                    btnInitiatePublication.Visible = false;
+                    btnDelete.Visible = false;
+                    btnReopen.Visible = false;
                     break;
                 default:
                     throw new Exception("UnRecognized Form Status: " + formStatus);
@@ -1280,7 +1292,7 @@ namespace PIW_SPAppWeb.Pages
 
             //notification receiver
             inputNotificationRecipient.Enabled = enabled;
-            tbComment.Enabled = enabled;
+            //tbComment.Enabled = enabled;
             ddFolaServiceRequired.Enabled = enabled;
         }
 

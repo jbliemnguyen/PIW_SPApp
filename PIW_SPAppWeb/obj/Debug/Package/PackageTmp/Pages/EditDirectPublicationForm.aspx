@@ -72,56 +72,6 @@
                     });
                 }
             });
-
-            //Confirm of deletion
-            //$("#btnDelete").click(function (event) {
-            //    event.preventDefault();
-            //    $("#deleteDialogConfirmation").dialog({
-            //        buttons: {
-            //            "No": function (e) {
-            //                $(this).dialog("close");
-
-            //            },
-            //            "Yes": function (e) {
-            //                $("#btnDeleteConfirm").click();
-            //            }
-            //        }
-            //    }, { width: 500 });
-            //});
-
-            ////Confirm of Publish
-            //$("#btnInitiatePublication").click(function (event) {
-            //    event.preventDefault();
-            //    //run validator
-            //    if ($("#mainForm").valid()) {
-            //        var modalHeight = 100;
-            //        //dialog
-            //        $("#publishDialogConfirmation").dialog({
-            //            buttons: {
-            //                "No": function (e) {
-            //                    $(this).dialog("close");
-
-            //                },
-            //                "Yes": function (e) {
-            //                    $("#btnPublishConfirm").click();
-            //                    $(this).dialog("close");
-            //                }
-            //            }
-            //        }, { width: 600, height: modalHeight });
-            //    }
-                
-                
-            //});
-
-            //spinner
-            //$("#btnPublishConfirm").click(function (event) {
-            //    var btnInitiatePublication = $("#btnInitiatePublication");
-            //    setSpinIcon(btnInitiatePublication, true);
-            //});
-
-            //$(".historyhead").click(function () {
-            //    $(".historylist").slideToggle(100);
-            //});
         }
 
         function registerPeoplePicker(spHostUrl, appWebUrl, spLanguage) {
@@ -236,7 +186,7 @@
                         </FooterTemplate>
                     </asp:Repeater>
                     <br />
-                    <asp:Label ID="lbRequiredUploadedDocumentError" runat="server" ForeColor="Red" Visible="false">Please upload at least one document</asp:Label>
+                    <asp:Label ID="lbRequiredUploadedDocumentError" runat="server" ForeColor="Red" Visible="false">Please upload at least one public document</asp:Label>
                 </div>
             </div>
 
@@ -281,14 +231,17 @@
                 <div class="col-md-3">
                     <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server" ClientIDMode="Static">
                         <asp:ListItem Value="">Please Select</asp:ListItem>
-                        <asp:ListItem>Delegated Errata</asp:ListItem>
-                        <asp:ListItem>Delegated Letter</asp:ListItem>
-                        <asp:ListItem>Delegated Notice</asp:ListItem>
-                        <asp:ListItem>Delegated Order</asp:ListItem>
-                        <asp:ListItem>OALJ</asp:ListItem>
-                        <asp:ListItem>OALJ Errata</asp:ListItem>
-                        <asp:ListItem>Notice Errata</asp:ListItem>
-                        <asp:ListItem>Notice</asp:ListItem>
+                        <asp:ListItem>Chairman Statement</asp:ListItem>
+                        <asp:ListItem>Commissioner Statement</asp:ListItem>
+                        <asp:ListItem>Controlled Correspondence</asp:ListItem>
+                        <asp:ListItem>Errata</asp:ListItem>
+                        <asp:ListItem>Field Inspection Report</asp:ListItem>
+                        <asp:ListItem>Licensing Correspondence</asp:ListItem>
+                        <asp:ListItem>News Release</asp:ListItem>
+                        <asp:ListItem>Notice of Action Taken</asp:ListItem>
+                        <asp:ListItem>OEP Letter</asp:ListItem>
+                        <asp:ListItem>Sunshine Act Meeting Notice</asp:ListItem>
+
                     </asp:DropDownList>
                 </div>
             </div>
@@ -330,7 +283,7 @@
                 <asp:Label ID="lbProgramOfficeDocumentOwner" runat="server" Text="Program Office (Document Owner)" AssociatedControlID="ddProgramOfficeDocumentOwner" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
                     <asp:DropDownList ID="ddProgramOfficeDocumentOwner" CssClass="form-control" runat="server"  ClientIDMode="Static">
-                        <asp:ListItem>Please Select</asp:ListItem>
+                        <asp:ListItem Value="">Please Select</asp:ListItem>
                         <asp:ListItem>OAL</asp:ListItem>
                         <asp:ListItem>OALJ</asp:ListItem>
                         <asp:ListItem>OE</asp:ListItem>
@@ -373,7 +326,7 @@
             <div class="form-group">
                 <asp:Label ID="lbFOLAServiceRequired" runat="server" Text="FOLA Service Required<span class='accentText'> *</span>" AssociatedControlID="ddFolaServiceRequired" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
-                    <asp:DropDownList ID="ddFolaServiceRequired" CssClass="form-control" runat="server">
+                    <asp:DropDownList ID="ddFolaServiceRequired" CssClass="form-control" runat="server" ClientIDMode="Static">
                         <asp:ListItem Value="">Please Select</asp:ListItem>
                         <asp:ListItem>Yes</asp:ListItem>
                         <asp:ListItem>No</asp:ListItem>
@@ -413,7 +366,7 @@
                                 <asp:HyperLink ID="hyperlinkFileURL" runat="server" Text='<%#DataBinder.Eval(Container.DataItem,"Name")%>'
                                     NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"DownloadURL")%>'>
                                 </asp:HyperLink>
-                                &nbsp;&nbsp;|&nbsp;&nbsp;
+                                &nbsp;&nbsp;&nbsp;&nbsp;
                             <asp:LinkButton ID="btnRemoveDocument" runat="server" Text="Remove" CommandName="RemoveDocument"
                                 CommandArgument='<%#DataBinder.Eval(Container.DataItem,"ID")%>' />
                             </li>
@@ -427,10 +380,9 @@
             
             <div class="form-group">
                 <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
                 </div>
-                <div class="col-md-1"></div>
                 <div class="col-md-5">
                     <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
                 </div>
@@ -533,6 +485,9 @@
         </div>
         <div id="deleteDialogConfirmation" title="Are you sure you wish to delete this workflow item?"></div>
         <div id="publishDialogConfirmation" title="Are you sure you wish to publish this issuance?"></div>
-
+        <div id="skm_LockBackground" class="LockOff"></div>
+        <div id="skm_LockPane" class="LockOff">
+            <div id="skm_LockPaneText">&nbsp;</div>
+        </div>
     </form>
 </asp:Content>

@@ -342,7 +342,7 @@
                 <asp:Label ID="lbProgramOfficeDocumentOwner" runat="server" Text="Program Office (Document Owner)" AssociatedControlID="ddProgramOfficeDocumentOwner" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
                     <asp:DropDownList ID="ddProgramOfficeDocumentOwner" CssClass="form-control" runat="server" ClientIDMode="Static">
-                        <asp:ListItem>Please Select</asp:ListItem>
+                        <asp:ListItem Value="">Please Select</asp:ListItem>
                         <asp:ListItem>OAL</asp:ListItem>
                         <asp:ListItem>OALJ</asp:ListItem>
                         <asp:ListItem>OE</asp:ListItem>
@@ -445,7 +445,6 @@
                 <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-4">
                     <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="3" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
-                    <asp:Label ID="lbCommentValidation" runat="server" ForeColor="Red" Visible="false" Text="Comment is required" ClientIDMode="Static"></asp:Label>
                 </div>
                 <div class="col-md-5">
                         <asp:Label runat="server" ID="lbCommentValue"></asp:Label>

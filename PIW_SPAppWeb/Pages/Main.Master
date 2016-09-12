@@ -32,7 +32,7 @@
                 <ul class="nav navbar-nav">
                     <li><a href="EditStandardForm.aspx" id="EditStandardFormURL" style="color: white">Create New Standard Form</a></li>
                     <li><a href="EditAgendaForm.aspx" id="EditAgendaFormURL" style="color: white">Create New Agenda Form</a></li>
-                    <li><a href="EditDirectPublicationForm.aspxa" id="EditDirectPublicationFormURL" style="color: white">Create New Direct Publication Form</a></li>
+                    <li><a href="EditDirectPublicationForm.aspx" id="EditDirectPublicationFormURL" style="color: white">Create New Direct Publication Form</a></li>
                 </ul>
                 <form class="navbar-form navbar-right">
                     <div class="form-group">
@@ -54,7 +54,8 @@
                 <div class="list-group">
                     <a href="StandardForms.aspx" class="list-group-item" id="StandardFormsURL">Standard Forms</a>
                     <a href="AgendaForms.aspx" class="list-group-item" id="AgendaFormsURL">Agenda Forms</a>
-
+                    <a href="DirectPublicationForms.aspx" class="list-group-item" id="DirectPublicationFormsURL">Direct Publication Forms</a>
+                    
                     <%--<a href="EditStandardForm.aspx" class="list-group-item" id="EditStandardFormURL">New Standard Form</a>--%>
                     <%--<a href="EditAgendaForm.aspx" class="list-group-item" id="EditAgendaFormURL">New Agenda Form</a>--%>
                     <%--<a href="EditDirectPublicationForm.aspx" class="list-group-item" id="EditDirectPublicationFormURL">New Direct Publication Form</a>--%>
@@ -204,6 +205,34 @@
                 }
             }, 'This field is required in Non-Docketed or CNF');
 
+            //
+            $.validator.addMethod("requiredWhenDocumentOwnerProvided", function (value, element) {
+                var numberOfPeoples = $("#divDocumentOwner").find(".cam-entity-resolved");
+                if (numberOfPeoples.length > 0) {
+                    if (value) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return true;
+                }
+            }, 'This field is required when Document Owner is provided');
+
+            $.validator.addMethod("requiredWhenProgramOfficeDocumentOwnerProvided", function (value, element) {
+                var numberOfPeoples = $("#divDocumentOwner").find(".cam-entity-resolved");
+                var programOfficeDocumentOwner = $("#ddProgramOfficeDocumentOwner").val();
+
+                if (programOfficeDocumentOwner) {
+                    if (numberOfPeoples.length > 0) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    return true;
+                }
+            }, 'This field is required when Program Office (Document Owner) is provided');
 
             $("#mainForm").validate({
                 rules: {
@@ -216,7 +245,8 @@
                     ctl00$MainContentPlaceHolder$tbDueDate: "required",
                     ctl00$MainContentPlaceHolder$tbAlternateIdentifier: { requiredWhenNonDocketed: true, maxlength: 255 },
                     ctl00$MainContentPlaceHolder$tbInstruction: { maxlength: 255 },
-
+                    ctl00$MainContentPlaceHolder$ddProgramOfficeDocumentOwner: {requiredWhenDocumentOwnerProvided:true},
+                    ctl00$MainContentPlaceHolder$inputDocumentOwner: { requiredWhenProgramOfficeDocumentOwnerProvided: true },
                     //print req validation
                     ctl00$MainContentPlaceHolder$tbNumberofPages: {
                         required: true,
@@ -479,6 +509,9 @@
             $("#tbInstruction").rules("remove");
             $("#tbNumberofPages").rules("remove");
             $("#tbNumberofCopies").rules("remove");
+            $("#ddProgramOfficeDocumentOwner").rules("remove");
+            $("#inputDocumentOwner").rules("remove");
+            
         }
 
         ///http://www.4guysfromrolla.com/articles/121708-1.aspx
