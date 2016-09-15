@@ -91,7 +91,7 @@ namespace PIW_SPAppWeb.Helper
             var documentsWithServerRelativeURL = helper.getDocumentServerRelativeURL(clientContext, listItemId,
                 documentWithFullURLs);
 
-            //Copy all documentWithFullURLs and calcuate number of public pages
+            //Copy all document and calcuate number of public pages
             foreach (KeyValuePair<string, string> file in documentsWithServerRelativeURL)
             {
                 int filePages = 0;
@@ -180,13 +180,13 @@ namespace PIW_SPAppWeb.Helper
                 Directory.CreateDirectory(DestinationURNFolder);
             }
 
-
             FileInformation fileInfo = File.OpenBinaryDirect(clientContext, sourceFileURL);
             string fileName = helper.getFileNameFromURL(sourceFileURL);
             var destinationFileURN = DestinationURNFolder + "\\" + fileName;
             using (var fileStream = System.IO.File.Create(destinationFileURN))
             {
                 fileInfo.Stream.CopyTo(fileStream);
+                fileStream.Close();
             }
 
             pages = getPublishedIssuanceNumberOfPages(destinationFileURN);

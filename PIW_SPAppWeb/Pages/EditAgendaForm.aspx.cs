@@ -1169,7 +1169,7 @@ namespace PIW_SPAppWeb.Pages
 
         private void UpdateFormDataToList(ClientContext clientContext, ListItem listItem, enumAction action)
         {
-            string errorMessage = "UpdateFormDataToList method: Unknown Status and Previous status combination. Status:{0}, Previous Status: {1}";
+            const string errorMessage = "UpdateFormDataToList method: Unknown Status and Previous status combination. Status:{0}, Previous Status: {1}";
             switch (FormStatus)//this is the next status after action is performed
             {
                 case Constants.PIWList_FormStatus_Pending:
@@ -1876,13 +1876,11 @@ namespace PIW_SPAppWeb.Pages
             bool isCurrentUserLegalResouceTeam = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                             new string[] { Constants.Grp_PIWLegalResourcesReview });
 
+            
             //todo: number of fola mailing list and supp mailing list address --> display PRint req link
-
-
 
             var currentUser = clientContext.Web.CurrentUser;
             clientContext.Load(currentUser);
-
             clientContext.ExecuteQuery();
 
             switch (formStatus)
@@ -2219,14 +2217,11 @@ namespace PIW_SPAppWeb.Pages
             ddProgramOfficeWorkflowInitiator.Enabled = enabled;
             //initiator
             inputWorkflowInitiator.Enabled = false;//initiator alsways disabled
-
             ddProgramOfficeDocumentOwner.Enabled = enabled;
             //document owner
             inputDocumentOwner.Enabled = enabled;
-
             //notification receiver
             inputNotificationRecipient.Enabled = enabled;
-
             tbDueDate.Enabled = enabled;
             //tbComment.Enabled = enabled;
         }

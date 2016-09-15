@@ -484,13 +484,13 @@
                 <legend>Legal Resources And Review</legend>
                 <div class="form-group">
                     <asp:Label ID="lbLegalResourcesReviewCompletionDate" runat="server" Text="Completion Date" AssociatedControlID="tbLegalResourcesReviewCompletionDate" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <asp:TextBox ID="tbLegalResourcesReviewCompletionDate" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
                     </div>
                 </div>
                 <div class="form-group">
                     <asp:Label ID="lbLegalResourcesNote" runat="server" Text="Note" AssociatedControlID="tbLegalResourcesReviewNote" CssClass="col-md-2 control-label"></asp:Label>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <asp:TextBox ID="tbLegalResourcesReviewNote" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
                     </div>
                 </div>

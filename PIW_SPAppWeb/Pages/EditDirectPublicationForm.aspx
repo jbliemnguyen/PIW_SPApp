@@ -381,7 +381,7 @@
             <div class="form-group">
                 <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-4">
-                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="3" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
                 </div>
                 <div class="col-md-5">
                     <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
@@ -417,13 +417,13 @@
             <legend>Legal Resources And Review</legend>
             <div class="form-group">
                 <asp:Label ID="lbLegalResourcesReviewCompletionDate" runat="server" Text="Completion Date" AssociatedControlID="tbLegalResourcesReviewCompletionDate" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <asp:TextBox ID="tbLegalResourcesReviewCompletionDate" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
                 </div>
             </div>
             <div class="form-group">
                 <asp:Label ID="lbLegalResourcesNote" runat="server" Text="Note" AssociatedControlID="tbLegalResourcesReviewNote" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <asp:TextBox ID="tbLegalResourcesReviewNote" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
                 </div>
             </div>
@@ -441,6 +441,7 @@
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnDeleteConfirm_Click" />
                 <asp:Button ID="btnReopen" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" OnClick="btnReopen_Click" ClientIDMode="Static"/>
+                <asp:Button ID="btnGenerateMailingList" runat="server" Text="Generate Mailing List" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnGenerateMailingList_Click" />
             </div>
         </div>
         <div class="form-group">

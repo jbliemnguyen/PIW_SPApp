@@ -290,9 +290,7 @@ namespace PIW_SPAppWeb.Pages
                         User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                         clientContext.Load(currentUser);
                         clientContext.ExecuteQuery();
-
-                        //TODO: send email
-
+                        
                         //Create list history
                         if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
@@ -342,9 +340,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         return;
                     }
-
                     
-
                     //issuance documents
                     Dictionary<string, string> files = new Dictionary<string, string>();
                     foreach (RepeaterItem row in rpDocumentList.Items)
@@ -422,8 +418,6 @@ namespace PIW_SPAppWeb.Pages
                     User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                     clientContext.Load(currentUser);
                     clientContext.ExecuteQuery();
-
-                    //TODO: send email
 
                     //Create list history
                     helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item deleted.", FormStatus,
@@ -621,7 +615,6 @@ namespace PIW_SPAppWeb.Pages
                     clientContext.ExecuteQuery();
 
                     Email emailHelper = new Email();
-
                     emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
                         currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
 
@@ -629,7 +622,7 @@ namespace PIW_SPAppWeb.Pages
                     helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item Re-Opened", FormStatus,
                         Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
-                    //Redirect or Refresh page
+                    //Refresh page
                     helper.RefreshPage(Page.Request, Page.Response);
                 }
             }
@@ -640,6 +633,10 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
+        protected void btnGenerateMailingList_Click(object sender, EventArgs e)
+        {
+
+        }
         #endregion
 
         #region Save Data
@@ -682,10 +679,15 @@ namespace PIW_SPAppWeb.Pages
                     }
                     break;
                 case Constants.PIWList_FormStatus_ReOpen:
-                    if (PreviousFormStatus == Constants.PIWList_FormStatus_PublishInitiated)
+
+                    if (FormStatus == PreviousFormStatus)//save action
+                    {
+                        SaveMainPanelAndStatus(clientContext, listItem);
+                    }
+                    else if (PreviousFormStatus == Constants.PIWList_FormStatus_PublishInitiated)//reopen
                     {
                         helper.SaveReOpenInfoAndStatusAndComment(clientContext, listItem, FormStatus, PreviousFormStatus,
-                            tbComment.Text.Trim(), CurrentUserLogInName);
+                        tbComment.Text.Trim(), CurrentUserLogInName);
                     }
                     else
                     {
@@ -701,8 +703,10 @@ namespace PIW_SPAppWeb.Pages
                     if ((PreviousFormStatus == Constants.PIWList_FormStatus_Pending) || (PreviousFormStatus == Constants.PIWList_FormStatus_ReOpen))
                     {
                         SaveMainPanelAndStatus(clientContext, listItem);
+                        //becuase comment already save in above method SaveMainPanelAndStatus
+                        //we don't pass the comment to the next method to avoid duplicate
                         helper.SavePublishingInfoAndStatusAndComment(clientContext, listItem, FormStatus, PreviousFormStatus,
-                            tbComment.Text.Trim(),CurrentUserLogInName);
+                            string.Empty,CurrentUserLogInName);
                     }
                     else
                     {
@@ -727,19 +731,7 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        //private void SaveReOpenInfoAndStatus(ClientContext clientContext, ListItem listItem)
-        //{
-        //    var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-
-        //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = FormStatus;
-        //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = PreviousFormStatus;
-
-        //    //clear accession number
-        //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
-
-        //    listItem.Update();
-        //    clientContext.ExecuteQuery();
-        //}
+        
 
         private void SaveMainPanelAndStatus(ClientContext clientContext, ListItem listItem)
         {
@@ -996,6 +988,12 @@ namespace PIW_SPAppWeb.Pages
             {
                 ModifiedDateTime = listItem[internalColumnNames[Constants.PIWList_colName_Modified]].ToString();
             }
+
+            //FormType
+            if (listItem[internalColumnNames[Constants.PIWList_colName_FormType]] != null)
+            {
+                FormType = listItem[internalColumnNames[Constants.PIWList_colName_FormType]].ToString();
+            }
         }
         private void DisplayListItemInForm(ClientContext clientContext, ListItem listItem)
         {
@@ -1167,17 +1165,18 @@ namespace PIW_SPAppWeb.Pages
         #region Visibility
         public void ControlsVisiblitilyBasedOnStatus(ClientContext clientContext, string previousFormStatus, string formStatus, ListItem listItem)
         {
-            var piwlistInternalColumnName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-            var documentCategory = string.Empty;
-            if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_DocumentCategory]] != null)
-            {
-                documentCategory = listItem[piwlistInternalColumnName[Constants.PIWList_colName_DocumentCategory]].ToString();
-            }
+            bool isCurrentUserAllowSubmitDirectPubForm = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                            new string[] { Constants.Grp_PIWDirectPublicationSubmitOnly, Constants.Grp_PIWDirectPublication});
+
+            bool isCurrentUserAllowPublishDirectPubForm = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                            new string[] { Constants.Grp_PIWDirectPublication });
+
+            bool isCurrentUserLegalResouceTeam = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                            new string[] { Constants.Grp_PIWLegalResourcesReview });
 
             //SPUser checkoutUser = null;
             var currentUser = clientContext.Web.CurrentUser;
             clientContext.Load(currentUser);
-
             clientContext.ExecuteQuery();
 
             switch (formStatus)
@@ -1185,7 +1184,7 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_Pending:
                 case Constants.PIWList_FormStatus_ReOpen:
                     //submit section    
-                    EnableMainPanel(true, formStatus,true);
+                    EnableMainPanel(true, true);
                     lbMainMessage.Visible = false;
 
                     //Mailed Room and Legal Resources and Review
@@ -1193,55 +1192,56 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetLegalResourcesReview.Visible = false;
 
                     //buttons
-                    btnSave.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                        new string[]{Constants.Grp_PIWDirectPublication,Constants.Grp_PIWDirectPublicationSubmitOnly}  );
+                    btnSave.Visible = isCurrentUserAllowSubmitDirectPubForm;
 
-                    btnInitiatePublication.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                        new string[]{Constants.Grp_PIWDirectPublication});;
+                    btnInitiatePublication.Visible = isCurrentUserAllowPublishDirectPubForm;
 
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = btnSave.Visible;
-
                     btnReopen.Visible = false;
+                    btnGenerateMailingList.Visible = false;
 
                     break;
 
                 case Constants.PIWList_FormStatus_PublishInitiated:
                     //submitter
-                    EnableMainPanel(false, formStatus,false);
+                    EnableMainPanel(false,false);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "Publication has been initiated for this issuance.";
 
                     //Mailed Room and Legal Resources and Review
-                    fieldsetMailedRoom.Visible = false;
-                    fieldsetLegalResourcesReview.Visible = false;
+                    fieldsetMailedRoom.Visible = false;//todo: print req check 
+                    fieldsetLegalResourcesReview.Visible = true;
 
                     //buttons
-                    btnSave.Visible = false;
+                    btnSave.Visible = isCurrentUserLegalResouceTeam;
                     btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
-                    btnDelete.Visible = btnSave.Visible;
+                    btnDelete.Visible = false;
                     btnReopen.Visible = true;
+                    btnGenerateMailingList.Visible = false;
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    EnableMainPanel(false, formStatus,false);
+                    EnableMainPanel(false, false);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "This issuance is available in eLibrary.";
 
                     //Mailed Room and Legal Resources and Review
-                    fieldsetMailedRoom.Visible = true;
+                    fieldsetMailedRoom.Visible = false;//todo: print req check
                     fieldsetLegalResourcesReview.Visible = true;
 
                     //buttons
-                    btnSave.Visible = true;
+                    btnSave.Visible = isCurrentUserLegalResouceTeam;
                     btnInitiatePublication.Visible = false;
                     btnDelete.Visible = false;
                     btnReopen.Visible = false;
+                    btnGenerateMailingList.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                        new string[] { Constants.Grp_PIWAdmin, Constants.Grp_PIWSystemAdmin });
                     break;
 
                 case Constants.PIWList_FormStatus_Deleted:
                     //this status is only viewable by admin
-                    EnableMainPanel(false, formStatus,false);
+                    EnableMainPanel(false,false);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "This issuance has been deleted.";
 
@@ -1254,6 +1254,7 @@ namespace PIW_SPAppWeb.Pages
                     btnInitiatePublication.Visible = false;
                     btnDelete.Visible = false;
                     btnReopen.Visible = false;
+                    btnGenerateMailingList.Visible = false;
                     break;
                 default:
                     throw new Exception("UnRecognized Form Status: " + formStatus);
@@ -1262,34 +1263,19 @@ namespace PIW_SPAppWeb.Pages
         }
 
 
-        private void EnableMainPanel(bool enabled, string FormStatus, bool canEditUploadedDocument)
+        private void EnableMainPanel(bool enabled, bool canEditUploadedDocument)
         {
             EnableFileUploadComponent(enabled, canEditUploadedDocument);
             tbDocketNumber.Enabled = enabled;
             cbIsNonDocket.Enabled = enabled;
             tbAlternateIdentifier.Enabled = enabled;
             tbDescription.Enabled = enabled;
-
-            //only allow document category to be changed if Status is not Edited
-            if (FormStatus.Equals(Constants.PIWList_FormStatus_Edited))
-            {
-                ddDocumentCategory.Enabled = false;
-            }
-            else
-            {
-                ddDocumentCategory.Enabled = enabled;
-            }
-
-
-
             ddProgramOfficeWorkflowInitiator.Enabled = enabled;
             //initiator
             inputWorkflowInitiator.Enabled = false;//initiator alsways disabled
-
             ddProgramOfficeDocumentOwner.Enabled = enabled;
             //document owner
             inputDocumentOwner.Enabled = enabled;
-
             //notification receiver
             inputNotificationRecipient.Enabled = enabled;
             //tbComment.Enabled = enabled;
@@ -1331,6 +1317,8 @@ namespace PIW_SPAppWeb.Pages
         }
 
         #endregion
+
+        
 
     }
 

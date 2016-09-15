@@ -2319,7 +2319,7 @@ namespace PIW_SPAppWeb.Pages
                     EnableCitationNumberControls(false, false);
 
                     //Mailed Room and Legal Resources and Review
-                    fieldsetMailedRoom.Visible = false;
+                    fieldsetMailedRoom.Visible = false;//todo: print req check
                     fieldsetLegalResourcesReview.Visible = true;
 
                     //buttons

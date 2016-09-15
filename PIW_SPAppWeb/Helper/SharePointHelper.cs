@@ -1772,7 +1772,7 @@ namespace PIW_SPAppWeb.Helper
 
             if (securityControl.Equals(Constants.ddlSecurityControl_Option_CEII))
             {
-                group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIW_FOL_Submission_CEII_ReadOnly);
+                group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_CEII_RO);
             }
             else if (securityControl.Equals(Constants.ddlSecurityControl_Option_Privileged))
             {

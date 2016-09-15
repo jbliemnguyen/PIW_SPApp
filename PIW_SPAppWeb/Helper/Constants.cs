@@ -1,4 +1,5 @@
-﻿using Microsoft.SqlServer.Server;
+﻿using FERC.eLibrary.Business.Entity;
+using Microsoft.SqlServer.Server;
 
 namespace PIW_SPAppWeb
 {
@@ -242,11 +243,20 @@ namespace PIW_SPAppWeb
         //public const string Grp_PrintRequisitionSubmitter = "PrintRequisitionSubmitter";
         public const string Grp_CopyCenter = "CopyCenter";
         public const string Grp_PIWLegalResourcesReview = "PIWLegalResourcesReview";
-        public const string Grp_PIW_FOL_Submission_CEII_ReadOnly = "PIW–FOL-Submission-CEII-ReadOnly";
-        public const string Grp_PIW_FOL_Submission_Privileged_ReadOnly = "PIW–FOL-Submission-Privileged–ReadOnly";
         public const string Grp_PIWSection206Notice = "PIWSection206Notice";
         public const string Grp_PIWHearingOrder = "PIWHearingOrder";
         public const string Grp_PIWFederalResister = "PIWFederalResister";
+        //CEII Privileged from eLibrary grp
+        public const string Grp_FAWSGG_elc_FERCStaff_Privileged_CEII_RO = "FAWSGG-elc-FERCStaff-Privileged-CEII-RO";
+        public const string Grp_PIW_FOL_Submission_Privileged_ReadOnly = "PIW–FOL-Submission-Privileged–ReadOnly";
+
+        public const string Grp_FAWSGG_elc_FERCStaff_Privileged_General_RO = "FAWSGG-elc-FERCStaff-Privileged-General-RO";
+        public const string Grp_FAWSGG_elc_FERCStaff_Privileged_GAS_RO = "FAWSGG-elc-FERCStaff-Privileged-GAS-RO";
+        public const string Grp_FAWSGG_elc_FERCStaff_Privileged_electric_RO ="FAWSGG-elc-FERCStaff-Privileged-electric-RO";
+        public const string Grp_FAWSGG_elc_FERCStaff_Privileged_hydro_RO = "FAWSGG-elc-FERCStaff-Privileged-hydro-RO";
+        public const string Grp_FAWSGG_elc_FERCStaff_Privileged_Oil_RO = "FAWSGG-elc-FERCStaff-Privileged-Oil-RO";
+        public const string Grp_FAWSGG_elc_FERCStaff_Privileged_RuleMaking_RO = "FAWSGG-elc-FERCStaff-Privileged-RuleMaking-RO";
+
         
  
         
