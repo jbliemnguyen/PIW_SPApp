@@ -855,7 +855,7 @@ namespace PIW_SPAppWeb.Helper
                             listItemId, fileName, securityControlValue, docType, false);
 
                         //set permission if CEII or Privileged
-                        AssignPermissionForCEIIOrPrivilegedDocument(clientContext, listItemId, uploadedFileURL, securityControlValue);
+                        //AssignPermissionForCEIIAndPrivilegedDocument(clientContext, listItemId, uploadedFileURL, securityControlValue);
 
 
                         //clear validation error
@@ -1760,13 +1760,25 @@ namespace PIW_SPAppWeb.Helper
                 AssignRoleForGroup(clientContext, group, PIWDirectPublicationSubmissionOnlyRole, folder);
             }
 
+            //CEII and Privileged
+            ListItem listItem = GetPiwListItemById(clientContext, listitemID, false);
+            var piwlistInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+            string CEIIUrls = listItem[piwlistInternalNameList[Constants.PIWList_colName_CEIIDocumentURLs]] != null
+                ? listItem[piwlistInternalNameList[Constants.PIWList_colName_CEIIDocumentURLs]].ToString(): string.Empty;
+            string PrivilegedUrls = listItem[piwlistInternalNameList[Constants.PIWList_colName_PrivilegedDocumentURLs]] != null
+                ? listItem[piwlistInternalNameList[Constants.PIWList_colName_PrivilegedDocumentURLs]].ToString(): string.Empty;
+
+            //todo: get the library
+            AssignPermissionForCEIIAndPrivilegedDocument(clientContext,listitemID,CEIIUrls,PrivilegedUrls,"Gas");
+            
+            
             //update
             folder.Update();
             clientContext.ExecuteQuery();
 
         }
 
-        public void AssignPermissionForCEIIOrPrivilegedDocument(ClientContext clientContext, string listItemID, string fileURL, string securityControl)
+        public void AssignPermissionForCEIIAndPrivilegedDocument(ClientContext clientContext, string listItemID, string fileURL, string securityControl)
         {
             Group group = null;
 
@@ -1783,6 +1795,94 @@ namespace PIW_SPAppWeb.Helper
             {
                 AssignRoleForDocument(clientContext, listItemID, group, Constants.Role_Read, fileURL);
             }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="clientContext"></param>
+        /// <param name="listItemID"></param>
+        /// <param name="CEIIUrls">urls saved in splist, text seperated by _##_</param>
+        /// <param name="PrivilegedUrls"></param>
+        /// <param name="library"></param>
+        public void AssignPermissionForCEIIAndPrivilegedDocument(ClientContext clientContext, string listItemID, 
+            string CEIIUrls,string PrivilegedUrls,string library)
+        {
+            Group group = null;
+
+            //CEII
+            if (!string.IsNullOrEmpty(CEIIUrls))
+            {
+                string[] urls = CEIIUrls.Split(new string[] { Constants.DocumentURLsSeparator },
+                                        StringSplitOptions.RemoveEmptyEntries);
+                group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_CEII_RO);
+                foreach (string url in urls)
+                {
+                    if (group != null)
+                    {
+                        AssignRoleForDocument(clientContext, listItemID, group, Constants.Role_Read, url);
+                    }
+                }
+            }
+            
+            //Privileged
+            if (!string.IsNullOrEmpty(PrivilegedUrls))
+            {
+                string[] urls = PrivilegedUrls.Split(new string[] { Constants.DocumentURLsSeparator },
+                                        StringSplitOptions.RemoveEmptyEntries);
+                //get group
+                switch (library)
+                {
+                    case Constants.PrivilegedLibrary_General:
+                        group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_General_RO);
+                        break;
+                    case Constants.PrivilegedLibrary_Gas:
+                        group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_GAS_RO);
+                        break;
+                    case Constants.PrivilegedLibrary_Electric:
+                        group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_electric_RO);
+                        break;
+                    case Constants.PrivilegedLibrary_Hydro:
+                        group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_hydro_RO);
+                        break;
+                    case Constants.PrivilegedLibrary_Oil:
+                        group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_Oil_RO);
+                        break;
+                    case Constants.PrivilegedLibrary_RuleMaking:
+                        group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_RuleMaking_RO);
+                        break;
+                    default:
+                        group = null;
+                        break;
+
+                }
+
+                foreach (string url in urls)
+                {
+                    if (group != null)
+                    {
+                        AssignRoleForDocument(clientContext, listItemID, group, Constants.Role_Read, url);
+                    }
+                }
+            }
+
+            //clientContext.ExecuteQuery();
+        }
+
+        public Dictionary<string, string> getAllDocumentUrls(Repeater rpDocumentList)
+        {
+            Dictionary<string, string> issuanceDocuments = new Dictionary<string, string>();
+            foreach (RepeaterItem row in rpDocumentList.Items)
+            {
+                var url = ((HyperLink)row.FindControl("hplEdit")).NavigateUrl;
+                var securityLevel = ((Label)row.FindControl("lbSecurityLevel")).Text;
+                if (!issuanceDocuments.ContainsKey(url))
+                {
+                    issuanceDocuments.Add(url, securityLevel);
+                }
+            }
+
+            return issuanceDocuments;
         }
 
         public void AssignRoleForGroup(ClientContext clientContext, Group group, string role, Folder folder)

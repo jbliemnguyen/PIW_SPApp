@@ -558,17 +558,7 @@ namespace PIW_SPAppWeb.Pages
 
                     //publish
                     //issuance documents
-                    Dictionary<string, string> issuanceDocuments = new Dictionary<string, string>();
-                    foreach (RepeaterItem row in rpDocumentList.Items)
-                    {
-                        var url = ((HyperLink)row.FindControl("hplEdit")).NavigateUrl;
-                        var securityLevel = ((Label)row.FindControl("lbSecurityLevel")).Text;
-                        if (!issuanceDocuments.ContainsKey(url))
-                        {
-                            issuanceDocuments.Add(url, securityLevel);
-                        }
-                    }
-
+                    Dictionary<string, string> issuanceDocuments = helper.getAllDocumentUrls(rpDocumentList);
                     //supplemental mailing list - only 1 excel document
                     string supplementalMailingListFileName = string.Empty;
                     if (rpSupplementalMailingListDocumentList.Items.Count > 0)

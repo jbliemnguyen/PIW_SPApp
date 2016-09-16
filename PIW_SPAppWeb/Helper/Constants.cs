@@ -172,6 +172,14 @@ namespace PIW_SPAppWeb
         public const string ddlSecurityControl_Option_CEII = "CEII";
         public const string ddlSecurityControl_Option_Privileged = "Privileged";
 
+        public const string PrivilegedLibrary_General = "General";
+        public const string PrivilegedLibrary_Gas = "Gas";
+        public const string PrivilegedLibrary_Electric = "Electric";
+        public const string PrivilegedLibrary_Hydro = "Hydro";
+        public const string PrivilegedLibrary_Oil = "Oil";
+        public const string PrivilegedLibrary_RuleMaking = "Rule Making";
+
+
         public const string ddProgramOfficeWorkflowInitiator_Option_OSEC = "OSEC";
         public const string ddDocumentCategory_Option_Notice = "Notice";
         public const string ddDocumentCategory_Option_NoticeErrata = "Notice Errata";
