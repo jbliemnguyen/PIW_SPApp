@@ -49,6 +49,51 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Label lbMainMessage;
         
         /// <summary>
+        /// btnSave1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSave1;
+        
+        /// <summary>
+        /// btnInitiatePublication1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnInitiatePublication1;
+        
+        /// <summary>
+        /// btnDelete1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnDelete1;
+        
+        /// <summary>
+        /// btnReopen1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnReopen1;
+        
+        /// <summary>
+        /// btnGenerateMailingList1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnGenerateMailingList1;
+        
+        /// <summary>
         /// fieldsetUpload control.
         /// </summary>
         /// <remarks>

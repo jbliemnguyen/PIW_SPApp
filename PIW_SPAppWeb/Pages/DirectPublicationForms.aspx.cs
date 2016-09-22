@@ -152,7 +152,8 @@ namespace PIW_SPAppWeb.Pages
                 Constants.PIWList_FormStatus_PublishInitiated,
                 Constants.PIWList_FormStatus_PublishedToeLibrary,
                 piwListInternalName[Constants.PIWList_colName_FormType],
-                Constants.PIWList_FormType_DirectPublicationForm
+                Constants.PIWList_FormType_DirectPublicationForm,
+                "Created"
             };
 
             query.ViewXml = string.Format(@"<View>
@@ -182,7 +183,7 @@ namespace PIW_SPAppWeb.Pages
 			                                            </And>
 		                                            </Where>
 		                                            <OrderBy>
-			                                            <FieldRef Name='{1}'/>
+			                                            <FieldRef Name='{6}'/>
 		                                            </OrderBy>
 	                                            </Query>
                                             </View>", args);

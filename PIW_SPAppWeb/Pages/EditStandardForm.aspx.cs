@@ -1746,8 +1746,6 @@ namespace PIW_SPAppWeb.Pages
                 }
             }
 
-
-
             return isValid;
         }
 

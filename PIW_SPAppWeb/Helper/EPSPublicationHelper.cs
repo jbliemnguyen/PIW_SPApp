@@ -179,20 +179,18 @@ namespace PIW_SPAppWeb.Helper
             {
                 Directory.CreateDirectory(DestinationURNFolder);
             }
-
-            FileInformation fileInfo = File.OpenBinaryDirect(clientContext, sourceFileURL);
-            string fileName = helper.getFileNameFromURL(sourceFileURL);
-            var destinationFileURN = DestinationURNFolder + "\\" + fileName;
-            using (var fileStream = System.IO.File.Create(destinationFileURN))
+            using (var fileInfo = File.OpenBinaryDirect(clientContext, sourceFileURL))
             {
-                fileInfo.Stream.CopyTo(fileStream);
-                fileStream.Close();
+                string fileName = helper.getFileNameFromURL(sourceFileURL);
+                var destinationFileURN = DestinationURNFolder + "\\" + fileName;
+                using (var fileStream = System.IO.File.Create(destinationFileURN))
+                {
+                    fileInfo.Stream.CopyTo(fileStream);
+                }
+                pages = getPublishedIssuanceNumberOfPages(destinationFileURN);
+
+                return destinationFileURN;
             }
-
-            pages = getPublishedIssuanceNumberOfPages(destinationFileURN);
-
-            return destinationFileURN;
-
         }
 
         public EpsResult ValidateDocument(string fullPathFileName, int? documentOfficialFlag,

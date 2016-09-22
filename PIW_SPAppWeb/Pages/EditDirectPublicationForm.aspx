@@ -124,9 +124,19 @@
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
 
         <fieldset id="mainFieldSet">
-            <legend><asp:Label ID="lbheaderDocketNumber" runat="server"></asp:Label>Direct Publication Form</legend>
+            <legend>
+                <asp:Label ID="lbheaderDocketNumber" runat="server"></asp:Label>Direct Publication Form</legend>
             <asp:Label ID="lbMainMessage" runat="server" CssClass="error" Visible="false"></asp:Label>
-
+            <div class="form-group">
+                <div class="col-md-2"></div>
+                <div class="col-md-6">
+                    <asp:Button ID="btnSave1" runat="server" Text="Save" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnInitiatePublication1" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnDelete1" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnReopen1" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnGenerateMailingList1" runat="server" Text="Generate Mailing List" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                </div>
+            </div>
             <fieldset runat="server" id="fieldsetUpload">
                 <div class="form-group">
 
@@ -153,7 +163,7 @@
                         </asp:DropDownList>
                     </div>
                     <div class="col-md-2">
-                        <asp:Button ID="btnUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary" OnClick="btnUpload_Click" ClientIDMode="Static"/>
+                        <asp:Button ID="btnUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary" OnClick="btnUpload_Click" ClientIDMode="Static" />
                         <%--Note: "cancel" in CssClass is to bypass the jquery validation when user upload file-- not used any more --%>
                     </div>
                 </div>
@@ -174,7 +184,7 @@
                                 <asp:Label runat="server" ID="lbSecurityLevel" Text='<%#DataBinder.Eval(Container.DataItem,"Security Level")%>'></asp:Label>
                                 &nbsp;&nbsp;&nbsp;&nbsp;
                                         <asp:LinkButton ID="btnRemoveDocument" runat="server" Text="Remove" CommandName="RemoveDocument"
-                                CommandArgument='<%#DataBinder.Eval(Container.DataItem,"ID")%>' />
+                                            CommandArgument='<%#DataBinder.Eval(Container.DataItem,"ID")%>' />
                                 &nbsp;&nbsp;&nbsp;&nbsp;
                                 <asp:HyperLink ID="hplEdit" runat="server" Text="Edit"
                                     NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"URL")%>'>
@@ -249,7 +259,7 @@
             <div class="form-group">
                 <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)<span class='accentText'> *</span>" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
-                    <asp:DropDownList ID="ddProgramOfficeWorkflowInitiator" CssClass="form-control" runat="server"  ClientIDMode="Static">
+                    <asp:DropDownList ID="ddProgramOfficeWorkflowInitiator" CssClass="form-control" runat="server" ClientIDMode="Static">
                         <asp:ListItem Value="">Please Select</asp:ListItem>
                         <asp:ListItem>OAL</asp:ListItem>
                         <asp:ListItem>OALJ</asp:ListItem>
@@ -282,7 +292,7 @@
             <div class="form-group">
                 <asp:Label ID="lbProgramOfficeDocumentOwner" runat="server" Text="Program Office (Document Owner)" AssociatedControlID="ddProgramOfficeDocumentOwner" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
-                    <asp:DropDownList ID="ddProgramOfficeDocumentOwner" CssClass="form-control" runat="server"  ClientIDMode="Static">
+                    <asp:DropDownList ID="ddProgramOfficeDocumentOwner" CssClass="form-control" runat="server" ClientIDMode="Static">
                         <asp:ListItem Value="">Please Select</asp:ListItem>
                         <asp:ListItem>OAL</asp:ListItem>
                         <asp:ListItem>OALJ</asp:ListItem>
@@ -349,7 +359,7 @@
                 <div class="form-group">
                     <div class="col-md-2"></div>
                     <div class="col-md-2">
-                        <asp:Button ID="btnSupplementalMailingListUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary cancel" OnClick="btnSupplementalMailingListUpload_Click" ClientIDMode="Static"/>
+                        <asp:Button ID="btnSupplementalMailingListUpload" runat="server" Text="Upload" CssClass="btn-sm btn-primary cancel" OnClick="btnSupplementalMailingListUpload_Click" ClientIDMode="Static" />
                         <%--Note: "cancel" in CssClass is to bypass the jquery validation when user upload file--%>
                     </div>
                 </div>
@@ -377,7 +387,7 @@
                     </asp:Repeater>
                 </div>
             </div>
-            
+
             <div class="form-group">
                 <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-4">
@@ -395,7 +405,7 @@
             <%--</form>--%>
             <%--End of Button pannel--%>
         </fieldset>
-        
+
 
         <fieldset runat="server" id="fieldsetMailedRoom" visible="false">
             <legend>Mail Room</legend>
@@ -440,7 +450,7 @@
                 <asp:Button ID="btnPublishConfirm" runat="server" Text="Publish" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnInitiatePublication_Click" />
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnDeleteConfirm_Click" />
-                <asp:Button ID="btnReopen" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" OnClick="btnReopen_Click" ClientIDMode="Static"/>
+                <asp:Button ID="btnReopen" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" OnClick="btnReopen_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnGenerateMailingList" runat="server" Text="Generate Mailing List" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnGenerateMailingList_Click" />
             </div>
         </div>

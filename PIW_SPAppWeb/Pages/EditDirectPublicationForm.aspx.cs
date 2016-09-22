@@ -139,7 +139,7 @@ namespace PIW_SPAppWeb.Pages
                 ViewState.Add(Constants.ListItemIDKey, value);
             }
         }
-        
+
         //fuction
         static SharePointHelper helper;
         #endregion
@@ -183,7 +183,7 @@ namespace PIW_SPAppWeb.Pages
                             {
                                 PopulateFormStatusAndModifiedDateProperties(clientContext, listItem);
                                 if (!helper.CanUserViewForm(clientContext, CurrentUserLogInID,
-                                    new[] { Constants.Grp_PIWDirectPublication, Constants.Grp_PIWDirectPublicationSubmitOnly}, FormStatus))
+                                    new[] { Constants.Grp_PIWDirectPublication, Constants.Grp_PIWDirectPublicationSubmitOnly }, FormStatus))
                                 {
                                     helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
                                     return;
@@ -236,7 +236,7 @@ namespace PIW_SPAppWeb.Pages
                             }
 
 
-                            ListItem newItem = helper.createNewPIWListItem(clientContext, Constants.PIWList_FormType_DirectPublicationForm,CurrentUserLogInID);
+                            ListItem newItem = helper.createNewPIWListItem(clientContext, Constants.PIWList_FormType_DirectPublicationForm, CurrentUserLogInID);
                             ListItemID = newItem.Id.ToString();
 
                             //Create subfolder in piwdocuments and mailing list
@@ -253,8 +253,8 @@ namespace PIW_SPAppWeb.Pages
                             if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                             {
                                 //Form status must be specified becuae the viewstate hasn't have value
-                                helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item created.", Constants.PIWList_FormStatus_Pending, 
-                                    Constants.PIWListHistory_FormTypeOption_EditForm,currentUser);
+                                helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item created.", Constants.PIWList_FormStatus_Pending,
+                                    Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                             }
                         }
 
@@ -290,7 +290,7 @@ namespace PIW_SPAppWeb.Pages
                         User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                         clientContext.Load(currentUser);
                         clientContext.ExecuteQuery();
-                        
+
                         //Create list history
                         if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_EditForm).Count == 0)
                         {
@@ -335,52 +335,59 @@ namespace PIW_SPAppWeb.Pages
                 const enumAction action = enumAction.Publish;
                 using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
-                    ListItem listItem = null;
-                    if (!SaveData(clientContext, action, ref listItem))
+                    if (ValidFormData(action))
                     {
-                        return;
-                    }
-                    
-                    //issuance documents
-                    Dictionary<string, string> issuanceDocuments = helper.getAllDocumentUrls(rpDocumentList);
+                        ListItem listItem = null;
+                        if (!SaveData(clientContext, action, ref listItem))
+                        {
+                            return;
+                        }
 
-                    //supplemental mailing list - only 1 excel document
-                    string supplementalMailingListFileName = string.Empty;
-                    if (rpSupplementalMailingListDocumentList.Items.Count > 0)
-                    {
-                        RepeaterItem row = rpSupplementalMailingListDocumentList.Items[0];
-                        var downloadedURL = helper.getFileNameFromURL(((HyperLink)row.FindControl("hyperlinkFileURL")).NavigateUrl);
-                        supplementalMailingListFileName = downloadedURL.Substring(0, downloadedURL.IndexOf("?web=0"));
-                    }
+                        //issuance documents
+                        Dictionary<string, string> issuanceDocuments = helper.getAllDocumentUrls(rpDocumentList);
 
-                    //publish
-                    EPSPublicationHelper epsHelper = new EPSPublicationHelper();
-                    epsHelper.Publish(clientContext, issuanceDocuments, supplementalMailingListFileName, listItem);
+                        //supplemental mailing list - only 1 excel document
+                        string supplementalMailingListFileName = string.Empty;
+                        if (rpSupplementalMailingListDocumentList.Items.Count > 0)
+                        {
+                            RepeaterItem row = rpSupplementalMailingListDocumentList.Items[0];
+                            var downloadedURL =
+                                helper.getFileNameFromURL(((HyperLink)row.FindControl("hyperlinkFileURL")).NavigateUrl);
+                            supplementalMailingListFileName = downloadedURL.Substring(0, downloadedURL.IndexOf("?web=0"));
+                        }
+
+                        //publish
+                        EPSPublicationHelper epsHelper = new EPSPublicationHelper();
+                        epsHelper.Publish(clientContext, issuanceDocuments, supplementalMailingListFileName, listItem);
 
 
-                    //Change document permission
-                    helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
+                        //Change document permission
+                        helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
 
-                    //get current user
-                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
-                    clientContext.Load(currentUser);
-                    clientContext.ExecuteQuery();
+                        //get current user
+                        User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                        clientContext.Load(currentUser);
+                        clientContext.ExecuteQuery();
 
-                    //send email
-                    Email emailHelper = new Email();
-                    emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
-                        currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
+                        //send email
+                        Email emailHelper = new Email();
+                        emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun,
+                            previousStatusBeforeWFRun,
+                            currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner,
+                            hdnNotificationRecipient, tbComment.Text);
 
-                    //Create list history - must create new client context because current client context is system account
-                    //so it can have permission to perform files copy.
-                    //But we must use normal client context so we can capture current user in History List
-                    
-                    helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item publication to eLibrary Data Entry initiated",
+                        //Create list history - must create new client context because current client context is system account
+                        //so it can have permission to perform files copy.
+                        //But we must use normal client context so we can capture current user in History List
+
+                        helper.CreatePIWListHistory(clientContext, ListItemID,
+                            "Workflow Item publication to eLibrary Data Entry initiated",
                             FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
 
-                    //Redirect
-                    helper.RedirectToSourcePage(Page.Request, Page.Response);
+                        //Redirect
+                        helper.RedirectToSourcePage(Page.Request, Page.Response);
+                    }
                 }
             }
             catch (Exception exc)
@@ -442,8 +449,8 @@ namespace PIW_SPAppWeb.Pages
                             string cEiiDocumentUrLs;
                             string privilegedDocumentURLs;
                             helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
-                                out publicDocumentURLs,out cEiiDocumentUrLs,out privilegedDocumentURLs);
-                            SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,privilegedDocumentURLs  );
+                                out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
+                            SaveDocumentURLsToPageProperty(publicDocumentURLs, cEiiDocumentUrLs, privilegedDocumentURLs);
 
                             //get current user
                             User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
@@ -506,34 +513,34 @@ namespace PIW_SPAppWeb.Pages
                 if (fileUpload.HasFiles)
                 {
                     using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                    {
+                        var uploadedFileURL = helper.UploadIssuanceDocument(clientContext, fileUpload, ListItemID, rpDocumentList,
+                            lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus,
+                            ddlSecurityControl.SelectedValue, Constants.PIWDocuments_DocTypeOption_Issuance, CurrentUserLogInID);
+                        if (!string.IsNullOrEmpty(uploadedFileURL)) //only save the document url if the upload is good
                         {
-                            var uploadedFileURL = helper.UploadIssuanceDocument(clientContext, fileUpload, ListItemID, rpDocumentList,
-                                lbUploadedDocumentError, lbRequiredUploadedDocumentError, FormStatus,
-                                ddlSecurityControl.SelectedValue, Constants.PIWDocuments_DocTypeOption_Issuance,CurrentUserLogInID);
-                            if (!string.IsNullOrEmpty(uploadedFileURL)) //only save the document url if the upload is good
+                            string publicDocumentURLs;
+                            string cEiiDocumentUrLs;
+                            string privilegedDocumentURLs;
+                            helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
+                                out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
+                            SaveDocumentURLsToPageProperty(publicDocumentURLs, cEiiDocumentUrLs, privilegedDocumentURLs);
+
+                            //Extract docket numner
+                            if (rpDocumentList.Items.Count == 1)
+                            //only extract docket number if first document uploaded
                             {
-                                string publicDocumentURLs;
-                                string cEiiDocumentUrLs;
-                                string privilegedDocumentURLs;
-                                helper.PopulateIssuanceDocumentList(clientContext, ListItemID,rpDocumentList,
-                                    out publicDocumentURLs,out cEiiDocumentUrLs,out privilegedDocumentURLs);
-                                SaveDocumentURLsToPageProperty(publicDocumentURLs,cEiiDocumentUrLs,privilegedDocumentURLs);
-
-                                //Extract docket numner
-                                if (rpDocumentList.Items.Count == 1)
-                                //only extract docket number if first document uploaded
+                                if (!cbIsNonDocket.Checked)
                                 {
-                                    if (!cbIsNonDocket.Checked)
-                                    {
-                                        tbDocketNumber.Text = helper.ExtractDocket(fileUpload.FileName);
-                                    }
+                                    tbDocketNumber.Text = helper.ExtractDocket(fileUpload.FileName);
                                 }
-
-                                //pop-up upload document 
-                                helper.OpenDocument(Page, uploadedFileURL);
                             }
+
+                            //pop-up upload document 
+                            helper.OpenDocument(Page, uploadedFileURL);
                         }
-                    
+                    }
+
                     //reset security level
                     ddlSecurityControl.SelectedIndex = 0;
                 }
@@ -559,7 +566,7 @@ namespace PIW_SPAppWeb.Pages
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
                             var uploadResult = helper.UploadSupplementalMailingListDocument(clientContext, supplementalMailingListFileUpload, ListItemID, rpSupplementalMailingListDocumentList,
-                                lbSupplementalMailingListUploadError, FormStatus, Constants.ddlSecurityControl_Option_Public, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList,CurrentUserLogInID);
+                                lbSupplementalMailingListUploadError, FormStatus, Constants.ddlSecurityControl_Option_Public, Constants.PIWDocuments_DocTypeOption_SupplementalMailingList, CurrentUserLogInID);
                             if (uploadResult) //only save the document url if the upload is good
                             {
                                 helper.PopulateSupplementalMailingListDocumentList(clientContext, ListItemID, rpSupplementalMailingListDocumentList, fieldSetSupplementalMailingList);
@@ -697,7 +704,7 @@ namespace PIW_SPAppWeb.Pages
                         //becuase comment already save in above method SaveMainPanelAndStatus
                         //we don't pass the comment to the next method to avoid duplicate
                         helper.SavePublishingInfoAndStatusAndComment(clientContext, listItem, FormStatus, PreviousFormStatus,
-                            string.Empty,CurrentUserLogInName);
+                            string.Empty, CurrentUserLogInName);
                     }
                     else
                     {
@@ -722,7 +729,7 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        
+
 
         private void SaveMainPanelAndStatus(ClientContext clientContext, ListItem listItem)
         {
@@ -1151,13 +1158,22 @@ namespace PIW_SPAppWeb.Pages
                 PrivilegedDocumentURLsFromViewState = privilegedDocumentURLs;
             }
         }
+
+        public void SetVisiblePropertyInTopButtons()
+        {
+            btnSave1.Visible = btnSave.Visible;
+            btnInitiatePublication1.Visible = btnInitiatePublication.Visible;
+            btnDelete1.Visible = btnDelete.Visible;
+            btnReopen1.Visible = btnReopen.Visible;
+            btnGenerateMailingList1.Visible = btnGenerateMailingList.Visible;
+        }
         #endregion
 
         #region Visibility
         public void ControlsVisiblitilyBasedOnStatus(ClientContext clientContext, string previousFormStatus, string formStatus, ListItem listItem)
         {
             bool isCurrentUserAllowSubmitDirectPubForm = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                            new string[] { Constants.Grp_PIWDirectPublicationSubmitOnly, Constants.Grp_PIWDirectPublication});
+                            new string[] { Constants.Grp_PIWDirectPublicationSubmitOnly, Constants.Grp_PIWDirectPublication });
 
             bool isCurrentUserAllowPublishDirectPubForm = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                             new string[] { Constants.Grp_PIWDirectPublication });
@@ -1196,7 +1212,7 @@ namespace PIW_SPAppWeb.Pages
 
                 case Constants.PIWList_FormStatus_PublishInitiated:
                     //submitter
-                    EnableMainPanel(false,false);
+                    EnableMainPanel(false, false);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "Publication has been initiated for this issuance.";
 
@@ -1209,7 +1225,8 @@ namespace PIW_SPAppWeb.Pages
                     btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = false;
-                    btnReopen.Visible = true;
+                    btnReopen.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                        new string[] { Constants.Grp_PIWAdmin, Constants.Grp_PIWSystemAdmin });
                     btnGenerateMailingList.Visible = false;
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
@@ -1232,7 +1249,7 @@ namespace PIW_SPAppWeb.Pages
 
                 case Constants.PIWList_FormStatus_Deleted:
                     //this status is only viewable by admin
-                    EnableMainPanel(false,false);
+                    EnableMainPanel(false, false);
                     lbMainMessage.Visible = true;
                     lbMainMessage.Text = "This issuance has been deleted.";
 
@@ -1249,8 +1266,11 @@ namespace PIW_SPAppWeb.Pages
                     break;
                 default:
                     throw new Exception("UnRecognized Form Status: " + formStatus);
-                    
+
             }
+
+            //set the top buttons
+            SetVisiblePropertyInTopButtons();
         }
 
 
@@ -1309,7 +1329,7 @@ namespace PIW_SPAppWeb.Pages
 
         #endregion
 
-        
+
 
     }
 
