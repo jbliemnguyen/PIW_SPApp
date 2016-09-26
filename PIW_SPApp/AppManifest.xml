@@ -9,15 +9,17 @@
   <Properties>
     <Title>PIW_SPApp</Title>
     <!--DEV-->
-    <!--<StartPage>https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>-->
+    <StartPage>https://dev.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>
     
     <!--Test-->
-    <StartPage>https://test.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>
+    <!--<StartPage>https://test.spapps.ferc.gov/PIW_SPAppWeb/pages/default.aspx?{StandardTokens}</StartPage>-->
   </Properties>
 
   <AppPrincipal>
     <!--DEV-->
-    <RemoteWebApplication ClientId="fa894505-c3c7-4195-b173-71e90aa289d2" />
+    <!--<RemoteWebApplication ClientId="fa894505-c3c7-4195-b173-71e90aa289d2" />--><!--Test new certificate - original value-->
+    <RemoteWebApplication ClientId="0daef9bf-d4f3-4fbb-88e8-15c977058ee4" />
+    
 
     <!--TEST-->
     <!--<RemoteWebApplication ClientId="7cc9aa34-aa0e-46da-9685-25e68f860b13" />-->
