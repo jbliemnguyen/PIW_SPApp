@@ -269,7 +269,14 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, Page.Request.Url.OriginalString);
-                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                if (exc is ServerUnauthorizedAccessException)
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_AccessDenied);
+                }
+                else
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                }
             }
         }
 
@@ -313,7 +320,11 @@ namespace PIW_SPAppWeb.Pages
                         //TODO: create list history for Mailing Date and FERC Report Completed.
 
                         //Refresh or Redirect depends on Previous Status
-                        if (PreviousFormStatus.Equals(Constants.PIWList_FormStatus_Pending))
+                        if (PreviousFormStatus.Equals(Constants.PIWList_FormStatus_Pending) ||
+                            PreviousFormStatus.Equals(Constants.PIWList_FormStatus_Recalled) ||
+                            PreviousFormStatus.Equals(Constants.PIWList_FormStatus_Rejected) ||
+                            PreviousFormStatus.Equals(Constants.PIWList_FormStatus_PublishInitiated) ||
+                            PreviousFormStatus.Equals(Constants.PIWList_FormStatus_ReOpen))
                         {
                             helper.RedirectToSourcePage(Request, Response);
                         }
@@ -1807,6 +1818,19 @@ namespace PIW_SPAppWeb.Pages
                     tbCitationNumber.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_CitationNumber]].ToString();
                 }
 
+                //mail room
+                hyperlinkPrintReq.NavigateUrl = helper.getEditFormURL(Constants.PIWList_FormType_PrintReqForm, ListItemID, Request, string.Empty);
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]] != null)
+                {
+                    tbPrintDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]].ToString()).ToShortDateString();
+                }
+
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]] != null)
+                {
+                    tbMailDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]].ToString()).ToShortDateString();
+                }
+
+
                 //Legal resources and review
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]] != null)
                 {
@@ -1858,7 +1882,7 @@ namespace PIW_SPAppWeb.Pages
         #region Visibility
         public void ControlsVisiblitilyBasedOnStatus(ClientContext clientContext, string previousFormStatus, string formStatus, ListItem listItem)
         {
-
+            var piwlistInternalColumnName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
             bool isCurrentUserOSEC = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                             new string[] { Constants.Grp_OSEC, Constants.Grp_SecReview });
 
@@ -1867,8 +1891,19 @@ namespace PIW_SPAppWeb.Pages
             bool isCurrentUserLegalResouceTeam = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                             new string[] { Constants.Grp_PIWLegalResourcesReview });
 
-            
-            //todo: number of fola mailing list and supp mailing list address --> display PRint req link
+
+            //number of fola mailing list and supp mailing list address
+            int numberOfFOLAMailingListAddress = 0;
+            int numberOfSuppMailingListAddress = 0;
+            if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] != null)
+            {
+                numberOfFOLAMailingListAddress = int.Parse(listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]].ToString());
+            }
+
+            if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
+            {
+                numberOfSuppMailingListAddress = int.Parse(listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+            }
 
             var currentUser = clientContext.Web.CurrentUser;
             clientContext.Load(currentUser);
@@ -2068,10 +2103,10 @@ namespace PIW_SPAppWeb.Pages
 
                     //Mailed Room and Legal Resources and Review
                     fieldsetMailedRoom.Visible = false;
-                    fieldsetLegalResourcesReview.Visible = true;
+                    fieldsetLegalResourcesReview.Visible = false;
 
                     //buttons
-                    btnSave.Visible = isCurrentUserLegalResouceTeam;
+                    btnSave.Visible = false;
                     btnSubmit.Visible = false;
                     btnEdit.Visible = false;
                     btnAccept.Visible = false;
@@ -2097,7 +2132,7 @@ namespace PIW_SPAppWeb.Pages
 
 
                     //Mailed Room and Legal Resources and Review
-                    fieldsetMailedRoom.Visible = false;//todo: print req check
+                    fieldsetMailedRoom.Visible = (numberOfFOLAMailingListAddress + numberOfSuppMailingListAddress) > 0;
                     fieldsetLegalResourcesReview.Visible = true;
 
                     //buttons
@@ -2159,36 +2194,7 @@ namespace PIW_SPAppWeb.Pages
         {
             using (var clientContext = helper.getElevatedClientContext(Context, Request))
             {
-                FOLAMailingList folaMailingList = new FOLAMailingList();
-                int numberOfFOLAAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, tbDocketNumber.Text.Trim(), ListItemID);
-
-                //save number of fola mailing list address
-                ListItem listItem = helper.GetPiwListItemById(clientContext, ListItemID, false);
-                string PrintReqStatus = Constants.PrintReq_FormStatus_PrintReqGenerated;
-
-                bool printReqGenerated = helper.InitiatePrintReqForm(clientContext, listItem, numberOfFOLAAddress, PrintReqStatus);
-
-                //create first history list
-                if (printReqGenerated)
-                {
-                    //get current user
-                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
-                    clientContext.Load(currentUser);
-                    clientContext.ExecuteQuery();
-                    //add history list for the main form 
-                    helper.CreatePIWListHistory(clientContext, ListItemID, "Print Requisition Generated.",
-                            FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
-
-                    //Add history list for the print req form
-                    if (helper.getHistoryListByPIWListID(clientContext, ListItemID, Constants.PIWListHistory_FormTypeOption_PrintReq).Count == 0)
-                    {
-                        string message = "Print Requisition Generated.";
-                        helper.CreatePIWListHistory(clientContext, ListItemID, message,
-                            PrintReqStatus, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
-                    }
-
-                }
-
+                helper.InitiatePrintReqForm(clientContext,ListItemID,CurrentUserLogInID);
                 helper.RefreshPage(Request, Response);
             }
         }

@@ -3,7 +3,7 @@ using Microsoft.SqlServer.Server;
 
 namespace PIW_SPAppWeb
 {
-    internal static class Constants
+    public static class Constants
     {
 
 

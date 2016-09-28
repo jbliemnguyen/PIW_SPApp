@@ -50,6 +50,7 @@ namespace PIW_SPAppWeb.Pages
                 dataTable.Columns.Add("OwnerOffice", typeof(string));
                 dataTable.Columns.Add("DueDate", typeof(string));
                 dataTable.Columns.Add("Created", typeof(string));
+                dataTable.Columns.Add("GroupOrder", typeof(string));
                 foreach (var listItem in listItemCollection)
                 {
                     dataRow = dataTable.Rows.Add();
@@ -62,6 +63,13 @@ namespace PIW_SPAppWeb.Pages
                     dataRow["URL"] = listItem[piwListInternalName[Constants.PIWList_colName_EditFormURL]] != null
                         ? listItem[piwListInternalName[Constants.PIWList_colName_EditFormURL]].ToString()
                         : string.Empty;
+
+                    var formStatus = listItem[piwListInternalName[Constants.PIWList_colName_FormStatus]] != null
+                        ? listItem[piwListInternalName[Constants.PIWList_colName_FormStatus]].ToString()
+                        : string.Empty;
+                    dataRow["Status"] = formStatus;
+
+                    dataRow["GroupOrder"] = getGroupOrder(formStatus);
 
                     dataRow["InitiatorOffice"] =
                         listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeWFInitator]] != null
@@ -135,6 +143,11 @@ namespace PIW_SPAppWeb.Pages
             gridView.AutoGenerateColumns = false;
             DataView view = dataTable.DefaultView;
 
+            if (view.Count > 0) //without this check, exception happens if no row in the view
+            {
+                view.Sort = "GroupOrder";
+            }
+
             gridView.DataSource = view;
             gridView.DataBind();
         }
@@ -195,6 +208,44 @@ namespace PIW_SPAppWeb.Pages
 
         }
 
+        //create new column for Grouping order
+        //Pending group should appear first on the list of issuance (not Edit, if by alphabetical)
+        private string getGroupOrder(string formStatus)
+        {
+            string result = string.Empty;
+            switch (formStatus)
+            {
+                case Constants.PIWList_FormStatus_Pending:
+                    result = "1";
+                    break;
+                case Constants.PIWList_FormStatus_Submitted:
+                    result = "2";
+                    break;
+                case Constants.PIWList_FormStatus_SecretaryReview:
+                    result = "3";
+                    break;
+                case Constants.PIWList_FormStatus_ReadyForPublishing:
+                    result = "4";
+                    break;
+                case Constants.PIWList_FormStatus_Edited:
+                    result = "5";
+                    break;
+                case Constants.PIWList_FormStatus_Rejected:
+                    result = "6";
+                    break;
+                case Constants.PIWList_FormStatus_Recalled:
+                    result = "7";
+                    break;
+                default:
+                    result = "8";
+                    break;
+            }
+
+            return result;
+        }
+
+        
+
         protected void tmrRefresh_Tick(object sender, EventArgs e)
         {
             try
@@ -215,9 +266,39 @@ namespace PIW_SPAppWeb.Pages
             helper = new SharePointHelper();
             using (var clientContext = helper.getElevatedClientContext(Context, Request))
             {
-                
+                ResetField();
                 RenderGridView(clientContext);
                 lbLastUpdated.Text = "Last Updated: " + DateTime.Now.ToString("g");
+            }
+        }
+
+        private void ResetField()
+        {
+            previousRowFormStatus = string.Empty;
+            intSubTotalIndex = 1;
+        }
+
+        protected void gridView_OnRowCreated(object sender, GridViewRowEventArgs e)
+        {
+            if (DataBinder.Eval(e.Row.DataItem, "Status") != null)
+            {
+                string Status = DataBinder.Eval(e.Row.DataItem, "Status").ToString();
+                if (!previousRowFormStatus.Equals(Status))
+                {
+                    GridView StandardFormgrdView = (GridView)sender;
+                    GridViewRow row = new GridViewRow(0, 0, DataControlRowType.DataRow, DataControlRowState.Insert);
+                    TableCell cell = new TableCell
+                    {
+                        Text = "Status : " + Status,
+                        ColumnSpan = 10,
+                        CssClass = "GroupHeaderStyle"
+                    };
+                    row.Cells.Add(cell);
+                    StandardFormgrdView.Controls[0].Controls.AddAt(e.Row.RowIndex + intSubTotalIndex, row);
+                    intSubTotalIndex++;
+                }
+
+                previousRowFormStatus = Status;
             }
         }
     }

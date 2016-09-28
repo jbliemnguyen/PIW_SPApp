@@ -517,6 +517,33 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetMailedRoom;
         
         /// <summary>
+        /// hyperlinkPrintReq control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HyperLink hyperlinkPrintReq;
+        
+        /// <summary>
+        /// lbPrintDate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbPrintDate;
+        
+        /// <summary>
+        /// tbPrintDate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox tbPrintDate;
+        
+        /// <summary>
         /// lbMailedDate control.
         /// </summary>
         /// <remarks>
@@ -526,31 +553,13 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Label lbMailedDate;
         
         /// <summary>
-        /// lbMailedDateValue control.
+        /// tbMailDate control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbMailedDateValue;
-        
-        /// <summary>
-        /// lbMailedRoomNote control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbMailedRoomNote;
-        
-        /// <summary>
-        /// lbMailedRoomNoteValue control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbMailedRoomNoteValue;
+        protected global::System.Web.UI.WebControls.TextBox tbMailDate;
         
         /// <summary>
         /// fieldsetLegalResourcesReview control.

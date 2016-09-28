@@ -266,7 +266,14 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, Page.Request.Url.OriginalString);
-                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                if (exc is ServerUnauthorizedAccessException)
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_AccessDenied);
+                }
+                else
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                }
             }
         }
         protected void btnSave_Click(object sender, EventArgs e)
@@ -305,15 +312,9 @@ namespace PIW_SPAppWeb.Pages
 
                         //TODO: create list history for Mailing Date and FERC Report Completed.
 
-                        //Refresh or Redirect depends on Previous Status
-                        if (PreviousFormStatus.Equals(Constants.PIWList_FormStatus_Pending))
-                        {
-                            helper.RedirectToSourcePage(Request, Response);
-                        }
-                        else
-                        {
-                            helper.RefreshPage(Request, Response);
-                        }
+                        //Redirect depends on Previous Status
+                        helper.RedirectToSourcePage(Request, Response);
+
                     }
                 }
             }
@@ -633,7 +634,11 @@ namespace PIW_SPAppWeb.Pages
 
         protected void btnGenerateMailingList_Click(object sender, EventArgs e)
         {
-
+            using (var clientContext = helper.getElevatedClientContext(Context, Request))
+            {
+                helper.InitiatePrintReqForm(clientContext, ListItemID, CurrentUserLogInID);
+                helper.RefreshPage(Request, Response);
+            }
         }
         #endregion
 
@@ -1124,7 +1129,18 @@ namespace PIW_SPAppWeb.Pages
                 }
 
 
-                //todo: Mail Room - Print
+                //mail room
+                hyperlinkPrintReq.NavigateUrl = helper.getEditFormURL(Constants.PIWList_FormType_PrintReqForm, ListItemID, Request, string.Empty);
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]] != null)
+                {
+                    tbPrintDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]].ToString()).ToShortDateString();
+                }
+
+                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]] != null)
+                {
+                    tbMailDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]].ToString()).ToShortDateString();
+                }
+
 
                 //Legal resources and review
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]] != null)
@@ -1172,6 +1188,8 @@ namespace PIW_SPAppWeb.Pages
         #region Visibility
         public void ControlsVisiblitilyBasedOnStatus(ClientContext clientContext, string previousFormStatus, string formStatus, ListItem listItem)
         {
+            var piwlistInternalColumnName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
             bool isCurrentUserAllowSubmitDirectPubForm = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                             new string[] { Constants.Grp_PIWDirectPublicationSubmitOnly, Constants.Grp_PIWDirectPublication });
 
@@ -1181,6 +1199,19 @@ namespace PIW_SPAppWeb.Pages
             bool isCurrentUserLegalResouceTeam = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                             new string[] { Constants.Grp_PIWLegalResourcesReview });
 
+            //number of fola mailing list and supp mailing list address
+            int numberOfFOLAMailingListAddress = 0;
+            int numberOfSuppMailingListAddress = 0;
+            if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] != null)
+            {
+                numberOfFOLAMailingListAddress = int.Parse(listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]].ToString());
+            }
+
+            if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
+            {
+                numberOfSuppMailingListAddress = int.Parse(listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+            }
+            
             //SPUser checkoutUser = null;
             var currentUser = clientContext.Web.CurrentUser;
             clientContext.Load(currentUser);
@@ -1217,11 +1248,11 @@ namespace PIW_SPAppWeb.Pages
                     lbMainMessage.Text = "Publication has been initiated for this issuance.";
 
                     //Mailed Room and Legal Resources and Review
-                    fieldsetMailedRoom.Visible = false;//todo: print req check 
-                    fieldsetLegalResourcesReview.Visible = true;
+                    fieldsetMailedRoom.Visible = false;
+                    fieldsetLegalResourcesReview.Visible = false;
 
                     //buttons
-                    btnSave.Visible = isCurrentUserLegalResouceTeam;
+                    btnSave.Visible = false;
                     btnInitiatePublication.Visible = false;
                     //delete button has the same visibility as Save button
                     btnDelete.Visible = false;
@@ -1235,7 +1266,7 @@ namespace PIW_SPAppWeb.Pages
                     lbMainMessage.Text = "This issuance is available in eLibrary.";
 
                     //Mailed Room and Legal Resources and Review
-                    fieldsetMailedRoom.Visible = false;//todo: print req check
+                    fieldsetMailedRoom.Visible = (numberOfFOLAMailingListAddress + numberOfSuppMailingListAddress) > 0;
                     fieldsetLegalResourcesReview.Visible = true;
 
                     //buttons
@@ -1279,6 +1310,7 @@ namespace PIW_SPAppWeb.Pages
             EnableFileUploadComponent(enabled, canEditUploadedDocument);
             tbDocketNumber.Enabled = enabled;
             cbIsNonDocket.Enabled = enabled;
+            ddDocumentCategory.Enabled = enabled;
             tbAlternateIdentifier.Enabled = enabled;
             tbDescription.Enabled = enabled;
             ddProgramOfficeWorkflowInitiator.Enabled = enabled;

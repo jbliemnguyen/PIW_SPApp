@@ -22,7 +22,7 @@
     <WorkflowPartId>{6b2a426f-5871-4a58-82ab-840c5acd1f0a}</WorkflowPartId>
     <CspkgPartId>{73e9aa44-fcb4-4fb7-a416-fa71debde5cd}</CspkgPartId>
     <SqlPackagePartId>{972f21db-ca1f-4f29-9b5f-740b4096c47a}</SqlPackagePartId>
-    <ActivePublishProfile>DEV_PIW_SPApp</ActivePublishProfile>
+    <ActivePublishProfile>DEV_PIW_SPAppWeb</ActivePublishProfile>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
     <SccAuxPath>SAK</SccAuxPath>

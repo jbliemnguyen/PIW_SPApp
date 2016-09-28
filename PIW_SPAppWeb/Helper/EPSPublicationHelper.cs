@@ -146,8 +146,8 @@ namespace PIW_SPAppWeb.Helper
             helper.SaveNumberOfPublicPagesAndSupplementalMailingListAddress(clientContext,piwListItem,totalPublicDocPages,supplementalMailingListNumberOfPages);
 
             //generate fola excel mailing list file
-            FOLAMailingList folaMailingList = new FOLAMailingList();
-            folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemId);
+            //FOLAMailingList folaMailingList = new FOLAMailingList();
+            //folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemId);
             
 
             return true;

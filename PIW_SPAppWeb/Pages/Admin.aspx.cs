@@ -51,14 +51,28 @@ namespace PIW_SPAppWeb
         {
             using (var clientContext = SharePointContextProvider.Current.GetSharePointContext(Context).CreateUserClientContextForSPHost())
             {
-                var currentUser = clientContext.Web.CurrentUser;
-                clientContext.Load(currentUser);
-                clientContext.ExecuteQuery();
-                var isAdmin = helper.IsUserMemberOfGroup(clientContext, currentUser.LoginName,
-                    new string[] {Constants.Grp_PIWSystemAdmin});
-                if (!isAdmin)
+                try
                 {
-                    helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
+                    var currentUser = clientContext.Web.CurrentUser;
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
+                    var isAdmin = helper.IsUserMemberOfGroup(clientContext, currentUser.LoginName,
+                        new string[] { Constants.Grp_PIWSystemAdmin });
+                    if (!isAdmin)
+                    {
+                        helper.RedirectToAPage(Request, Response, Constants.Page_AccessDenied);
+                    }
+                }
+                catch (Exception exc)
+                {
+                    if (exc is ServerUnauthorizedAccessException)
+                    {
+                        helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_AccessDenied);
+                    }
+                    else
+                    {
+                        helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                    }
                 }
 
             }
@@ -217,27 +231,27 @@ namespace PIW_SPAppWeb
             if (null == clientContext) throw new ArgumentNullException("clientContext");
             try
             {
-                
-                    // Get the list
-                    var listName = Constants.PIWDocuments_DocumentLibraryName;
-                    
-                    List srcList = clientContext.Web.Lists.GetByTitle(listName);
-                    clientContext.Load(clientContext.Web);
+
+                // Get the list
+                var listName = Constants.PIWDocuments_DocumentLibraryName;
+
+                List srcList = clientContext.Web.Lists.GetByTitle(listName);
+                clientContext.Load(clientContext.Web);
+                clientContext.ExecuteQuery();
+                // Remove all event receivers.
+                clientContext.Load(srcList.EventReceivers);
+                clientContext.ExecuteQuery();
+                var toDelete = new List<EventReceiverDefinition>();
+
+                foreach (EventReceiverDefinition er in srcList.EventReceivers)
+                    if (er.ReceiverName == Constants.LIBEVTRCVR_NAME)
+                        toDelete.Add(er);
+                foreach (EventReceiverDefinition er in toDelete)
+                {
+                    er.DeleteObject();
                     clientContext.ExecuteQuery();
-                    // Remove all event receivers.
-                    clientContext.Load(srcList.EventReceivers);
-                    clientContext.ExecuteQuery();
-                    var toDelete = new List<EventReceiverDefinition>();
-                    
-                    foreach (EventReceiverDefinition er in srcList.EventReceivers)
-                        if (er.ReceiverName == Constants.LIBEVTRCVR_NAME)
-                            toDelete.Add(er);
-                    foreach (EventReceiverDefinition er in toDelete)
-                    {
-                        er.DeleteObject();
-                        clientContext.ExecuteQuery();
-                    }
-                
+                }
+
             }
             catch (Exception ex)
             {
@@ -258,7 +272,7 @@ namespace PIW_SPAppWeb
             using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
             {
                 var listName = Constants.PIWDocuments_DocumentLibraryName;
-                
+
                 var citationNumber = "Citation Number " + DateTime.Now.ToLongTimeString();
                 string listItemID = "36";
                 var fileName = "ER02-2001-000.docx";
@@ -266,7 +280,7 @@ namespace PIW_SPAppWeb
 
                 //var newclientContext = new ClientContext(Request.QueryString["SPHostUrl"]);
                 FileInformation fileInformation = File.OpenBinaryDirect(clientContext, documentServerRelativeURL);
-                
+
                 using (MemoryStream memoryStream = new MemoryStream())
                 {
                     fileInformation.Stream.CopyTo(memoryStream);
@@ -278,11 +292,11 @@ namespace PIW_SPAppWeb
                     }
                     // Seek to beginning before writing to the SharePoint server.
                     memoryStream.Seek(0, SeekOrigin.Begin);
-                    
+
                     File.SaveBinaryDirect(clientContext, documentServerRelativeURL, memoryStream, true);
                 }
 
-                
+
 
             }
 
@@ -296,20 +310,20 @@ namespace PIW_SPAppWeb
 
             return string.Format("{0}/{1}/{2}/{3}", clientContext.Web.ServerRelativeUrl,
                     Constants.PIWDocuments_DocumentLibraryName, listItemID, fileName);
-   
+
         }
 
         public Paragraph GenerateCitParagraph(string text)
         {
             //citation paragraph will be bold, centered and size 13, font size by default will be Times New Romain
-            Paragraph paragraph1 = new Paragraph() {};
+            Paragraph paragraph1 = new Paragraph() { };
 
             ParagraphProperties paragraphProperties1 = new ParagraphProperties();
 
             Justification justification1 = new Justification()
             {
                 Val = JustificationValues.Center,
-            
+
             };
 
             paragraphProperties1.Append(justification1);
@@ -317,14 +331,14 @@ namespace PIW_SPAppWeb
             Run run1 = new Run();
 
             RunProperties runProperties1 = new RunProperties();
-            
+
             //RunFonts runFonts1 = new RunFonts() { Ascii = "Times New Roman"};
             Bold bold1 = new Bold();
             FontSize fontSize1 = new FontSize() { Val = "26" };//font size 13 - half size paramater
 
             runProperties1.Append(bold1);
             runProperties1.Append(fontSize1);
-            
+
             Text text1 = new Text();
             text1.Text = text;
 
@@ -338,8 +352,8 @@ namespace PIW_SPAppWeb
 
         protected void btnTestExcelGeneration_Click(object sender, EventArgs e)
         {
-            
-            
+
+
             //System.IO.File.WriteAllBytes(@"E:\PIWDocuments\TestMailingList.xlsx",file);
         }
 
@@ -356,7 +370,7 @@ namespace PIW_SPAppWeb
 
                 lbNumberOfPages.Text = "Number of Pages:" + numberOfPages;
             }
-            
+
         }
 
         protected void btnTestPermissionSetting_Click(object sender, EventArgs e)
@@ -364,17 +378,17 @@ namespace PIW_SPAppWeb
             //elevated 
             using (var clientContext = new ClientContext(Request.QueryString["SPHostUrl"]))
             {
-                helper.AssignUniqueRoles(clientContext,"118","Read","Contribute","Read","Read","Read");
+                helper.AssignUniqueRoles(clientContext, "118", "Read", "Contribute", "Read", "Read", "Read");
             }
         }
 
         protected void btnEmail_Click(object sender, EventArgs e)
         {
-            using (var clientContext = helper.getElevatedClientContext(Context,Request))
+            using (var clientContext = helper.getElevatedClientContext(Context, Request))
             {
                 Email emailHelper = new Email();
 
-                emailHelper.SendEmail(clientContext,"liem.nguyen@ferc.gov", "PIW Test Email", "PIW Test");
+                emailHelper.SendEmail(clientContext, "liem.nguyen@ferc.gov", "PIW Test Email", "PIW Test");
             }
 
         }
@@ -400,14 +414,14 @@ namespace PIW_SPAppWeb
                 {
                     lbDVVO.Text = "File good";
                 }
-               
+
             }
             catch (Exception exc)
             {
                 lbDVVO.Text = exc.Message;
 
             }
-            
+
         }
 
         //protected void Button2_Click(object sender, EventArgs e)

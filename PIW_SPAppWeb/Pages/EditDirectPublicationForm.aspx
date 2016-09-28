@@ -243,15 +243,16 @@
                         <asp:ListItem Value="">Please Select</asp:ListItem>
                         <asp:ListItem>Chairman Statement</asp:ListItem>
                         <asp:ListItem>Commissioner Statement</asp:ListItem>
-                        <asp:ListItem>Controlled Correspondence</asp:ListItem>
+                        <asp:ListItem>Delegated Letter</asp:ListItem>
+                        <asp:ListItem>EA</asp:ListItem>
+                        <asp:ListItem>EIS</asp:ListItem>
                         <asp:ListItem>Errata</asp:ListItem>
-                        <asp:ListItem>Field Inspection Report</asp:ListItem>
-                        <asp:ListItem>Licensing Correspondence</asp:ListItem>
+                        <asp:ListItem>Inspection Report</asp:ListItem>
+                        <asp:ListItem>Memo</asp:ListItem>
                         <asp:ListItem>News Release</asp:ListItem>
                         <asp:ListItem>Notice of Action Taken</asp:ListItem>
-                        <asp:ListItem>OEP Letter</asp:ListItem>
+                        <asp:ListItem>Project Update</asp:ListItem>
                         <asp:ListItem>Sunshine Act Meeting Notice</asp:ListItem>
-
                     </asp:DropDownList>
                 </div>
             </div>
@@ -410,15 +411,21 @@
         <fieldset runat="server" id="fieldsetMailedRoom" visible="false">
             <legend>Mail Room</legend>
             <div class="form-group">
-                <asp:Label ID="lbMailedDate" runat="server" Text="Mailed Date" AssociatedControlID="lbMailedDateValue" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-2"></div>
                 <div class="col-md-2">
-                    <asp:Label ID="lbMailedDateValue" runat="server"></asp:Label>
+                    <asp:HyperLink ID="hyperlinkPrintReq" runat="server" Text="Print Requisition Form" Target="_blank"></asp:HyperLink>
                 </div>
             </div>
             <div class="form-group">
-                <asp:Label ID="lbMailedRoomNote" runat="server" Text="Note" AssociatedControlID="lbMailedRoomNoteValue" CssClass="col-md-2 control-label"></asp:Label>
+                <asp:Label ID="lbPrintDate" runat="server" Text="Print Date" AssociatedControlID="tbPrintDate" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-2">
-                    <asp:Label ID="lbMailedRoomNoteValue" runat="server"></asp:Label>
+                    <asp:TextBox runat="server" ID="tbPrintDate" Enabled="False" ClientIDMode="Static" CssClass="form-control"></asp:TextBox>
+                </div>
+            </div>
+            <div class="form-group">
+                <asp:Label ID="lbMailedDate" runat="server" Text="Mail Date" AssociatedControlID="tbMailDate" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-2">
+                    <asp:TextBox runat="server" ID="tbMailDate" Enabled="False" ClientIDMode="Static" CssClass="form-control"></asp:TextBox>
                 </div>
             </div>
         </fieldset>

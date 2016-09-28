@@ -296,17 +296,66 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public bool InitiatePrintReqForm(ClientContext clientContext, ListItem listItem, int numberOfFOLAMailingListAddress, string PrintReqStatus)
+        public void InitiatePrintReqForm(ClientContext clientContext, ListItem listItem, string CurrentUserLogInID)
         {
-            int supplementalMailingListAddress = 0;
-            bool result = false;
+            string PrintReqStatus = Constants.PrintReq_FormStatus_PrintReqGenerated;
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
+
+            string listItemID = listItem["ID"].ToString();
+            string docketNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
+            string FormStatus = listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]].ToString();
+
+            FOLAMailingList folaMailingList = new FOLAMailingList();
+            int numberOfFOLAAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemID);
+
+
+
+            int supplementalMailingListAddress = 0;
             if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
             {
                 supplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
             }
 
+            bool printReqGenerated = UpdatePIWListForInitiatePrintReqForm(clientContext, listItem, numberOfFOLAAddress, supplementalMailingListAddress, PrintReqStatus);
+
+
+            //create history list
+            if (printReqGenerated)
+            {
+                //get current user
+                User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                clientContext.Load(currentUser);
+                clientContext.ExecuteQuery();
+                //add history list for the main form 
+                CreatePIWListHistory(clientContext, listItemID, "Print Requisition Generated.",
+                        FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+
+                //Add history list for the print req form
+                if (getHistoryListByPIWListID(clientContext, listItemID, Constants.PIWListHistory_FormTypeOption_PrintReq).Count == 0)
+                {
+                    string message = "Print Requisition Generated.";
+                    CreatePIWListHistory(clientContext, listItemID, message,
+                        PrintReqStatus, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+                }
+
+            }
+        }
+        
+        public void InitiatePrintReqForm(ClientContext clientContext, string listItemID, string CurrentUserLogInID)
+        {
+            ListItem listItem = GetPiwListItemById(clientContext, listItemID, false);
+            InitiatePrintReqForm(clientContext,listItem,CurrentUserLogInID);
+            
+        }
+        private bool UpdatePIWListForInitiatePrintReqForm(ClientContext clientContext, ListItem listItem, int numberOfFOLAMailingListAddress, int supplementalMailingListAddress,string PrintReqStatus)
+        {
+            
+            bool result = false;
+            var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+            
+
+            //update piw list field
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] = numberOfFOLAMailingListAddress;
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = numberOfFOLAMailingListAddress + supplementalMailingListAddress;
 
@@ -1111,23 +1160,7 @@ namespace PIW_SPAppWeb.Helper
                 }
                 else
                 {
-                    //Query the new list from SharePoint
-                    var internalColumnList = new Dictionary<string, string>();
-                    List list = clientContext.Web.Lists.GetByTitle(listName);
-
-                    FieldCollection fields = list.Fields;
-
-                    clientContext.Load(fields);
-                    clientContext.ExecuteQuery();
-
-                    foreach (var field in fields)
-                    {
-                        if (!internalColumnList.ContainsKey(field.Title))
-                        {
-                            internalColumnList.Add(field.Title, field.InternalName);
-                        }
-
-                    }
+                    var internalColumnList = getInternalColumnNames(clientContext, listName);
 
                     //Add the new object to cache
                     cache.Insert(listName, internalColumnList, null, DateTime.Now.AddHours(10), Cache.NoSlidingExpiration);
@@ -1135,6 +1168,27 @@ namespace PIW_SPAppWeb.Helper
                 }
             }
 
+        }
+
+        public Dictionary<string, string> getInternalColumnNames(ClientContext clientContext, string listName)
+        {
+            //Query the new list from SharePoint
+            var internalColumnList = new Dictionary<string, string>();
+            List list = clientContext.Web.Lists.GetByTitle(listName);
+
+            FieldCollection fields = list.Fields;
+
+            clientContext.Load(fields);
+            clientContext.ExecuteQuery();
+
+            foreach (var field in fields)
+            {
+                if (!internalColumnList.ContainsKey(field.Title))
+                {
+                    internalColumnList.Add(field.Title, field.InternalName);
+                }
+            }
+            return internalColumnList;
         }
 
         public void LogError(HttpContext httpContext, HttpRequest httpRequest, Exception exc, string listItemID, string pageName)
@@ -1175,6 +1229,8 @@ namespace PIW_SPAppWeb.Helper
                 {
                     message = message + "Stack Trace: " + exc.StackTrace;
                 }
+
+                message = message + "Type: " + exc.GetType();
 
                 newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorMessage]] = message;
 
@@ -1478,6 +1534,11 @@ namespace PIW_SPAppWeb.Helper
             return new ClientContext(request.QueryString["SPHostUrl"]);
         }
 
+        public ClientContext getElevatedClientContext(string spHostUrl)
+        {
+            return new ClientContext(spHostUrl);
+        }
+
         public ClientContext getCurrentLoginClientContext(HttpContext context, HttpRequest request)
         {
             return SharePointContextProvider.Current.GetSharePointContext(context).CreateUserClientContextForSPHost();
@@ -1761,15 +1822,18 @@ namespace PIW_SPAppWeb.Helper
             }
 
             //CEII and Privileged
-            ListItem listItem = GetPiwListItemById(clientContext, listitemID, false);
-            var piwlistInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-            string CEIIUrls = listItem[piwlistInternalNameList[Constants.PIWList_colName_CEIIDocumentURLs]] != null
-                ? listItem[piwlistInternalNameList[Constants.PIWList_colName_CEIIDocumentURLs]].ToString(): string.Empty;
-            string PrivilegedUrls = listItem[piwlistInternalNameList[Constants.PIWList_colName_PrivilegedDocumentURLs]] != null
-                ? listItem[piwlistInternalNameList[Constants.PIWList_colName_PrivilegedDocumentURLs]].ToString(): string.Empty;
+            ListItem listItem = GetPiwListItemById(clientContext, listitemID, true);
+            if (listItem != null)
+            {
+                var piwlistInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+                string CEIIUrls = listItem[piwlistInternalNameList[Constants.PIWList_colName_CEIIDocumentURLs]] != null
+                    ? listItem[piwlistInternalNameList[Constants.PIWList_colName_CEIIDocumentURLs]].ToString() : string.Empty;
+                string PrivilegedUrls = listItem[piwlistInternalNameList[Constants.PIWList_colName_PrivilegedDocumentURLs]] != null
+                    ? listItem[piwlistInternalNameList[Constants.PIWList_colName_PrivilegedDocumentURLs]].ToString() : string.Empty;
 
-            //todo: get the library
-            AssignPermissionForCEIIAndPrivilegedDocument(clientContext,listitemID,CEIIUrls,PrivilegedUrls,"Gas");
+                //todo: get the library
+                AssignPermissionForCEIIAndPrivilegedDocument(clientContext, listitemID, CEIIUrls, PrivilegedUrls, "Gas");    
+            }
             
             
             //update

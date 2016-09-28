@@ -46,16 +46,15 @@ namespace PIW_SPAppWeb.Helper
 
 
                     cmd.Parameters.Add("@Work_Set_Short_Label", SqlDbType.VarChar).Value = WorksetShortLabel;
-                    cmd.Parameters.Add("@Include_Senators", SqlDbType.Bit).Value = 0;
+                    cmd.Parameters.Add("@Include_Senators", SqlDbType.Bit).Value = 1;
                     cmd.Parameters.Add("@Include_eReg", SqlDbType.Bit).Value = 0;
                     cmd.Parameters.Add("@ReturnBlankAddress", SqlDbType.Bit).Value = 0;
 
 
                     SqlDataReader reader = cmd.ExecuteReader();
-                    List<string> row;
                     while (reader.Read())
                     {
-                        row = new List<string>();
+                        var row = new List<string>();
 
                         //Contact FUll Name
                         if ((reader[Constants.FOLA_MailingListColumnName_Contact_Full_Name] != null) &&
@@ -268,7 +267,7 @@ namespace PIW_SPAppWeb.Helper
                                 Constants.PIWDocuments_DocTypeOption_FOLAServiceMailingList, true);
                             //save number of fola mailing list address
                             //ListItem listItem = helper.GetPiwListItemById(clientContext, listItemID, false);
-                            //helper.InitiatePrintReqForm(clientContext, listItem, folaMailingList.DataRows.Count);
+                            //helper.UpdatePIWListForInitiatePrintReqForm(clientContext, listItem, folaMailingList.DataRows.Count);
                             numberOfAddress = folaMailingList.DataRows.Count;
 
                         }

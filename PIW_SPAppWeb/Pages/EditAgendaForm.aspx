@@ -469,13 +469,13 @@
                 <div class="form-group">
                     <asp:Label ID="lbPrintDate" runat="server" Text="Print Date" AssociatedControlID="tbPrintDate" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-2">
-                        <asp:TextBox runat="server" ID="tbPrintDate" Enabled="False" ClientIDMode="Static"></asp:TextBox>
+                        <asp:TextBox runat="server" ID="tbPrintDate" Enabled="False" ClientIDMode="Static" CssClass="form-control"></asp:TextBox>
                     </div>
                 </div>
                 <div class="form-group">
                     <asp:Label ID="lbMailedDate" runat="server" Text="Mail Date" AssociatedControlID="tbMailDate" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-2">
-                        <asp:TextBox runat="server" ID="tbMailDate" Enabled="False" ClientIDMode="Static"></asp:TextBox>
+                        <asp:TextBox runat="server" ID="tbMailDate" Enabled="False" ClientIDMode="Static" CssClass="form-control"></asp:TextBox>
                     </div>
                 </div>
             </fieldset>

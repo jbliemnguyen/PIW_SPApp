@@ -436,7 +436,7 @@
 
             $("#btnGenerateMailingList1").click(function (event) {
                 event.preventDefault();
-                $("#btnGenerateMailingList1").click();
+                $("#btnGenerateMailingList").click();
             });
             //end top buttons event
 

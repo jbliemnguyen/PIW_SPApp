@@ -27,7 +27,7 @@
                 </div>
                 <div class="form-group">
                     <div id="gridDiv" class="col-md-12">
-                        <asp:GridView runat="server" ID="gridView" AutoGenerateColumns="false" CssClass="table-striped table-hover table-condensed piw-borderless">
+                        <asp:GridView runat="server" ID="gridView" AutoGenerateColumns="false" CssClass="table-striped table-hover table-condensed piw-borderless" OnRowCreated="gridView_OnRowCreated">
                         </asp:GridView>
                     </div>
                 </div>
