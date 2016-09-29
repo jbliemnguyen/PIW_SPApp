@@ -204,6 +204,26 @@
             <%--<form id="mainForm1">--%>
             <%--Main panel--%>
             <div class="form-group">
+                <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-3">
+                    <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server" ClientIDMode="Static">
+                        <asp:ListItem Value="">Please Select</asp:ListItem>
+                        <asp:ListItem>Chairman Statement</asp:ListItem>
+                        <asp:ListItem>Commissioner Statement</asp:ListItem>
+                        <asp:ListItem>Delegated Letter</asp:ListItem>
+                        <asp:ListItem>EA</asp:ListItem>
+                        <asp:ListItem>EIS</asp:ListItem>
+                        <asp:ListItem>Errata</asp:ListItem>
+                        <asp:ListItem>Inspection Report</asp:ListItem>
+                        <asp:ListItem>Memo</asp:ListItem>
+                        <asp:ListItem>News Release</asp:ListItem>
+                        <asp:ListItem>Notice of Action Taken</asp:ListItem>
+                        <asp:ListItem>Project Update</asp:ListItem>
+                        <asp:ListItem>Sunshine Act Meeting Notice</asp:ListItem>
+                    </asp:DropDownList>
+                </div>
+            </div>
+            <div class="form-group">
                 <asp:Label ID="lbDocketNumber" runat="server" Text="Docket Number<span class='accentText'> *</span>" CssClass="col-md-2 control-label" AssociatedControlID="tbDocketNumber"></asp:Label>
 
                 <div class="col-md-6">
@@ -233,27 +253,6 @@
                 <asp:Label ID="lbDescription" runat="server" Text="Description<span class='accentText'> *</span>" AssociatedControlID="tbDescription" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-6">
                     <asp:TextBox ID="tbDescription" runat="server" TextMode="MultiLine" Rows="4" CssClass="form-control" ClientIDMode="Static"></asp:TextBox>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-3">
-                    <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server" ClientIDMode="Static">
-                        <asp:ListItem Value="">Please Select</asp:ListItem>
-                        <asp:ListItem>Chairman Statement</asp:ListItem>
-                        <asp:ListItem>Commissioner Statement</asp:ListItem>
-                        <asp:ListItem>Delegated Letter</asp:ListItem>
-                        <asp:ListItem>EA</asp:ListItem>
-                        <asp:ListItem>EIS</asp:ListItem>
-                        <asp:ListItem>Errata</asp:ListItem>
-                        <asp:ListItem>Inspection Report</asp:ListItem>
-                        <asp:ListItem>Memo</asp:ListItem>
-                        <asp:ListItem>News Release</asp:ListItem>
-                        <asp:ListItem>Notice of Action Taken</asp:ListItem>
-                        <asp:ListItem>Project Update</asp:ListItem>
-                        <asp:ListItem>Sunshine Act Meeting Notice</asp:ListItem>
-                    </asp:DropDownList>
                 </div>
             </div>
 

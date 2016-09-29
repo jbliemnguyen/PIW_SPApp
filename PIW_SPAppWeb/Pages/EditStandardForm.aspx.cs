@@ -851,7 +851,7 @@ namespace PIW_SPAppWeb.Pages
         {
             using (var clientContext = helper.getElevatedClientContext(Context, Request))
             {
-                helper.InitiatePrintReqForm(clientContext, ListItemID, CurrentUserLogInID);
+                helper.ReGenerateFOLAMailingList(clientContext, ListItemID, CurrentUserLogInID);
                 helper.RefreshPage(Request, Response);
             }
         }

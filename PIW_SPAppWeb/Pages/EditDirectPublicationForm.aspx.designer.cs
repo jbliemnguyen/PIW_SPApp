@@ -184,6 +184,24 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Label lbRequiredUploadedDocumentError;
         
         /// <summary>
+        /// lbDocumentCategory control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbDocumentCategory;
+        
+        /// <summary>
+        /// ddDocumentCategory control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.DropDownList ddDocumentCategory;
+        
+        /// <summary>
         /// lbDocketNumber control.
         /// </summary>
         /// <remarks>
@@ -263,24 +281,6 @@ namespace PIW_SPAppWeb.Pages {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox tbDescription;
-        
-        /// <summary>
-        /// lbDocumentCategory control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbDocumentCategory;
-        
-        /// <summary>
-        /// ddDocumentCategory control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList ddDocumentCategory;
         
         /// <summary>
         /// lbProgramOfficeWorkflowInitiator control.

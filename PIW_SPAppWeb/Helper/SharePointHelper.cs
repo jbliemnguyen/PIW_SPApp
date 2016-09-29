@@ -301,73 +301,106 @@ namespace PIW_SPAppWeb.Helper
             string PrintReqStatus = Constants.PrintReq_FormStatus_PrintReqGenerated;
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
-
             string listItemID = listItem["ID"].ToString();
-            string docketNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
-            string FormStatus = listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]].ToString();
+
+            string docketNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]] != null?
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]].ToString():string.Empty;
+
+            string FormStatus = listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] != null
+                ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]].ToString(): string.Empty;
+            
+            int numberOfPublicPages = listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]] != null
+                    ? int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]].ToString()): 0;
+
 
             FOLAMailingList folaMailingList = new FOLAMailingList();
             int numberOfFOLAAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemID);
 
 
-
-            int supplementalMailingListAddress = 0;
+            //number of supplemental mailing list address
+            int numberOfSupplementalMailingListAddress = 0;
             if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
             {
-                supplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+                numberOfSupplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
             }
 
-            bool printReqGenerated = UpdatePIWListForInitiatePrintReqForm(clientContext, listItem, numberOfFOLAAddress, supplementalMailingListAddress, PrintReqStatus);
 
 
             //create history list
-            if (printReqGenerated)
+            if ((numberOfSupplementalMailingListAddress + numberOfFOLAAddress) > 0)
             {
+
+                int printPriority = getPrintPriority(listItem);
+                int numberofCopies = numberOfFOLAAddress + numberOfSupplementalMailingListAddress;
+                DateTime dateRequested = DateTime.Now;
+                //update piw list
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] = numberOfFOLAAddress;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = numberofCopies;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqStatus]] = PrintReqStatus;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequested]] = dateRequested.ToString();
+                
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPrintPriority]] = printPriority;
+
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequired]] = getDateRequired(printPriority, dateRequested, numberofCopies * numberOfPublicPages);
+
+                listItem.Update();
+                clientContext.ExecuteQuery();
+
+                //todo: send email
+
+
+                //history list
                 //get current user
                 User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                 clientContext.Load(currentUser);
                 clientContext.ExecuteQuery();
                 //add history list for the main form 
-                CreatePIWListHistory(clientContext, listItemID, "Print Requisition Generated.",
+                CreatePIWListHistory(clientContext, listItemID, "Print Requisition Generated/Submitted.",
                         FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
                 //Add history list for the print req form
                 if (getHistoryListByPIWListID(clientContext, listItemID, Constants.PIWListHistory_FormTypeOption_PrintReq).Count == 0)
                 {
-                    string message = "Print Requisition Generated.";
+                    string message = "Print Requisition Generated/Submitted.";
                     CreatePIWListHistory(clientContext, listItemID, message,
                         PrintReqStatus, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
                 }
-
+                
             }
         }
-        
-        public void InitiatePrintReqForm(ClientContext clientContext, string listItemID, string CurrentUserLogInID)
+
+        private DateTime getDateRequired(int PrintPriority,DateTime dateRequested,int totalPrintPages)
         {
-            ListItem listItem = GetPiwListItemById(clientContext, listItemID, false);
-            InitiatePrintReqForm(clientContext,listItem,CurrentUserLogInID);
-            
+            return dateRequested.AddDays(2);
         }
-        private bool UpdatePIWListForInitiatePrintReqForm(ClientContext clientContext, ListItem listItem, int numberOfFOLAMailingListAddress, int supplementalMailingListAddress,string PrintReqStatus)
+
+        private int getPrintPriority(ListItem listItem)
         {
-            
-            bool result = false;
+            return 1;
+        }
+
+        public void ReGenerateFOLAMailingList(ClientContext clientContext, string listItemID, string CurrentUserLogInID)
+        {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-            
+            ListItem listItem = GetPiwListItemById(clientContext, listItemID, false);
+            string docketNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
 
-            //update piw list field
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] = numberOfFOLAMailingListAddress;
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = numberOfFOLAMailingListAddress + supplementalMailingListAddress;
-
-            if ((supplementalMailingListAddress + numberOfFOLAMailingListAddress) > 0)
+            //number of supplemental mailing list address
+            int numberofSupplementalMailingListAddress = 0;
+            if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
             {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqStatus]] = PrintReqStatus;
-                result = true;
+                numberofSupplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
             }
 
+            FOLAMailingList folaMailingList = new FOLAMailingList();
+            int numberOfFOLAMailingListAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemID);
+
+
+            //update number of fola address and number of copies to piwlist
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] = numberOfFOLAMailingListAddress;
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = numberOfFOLAMailingListAddress + numberofSupplementalMailingListAddress;
             listItem.Update();
             clientContext.ExecuteQuery();
-            return result;
         }
 
         public void SaveNumberOfPublicPagesAndSupplementalMailingListAddress(ClientContext clientContext, ListItem listItem, int numberOfPublicPages, int numberOfSupplementalMailingListAddress)
@@ -376,8 +409,7 @@ namespace PIW_SPAppWeb.Helper
 
             if (numberOfPublicPages > 0)
             {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]] =
-                    numberOfPublicPages;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]] = numberOfPublicPages;
             }
 
             if (numberOfSupplementalMailingListAddress > 0)
@@ -496,7 +528,7 @@ namespace PIW_SPAppWeb.Helper
 
             string uploadSubFolderURL = string.Format("{0}/{1}/{2}", clientContext.Web.Url, libraryName, subFoder);
             //string downloadURL = string.Format("{0}/_layouts/download.aspx?SourceURL=", clientContext.Web.Url);
-            
+
             var documentList = getDocumentsByDocType(clientContext, uploadSubFolderURL, docType);
 
             foreach (File file in documentList)
@@ -1136,7 +1168,7 @@ namespace PIW_SPAppWeb.Helper
                 System.Runtime.Remoting.RemotingConfiguration.Configure(configPath, true);
 
             IDvvoRemoteBusiness m_RemoteObject = (IDvvoRemoteBusiness)
-                             Activator.GetObject(typeof(IDvvoRemoteBusiness),ConfigurationManager.AppSettings["eLibRemoteServiceDvvoURI"]);
+                             Activator.GetObject(typeof(IDvvoRemoteBusiness), ConfigurationManager.AppSettings["eLibRemoteServiceDvvoURI"]);
 
             return m_RemoteObject;
         }
@@ -1634,19 +1666,19 @@ namespace PIW_SPAppWeb.Helper
             return result.ToString();
         }
 
-        public void SetCommentURLHTML(ListItem listItem,Dictionary<string,string> piwListInternalColumnNames,string userName,string comment)
+        public void SetCommentURLHTML(ListItem listItem, Dictionary<string, string> piwListInternalColumnNames, string userName, string comment)
         {
             if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] == null)
-                {
-                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("<li>{0} ({1}): {2}</li>", userName,
-                        DateTime.Now.ToString("G"), comment);
-                }
-                else
-                {
-                    //append
-                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("<li>{0} ({1}): {2}</li><br>{3}",
-                        userName, DateTime.Now.ToString("G"), comment, listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]]);
-                }
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("<li>{0} ({1}): {2}</li>", userName,
+                    DateTime.Now.ToString("G"), comment);
+            }
+            else
+            {
+                //append
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("<li>{0} ({1}): {2}</li><br>{3}",
+                    userName, DateTime.Now.ToString("G"), comment, listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]]);
+            }
         }
 
         public void CreateLog(ClientContext clientContext, string Title, string Message)
@@ -1832,10 +1864,10 @@ namespace PIW_SPAppWeb.Helper
                     ? listItem[piwlistInternalNameList[Constants.PIWList_colName_PrivilegedDocumentURLs]].ToString() : string.Empty;
 
                 //todo: get the library
-                AssignPermissionForCEIIAndPrivilegedDocument(clientContext, listitemID, CEIIUrls, PrivilegedUrls, "Gas");    
+                AssignPermissionForCEIIAndPrivilegedDocument(clientContext, listitemID, CEIIUrls, PrivilegedUrls, "Gas");
             }
-            
-            
+
+
             //update
             folder.Update();
             clientContext.ExecuteQuery();
@@ -1869,8 +1901,8 @@ namespace PIW_SPAppWeb.Helper
         /// <param name="CEIIUrls">urls saved in splist, text seperated by _##_</param>
         /// <param name="PrivilegedUrls"></param>
         /// <param name="library"></param>
-        public void AssignPermissionForCEIIAndPrivilegedDocument(ClientContext clientContext, string listItemID, 
-            string CEIIUrls,string PrivilegedUrls,string library)
+        public void AssignPermissionForCEIIAndPrivilegedDocument(ClientContext clientContext, string listItemID,
+            string CEIIUrls, string PrivilegedUrls, string library)
         {
             Group group = null;
 
@@ -1888,7 +1920,7 @@ namespace PIW_SPAppWeb.Helper
                     }
                 }
             }
-            
+
             //Privileged
             if (!string.IsNullOrEmpty(PrivilegedUrls))
             {
