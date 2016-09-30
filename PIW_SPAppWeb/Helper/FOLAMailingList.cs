@@ -46,7 +46,7 @@ namespace PIW_SPAppWeb.Helper
 
 
                     cmd.Parameters.Add("@Work_Set_Short_Label", SqlDbType.VarChar).Value = WorksetShortLabel;
-                    cmd.Parameters.Add("@Include_Senators", SqlDbType.Bit).Value = 1;
+                    cmd.Parameters.Add("@Include_Senators", SqlDbType.Bit).Value = getIncludeSenatorsParameter(WorksetShortLabel);
                     cmd.Parameters.Add("@Include_eReg", SqlDbType.Bit).Value = 0;
                     cmd.Parameters.Add("@ReturnBlankAddress", SqlDbType.Bit).Value = 0;
 
@@ -277,6 +277,53 @@ namespace PIW_SPAppWeb.Helper
             }
 
             return numberOfAddress;
+        }
+
+        private bool getIncludeSenatorsParameter(string shortLabel)
+        {
+            /*
+            If "RM" and "P" docket --> True
+            else If "EL"
+	            if same fiscal year --> True ("but a docket: ER04-7 EL09-3 would get a ‘True’ value")
+	            else (if different fiscal year)
+		            if there is another docket --> true ("A lead EL docket stated with a different fiscal 							year would get a ‘True’ value also")
+
+            other than above, false
+             * */
+            //this code dertermine if includesenator is true, default is false
+            bool includeSenator = false;
+            if ((shortLabel.IndexOf("RM", StringComparison.OrdinalIgnoreCase) > -1) ||
+                (shortLabel.IndexOf("P", StringComparison.OrdinalIgnoreCase) > -1))
+            {
+                includeSenator = true;
+            }
+            else if (shortLabel.IndexOf("EL", StringComparison.OrdinalIgnoreCase) > -1)
+            {
+                int fiscalYear = DateTime.Now.Year;
+                if (DateTime.Now.Month >= 10)
+                {
+                    fiscalYear++;
+                }
+
+                //turn fiscal year to short: 2016 --> 16
+                var strfiscalYear = fiscalYear.ToString().Substring(2, 2);
+                var searchText = "EL" + strfiscalYear;
+
+                if (shortLabel.IndexOf(searchText) > -1) //it means same fiscal year for EL
+                {
+                    includeSenator = true;
+                }
+                else
+                {
+                    //if there is another docket, check comma ','
+                    if ((shortLabel.IndexOf(",")) > -1)
+                    {
+                        includeSenator = true;
+                    }
+                }
+            }
+
+            return includeSenator;
         }
 
         #region Excel file writer

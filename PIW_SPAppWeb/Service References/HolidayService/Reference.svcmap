@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="6409430e-7dc3-4424-97d1-083842f23a20" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <GenerateTaskBasedAsynchronousMethod>true</GenerateTaskBasedAsynchronousMethod>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://facfs-elibappt1.ferc.gov/HolidayService/" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="HolidayService.xsd" MetadataType="Schema" ID="7fd3490d-c5df-4852-b90c-ec7ce79d5904" SourceId="1" SourceUrl="http://facfs-elibappt1.ferc.gov/HolidayService/HolidayService.svc?xsd=xsd0" />
+    <MetadataFile FileName="HolidayService1.xsd" MetadataType="Schema" ID="eba9536f-6e25-471a-bd12-af4d928946dd" SourceId="1" SourceUrl="http://facfs-elibappt1.ferc.gov/HolidayService/HolidayService.svc?xsd=xsd1" />
+    <MetadataFile FileName="HolidayService.wsdl" MetadataType="Wsdl" ID="0844fe12-193a-41f6-8232-a2a82d7e7f09" SourceId="1" SourceUrl="http://facfs-elibappt1.ferc.gov/HolidayService/HolidayService.svc?wsdl" />
+    <MetadataFile FileName="HolidayService2.xsd" MetadataType="Schema" ID="b40b892a-8731-44af-ac5a-dac2569b6baa" SourceId="1" SourceUrl="http://facfs-elibappt1.ferc.gov/HolidayService/HolidayService.svc?xsd=xsd3" />
+    <MetadataFile FileName="HolidayService3.xsd" MetadataType="Schema" ID="16a85d7e-b494-4445-af07-1b603d2e4e76" SourceId="1" SourceUrl="http://facfs-elibappt1.ferc.gov/HolidayService/HolidayService.svc?xsd=xsd2" />
+    <MetadataFile FileName="HolidayService.disco" MetadataType="Disco" ID="7d90f9fa-de2c-4680-a880-9f859f22d759" SourceId="1" SourceUrl="http://facfs-elibappt1.ferc.gov/HolidayService/HolidayService.svc?disco" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

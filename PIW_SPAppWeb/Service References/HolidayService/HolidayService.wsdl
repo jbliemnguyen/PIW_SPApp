@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="http://tempuri.org/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="HolidayService" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://tempuri.org/Imports">
+      <xsd:import schemaLocation="http://facfs-elibappt1.ferc.gov/HolidayService/HolidayService.svc?xsd=xsd0" namespace="http://tempuri.org/" />
+      <xsd:import schemaLocation="http://facfs-elibappt1.ferc.gov/HolidayService/HolidayService.svc?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://facfs-elibappt1.ferc.gov/HolidayService/HolidayService.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/FERC.FOL.HolidayService.Common" />
+      <xsd:import schemaLocation="http://facfs-elibappt1.ferc.gov/HolidayService/HolidayService.svc?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="IHolidayService_GetHolidays_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetHolidays" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_GetHolidays_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetHolidaysResponse" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_GetHolidays_StringFault_FaultMessage">
+    <wsdl:part xmlns:q1="http://schemas.microsoft.com/2003/10/Serialization/" name="detail" element="q1:string" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_GetHolidaysFrom_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetHolidaysFrom" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_GetHolidaysFrom_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetHolidaysFromResponse" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_GetHolidaysFrom_StringFault_FaultMessage">
+    <wsdl:part xmlns:q2="http://schemas.microsoft.com/2003/10/Serialization/" name="detail" element="q2:string" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_GetHolidayDictionary_InputMessage">
+    <wsdl:part name="parameters" element="tns:GetHolidayDictionary" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_GetHolidayDictionary_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GetHolidayDictionaryResponse" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_GetHolidayDictionary_StringFault_FaultMessage">
+    <wsdl:part xmlns:q3="http://schemas.microsoft.com/2003/10/Serialization/" name="detail" element="q3:string" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_getNextBusinessDateWithHolidayList_InputMessage">
+    <wsdl:part name="parameters" element="tns:getNextBusinessDateWithHolidayList" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_getNextBusinessDateWithHolidayList_OutputMessage">
+    <wsdl:part name="parameters" element="tns:getNextBusinessDateWithHolidayListResponse" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_getNextBusinessDateWithHolidayList_StringFault_FaultMessage">
+    <wsdl:part xmlns:q4="http://schemas.microsoft.com/2003/10/Serialization/" name="detail" element="q4:string" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_AddHoliday_InputMessage">
+    <wsdl:part name="parameters" element="tns:AddHoliday" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_AddHoliday_OutputMessage">
+    <wsdl:part name="parameters" element="tns:AddHolidayResponse" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_AddHoliday_StringFault_FaultMessage">
+    <wsdl:part xmlns:q5="http://schemas.microsoft.com/2003/10/Serialization/" name="detail" element="q5:string" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_UpdateHoliday_InputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateHoliday" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_UpdateHoliday_OutputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateHolidayResponse" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_UpdateHoliday_StringFault_FaultMessage">
+    <wsdl:part xmlns:q6="http://schemas.microsoft.com/2003/10/Serialization/" name="detail" element="q6:string" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_DeleteHoliday_InputMessage">
+    <wsdl:part name="parameters" element="tns:DeleteHoliday" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_DeleteHoliday_OutputMessage">
+    <wsdl:part name="parameters" element="tns:DeleteHolidayResponse" />
+  </wsdl:message>
+  <wsdl:message name="IHolidayService_DeleteHoliday_StringFault_FaultMessage">
+    <wsdl:part xmlns:q7="http://schemas.microsoft.com/2003/10/Serialization/" name="detail" element="q7:string" />
+  </wsdl:message>
+  <wsdl:portType name="IHolidayService">
+    <wsdl:operation name="GetHolidays">
+      <wsdl:input wsaw:Action="http://tempuri.org/IHolidayService/GetHolidays" message="tns:IHolidayService_GetHolidays_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IHolidayService/GetHolidaysResponse" message="tns:IHolidayService_GetHolidays_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IHolidayService/GetHolidaysStringFault" name="StringFault" message="tns:IHolidayService_GetHolidays_StringFault_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetHolidaysFrom">
+      <wsdl:input wsaw:Action="http://tempuri.org/IHolidayService/GetHolidaysFrom" message="tns:IHolidayService_GetHolidaysFrom_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IHolidayService/GetHolidaysFromResponse" message="tns:IHolidayService_GetHolidaysFrom_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IHolidayService/GetHolidaysFromStringFault" name="StringFault" message="tns:IHolidayService_GetHolidaysFrom_StringFault_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GetHolidayDictionary">
+      <wsdl:input wsaw:Action="http://tempuri.org/IHolidayService/GetHolidayDictionary" message="tns:IHolidayService_GetHolidayDictionary_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IHolidayService/GetHolidayDictionaryResponse" message="tns:IHolidayService_GetHolidayDictionary_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IHolidayService/GetHolidayDictionaryStringFault" name="StringFault" message="tns:IHolidayService_GetHolidayDictionary_StringFault_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="getNextBusinessDateWithHolidayList">
+      <wsdl:input wsaw:Action="http://tempuri.org/IHolidayService/getNextBusinessDateWithHolidayList" message="tns:IHolidayService_getNextBusinessDateWithHolidayList_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IHolidayService/getNextBusinessDateWithHolidayListResponse" message="tns:IHolidayService_getNextBusinessDateWithHolidayList_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IHolidayService/getNextBusinessDateWithHolidayListStringFault" name="StringFault" message="tns:IHolidayService_getNextBusinessDateWithHolidayList_StringFault_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="AddHoliday">
+      <wsdl:input wsaw:Action="http://tempuri.org/IHolidayService/AddHoliday" message="tns:IHolidayService_AddHoliday_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IHolidayService/AddHolidayResponse" message="tns:IHolidayService_AddHoliday_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IHolidayService/AddHolidayStringFault" name="StringFault" message="tns:IHolidayService_AddHoliday_StringFault_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateHoliday">
+      <wsdl:input wsaw:Action="http://tempuri.org/IHolidayService/UpdateHoliday" message="tns:IHolidayService_UpdateHoliday_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IHolidayService/UpdateHolidayResponse" message="tns:IHolidayService_UpdateHoliday_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IHolidayService/UpdateHolidayStringFault" name="StringFault" message="tns:IHolidayService_UpdateHoliday_StringFault_FaultMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteHoliday">
+      <wsdl:input wsaw:Action="http://tempuri.org/IHolidayService/DeleteHoliday" message="tns:IHolidayService_DeleteHoliday_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IHolidayService/DeleteHolidayResponse" message="tns:IHolidayService_DeleteHoliday_OutputMessage" />
+      <wsdl:fault wsaw:Action="http://tempuri.org/IHolidayService/DeleteHolidayStringFault" name="StringFault" message="tns:IHolidayService_DeleteHoliday_StringFault_FaultMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BasicHttpBinding_IHolidayService" type="tns:IHolidayService">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetHolidays">
+      <soap:operation soapAction="http://tempuri.org/IHolidayService/GetHolidays" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="StringFault">
+        <soap:fault use="literal" name="StringFault" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="GetHolidaysFrom">
+      <soap:operation soapAction="http://tempuri.org/IHolidayService/GetHolidaysFrom" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="StringFault">
+        <soap:fault use="literal" name="StringFault" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="GetHolidayDictionary">
+      <soap:operation soapAction="http://tempuri.org/IHolidayService/GetHolidayDictionary" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="StringFault">
+        <soap:fault use="literal" name="StringFault" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="getNextBusinessDateWithHolidayList">
+      <soap:operation soapAction="http://tempuri.org/IHolidayService/getNextBusinessDateWithHolidayList" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="StringFault">
+        <soap:fault use="literal" name="StringFault" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="AddHoliday">
+      <soap:operation soapAction="http://tempuri.org/IHolidayService/AddHoliday" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="StringFault">
+        <soap:fault use="literal" name="StringFault" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateHoliday">
+      <soap:operation soapAction="http://tempuri.org/IHolidayService/UpdateHoliday" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="StringFault">
+        <soap:fault use="literal" name="StringFault" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteHoliday">
+      <soap:operation soapAction="http://tempuri.org/IHolidayService/DeleteHoliday" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+      <wsdl:fault name="StringFault">
+        <soap:fault use="literal" name="StringFault" namespace="" />
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="HolidayService">
+    <wsdl:port name="BasicHttpBinding_IHolidayService" binding="tns:BasicHttpBinding_IHolidayService">
+      <soap:address location="http://facfs-elibappt1.ferc.gov/HolidayService/HolidayService.svc/basic" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

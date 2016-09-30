@@ -16,6 +16,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using FERC.eLibrary.Dvvo.Common;
 using Microsoft.SharePoint.Client;
 using Microsoft.SharePoint.Client.UserProfiles;
+using PIW_SPAppWeb.HolidayService;
 using File = Microsoft.SharePoint.Client.File;
 using ListItem = Microsoft.SharePoint.Client.ListItem;
 using FERC.FOL.ATMS.Remote.Interfaces;
@@ -399,8 +400,12 @@ namespace PIW_SPAppWeb.Helper
             }
 
             //call web service to get next business date.
+            HolidayServiceClient hs = new HolidayServiceClient();
+            
+            var holidaysDictionary = hs.GetHolidayDictionary(dateRequested.AddYears(-1), dateRequested.AddYears(1));//2 years of holidays
+            var dateRequired = hs.getNextBusinessDateWithHolidayList(dateRequested, numberOfBusinessDays, holidaysDictionary);
 
-            return dateRequested.AddDays(2);
+            return dateRequired;
         }
 
         private int getPrintPriority(string documentCategory)
