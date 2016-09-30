@@ -312,6 +312,9 @@ namespace PIW_SPAppWeb.Helper
             int numberOfPublicPages = listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]] != null
                     ? int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]].ToString()): 0;
 
+            string documentCategory = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]] != null
+                ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]].ToString() : string.Empty;
+
 
             FOLAMailingList folaMailingList = new FOLAMailingList();
             int numberOfFOLAAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemID);
@@ -330,7 +333,7 @@ namespace PIW_SPAppWeb.Helper
             if ((numberOfSupplementalMailingListAddress + numberOfFOLAAddress) > 0)
             {
 
-                int printPriority = getPrintPriority(listItem);
+                int printPriority = getPrintPriority(documentCategory);
                 int numberofCopies = numberOfFOLAAddress + numberOfSupplementalMailingListAddress;
                 DateTime dateRequested = DateTime.Now;
                 //update piw list
@@ -371,12 +374,51 @@ namespace PIW_SPAppWeb.Helper
 
         private DateTime getDateRequired(int PrintPriority,DateTime dateRequested,int totalPrintPages)
         {
+            DateTime ThreePMCutOffDate = new DateTime(dateRequested.Year,dateRequested.Month,dateRequested.Day,15,0,0);
+            int numberOfBusinessDays = 0;
+            if (PrintPriority.Equals(1))
+            {
+                if (totalPrintPages < 25000)
+                {
+                    numberOfBusinessDays = 1;
+                }
+                else
+                {
+                    numberOfBusinessDays = 2;
+                }
+            }
+            else if (PrintPriority.Equals(2))
+            {
+                numberOfBusinessDays = 2;
+            }
+
+            //if submit after cutoff time 3pm, add one more business day
+            if (dateRequested.CompareTo(ThreePMCutOffDate) >= 0)
+            {
+                numberOfBusinessDays ++;
+            }
+
+            //call web service to get next business date.
+
             return dateRequested.AddDays(2);
         }
 
-        private int getPrintPriority(ListItem listItem)
+        private int getPrintPriority(string documentCategory)
         {
-            return 1;
+            int PrintPriority = 0;
+
+            switch (documentCategory)
+            {
+                case Constants.PIWList_DocCat_DelegatedLetter:
+                case Constants.PIWList_DocCat_SunshineNotice:
+                    PrintPriority = 2;
+                    break;
+                default:
+                    PrintPriority = 1;
+                    break;
+            }
+            
+            return PrintPriority;
         }
 
         public void ReGenerateFOLAMailingList(ClientContext clientContext, string listItemID, string CurrentUserLogInID)
@@ -2016,5 +2058,6 @@ namespace PIW_SPAppWeb.Helper
     }
 
 }
+
 
 
