@@ -21,22 +21,12 @@ namespace PIW_SPAppWeb.Helper
         /// </summary>
         /// <param name="WorksetShortLabel">root dockets seperated by comma - ex: P-1234,PQ-789</param>
         /// <returns></returns>
-        private FOLAMailingListData GetFOLAMailingList(string WorksetShortLabel)
+        private FOLAMailingListData GetFOLAMailingList(string WorksetShortLabel, ref int numberOfAddress)
         {
             FOLAMailingListData data = new FOLAMailingListData();
-            data.Headers.Add("Contact Name");
-            data.Headers.Add("FERC ID");
-            data.Headers.Add("Contact Title");
-            data.Headers.Add("Contact Organization");
-            data.Headers.Add("PO Box");
-            data.Headers.Add("Address Line 1");
-            data.Headers.Add("Address Line 2");
-            data.Headers.Add("City");
-            data.Headers.Add("Zip");
-            data.Headers.Add("Zip 2");
-            data.Headers.Add("State");
-            data.Headers.Add("Docket");
-            
+            int groupCount = 0;
+            int grandCount = 0;
+
             using (SqlConnection con = new SqlConnection(ConfigurationManager.AppSettings["FOLAConnectionString"]))
             {
                 using (SqlCommand cmd = new SqlCommand("p_fola_rpt_getmailinglist4", con))
@@ -49,171 +39,222 @@ namespace PIW_SPAppWeb.Helper
                     cmd.Parameters.Add("@Include_Senators", SqlDbType.Bit).Value = getIncludeSenatorsParameter(WorksetShortLabel);
                     cmd.Parameters.Add("@Include_eReg", SqlDbType.Bit).Value = 0;
                     cmd.Parameters.Add("@ReturnBlankAddress", SqlDbType.Bit).Value = 0;
+                    //SqlDataReader dataRow = cmd.ExecuteReader();
 
-
-                    SqlDataReader reader = cmd.ExecuteReader();
-                    while (reader.Read())
+                    DataTable dt = new DataTable();
+                    using (SqlDataAdapter da = new SqlDataAdapter(cmd))
                     {
-                        var row = new List<string>();
+                        da.Fill(dt);
+                    }
 
-                        //Contact FUll Name
-                        if ((reader[Constants.FOLA_MailingListColumnName_Contact_Full_Name] != null) &&
-                            !string.IsNullOrEmpty(
-                                reader[Constants.FOLA_MailingListColumnName_Contact_Full_Name].ToString()))
-                        {
-                            row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_Full_Name].ToString());
-                        }
-                        else
-                        {
-                            row.Add(string.Empty);
-                        }
+                    DataView dv = dt.DefaultView;
+                    dv.Sort = Constants.FOLA_MailingListColumnName_Contact_Country_Name + " DESC";
+                    DataTable sortedDT = dv.ToTable();
 
 
-                        //row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_Full_Name].ToString());
 
 
-                        //FERC ID
-                        if ((reader[Constants.FOLA_MailingListColumnName_Contact_FERC_id] != null) &&
-                            !string.IsNullOrEmpty(
-                                reader[Constants.FOLA_MailingListColumnName_Contact_FERC_id].ToString()))
+
+                    for (int index = 0; index < sortedDT.Rows.Count; index++)
+                    {
+                        DataRow dataRow = sortedDT.Rows[index];
+                        string Country = dataRow[Constants.FOLA_MailingListColumnName_Contact_Country_Name].ToString().Trim();
+
+                        //add first header for each country
+                        if (groupCount.Equals(0))
                         {
-                            row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_FERC_id].ToString());
-                        }
-                        else
-                        {
-                            row.Add(string.Empty);
+                            data.DataRows.Add(getHeaderRow());
                         }
 
-                        //Contact Title
-                        if ((reader[Constants.FOLA_MailingListColumnName_Contact_Title] != null) &&
-                            !string.IsNullOrEmpty(
-                                reader[Constants.FOLA_MailingListColumnName_Contact_Title].ToString()))
-                        {
-                            row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_Title].ToString());
-                        }
-                        else
-                        {
-                            row.Add(string.Empty);
-                        }
+                        groupCount++;
+                        grandCount++;
 
-                        //Contact Organization
-                        if ((reader[Constants.FOLA_MailingListColumnName_Contact_Organization] != null) &&
-                            !string.IsNullOrEmpty(
-                                reader[Constants.FOLA_MailingListColumnName_Contact_Organization].ToString()))
+                        data.DataRows.Add(getDataRow(dataRow));
+                        if (index < sortedDT.Rows.Count - 1)
                         {
-                            row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_Organization].ToString());
-                        }
-                        else
-                        {
-                            row.Add(string.Empty);
-                        }
+                            string nextCountry =
+                                sortedDT.Rows[index + 1][Constants.FOLA_MailingListColumnName_Contact_Country_Name].ToString().Trim();
 
-                        //PO Box value = "PO Box:" + value of Contact_PO_Box if it is not null
-                        if ((reader[Constants.FOLA_MailingListColumnName_Contact_Po_Box] != null) &&
-                            !string.IsNullOrEmpty(
-                                reader[Constants.FOLA_MailingListColumnName_Contact_Po_Box].ToString()))
-                        {
-                            row.Add("PO Box: " +
-                                    reader[Constants.FOLA_MailingListColumnName_Contact_Po_Box].ToString());
-                        }
-                        else
-                        {
-                            row.Add(string.Empty);
-                        }
-
-                        //Address Line 1
-                        if ((reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line1] != null) &&
-                            !string.IsNullOrEmpty(
-                                reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line1].ToString()))
-                        {
-                            row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line1].ToString());
-                        }
-                        else
-                        {
-                            row.Add(string.Empty);
-                        }
-
-                        //Address Line 2
-                        if ((reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line2] != null) &&
-                            !string.IsNullOrEmpty(
-                                reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line2].ToString()))
-                        {
-                            row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_Address_Line2].ToString());
-                        }
-                        else
-                        {
-                            row.Add(string.Empty);
-                        }
-
-                        //Contact City
-                        if ((reader[Constants.FOLA_MailingListColumnName_Contact_City] != null) &&
-                            !string.IsNullOrEmpty(
-                                reader[Constants.FOLA_MailingListColumnName_Contact_City].ToString()))
-                        {
-                            row.Add(reader[Constants.FOLA_MailingListColumnName_Contact_City].ToString());
-                        }
-                        else
-                        {
-                            row.Add(string.Empty);
-                        }
-
-                        //Zip and Zip 2
-                        if ((reader[Constants.FOLA_MailingListColumnName_Contact_Zip_2] != null) &&
-                            !string.IsNullOrEmpty(
-                                reader[Constants.FOLA_MailingListColumnName_Contact_Zip_2].ToString()))
-                        {
-                            var zips =
-                                reader[Constants.FOLA_MailingListColumnName_Contact_Zip_2].ToString()
-                                    .Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
-                            if (zips.Count() == 1)
+                            if (!Country.Equals(nextCountry, StringComparison.OrdinalIgnoreCase))
                             {
-                                row.Add(zips[0]);
-                                row.Add(string.Empty);
-                            }
-                            else if (zips.Count() > 1)
-                            {
-                                row.Add(zips[0]);
-                                row.Add(zips[1]);
+                                //new country row, add an summary (group total)
+                                var groupRow = new List<string>();
+                                groupRow.Add(String.Format("Group Total for {0}: {1}", Country, groupCount));
+                                data.DataRows.Add(groupRow);
+                                groupCount = 0;
                             }
                         }
-                        else
+                        else if (index.Equals(sortedDT.Rows.Count - 1))//last row, add final group count and total group count
                         {
-                            row.Add(string.Empty);
-                            row.Add(string.Empty);
+                            var groupRow = new List<string>();
+                            groupRow.Add(String.Format("Group Total for {0}: {1}", Country, groupCount));
+                            data.DataRows.Add(groupRow);
+
+                            groupRow = new List<string>();
+                            groupRow.Add(String.Format("Grand Report Total: {0}", grandCount));
+                            data.DataRows.Add(groupRow);
                         }
 
-                        //State - last 2 character of Contact_CS
-                        if ((reader[Constants.FOLA_MailingListColumnName_Contact_CS] != null) &&
-                            !string.IsNullOrEmpty(reader[Constants.FOLA_MailingListColumnName_Contact_CS].ToString()))
-                        {
-                            string contact_cs = reader[Constants.FOLA_MailingListColumnName_Contact_CS].ToString();
-                            string state = contact_cs.Substring(contact_cs.Length - 2);
-                            row.Add(state);
-                        }
-                        else
-                        {
-                            row.Add(string.Empty);
-                        }
-
-                        //Docket
-                        if ((reader[Constants.FOLA_MailingListColumnName_Work_Set_Short_Label] != null) &&
-                            !string.IsNullOrEmpty(
-                                reader[Constants.FOLA_MailingListColumnName_Work_Set_Short_Label].ToString()))
-                        {
-                            row.Add(reader[Constants.FOLA_MailingListColumnName_Work_Set_Short_Label].ToString());
-                        }
-                        else
-                        {
-                            row.Add(string.Empty);
-                        }
-
-                        data.DataRows.Add(row);
                     }
                 }
             }
 
-
+            numberOfAddress = grandCount;
             return data;
+        }
+
+        private List<String> getDataRow(DataRow dataRow)
+        {
+            var row = new List<string>();
+            //Contact FUll Name
+            if ((dataRow[Constants.FOLA_MailingListColumnName_Contact_Full_Name] != null) &&
+                !string.IsNullOrEmpty(
+                    dataRow[Constants.FOLA_MailingListColumnName_Contact_Full_Name].ToString()))
+            {
+                row.Add(dataRow[Constants.FOLA_MailingListColumnName_Contact_Full_Name].ToString());
+            }
+            else
+            {
+                row.Add(string.Empty);
+            }
+
+
+            //FERC ID
+            if ((dataRow[Constants.FOLA_MailingListColumnName_Contact_FERC_id] != null) &&
+                !string.IsNullOrEmpty(
+                    dataRow[Constants.FOLA_MailingListColumnName_Contact_FERC_id].ToString()))
+            {
+                row.Add(dataRow[Constants.FOLA_MailingListColumnName_Contact_FERC_id].ToString());
+            }
+            else
+            {
+                row.Add(string.Empty);
+            }
+
+            //Contact Title
+            if ((dataRow[Constants.FOLA_MailingListColumnName_Contact_Title] != null) &&
+                !string.IsNullOrEmpty(
+                    dataRow[Constants.FOLA_MailingListColumnName_Contact_Title].ToString()))
+            {
+                row.Add(dataRow[Constants.FOLA_MailingListColumnName_Contact_Title].ToString());
+            }
+            else
+            {
+                row.Add(string.Empty);
+            }
+
+            //Contact Organization
+            if ((dataRow[Constants.FOLA_MailingListColumnName_Contact_Organization] != null) &&
+                !string.IsNullOrEmpty(
+                    dataRow[Constants.FOLA_MailingListColumnName_Contact_Organization].ToString()))
+            {
+                row.Add(dataRow[Constants.FOLA_MailingListColumnName_Contact_Organization].ToString());
+            }
+            else
+            {
+                row.Add(string.Empty);
+            }
+
+            //PO Box value = "PO Box:" + value of Contact_PO_Box if it is not null
+            if ((dataRow[Constants.FOLA_MailingListColumnName_Contact_Po_Box] != null) &&
+                !string.IsNullOrEmpty(
+                    dataRow[Constants.FOLA_MailingListColumnName_Contact_Po_Box].ToString()))
+            {
+                row.Add("PO Box: " +
+                        dataRow[Constants.FOLA_MailingListColumnName_Contact_Po_Box].ToString());
+            }
+            else
+            {
+                row.Add(string.Empty);
+            }
+
+            //Address Line 1
+            if ((dataRow[Constants.FOLA_MailingListColumnName_Contact_Address_Line1] != null) &&
+                !string.IsNullOrEmpty(
+                    dataRow[Constants.FOLA_MailingListColumnName_Contact_Address_Line1].ToString()))
+            {
+                row.Add(dataRow[Constants.FOLA_MailingListColumnName_Contact_Address_Line1].ToString());
+            }
+            else
+            {
+                row.Add(string.Empty);
+            }
+
+            //Address Line 2
+            if ((dataRow[Constants.FOLA_MailingListColumnName_Contact_Address_Line2] != null) &&
+                !string.IsNullOrEmpty(
+                    dataRow[Constants.FOLA_MailingListColumnName_Contact_Address_Line2].ToString()))
+            {
+                row.Add(dataRow[Constants.FOLA_MailingListColumnName_Contact_Address_Line2].ToString());
+            }
+            else
+            {
+                row.Add(string.Empty);
+            }
+
+            //Contact City
+            if ((dataRow[Constants.FOLA_MailingListColumnName_Contact_City] != null) &&
+                !string.IsNullOrEmpty(
+                    dataRow[Constants.FOLA_MailingListColumnName_Contact_City].ToString()))
+            {
+                row.Add(dataRow[Constants.FOLA_MailingListColumnName_Contact_City].ToString());
+            }
+            else
+            {
+                row.Add(string.Empty);
+            }
+
+            //Zip and Zip 2
+            if ((dataRow[Constants.FOLA_MailingListColumnName_Contact_Zip_2] != null) &&
+                !string.IsNullOrEmpty(
+                    dataRow[Constants.FOLA_MailingListColumnName_Contact_Zip_2].ToString()))
+            {
+                var zips =
+                    dataRow[Constants.FOLA_MailingListColumnName_Contact_Zip_2].ToString()
+                        .Split(new char[] { '-' }, StringSplitOptions.RemoveEmptyEntries);
+                if (zips.Count() == 1)
+                {
+                    row.Add(zips[0]);
+                    row.Add(string.Empty);
+                }
+                else if (zips.Count() > 1)
+                {
+                    row.Add(zips[0]);
+                    row.Add(zips[1]);
+                }
+            }
+            else
+            {
+                row.Add(string.Empty);
+                row.Add(string.Empty);
+            }
+
+            //State - last 2 character of Contact_CS
+            if ((dataRow[Constants.FOLA_MailingListColumnName_Contact_CS] != null) &&
+                !string.IsNullOrEmpty(dataRow[Constants.FOLA_MailingListColumnName_Contact_CS].ToString()))
+            {
+                string contact_cs = dataRow[Constants.FOLA_MailingListColumnName_Contact_CS].ToString();
+                string state = contact_cs.Substring(contact_cs.Length - 2);
+                row.Add(state);
+            }
+            else
+            {
+                row.Add(string.Empty);
+            }
+
+            //Docket
+            if ((dataRow[Constants.FOLA_MailingListColumnName_Work_Set_Short_Label] != null) &&
+                !string.IsNullOrEmpty(
+                    dataRow[Constants.FOLA_MailingListColumnName_Work_Set_Short_Label].ToString()))
+            {
+                row.Add(dataRow[Constants.FOLA_MailingListColumnName_Work_Set_Short_Label].ToString());
+            }
+            else
+            {
+                row.Add(string.Empty);
+            }
+
+            return row;
         }
 
         /// <summary>
@@ -222,7 +263,7 @@ namespace PIW_SPAppWeb.Helper
         /// <param name="clientContext"></param>
         /// <param name="docketNumber">root dockets seperated by comma - ex: P-1234,PQ-789</param>
         /// <param name="listItemID"></param>
-        public int GenerateFOLAMailingExcelFile(ClientContext clientContext,string docketNumber,string listItemID)
+        public int GenerateFOLAMailingExcelFile(ClientContext clientContext, string docketNumber, string listItemID)
         {
             SharePointHelper helper = new SharePointHelper();
             int numberOfAddress = 0;
@@ -254,7 +295,7 @@ namespace PIW_SPAppWeb.Helper
 
                 if (!String.IsNullOrEmpty(rootDocketNumbers))
                 {
-                    var folaMailingList = GetFOLAMailingList(rootDocketNumbers);
+                    var folaMailingList = GetFOLAMailingList(rootDocketNumbers,ref numberOfAddress);
                     if (folaMailingList.DataRows.Count > 0)
                     {
                         var file = GenerateExcel(folaMailingList);
@@ -265,11 +306,6 @@ namespace PIW_SPAppWeb.Helper
                                 listItemID, Constants.FOLA_MailingList_FileName,
                                 Constants.ddlSecurityControl_Option_Public,
                                 Constants.PIWDocuments_DocTypeOption_FOLAServiceMailingList, true);
-                            //save number of fola mailing list address
-                            //ListItem listItem = helper.GetPiwListItemById(clientContext, listItemID, false);
-                            //helper.UpdatePIWListForInitiatePrintReqForm(clientContext, listItem, folaMailingList.DataRows.Count);
-                            numberOfAddress = folaMailingList.DataRows.Count;
-
                         }
                     }
                 }
@@ -324,6 +360,27 @@ namespace PIW_SPAppWeb.Helper
             }
 
             return includeSenator;
+        }
+
+        private List<String> getHeaderRow()
+        {
+            var result = new List<String>
+            {
+                "Contact Name",
+                "FERC ID",
+                "Contact Title",
+                "Contact Organization",
+                "PO Box",
+                "Address Line 1",
+                "Address Line 2",
+                "City",
+                "Zip",
+                "Zip 2",
+                "State",
+                "Docket"
+            };
+
+            return result;
         }
 
         #region Excel file writer
@@ -388,22 +445,13 @@ namespace PIW_SPAppWeb.Helper
                 };
                 sheets.AppendChild(sheet);
 
-                // Add header
                 UInt32 rowIdex = 0;
-                var row = new Row { RowIndex = ++rowIdex };
-                sheetData.AppendChild(row);
-                var cellIdex = 0;
-
-                foreach (var header in data.Headers)
-                {
-                    row.AppendChild(CreateTextCell(ColumnLetter(cellIdex++),
-                        rowIdex, header ?? string.Empty));
-                }
+                Row row = null;
 
                 // Add sheet data
                 foreach (var rowData in data.DataRows)
                 {
-                    cellIdex = 0;
+                    var cellIdex = 0;
                     row = new Row { RowIndex = ++rowIdex };
                     sheetData.AppendChild(row);
                     foreach (var callData in rowData)
@@ -419,6 +467,8 @@ namespace PIW_SPAppWeb.Helper
 
             return stream;
         }
+
+
         #endregion
     }
 }

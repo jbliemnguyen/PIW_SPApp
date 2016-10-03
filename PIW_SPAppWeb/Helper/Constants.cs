@@ -347,6 +347,7 @@ namespace PIW_SPAppWeb
         public const string FOLA_MailingListColumnName_Contact_Address_Line2 = "Contact_Address_Line2";
         public const string FOLA_MailingListColumnName_Contact_City = "Contact_City";
         public const string FOLA_MailingListColumnName_Contact_Zip_2 = "Contact_Zip_2";
+        public const string FOLA_MailingListColumnName_Contact_Country_Name = "Contact_Country_Name";
         public const string FOLA_MailingListColumnName_Contact_CS = "Contact_CS";
         public const string FOLA_MailingListColumnName_Work_Set_Short_Label = "Work_Set_Short_Label";
 

@@ -5,12 +5,12 @@ namespace PIW_SPAppWeb.Helper
 {
     public class FOLAMailingListData
     {
-        public List<string> Headers { get; set; }
+        //public List<string> Headers { get; set; }
         public List<List<string>> DataRows { get; set; }
 
         public FOLAMailingListData()
         {
-            Headers = new List<string>();
+            //Headers = new List<string>();
             DataRows = new List<List<string>>();
         }
     }
