@@ -33,7 +33,7 @@ namespace PIW_SPAppJob
                 foreach (var piwListItem in piwListItemCol)
                 {
                     UpdateListItem(piwListItem, piwListInternalName);
-                    helper.InitiatePrintReqForm(clientContext, piwListItem, CurrentUserLogInID);
+                    helper.GenerateAndSubmitPrintReqForm(clientContext, piwListItem, CurrentUserLogInID);
                 }
 
                 clientContext.ExecuteQuery();

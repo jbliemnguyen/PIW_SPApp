@@ -848,7 +848,7 @@ namespace PIW_SPAppWeb.Pages
             //comment
             if (!string.IsNullOrEmpty(tbComment.Text.Trim()))
             {
-                helper.SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, tbComment.Text.Trim());
+                helper.SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, tbComment.Text.Trim(),Constants.PIWList_FormType_DirectPublicationForm);
             }
 
             //FOLA Service Required

@@ -80,9 +80,7 @@
                     <asp:TextBox ID="tbTotalPrintPages" runat="server" CssClass="form-control" ClientIDMode="Static" Enabled="false"></asp:TextBox>
                 </div>
             </div>
-        </fieldset>
-        <fieldset id="documents">
-            <legend>Documents</legend>
+
             <div class="form-group">
                 <div class="col-md-2"></div>
                 <div class="col-md-2">
@@ -96,7 +94,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <asp:Label ID="lbDocumenttobePrinted" runat="server" Text="Document(s) to be Printed" CssClass="col-md-2 control-label" AssociatedControlID="rpDocumentList"></asp:Label>
+                <asp:Label ID="lbDocumenttobePrinted" runat="server" Text="Printing Document(s)" CssClass="col-md-2 control-label" AssociatedControlID="rpDocumentList"></asp:Label>
                 <div class="col-md-6">
                     <asp:Repeater ID="rpDocumentList" runat="server">
                         <HeaderTemplate>
@@ -115,8 +113,17 @@
                     </asp:Repeater>
                 </div>
             </div>
+            <div class="form-group">
+                <asp:Label ID="lbComment" runat="server" Text="Comment" AssociatedControlID="tbComment" CssClass="col-md-2 control-label"></asp:Label>
+                <div class="col-md-4">
+                    <asp:TextBox ID="tbComment" TextMode="MultiLine" Rows="3" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+                </div>
+                <div class="col-md-5">
+                    <asp:Label runat="server" ID="lbCommentValue"></asp:Label>
+                </div>
+            </div>
         </fieldset>
-        <fieldset id="documents">
+        <fieldset runat="server" id="fieldsetTasks">
             <legend>Tasks</legend>
             <div class="form-group">
                 <div class="col-md-2"></div>
@@ -139,22 +146,15 @@
                     <asp:TextBox ID="tbMailJobCompletedDate" runat="server" CssClass="form-control" ClientIDMode="Static"></asp:TextBox>
                 </div>
             </div>
-            <div class="form-group">
-                <asp:Label ID="lbNote" runat="server" Text="Note" CssClass="col-md-2 control-label" AssociatedControlID="tbNote"></asp:Label>
-                <div class="col-md-6">
-                    <asp:TextBox ID="tbNote" TextMode="MultiLine" Rows="4" CssClass="form-control" runat="server"></asp:TextBox>
-                </div>
-            </div>
         </fieldset>
-        <div class="form-group"></div>
         <div class="form-group">
             <div class="col-md-2"></div>
-            <div class="col-md-1">
-                <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-lg btn-primary active" OnClick="btnSave_Click" />
-
-            </div>
-            <div class="col-md-1">
+            <div class="col-md-6">
+                <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-lg btn-primary active" OnClick="btnAccept_Click" />
                 <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-lg btn-primary active" OnClick="btnReject_Click" />
+                <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-lg btn-primary active" OnClick="btnSubmit_Click" />
+                <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-lg btn-primary active" OnClick="btnSave_Click" />
+                <asp:Button ID="btnComplete" runat="server" Text="Complete" CssClass="btn-lg btn-primary active" OnClick="btnComplete_Click" />
             </div>
         </div>
         <div class="form-group">

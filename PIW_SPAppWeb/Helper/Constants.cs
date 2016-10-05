@@ -80,6 +80,7 @@ namespace PIW_SPAppWeb
         //public const string PIWList_colName_PrintReqNumberofPages = "PrintReq Number of Pages";
         public const string PIWList_colName_PrintReqNumberofCopies = "PrintReq Number of Copies";
         public const string PIWList_colName_PrintReqStatus = "PrintReq Status";
+        public const string PIWList_colName_PrintReqPreviousStatus = "PrintReq Previous Status";
 
 
         //public const string PIWList_colName_TotalPrintPages = "Total Print Pages";
@@ -89,7 +90,8 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_PrintReqMailJobCompleteDate = "PrintReq Mail Job Complete Date";
         public const string PIWList_colName_PrintReqPrintJobCompleteDate = "PrintReq Print Job Complete Date";
         public const string PIWList_colName_PrintReqPrintJobCompleted = "PrintReq Print Job Completed";
-        public const string PIWList_colName_PrintReqNotes = "PrintReq Notes";
+        public const string PIWList_colName_PrintReqComment = "PrintReq Comment";
+
         
         
         
@@ -119,11 +121,15 @@ namespace PIW_SPAppWeb
         public const string PIWList_FormStatus_PublishInitiated = "Publish Initiated";
         public const string PIWList_FormStatus_PublishedToeLibrary = "Published To eLibrary";
         public const string PIWList_FormStatus_ReOpen = "ReOpen";
+        public const string PIWList_FormStatus_PrintReqCompleted = "Completed";//for print req only
+        public const string PIWList_FormStatus_PrintReqAccepted = "Accepted";//for print req only
 
         public const string PrintReq_FormStatus_PrintReqGenerated = "Print Req Generated";
+        //public const string PrintReq_FormStatus_PrintReqSubmitted = "Print Req Submitted";
         public const string PrintReq_FormStatus_PrintJobCompleted = "Print Job Completed";
         public const string PrintReq_FormStatus_MailJobCompleted = "Mail Job Completed";
-        public const string PrintReq_FormStatus_PrintReqRejected = "Print Req Rejected";
+        
+        //public const string PrintReq_FormStatus_PrintReqRejected = "Print Req Rejected";
 
 
         public const string PIWList_DocCat_DelegatedErrata = "Delegated Errata";
@@ -367,7 +373,6 @@ namespace PIW_SPAppWeb
         Publish,
         Save,
         Edit,
-        Complete,
         ReOpen,
         Delete,
         PrintJobComplete,

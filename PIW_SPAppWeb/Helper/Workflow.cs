@@ -390,4 +390,66 @@ namespace PIW_SPAppWeb.Helper
             return nextStatus;
         }
     }
+
+    public class PrintReqFormWorkflow
+    {
+        public string Execute(string currentStatus, enumAction action)
+        {
+            string errorMessage = "Print Req Form WF Error - Unknown combination of Action:{0} and Form Status:{1}";
+            string nextStatus = currentStatus;
+            switch (currentStatus)
+            {
+                case Constants.PIWList_FormStatus_Pending:
+                case Constants.PIWList_FormStatus_Rejected:
+                    //in Pending, ReJected
+                    //user can only perform submit action
+                    if (action == enumAction.Submit)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_Submitted;
+                    }
+                    else if (action == enumAction.Save)
+                    {
+                        //no change
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format(errorMessage, action, currentStatus));
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_Submitted:
+                    if (action == enumAction.Accept)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_PrintReqAccepted;
+                    }
+                    else if (action == enumAction.Reject)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_Rejected;
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format(errorMessage, action, currentStatus));
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_PrintReqAccepted:
+                    if (action == enumAction.Save)
+                    {
+                        //no change
+                    }
+                    else if (action == enumAction.PrintJobComplete)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_PrintReqCompleted;
+                    }
+                    else
+                    {
+                        throw new Exception(string.Format(errorMessage, action, currentStatus));
+                    }
+                    break;
+                default:
+                    throw new Exception(string.Format(errorMessage, action, currentStatus));
+                    
+
+            }
+            return nextStatus;
+        }
+    }
 }

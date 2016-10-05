@@ -220,6 +220,42 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Repeater rpDocumentList;
         
         /// <summary>
+        /// lbComment control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbComment;
+        
+        /// <summary>
+        /// tbComment control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox tbComment;
+        
+        /// <summary>
+        /// lbCommentValue control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lbCommentValue;
+        
+        /// <summary>
+        /// fieldsetTasks control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetTasks;
+        
+        /// <summary>
         /// cbPrintJobCompleted control.
         /// </summary>
         /// <remarks>
@@ -274,22 +310,31 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.TextBox tbMailJobCompletedDate;
         
         /// <summary>
-        /// lbNote control.
+        /// btnAccept control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbNote;
+        protected global::System.Web.UI.WebControls.Button btnAccept;
         
         /// <summary>
-        /// tbNote control.
+        /// btnReject control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox tbNote;
+        protected global::System.Web.UI.WebControls.Button btnReject;
+        
+        /// <summary>
+        /// btnSubmit control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnSubmit;
         
         /// <summary>
         /// btnSave control.
@@ -301,13 +346,13 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Button btnSave;
         
         /// <summary>
-        /// btnReject control.
+        /// btnComplete control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnReject;
+        protected global::System.Web.UI.WebControls.Button btnComplete;
         
         /// <summary>
         /// rpHistoryList control.

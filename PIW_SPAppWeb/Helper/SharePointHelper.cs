@@ -186,7 +186,7 @@ namespace PIW_SPAppWeb.Helper
             //comment
             if (!string.IsNullOrEmpty(comment))
             {
-                SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+                SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment,string.Empty);
             }
 
             //clear accession number
@@ -227,7 +227,7 @@ namespace PIW_SPAppWeb.Helper
             //comment
             if (!string.IsNullOrEmpty(comment))
             {
-                SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+                SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment,string.Empty);
             }
 
             listItem.Update();
@@ -247,7 +247,7 @@ namespace PIW_SPAppWeb.Helper
             //comment
             if (!string.IsNullOrEmpty(comment))
             {
-                SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+                SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment,string.Empty);
             }
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsActive]] = false;
@@ -271,7 +271,7 @@ namespace PIW_SPAppWeb.Helper
             //comment
             if (!string.IsNullOrEmpty(comment))
             {
-                SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+                SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment,string.Empty);
             }
 
             //publisher
@@ -297,21 +297,20 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public void InitiatePrintReqForm(ClientContext clientContext, ListItem listItem, string CurrentUserLogInID)
+        public void GenerateAndSubmitPrintReqForm(ClientContext clientContext, ListItem listItem, string CurrentUserLogInID)
         {
-            string PrintReqStatus = Constants.PrintReq_FormStatus_PrintReqGenerated;
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             string listItemID = listItem["ID"].ToString();
 
-            string docketNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]] != null?
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]].ToString():string.Empty;
+            string docketNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]] != null ?
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]].ToString() : string.Empty;
 
             string FormStatus = listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] != null
-                ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]].ToString(): string.Empty;
-            
+                ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]].ToString() : string.Empty;
+
             int numberOfPublicPages = listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]] != null
-                    ? int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]].ToString()): 0;
+                    ? int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]].ToString()) : 0;
 
             string documentCategory = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]] != null
                 ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]].ToString() : string.Empty;
@@ -340,9 +339,9 @@ namespace PIW_SPAppWeb.Helper
                 //update piw list
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] = numberOfFOLAAddress;
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = numberofCopies;
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqStatus]] = PrintReqStatus;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqStatus]] = Constants.PIWList_FormStatus_Submitted;
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequested]] = dateRequested.ToString();
-                
+
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPrintPriority]] = printPriority;
 
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequired]] = getDateRequired(printPriority, dateRequested, numberofCopies * numberOfPublicPages);
@@ -353,29 +352,38 @@ namespace PIW_SPAppWeb.Helper
                 //todo: send email
 
 
-                //history list
+                //history list for print req generate
                 //get current user
                 User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                 clientContext.Load(currentUser);
                 clientContext.ExecuteQuery();
                 //add history list for the main form 
-                CreatePIWListHistory(clientContext, listItemID, "Print Requisition Generated/Submitted.",
+                //CreatePIWListHistory(clientContext, listItemID, "Print Requisition Form Generated.",
+                //        FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+
+                //Add history list for genereate print req form in both: main form and print req form
+                string message = "Print Requisition Form Generated.";
+                CreatePIWListHistory(clientContext, listItemID, message,
                         FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
-                //Add history list for the print req form
-                if (getHistoryListByPIWListID(clientContext, listItemID, Constants.PIWListHistory_FormTypeOption_PrintReq).Count == 0)
-                {
-                    string message = "Print Requisition Generated/Submitted.";
-                    CreatePIWListHistory(clientContext, listItemID, message,
-                        PrintReqStatus, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
-                }
-                
+                CreatePIWListHistory(clientContext, listItemID, message,
+                    Constants.PrintReq_FormStatus_PrintReqGenerated, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+
+                //history list for submit print req
+                message = "Print Requisition Form Submitted.";
+                CreatePIWListHistory(clientContext, listItemID, message,
+                        FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+
+                CreatePIWListHistory(clientContext, listItemID, message,
+                    Constants.PIWList_FormStatus_Submitted, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+
+
             }
         }
 
-        private DateTime getDateRequired(int PrintPriority,DateTime dateRequested,int totalPrintPages)
+        private DateTime getDateRequired(int PrintPriority, DateTime dateRequested, int totalPrintPages)
         {
-            DateTime ThreePMCutOffDate = new DateTime(dateRequested.Year,dateRequested.Month,dateRequested.Day,15,0,0);
+            DateTime ThreePMCutOffDate = new DateTime(dateRequested.Year, dateRequested.Month, dateRequested.Day, 15, 0, 0);
             int numberOfBusinessDays = 0;
             if (PrintPriority.Equals(1))
             {
@@ -396,12 +404,12 @@ namespace PIW_SPAppWeb.Helper
             //if submit after cutoff time 3pm, add one more business day
             if (dateRequested.CompareTo(ThreePMCutOffDate) >= 0)
             {
-                numberOfBusinessDays ++;
+                numberOfBusinessDays++;
             }
 
             //call web service to get next business date.
             HolidayServiceClient hs = new HolidayServiceClient();
-            
+
             var holidaysDictionary = hs.GetHolidayDictionary(dateRequested.AddYears(-1), dateRequested.AddYears(1));//2 years of holidays
             var dateRequired = hs.getNextBusinessDateWithHolidayList(dateRequested, numberOfBusinessDays, holidaysDictionary);
 
@@ -422,7 +430,7 @@ namespace PIW_SPAppWeb.Helper
                     PrintPriority = 1;
                     break;
             }
-            
+
             return PrintPriority;
         }
 
@@ -1713,18 +1721,29 @@ namespace PIW_SPAppWeb.Helper
             return result.ToString();
         }
 
-        public void SetCommentURLHTML(ListItem listItem, Dictionary<string, string> piwListInternalColumnNames, string userName, string comment)
+        public void SetCommentHTML(ListItem listItem, Dictionary<string, string> piwListInternalColumnNames, string userName, string comment,string formType)
         {
-            if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] == null)
+            string commentField = string.Empty;
+            //the print req form has different comment field
+            if (formType.Equals(Constants.PIWList_FormType_PrintReqForm))
             {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("<li>{0} ({1}): {2}</li>", userName,
+                commentField = Constants.PIWList_colName_PrintReqComment;
+            }
+            else//standard, agenda or directpub form and empty string in form type
+            {
+                commentField = Constants.PIWList_colName_Comment;
+            }
+
+            if (listItem[piwListInternalColumnNames[commentField]] == null)
+            {
+                listItem[piwListInternalColumnNames[commentField]] = String.Format("<li>{0} ({1}): {2}</li>", userName,
                     DateTime.Now.ToString("G"), comment);
             }
             else
             {
                 //append
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]] = String.Format("<li>{0} ({1}): {2}</li><br>{3}",
-                    userName, DateTime.Now.ToString("G"), comment, listItem[piwListInternalColumnNames[Constants.PIWList_colName_Comment]]);
+                listItem[piwListInternalColumnNames[commentField]] = String.Format("<li>{0} ({1}): {2}</li><br>{3}",
+                    userName, DateTime.Now.ToString("G"), comment, listItem[piwListInternalColumnNames[commentField]]);
             }
         }
 

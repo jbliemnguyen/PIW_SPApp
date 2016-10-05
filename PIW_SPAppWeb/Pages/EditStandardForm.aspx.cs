@@ -1482,7 +1482,7 @@ namespace PIW_SPAppWeb.Pages
         //    }
 
         //    //comment
-        //    helper.SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
+        //    helper.SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment);
 
         //    listItem.Update();
         //    clientContext.ExecuteQuery();
@@ -1619,7 +1619,7 @@ namespace PIW_SPAppWeb.Pages
             //comment
             if (!string.IsNullOrEmpty(tbComment.Text.Trim()))
             {
-                helper.SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, tbComment.Text.Trim());
+                helper.SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, tbComment.Text.Trim(),Constants.PIWList_FormType_StandardForm);
 
             }
 

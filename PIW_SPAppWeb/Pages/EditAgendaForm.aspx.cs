@@ -1439,22 +1439,9 @@ namespace PIW_SPAppWeb.Pages
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]] = string.Empty;
             }
 
-            //program office(wokflow initiator)
-            //if (ddProgramOfficeWorkflowInitiator.SelectedIndex != 0)
-            //{
-            //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = ddProgramOfficeWorkflowInitiator.SelectedValue;
-            //}
-            //else
-            //{
-            //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = string.Empty;
-            //}
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] = ddProgramOfficeWorkflowInitiator.SelectedValue;
 
-
-
-            //Workflow initiator - set by default to current login value when form is created
-
-
+            
             //program office(document owner)
             //program office(wokflow initiator)
             if (ddProgramOfficeDocumentOwner.SelectedIndex != 0)
@@ -1478,7 +1465,7 @@ namespace PIW_SPAppWeb.Pages
             //comment
             if (!string.IsNullOrEmpty(tbComment.Text.Trim()))
             {
-                helper.SetCommentURLHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, tbComment.Text.Trim());
+                helper.SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, tbComment.Text.Trim(),Constants.PIWList_FormType_AgendaForm);
             }
 
             if (!string.IsNullOrEmpty(FormStatus))
