@@ -646,10 +646,6 @@ namespace PIW_SPAppWeb.Pages
 
                     //Create list history
                     string message = "Workflow Item deleted.";
-                    //if (!string.IsNullOrEmpty(tbComment.Text))
-                    //{
-                    //    message = message + "</br>Comment: " + tbComment.Text.Trim();
-                    //}
                     helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
                         Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 

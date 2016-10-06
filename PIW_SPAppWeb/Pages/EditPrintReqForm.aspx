@@ -6,16 +6,6 @@
     <script type="text/javascript">
         function PageClient() {
 
-            //register date picker
-            $("#tbPrintJobCompletedDate").datepicker();
-            $("#tbMailJobCompletedDate").datepicker();
-
-            //prevent user from clear the date
-            $("#tbPrintJobCompletedDate").keydown(function (event) { event.preventDefault(); });
-            $("#tbMailJobCompletedDate").keydown(function (event) { event.preventDefault(); });
-
-            
-
             $(".historyhead").click(function () {
                 $(".historylist").slideToggle(100);
             });
@@ -73,15 +63,9 @@
 
             <div class="form-group">
                 <div class="col-md-2"></div>
-                <div class="col-md-2">
-                    <asp:HyperLink runat="server" ID="hplPIWFormLink" Target="_blank">Link to PIW Form</asp:HyperLink>
-                </div>
-                <div class="col-md-2">
-                    <asp:HyperLink runat="server" ID="hplFOLAMailingList">FOLA Mailing List</asp:HyperLink>
-                </div>
-                <div class="col-md-2">
-                    <asp:HyperLink runat="server" ID="hplSupplementalMailingList">Supplemental Mailing List</asp:HyperLink>
-                </div>
+                <asp:HyperLink runat="server" ID="hplPIWFormLink" Target="_blank" CssClass="col-md-2">Link to PIW Form</asp:HyperLink>
+                <asp:HyperLink runat="server" ID="hplFOLAMailingList" CssClass="col-md-2">FOLA Mailing List</asp:HyperLink>
+                <asp:HyperLink runat="server" ID="hplSupplementalMailingList" CssClass="col-md-2">Supplemental Mailing List</asp:HyperLink>
             </div>
             <div class="form-group">
                 <asp:Label ID="lbDocumenttobePrinted" runat="server" Text="Printing Document(s)" CssClass="col-md-2 control-label" AssociatedControlID="rpDocumentList"></asp:Label>
@@ -113,37 +97,17 @@
                 </div>
             </div>
         </fieldset>
-        <fieldset runat="server" id="fieldsetTasks">
-            <legend>Tasks</legend>
-                    <div class="form-group">
-                        <div class="col-md-2"></div>
-                        <div class="col-md-2">
-                            <asp:CheckBox ID="cbPrintJobCompleted" runat="server" Text="Print Job Completed" CssClass="checkbox" ClientIDMode="Static" OnCheckedChanged="cbPrintJobCompleted_CheckedChanged" AutoPostBack="True" />
-                        </div>
-                        <asp:Label ID="lbPrintJobCompletedDate" runat="server" Text="Print Date" CssClass="col-md-2 control-label" AssociatedControlID="tbPrintJobCompletedDate"></asp:Label>
-                        <div class="col-md-2">
-                            <asp:TextBox ID="tbPrintJobCompletedDate" runat="server" CssClass="form-control" ClientIDMode="Static"></asp:TextBox>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-md-2"></div>
-                        <div class="col-md-2">
-                            <asp:CheckBox ID="cbMailJobCompleted" runat="server" Text="Mail Job Completed" CssClass="checkbox" ClientIDMode="Static" OnCheckedChanged="cbMailJobCompleted_CheckedChanged" AutoPostBack="True" />
-                        </div>
-                        <asp:Label ID="lbMailJobCompletedDate" runat="server" Text="Mail Date" CssClass="col-md-2 control-label" AssociatedControlID="tbMailJobCompletedDate"></asp:Label>
-                        <div class="col-md-2">
-                            <asp:TextBox ID="tbMailJobCompletedDate" runat="server" CssClass="form-control" ClientIDMode="Static"></asp:TextBox>
-                        </div>
-                    </div>
-        </fieldset>
         <div class="form-group">
             <div class="col-md-2"></div>
             <div class="col-md-6">
-                <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-lg btn-primary active" OnClick="btnAccept_Click" />
-                <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-lg btn-primary active" OnClick="btnReject_Click" />
-                <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-lg btn-primary active" OnClick="btnSubmit_Click" />
-                <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-lg btn-primary active" OnClick="btnSave_Click" />
-                <asp:Button ID="btnComplete" runat="server" Text="Complete" CssClass="btn-lg btn-primary active" OnClick="btnComplete_Click" />
+                <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" OnClick="btnAccept_Click" />
+                <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" OnClick="btnReject_Click" />
+                <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary active" OnClick="btnSubmit_Click" />
+                <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary active" OnClick="btnSave_Click" />
+                <asp:Button ID="btnPrintJobComplete" runat="server" Text="Print Job Complete" CssClass="btn-sm btn-primary active" OnClick="btnPrintJobComplete_Click" />
+                <asp:Button ID="btnMailJobComplete" runat="server" Text="Mail Job Complete" CssClass="btn-sm btn-primary active" OnClick="btnMailJobComplete_Click" />
+                <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" OnClick="btnDeleteConfirm_Click" ClientIDMode="Static" />
             </div>
         </div>
         <div class="form-group">
@@ -186,5 +150,6 @@
                 </asp:Repeater>
             </div>
         </div>
+        <div id="deleteDialogConfirmation" title="Are you sure you wish to delete this print requisition form?"></div>
     </form>
 </asp:Content>

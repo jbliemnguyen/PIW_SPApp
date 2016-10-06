@@ -14,7 +14,7 @@ namespace PIW_SPAppWeb.Pages
     {
         #region variables and properties
 
-        
+
         public string CurrentUserLogInID
         {
             get
@@ -51,7 +51,7 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        
+
         static SharePointHelper helper = null;
 
         public string ModifiedDateTime
@@ -63,54 +63,6 @@ namespace PIW_SPAppWeb.Pages
             set
             {
                 ViewState.Add(Constants.ModifiedDateTimeKey, value);
-            }
-        }
-
-        public bool PrintJobCompleted
-        {
-            get
-            {
-                return ViewState[Constants.PrintJobCompletedKey] != null && bool.Parse(ViewState[Constants.PrintJobCompletedKey].ToString());
-            }
-            set
-            {
-                ViewState.Add(Constants.PrintJobCompletedKey, value);
-            }
-        }
-
-        public string PrintJobCompletedDate
-        {
-            get
-            {
-                return ViewState[Constants.PrintJobCompletedDateKey] != null ? DateTime.Parse(ViewState[Constants.PrintJobCompletedDateKey].ToString()).ToShortDateString() : string.Empty;
-            }
-            set
-            {
-                ViewState.Add(Constants.PrintJobCompletedDateKey, value);
-            }
-        }
-
-        public bool MailJobCompleted
-        {
-            get
-            {
-                return ViewState[Constants.MailJobCompletedKey] != null && bool.Parse(ViewState[Constants.MailJobCompletedKey].ToString());
-            }
-            set
-            {
-                ViewState.Add(Constants.MailJobCompletedKey, value);
-            }
-        }
-
-        public string MailJobCompletedDate
-        {
-            get
-            {
-                return ViewState[Constants.MailJobCompletedDateKey] != null ? DateTime.Parse(ViewState[Constants.MailJobCompletedDateKey].ToString()).ToShortDateString():string.Empty;
-            }
-            set
-            {
-                ViewState.Add(Constants.MailJobCompletedDateKey, value);
             }
         }
 
@@ -143,7 +95,7 @@ namespace PIW_SPAppWeb.Pages
         #endregion
 
         #region Data
-        private bool SaveData(ClientContext clientContext, enumAction action,ref ListItem returnedListItem)
+        private bool SaveData(ClientContext clientContext, enumAction action, ref ListItem returnedListItem)
         {
             ListItem listItem = helper.GetPiwListItemById(clientContext, ListItemID, false);
 
@@ -162,96 +114,42 @@ namespace PIW_SPAppWeb.Pages
             FormStatus = wf.Execute(FormStatus, action);
             PreviousFormStatus = currentFormStatus;
 
-            UpdateFormDataToList(clientContext, listItem);
+            SaveMainPanelAndStatus(clientContext, listItem, action);
 
             returnedListItem = listItem;
             return true;
         }
 
-        private void UpdateFormDataToList(ClientContext clientContext, ListItem listItem)
-        {
-            const string errorMessage = "UpdateFormDataToList method: Unknown Status and Previous status combination. Status:{0}, Previous Status: {1}";
-            switch (FormStatus) //this is the next status after action is performed
-            {
-                case Constants.PIWList_FormStatus_Pending:
-                    //do nothing - this scenario never happens
-                    break;
-                case Constants.PIWList_FormStatus_Rejected:
-                    if (FormStatus.Equals(PreviousFormStatus))//save action
-                    {
-                        SaveMainPanelAndStatus(clientContext,listItem);
-                    }
-                    else if (PreviousFormStatus.Equals(Constants.PIWList_FormStatus_Submitted))//reject
-                    {
-                        SavePrintReqFormStatusAndComment(clientContext, listItem);
-                    }
-                    else
-                    {
-                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
-                    }
-                    break;
-                case Constants.PIWList_FormStatus_Submitted:
-                    if (PreviousFormStatus.Equals(Constants.PIWList_FormStatus_Rejected))//submit
-                    {
-                        SavePrintReqFormStatusAndComment(clientContext,listItem);
-                    }
-                    else
-                    {
-                        throw new Exception(string.Format(errorMessage, FormStatus, PreviousFormStatus));
-                    }
-                    break;
-                case Constants.PIWList_FormStatus_PrintReqAccepted:
-                case Constants.PIWList_FormStatus_PrintJobCompleted:
-                case Constants.PIWList_FormStatus_MailJobCompleted:
-                case Constants.PIWList_FormStatus_PrintReqCompleted:
-                    SaveMainPanelAndStatus(clientContext, listItem);
-                    break;
-            }
-        }
-
-        public void SavePrintReqFormStatusAndComment(ClientContext clientContext, ListItem listItem)
+        public void SaveMainPanelAndStatus(ClientContext clientContext, ListItem listItem, enumAction action)
         {
             var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqStatus]] = FormStatus;
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPreviousStatus]] = PreviousFormStatus;
-
-            //comment
-            if (!string.IsNullOrEmpty(tbComment.Text.Trim()))
-            {
-                helper.SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, tbComment.Text.Trim(), Constants.PIWList_FormType_PrintReqForm);
-            }
-
-            listItem.Update();
-            clientContext.ExecuteQuery();
-        }
-
-        public void SaveMainPanelAndStatus(ClientContext clientContext, ListItem listItem)
-        {
-            var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             //number of pages
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]] = tbNumberofPages.Text.Trim();
 
             //number of copies
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = tbNumberofCopies.Text.Trim();
-
-            //Print Job Completed
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleted]] = cbPrintJobCompleted.Checked;
+            if (action == enumAction.Delete)
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = 0;
+                    //this is the reset
+            }
+            else
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = tbNumberofCopies.Text.Trim();    
+            }
+            
 
             //Print Job Completed Date
-            if (!string.IsNullOrEmpty(tbPrintJobCompletedDate.Text))
+            if (action == enumAction.PrintJobComplete)
             {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]] = tbPrintJobCompletedDate.Text.Trim();
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]] = DateTime.Now.ToShortDateString();
             }
 
-            //Mail Job Completed
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleted]] = cbMailJobCompleted.Checked;
-
             //Mail Job Completed Date
-            if (!string.IsNullOrEmpty(tbMailJobCompletedDate.Text))
+            if (action == enumAction.MailJobComplete)
             {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]] = tbMailJobCompletedDate.Text.Trim();
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]] = DateTime.Now.ToShortDateString();
             }
 
             //Print Req Comment
@@ -272,12 +170,16 @@ namespace PIW_SPAppWeb.Pages
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPreviousStatus]] = PreviousFormStatus;
             }
 
+            //print req form url
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqFormURL]] = Request.Url.ToString();
+
+
+
+
             //execute query
             listItem.Update();
             clientContext.ExecuteQuery();
 
-            
-            
         }
 
         #endregion
@@ -350,31 +252,6 @@ namespace PIW_SPAppWeb.Pages
                     tbPriority.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintPriority]].ToString();
                 }
 
-                //Print Job Completed
-                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleted]] != null)
-                {
-                    cbPrintJobCompleted.Checked = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleted]].ToString());
-                }
-
-
-                //Print Job Completed Date
-                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]] != null)
-                {
-                    tbPrintJobCompletedDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]].ToString()).ToShortDateString();
-                }
-
-                //Mail Job Completed
-                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleted]] != null)
-                {
-                    cbMailJobCompleted.Checked = bool.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleted]].ToString());
-                }
-
-                //Mail Job Completed Date
-                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]] != null)
-                {
-                    tbMailJobCompletedDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]].ToString()).ToShortDateString();
-                }
-
             }
         }
 
@@ -397,26 +274,6 @@ namespace PIW_SPAppWeb.Pages
             if (listItem[internalColumnNames[Constants.PIWList_colName_PrintReqPreviousStatus]] != null)
             {
                 PreviousFormStatus = listItem[internalColumnNames[Constants.PIWList_colName_PrintReqPreviousStatus]].ToString();
-            }
-
-            if (listItem[internalColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleted]] != null)
-            {
-                PrintJobCompleted = bool.Parse(listItem[internalColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleted]].ToString());
-            }
-
-            if (listItem[internalColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]] != null)
-            {
-                PrintJobCompletedDate = DateTime.Parse(listItem[internalColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]].ToString()).ToShortDateString();
-            }
-
-            if (listItem[internalColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleted]] != null)
-            {
-                MailJobCompleted = bool.Parse(listItem[internalColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleted]].ToString());
-            }
-
-            if (listItem[internalColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]] != null)
-            {
-                MailJobCompletedDate = DateTime.Parse(listItem[internalColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]].ToString()).ToShortDateString();
             }
 
         }
@@ -453,90 +310,90 @@ namespace PIW_SPAppWeb.Pages
 
         }
 
-        public void ControlsVisiblitilyBasedOnStatus(string Status)
+        public void ControlsVisiblitilyBasedOnStatus(ClientContext clientContext, string Status)
         {
+            bool isCurrentUserCopyCenterMember = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                            new string[] { Constants.Grp_CopyCenter });
+
+            bool isCurrentUserpiwAdmin = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
+                            new string[] { Constants.Grp_PIWAdmin, Constants.Grp_PIWSystemAdmin });
             switch (Status)
             {
                 case Constants.PIWList_FormStatus_Pending:
                 case Constants.PIWList_FormStatus_Rejected:
-                    btnAccept.Visible = false;
-                    btnReject.Visible = false;
-                    btnSubmit.Visible = true;
-
-                    btnSave.Visible = true;
-                    btnComplete.Visible = false;
                     tbNumberofCopies.Enabled = true;
                     tbNumberofPages.Enabled = true;
-
-                    fieldsetTasks.Visible = false;
-                    cbMailJobCompleted.Enabled = false;
-                    tbMailJobCompletedDate.Enabled = cbMailJobCompleted.Checked;
-
-                    cbPrintJobCompleted.Enabled = false;
-                    tbPrintJobCompletedDate.Enabled = cbPrintJobCompleted.Checked;
-                    break;
-                case Constants.PIWList_FormStatus_Submitted:
-
-                    btnAccept.Visible = true;
-                    btnReject.Visible = true;
-                    btnSubmit.Visible = false;
-                    btnSave.Visible = false;
-                    btnComplete.Visible = false;
-                    tbNumberofCopies.Enabled = false;
-                    tbNumberofPages.Enabled = false;
-
-                    fieldsetTasks.Visible = false;
-                    cbMailJobCompleted.Enabled = false;
-                    tbMailJobCompletedDate.Enabled = cbMailJobCompleted.Checked;
-
-                    cbPrintJobCompleted.Enabled = false;
-                    tbPrintJobCompletedDate.Enabled = cbPrintJobCompleted.Checked;
-
-                    break;
-                case Constants.PIWList_FormStatus_PrintReqAccepted:
-                case Constants.PIWList_FormStatus_PrintJobCompleted:
-                case Constants.PIWList_FormStatus_MailJobCompleted:
 
                     //buttons
                     btnAccept.Visible = false;
                     btnReject.Visible = false;
-                    btnSave.Visible = true;
-                    btnComplete.Visible = true;
-                    btnSubmit.Visible = false;
+                    btnSubmit.Visible = isCurrentUserpiwAdmin;
 
-                    tbNumberofCopies.Enabled = true;
-                    tbNumberofPages.Enabled = true;
-
-                    fieldsetTasks.Visible = true;
-                    cbMailJobCompleted.Enabled = true;
-                    tbMailJobCompletedDate.Enabled = cbMailJobCompleted.Checked;
-
-                    cbPrintJobCompleted.Enabled = true;
-                    tbPrintJobCompletedDate.Enabled = cbPrintJobCompleted.Checked;
+                    btnSave.Visible = isCurrentUserpiwAdmin;
+                    btnPrintJobComplete.Visible = false;
+                    btnMailJobComplete.Visible = false;
+                    btnDelete.Visible = isCurrentUserpiwAdmin;
 
                     break;
-                case Constants.PIWList_FormStatus_PrintReqCompleted:
-
-                    //disable all controls
-                    btnAccept.Visible = false;
-                    btnReject.Visible = false;
-                    btnSave.Visible = false;
-                    btnComplete.Visible = false;
-                    btnSubmit.Visible = false;
-
+                case Constants.PIWList_FormStatus_Submitted:
                     tbNumberofCopies.Enabled = false;
                     tbNumberofPages.Enabled = false;
 
-                    fieldsetTasks.Visible = true;
-                    tbMailJobCompletedDate.Enabled = false;
-                    tbPrintJobCompletedDate.Enabled = false;
+                    //buttons
+                    btnAccept.Visible = isCurrentUserCopyCenterMember;
+                    btnReject.Visible = isCurrentUserCopyCenterMember;
+                    btnSubmit.Visible = false;
+                    btnSave.Visible = false;
+                    btnPrintJobComplete.Visible = false;
+                    btnMailJobComplete.Visible = false;
+                    btnDelete.Visible = false;
 
-                    cbMailJobCompleted.Enabled = false;
-                    cbPrintJobCompleted.Enabled = false;
+                    break;
+                case Constants.PIWList_FormStatus_PrintReqAccepted:
+                    tbNumberofCopies.Enabled = true;
+                    tbNumberofPages.Enabled = true;
+
+                    //buttons
+                    btnAccept.Visible = false;
+                    btnReject.Visible = false;
+                    btnSave.Visible = isCurrentUserCopyCenterMember;
+                    btnPrintJobComplete.Visible = isCurrentUserCopyCenterMember;
+                    btnMailJobComplete.Visible = false;
+                    btnSubmit.Visible = false;
+                    btnDelete.Visible = false;
+
+                    break;
+                case Constants.PIWList_FormStatus_PrintJobCompleted:
+                    tbNumberofCopies.Enabled = true;
+                    tbNumberofPages.Enabled = true;
+
+                    //buttons
+                    btnAccept.Visible = false;
+                    btnReject.Visible = false;
+                    btnSave.Visible = isCurrentUserCopyCenterMember;
+                    btnPrintJobComplete.Visible = false;
+                    btnMailJobComplete.Visible = isCurrentUserCopyCenterMember;
+                    btnSubmit.Visible = false;
+                    btnDelete.Visible = false;
+
+                    break;
+                case Constants.PIWList_FormStatus_MailJobCompleted:
+                    tbNumberofCopies.Enabled = true;
+                    tbNumberofPages.Enabled = true;
+
+                    //buttons
+                    btnAccept.Visible = false;
+                    btnReject.Visible = false;
+                    btnSave.Visible = false;
+                    btnPrintJobComplete.Visible = false;
+                    btnMailJobComplete.Visible = false;
+                    btnSubmit.Visible = false;
+                    btnDelete.Visible = false;
                     break;
             }
 
         }
+
         #endregion
 
         #region Events
@@ -562,15 +419,6 @@ namespace PIW_SPAppWeb.Pages
                     {
                         using (var clientContext = helper.getElevatedClientContext(Context, Request))
                         {
-                            string publicDocumentURLs;
-                            string cEiiDocumentUrLs;
-                            string privilegedDocumentURLs;
-                            helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
-                                out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
-
-                            PopulateFOLAAndSupplementalMailingListURL(clientContext);
-
-                            //var isCurrentUserAdmin = helper.IsCurrentUserMemberOfGroup(clientContext, Constants.Grp_PIWAdmin);
                             var isCurrentUserAdmin = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                                 new[] { Constants.Grp_PIWSystemAdmin });
 
@@ -579,15 +427,39 @@ namespace PIW_SPAppWeb.Pages
                             if (listItem == null)
                             {
                                 helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_ItemNotFound);
+                                return;
                             }
                             else
                             {
+
+                                var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+                                int numberofCopies = 0;
+                                if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] != null)
+                                {
+                                    numberofCopies = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]].ToString());
+                                }
+
+                                if (numberofCopies < 1)
+                                {
+                                    helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_ItemNotFound);
+                                    return;
+                                }
+
+
+
+                                string publicDocumentURLs;
+                                string cEiiDocumentUrLs;
+                                string privilegedDocumentURLs;
+                                helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
+                                out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
+
+                                PopulateFOLAAndSupplementalMailingListURL(clientContext);
                                 PopulateFormProperties(clientContext, listItem);
                                 DisplayListItemInForm(clientContext, listItem);
                                 helper.PopulateHistoryList(clientContext, ListItemID, rpHistoryList, Constants.PIWListHistory_FormTypeOption_PrintReq);
 
                                 //display form visiblility based on form status
-                                ControlsVisiblitilyBasedOnStatus(FormStatus);
+                                ControlsVisiblitilyBasedOnStatus(clientContext, FormStatus);
 
 
 
@@ -602,32 +474,6 @@ namespace PIW_SPAppWeb.Pages
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
 
-        }
-
-        protected void cbPrintJobCompleted_CheckedChanged(object sender, EventArgs e)
-        {
-            tbPrintJobCompletedDate.Enabled = cbPrintJobCompleted.Checked;
-            if (cbPrintJobCompleted.Checked)
-            {
-                tbPrintJobCompletedDate.Text = DateTime.Today.ToShortDateString();
-            }
-            else
-            {
-                tbPrintJobCompletedDate.Text = string.Empty;
-            }
-        }
-
-        protected void cbMailJobCompleted_CheckedChanged(object sender, EventArgs e)
-        {
-            tbMailJobCompletedDate.Enabled = cbMailJobCompleted.Checked;
-            if (cbMailJobCompleted.Checked)
-            {
-                tbMailJobCompletedDate.Text = DateTime.Today.ToShortDateString();
-            }
-            else
-            {
-                tbMailJobCompletedDate.Text = string.Empty;
-            }
         }
 
         protected void btnReject_Click(object sender, EventArgs e)
@@ -689,42 +535,6 @@ namespace PIW_SPAppWeb.Pages
                     clientContext.ExecuteQuery();
 
                     //create history list
-                    if ((!PrintJobCompleted) && (cbPrintJobCompleted.Checked))
-                    {
-                        FormStatus = Constants.PIWList_FormStatus_PrintJobCompleted;
-                        helper.CreatePIWListHistory(clientContext, ListItemID,
-                            "Print Job marked as Completed on " + tbPrintJobCompletedDate.Text, FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
-                    }
-                    else
-                    {
-                        //if PrintJobCompletedDate change    
-                        if (!PrintJobCompletedDate.Equals(tbPrintJobCompletedDate.Text))
-                        {
-                            helper.CreatePIWListHistory(clientContext, ListItemID,
-                            "Print Job Completed Date changed to " + tbPrintJobCompletedDate.Text, FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
-                        }
-                    }
-
-
-                    if ((!MailJobCompleted) && (cbMailJobCompleted.Checked))
-                    {
-                        FormStatus = Constants.PIWList_FormStatus_MailJobCompleted;
-                        helper.CreatePIWListHistory(clientContext, ListItemID,
-                            "Mail Job marked as Completed on " + tbMailJobCompletedDate.Text, FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
-                    }
-                    else
-                    {
-                        //if MailJobCompletedDate change    
-                        if (!MailJobCompletedDate.Equals(tbMailJobCompletedDate.Text))
-                        {
-                            helper.CreatePIWListHistory(clientContext, ListItemID,
-                            "Mail Job Completed Date changed to " + tbMailJobCompletedDate.Text, FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
-                        }
-                    }
 
                     helper.RefreshPage(Page.Request, Page.Response);
                 }
@@ -771,84 +581,84 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        protected void btnComplete_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                const enumAction action = enumAction.PrintReqComplete;
-                using (var clientContext = helper.getElevatedClientContext(Context, Request))
-                {
-                    ListItem listItem = null;
+        //protected void btnComplete_Click(object sender, EventArgs e)
+        //{
+        //    try
+        //    {
+        //        const enumAction action = enumAction.PrintReqComplete;
+        //        using (var clientContext = helper.getElevatedClientContext(Context, Request))
+        //        {
+        //            ListItem listItem = null;
 
-                    if (!SaveData(clientContext, action, ref listItem))
-                    {
-                        return;
-                    }
+        //            if (!SaveData(clientContext, action, ref listItem))
+        //            {
+        //                return;
+        //            }
 
-                    //TODO: send email
+        //            //TODO: send email
 
-                    //get current user
-                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
-                    clientContext.Load(currentUser);
-                    clientContext.ExecuteQuery();
+        //            //get current user
+        //            User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+        //            clientContext.Load(currentUser);
+        //            clientContext.ExecuteQuery();
 
-                    //create history list
-                    if ((!PrintJobCompleted) && (cbPrintJobCompleted.Checked))
-                    {
-                        FormStatus = Constants.PIWList_FormStatus_PrintJobCompleted;
-                        helper.CreatePIWListHistory(clientContext, ListItemID,
-                            "Print Job marked as Completed on " + tbPrintJobCompletedDate.Text, FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
-                    }
-                    else
-                    {
-                        //if PrintJobCompletedDate change    
-                        if (!PrintJobCompletedDate.Equals(tbPrintJobCompletedDate.Text))
-                        {
-                            helper.CreatePIWListHistory(clientContext, ListItemID,
-                            "Print Job Completed Date changed to " + tbPrintJobCompletedDate.Text, FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
-                        }
-                    }
-
-
-                    if ((!MailJobCompleted) && (cbMailJobCompleted.Checked))
-                    {
-                        FormStatus = Constants.PIWList_FormStatus_MailJobCompleted;
-                        helper.CreatePIWListHistory(clientContext, ListItemID,
-                            "Mail Job marked as Completed on " + tbMailJobCompletedDate.Text, FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
-                    }
-                    else
-                    {
-                        //if MailJobCompletedDate change    
-                        if (!MailJobCompletedDate.Equals(tbMailJobCompletedDate.Text))
-                        {
-                            helper.CreatePIWListHistory(clientContext, ListItemID,
-                            "Mail Job Completed Date changed to " + tbMailJobCompletedDate.Text, FormStatus,
-                            Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
-                        }
-                    }
+        //            //create history list
+        //            if ((!PrintJobCompleted) && (cbPrintJobCompleted.Checked))
+        //            {
+        //                FormStatus = Constants.PIWList_FormStatus_PrintJobCompleted;
+        //                helper.CreatePIWListHistory(clientContext, ListItemID,
+        //                    "Print Job marked as Completed on " + tbPrintJobCompletedDate.Text, FormStatus,
+        //                    Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+        //            }
+        //            else
+        //            {
+        //                //if PrintJobCompletedDate change    
+        //                if (!PrintJobCompletedDate.Equals(tbPrintJobCompletedDate.Text))
+        //                {
+        //                    helper.CreatePIWListHistory(clientContext, ListItemID,
+        //                    "Print Job Completed Date changed to " + tbPrintJobCompletedDate.Text, FormStatus,
+        //                    Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+        //                }
+        //            }
 
 
-                    helper.CreatePIWListHistory(clientContext, ListItemID, "Print Requisition Form Completed",
-                        FormStatus, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+        //            if ((!MailJobCompleted) && (cbMailJobCompleted.Checked))
+        //            {
+        //                FormStatus = Constants.PIWList_FormStatus_MailJobCompleted;
+        //                helper.CreatePIWListHistory(clientContext, ListItemID,
+        //                    "Mail Job marked as Completed on " + tbMailJobCompletedDate.Text, FormStatus,
+        //                    Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+        //            }
+        //            else
+        //            {
+        //                //if MailJobCompletedDate change    
+        //                if (!MailJobCompletedDate.Equals(tbMailJobCompletedDate.Text))
+        //                {
+        //                    helper.CreatePIWListHistory(clientContext, ListItemID,
+        //                    "Mail Job Completed Date changed to " + tbMailJobCompletedDate.Text, FormStatus,
+        //                    Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+        //                }
+        //            }
 
-                    //history list for main form
-                    var message = string.Format("Print Requisition Form Completed.</br>Print Job Completed Date: {0}</br>Mail Job Completed Date: {1}",
-                            tbPrintJobCompletedDate.Text, tbMailJobCompletedDate.Text);
-                    helper.CreatePIWListHistory(clientContext, ListItemID, message,
-                        FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
-                    helper.RefreshPage(Page.Request, Page.Response);
-                }
-            }
-            catch (Exception exc)
-            {
-                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
-                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
-            }
-        }
+        //            helper.CreatePIWListHistory(clientContext, ListItemID, "Print Requisition Form Completed",
+        //                FormStatus, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+
+        //            //history list for main form
+        //            var message = string.Format("Print Requisition Form Completed.</br>Print Job Completed Date: {0}</br>Mail Job Completed Date: {1}",
+        //                    tbPrintJobCompletedDate.Text, tbMailJobCompletedDate.Text);
+        //            helper.CreatePIWListHistory(clientContext, ListItemID, message,
+        //                FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+
+        //            helper.RefreshPage(Page.Request, Page.Response);
+        //        }
+        //    }
+        //    catch (Exception exc)
+        //    {
+        //        helper.LogError(Context, Request, exc, ListItemID, string.Empty);
+        //        helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+        //    }
+        //}
 
         protected void btnAccept_Click(object sender, EventArgs e)
         {
@@ -877,8 +687,128 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
+        protected void btnPrintJobComplete_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                const enumAction action = enumAction.PrintJobComplete;
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    ListItem listItem = null;
+
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
+
+                    //TODO: send email
+
+                    //get current user
+                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
+
+                    //create history list
+                    helper.CreatePIWListHistory(clientContext, ListItemID,
+                            "Print Job marked as Completed on " + DateTime.Now.ToShortDateString(), FormStatus,
+                            Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+
+                    helper.RefreshPage(Page.Request, Page.Response);
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+            }
+        }
+
+        protected void btnMailJobComplete_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                const enumAction action = enumAction.MailJobComplete;
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    ListItem listItem = null;
+
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
+
+                    //TODO: send email
+
+                    //get current user
+                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
+
+                    //create history list
+                    helper.CreatePIWListHistory(clientContext, ListItemID,
+                            "Mail Job marked as Completed on " + DateTime.Now.ToShortDateString(), FormStatus,
+                            Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+
+                    //set the history list for main form
+                    var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+                    var printJobCompletedDate = listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]] != null ?
+                        DateTime.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]].ToString()).ToShortDateString()
+                        : string.Empty;
+                    var mailJobCompletedDate = listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]] != null ?
+                        DateTime.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]].ToString()).ToShortDateString()
+                        : string.Empty;
+                    var piwFormStatus = listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] != null ?
+                        listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]].ToString() : string.Empty;
+
+                    var message = string.Format("Print Requisition Form Completed.</br>Print Job Completed Date: {0}</br>Mail Job Completed Date: {1}",
+                            printJobCompletedDate, mailJobCompletedDate);
+                    helper.CreatePIWListHistory(clientContext, ListItemID, message,
+                        piwFormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+
+                    helper.RefreshPage(Page.Request, Page.Response);
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+            }
+        }
+
         #endregion
 
-        
+        protected void btnDeleteConfirm_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                const enumAction action = enumAction.Delete;
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    ListItem listItem = null;
+                    if (!SaveData(clientContext, action, ref listItem))
+                    {
+                        return;
+                    }
+
+                    //get current user
+                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
+
+                    //Redirect
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+            }
+        }
+
+
+
+
     }
 }

@@ -411,6 +411,10 @@ namespace PIW_SPAppWeb.Helper
                     {
                         //no change
                     }
+                    else if (action == enumAction.Delete)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_Deleted;
+                    }
                     else
                     {
                         throw new Exception(string.Format(errorMessage, action, currentStatus));
@@ -444,10 +448,6 @@ namespace PIW_SPAppWeb.Helper
                     else if (action == enumAction.MailJobComplete)
                     {
                         nextStatus = Constants.PIWList_FormStatus_MailJobCompleted;
-                    }
-                    else if (action == enumAction.PrintReqComplete)
-                    {
-                        nextStatus = Constants.PIWList_FormStatus_PrintReqCompleted;
                     }
                     else
                     {

@@ -357,11 +357,8 @@ namespace PIW_SPAppWeb.Helper
                 User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                 clientContext.Load(currentUser);
                 clientContext.ExecuteQuery();
-                //add history list for the main form 
-                //CreatePIWListHistory(clientContext, listItemID, "Print Requisition Form Generated.",
-                //        FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
-                //Add history list for genereate print req form in both: main form and print req form
+                //Add history list for genereate print req form in both form: main form and print req form
                 string message = "Print Requisition Form Generated.";
                 CreatePIWListHistory(clientContext, listItemID, message,
                         FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
@@ -369,7 +366,7 @@ namespace PIW_SPAppWeb.Helper
                 CreatePIWListHistory(clientContext, listItemID, message,
                     Constants.PIWList_FormStatus_PrintReqGenerated, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
 
-                //history list for submit print req
+                //history list for submit print req in both forms
                 message = "Print Requisition Form Submitted.";
                 CreatePIWListHistory(clientContext, listItemID, message,
                         FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);

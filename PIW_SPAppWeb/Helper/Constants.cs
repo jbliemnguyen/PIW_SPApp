@@ -86,12 +86,13 @@ namespace PIW_SPAppWeb
         //public const string PIWList_colName_TotalPrintPages = "Total Print Pages";
         public const string PIWList_colName_PrintReqPrintPriority = "PrintReq Print Priority";
 
-        public const string PIWList_colName_PrintReqMailJobCompleted = "PrintReq Mail Job Completed";
+        //public const string PIWList_colName_PrintReqMailJobCompleted = "PrintReq Mail Job Completed";
         public const string PIWList_colName_PrintReqMailJobCompleteDate = "PrintReq Mail Job Complete Date";
         public const string PIWList_colName_PrintReqPrintJobCompleteDate = "PrintReq Print Job Complete Date";
-        public const string PIWList_colName_PrintReqPrintJobCompleted = "PrintReq Print Job Completed";
+        //public const string PIWList_colName_PrintReqPrintJobCompleted = "PrintReq Print Job Completed";
         public const string PIWList_colName_PrintReqComment = "PrintReq Comment";
-
+        public const string PIWList_colName_PrintReqFormURL = "PrintReq Form URL";
+        
         
         
         
@@ -121,7 +122,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_FormStatus_PublishInitiated = "Publish Initiated";
         public const string PIWList_FormStatus_PublishedToeLibrary = "Published To eLibrary";
         public const string PIWList_FormStatus_ReOpen = "ReOpen";
-        public const string PIWList_FormStatus_PrintReqCompleted = "Completed";//for print req only
+        //public const string PIWList_FormStatus_PrintReqCompleted = "Completed";//for print req only
         public const string PIWList_FormStatus_PrintReqAccepted = "Accepted";//for print req only
         public const string PIWList_FormStatus_PrintReqGenerated = "Print Req Generated";
         public const string PIWList_FormStatus_PrintJobCompleted = "Print Job Completed";
@@ -376,7 +377,6 @@ namespace PIW_SPAppWeb
         ReOpen,
         Delete,
         PublishedToElibrary,
-        PrintReqComplete,
         PrintJobComplete,
         MailJobComplete
     }

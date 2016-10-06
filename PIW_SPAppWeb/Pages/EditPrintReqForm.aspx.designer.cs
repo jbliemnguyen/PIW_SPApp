@@ -247,69 +247,6 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Label lbCommentValue;
         
         /// <summary>
-        /// fieldsetTasks control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl fieldsetTasks;
-        
-        /// <summary>
-        /// cbPrintJobCompleted control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBox cbPrintJobCompleted;
-        
-        /// <summary>
-        /// lbPrintJobCompletedDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbPrintJobCompletedDate;
-        
-        /// <summary>
-        /// tbPrintJobCompletedDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox tbPrintJobCompletedDate;
-        
-        /// <summary>
-        /// cbMailJobCompleted control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBox cbMailJobCompleted;
-        
-        /// <summary>
-        /// lbMailJobCompletedDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbMailJobCompletedDate;
-        
-        /// <summary>
-        /// tbMailJobCompletedDate control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox tbMailJobCompletedDate;
-        
-        /// <summary>
         /// btnAccept control.
         /// </summary>
         /// <remarks>
@@ -346,13 +283,40 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Button btnSave;
         
         /// <summary>
-        /// btnComplete control.
+        /// btnPrintJobComplete control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnComplete;
+        protected global::System.Web.UI.WebControls.Button btnPrintJobComplete;
+        
+        /// <summary>
+        /// btnMailJobComplete control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnMailJobComplete;
+        
+        /// <summary>
+        /// btnDelete control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnDelete;
+        
+        /// <summary>
+        /// btnDeleteConfirm control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnDeleteConfirm;
         
         /// <summary>
         /// rpHistoryList control.

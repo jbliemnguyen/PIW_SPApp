@@ -27,7 +27,7 @@ namespace PIW_SPAppWeb.Helper
         /// <param name="listItem"></param>
         /// <param name="action"></param>
         /// <param name="currentUser"></param>
-        public void SendEmail(ClientContext clientContext, ListItem listItem, enumAction action, User currentUser)
+        public void SendEmailForPrintReq(ClientContext clientContext, ListItem listItem, enumAction action, User currentUser)
         {
 
         }
@@ -210,7 +210,7 @@ namespace PIW_SPAppWeb.Helper
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    if (action.Equals(enumAction.PrintReqComplete))
+                    if (action.Equals(enumAction.MailJobComplete))
                     {
                         string subject = "PIW - Issuance Document Mailed";
                         string message = String.Format(@"The issuance associated with Workflow Item <a href='{0}'>{1}</a> 
@@ -385,7 +385,7 @@ namespace PIW_SPAppWeb.Helper
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    if (action.Equals(enumAction.PrintReqComplete))
+                    if (action.Equals(enumAction.MailJobComplete))
                     {
                         string subject = "PIW - Issuance Document Mailed";
                         string message = String.Format(@"The issuance associated with Workflow Item <a href='{0}'>{1}</a> 
@@ -460,7 +460,7 @@ namespace PIW_SPAppWeb.Helper
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    if (action.Equals(enumAction.PrintReqComplete))
+                    if (action.Equals(enumAction.MailJobComplete))
                     {
                         string subject = "PIW - Issuance Document Mailed";
                         string message = String.Format(@"The issuance associated with Workflow Item <a href='{0}'>{1}</a> 
@@ -503,6 +503,74 @@ namespace PIW_SPAppWeb.Helper
                         SendEmail(clientContext, To, subject, htmlContent);
                     }
                     break;
+                default:
+                    break;
+            }
+        }
+
+        private void SendEmailForPrintRequisitionForm(ClientContext clientContext, ListItem listItem, Dictionary<string, string> piwListInteralColumnNames, enumAction action, User currentUser,
+            string comment)
+        {
+            var docket = listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]] != null
+                ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocketNumber]].ToString()
+                : string.Empty;
+            var formURL = listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqFormURL]] != null
+                ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqFormURL]].ToString()
+                : string.Empty;
+
+            if (action == enumAction.Submit)
+            {
+                string subject = "PIW - Print Requisition Submitted";
+                string message = String.Format(@"Print Requisition Form <a href='{0}'>{1}</a> 
+                                            has been submitted for processing.",formURL, docket);
+                
+                string htmlContent = getHTMLFullMessageContent(clientContext, listItem, message);
+                String To = string.Empty;
+
+                //email to initiator, document owner and notification recipient
+                To = AddEmailAddress(To, initiatorEmails);
+                To = AddEmailAddress(To, documentOwnerEmails);
+                To = AddEmailAddress(To, notificationRecipientEmails);
+                SendEmail(clientContext, To, subject, htmlContent);
+            }
+            else if (action == enumAction.Reject)
+            {
+
+            }
+            else if (action == enumAction.MailJobComplete)
+            {
+                
+            }
+
+
+            switch (CurrentFormStatus)
+            {
+                case Constants.PIWList_FormStatus_Pending:
+                case Constants.PIWList_FormStatus_Rejected:
+                    if (action.Equals(enumAction.Submit))
+                    {
+                        string subject = string.Format("Docket: {0} - Print Requisition Submitted", docket);
+                    }
+                    break;
+                case Constants.PIWList_FormStatus_Submitted:
+                    if (action.Equals(enumAction.Reject))
+                    {
+                        string subject = "PIW – Print Requisition Form is Rejected.";
+                        string message = String.Format(@"Workflow Item <a href='{0}'>{1}</a> 
+                                    submitted through Publish Issuance Workflow has been rejected by {2}.",
+                            formURL, docket, currentUser.Title);
+                        string htmlContent = getRejectHTMLFullMessageContent(message, comment);
+                        String To = string.Empty;
+
+                        //email to initiator, document owner and notification recipient
+                        To = AddEmailAddress(To, initiatorEmails);
+                        To = AddEmailAddress(To, documentOwnerEmails);
+                        To = AddEmailAddress(To, notificationRecipientEmails);
+
+                        SendEmail(clientContext, To, subject, htmlContent);
+                    }
+                    break;
+                
                 default:
                     break;
             }
@@ -619,6 +687,48 @@ namespace PIW_SPAppWeb.Helper
 
 
             string fileNameListHTML = helper.getDocumentURLsHTML(PublicDocsURL, CEIIDocsURL, PrivilegedDocsURL, true);
+
+            string[] args = new string[] { message, fileNameListHTML, description, initiatorOffice, documentCategory, createdDate };
+            string htmlContent = string.Format(@" 
+                                                            {0}<br/><br/>
+                                                            - File Name: {1}<br/>                                                            
+                                                            - Description: {2}<br/>
+                                                            - Initiator Office: {3}<br/>
+                                                            - Document Category: {4}<br/> 
+                                                            - Created Date: {5}<br/>                                                       
+                                                 ", args);
+            return htmlContent;
+        }
+
+        public string getHTMLFullMessageContentForPrintReq(ClientContext clientContext, ListItem listItem, Dictionary<string, string> piwListInteralColumnNames, string message)
+        {
+
+            //var description = listItem[piwListInteralColumnNames[Constants.PIWList_colName_Description]] != null
+            //    ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_Description]].ToString() : string.Empty;
+
+            //var initiatorOffice = listItem[piwListInteralColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]] != null
+            //    ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_ProgramOfficeWFInitator]].ToString() : string.Empty;
+
+            //var documentCategory = listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentCategory]] != null
+            //    ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_DocumentCategory]].ToString() : string.Empty;
+
+            //var createdDate = listItem[piwListInteralColumnNames["Created"]] != null
+            //    ? System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Parse(listItem["Created"].ToString())).ToString() : string.Empty;
+
+            var dateRequested
+
+
+            var PublicDocsURL = listItem[piwListInteralColumnNames[Constants.PIWList_colName_PublicDocumentURLs]] != null
+                ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_PublicDocumentURLs]].ToString() : string.Empty;
+
+            var CEIIDocsURL = listItem[piwListInteralColumnNames[Constants.PIWList_colName_CEIIDocumentURLs]] != null
+                ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_CEIIDocumentURLs]].ToString() : string.Empty;
+
+            var PrivilegedDocsURL = listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrivilegedDocumentURLs]] != null
+                ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrivilegedDocumentURLs]].ToString() : string.Empty;
+
+
+            string fileNameListHTML = helper.getDocumentURLsHTML(PublicDocsURL, string.Empty, string.Empty, true);
 
             string[] args = new string[] { message, fileNameListHTML, description, initiatorOffice, documentCategory, createdDate };
             string htmlContent = string.Format(@" 
