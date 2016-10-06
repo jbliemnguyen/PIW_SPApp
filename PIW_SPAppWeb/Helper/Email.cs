@@ -210,7 +210,7 @@ namespace PIW_SPAppWeb.Helper
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    if (action.Equals(enumAction.PrintJobComplete))
+                    if (action.Equals(enumAction.PrintReqComplete))
                     {
                         string subject = "PIW - Issuance Document Mailed";
                         string message = String.Format(@"The issuance associated with Workflow Item <a href='{0}'>{1}</a> 
@@ -385,7 +385,7 @@ namespace PIW_SPAppWeb.Helper
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    if (action.Equals(enumAction.PrintJobComplete))
+                    if (action.Equals(enumAction.PrintReqComplete))
                     {
                         string subject = "PIW - Issuance Document Mailed";
                         string message = String.Format(@"The issuance associated with Workflow Item <a href='{0}'>{1}</a> 
@@ -460,7 +460,7 @@ namespace PIW_SPAppWeb.Helper
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    if (action.Equals(enumAction.PrintJobComplete))
+                    if (action.Equals(enumAction.PrintReqComplete))
                     {
                         string subject = "PIW - Issuance Document Mailed";
                         string message = String.Format(@"The issuance associated with Workflow Item <a href='{0}'>{1}</a> 

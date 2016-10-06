@@ -431,11 +431,21 @@ namespace PIW_SPAppWeb.Helper
                     }
                     break;
                 case Constants.PIWList_FormStatus_PrintReqAccepted:
+                case Constants.PIWList_FormStatus_PrintJobCompleted:
+                case Constants.PIWList_FormStatus_MailJobCompleted:
                     if (action == enumAction.Save)
                     {
                         //no change
                     }
                     else if (action == enumAction.PrintJobComplete)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_PrintJobCompleted;
+                    }
+                    else if (action == enumAction.MailJobComplete)
+                    {
+                        nextStatus = Constants.PIWList_FormStatus_MailJobCompleted;
+                    }
+                    else if (action == enumAction.PrintReqComplete)
                     {
                         nextStatus = Constants.PIWList_FormStatus_PrintReqCompleted;
                     }

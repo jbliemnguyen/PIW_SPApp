@@ -300,25 +300,26 @@
 
             jQueryValidation();
 
-            //Initiator Program office dirves the value of document owner program office
-            //$("#ddProgramOfficeWorkflowInitiator").change(function () {
-            //    var documentOwner = $("#ddProgramOfficeDocumentOwner");
-            //    documentOwner.val($(this).val());
-            //});
-
             //top button event, call to appropriate buttons in the bottom.
             RegisterEventForButtons();
 
             if (typeof (Sys) != "undefined")//Sys is created in Edit Form becuase of Ajax control only, in report, it is undefined
             {
-                var prm = Sys.WebForms.PageRequestManager.getInstance();
-                prm.add_endRequest(function () {
-                    RemoveLockScreenForAjaxUpdate(); //ajax request completed, remove the lock screen
-                });
+                //this code should used in edit standard and agenda form becuase the form has citation number
+                //it will fails when the code look for citation number textbox location in print req and direct pub
+                if ((document.URL.indexOf("EditStandardForm.aspx") > -1) ||
+                    (document.URL.indexOf("EditAgendaForm.aspx") > -1))
+                    {
+                    var prm = Sys.WebForms.PageRequestManager.getInstance();
+                    prm.add_endRequest(function () {
+                        RemoveLockScreenForAjaxUpdate(); //ajax request completed, remove the lock screen
+                    });
 
-                prm.add_beginRequest(function () {
-                    LockScreenForAjaxUpdate();
-                });
+                    prm.add_beginRequest(function () {
+                        LockScreenForAjaxUpdate();
+                    });
+                }
+                
             }
 
 

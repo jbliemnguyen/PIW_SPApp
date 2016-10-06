@@ -367,7 +367,7 @@ namespace PIW_SPAppWeb.Helper
                         FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
                 CreatePIWListHistory(clientContext, listItemID, message,
-                    Constants.PrintReq_FormStatus_PrintReqGenerated, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+                    Constants.PIWList_FormStatus_PrintReqGenerated, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
 
                 //history list for submit print req
                 message = "Print Requisition Form Submitted.";

@@ -123,13 +123,11 @@ namespace PIW_SPAppWeb
         public const string PIWList_FormStatus_ReOpen = "ReOpen";
         public const string PIWList_FormStatus_PrintReqCompleted = "Completed";//for print req only
         public const string PIWList_FormStatus_PrintReqAccepted = "Accepted";//for print req only
-
-        public const string PrintReq_FormStatus_PrintReqGenerated = "Print Req Generated";
-        //public const string PrintReq_FormStatus_PrintReqSubmitted = "Print Req Submitted";
-        public const string PrintReq_FormStatus_PrintJobCompleted = "Print Job Completed";
-        public const string PrintReq_FormStatus_MailJobCompleted = "Mail Job Completed";
+        public const string PIWList_FormStatus_PrintReqGenerated = "Print Req Generated";
+        public const string PIWList_FormStatus_PrintJobCompleted = "Print Job Completed";
+        public const string PIWList_FormStatus_MailJobCompleted = "Mail Job Completed";
         
-        //public const string PrintReq_FormStatus_PrintReqRejected = "Print Req Rejected";
+        
 
 
         public const string PIWList_DocCat_DelegatedErrata = "Delegated Errata";
@@ -314,7 +312,9 @@ namespace PIW_SPAppWeb
         public const string DocumentURLsSeparator = "_##_";
 
         public const string PrintJobCompletedKey = "PrintJobCompletedKey";
+        public const string PrintJobCompletedDateKey = "PrintJobCompletedDateKey";
         public const string MailJobCompletedKey = "MailJobCompletedKey";
+        public const string MailJobCompletedDateKey = "MailJobCompletedDateKey";
 
         //ATMS Validation error
         public const string ATMSRemotingServiceConnectionError = "Cannot connect to ATMS to validate docket.";
@@ -375,8 +375,10 @@ namespace PIW_SPAppWeb
         Edit,
         ReOpen,
         Delete,
-        PrintJobComplete,
         PublishedToElibrary,
+        PrintReqComplete,
+        PrintJobComplete,
+        MailJobComplete
     }
 }
 
