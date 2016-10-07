@@ -363,7 +363,7 @@ namespace PIW_SPAppWeb.Pages
                     btnDelete.Visible = false;
 
                     break;
-                case Constants.PIWList_FormStatus_PrintJobCompleted:
+                case Constants.PIWList_FormStatus_PrintReqPrintJobCompleted:
                     tbNumberofCopies.Enabled = true;
                     tbNumberofPages.Enabled = true;
 
@@ -377,7 +377,7 @@ namespace PIW_SPAppWeb.Pages
                     btnDelete.Visible = false;
 
                     break;
-                case Constants.PIWList_FormStatus_MailJobCompleted:
+                case Constants.PIWList_FormStatus_PrintReqMailJobCompleted:
                     tbNumberofCopies.Enabled = true;
                     tbNumberofPages.Enabled = true;
 
@@ -490,9 +490,6 @@ namespace PIW_SPAppWeb.Pages
                         return;
                     }
 
-                    //todo: send email
-
-
                     //get current user
                     User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
                     clientContext.Load(currentUser);
@@ -504,6 +501,11 @@ namespace PIW_SPAppWeb.Pages
                     helper.RefreshPage(Request, Response);
 
                     //TODO: send email
+                    var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+                    Email email = new Email();
+                    email.SendEmailForPrintRequisitionForm(clientContext, listItem, piwListInternalColumnNames,action,currentUser,tbComment.Text.Trim());
+
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -536,7 +538,7 @@ namespace PIW_SPAppWeb.Pages
 
                     //create history list
 
-                    helper.RefreshPage(Page.Request, Page.Response);
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -560,7 +562,7 @@ namespace PIW_SPAppWeb.Pages
                         return;
                     }
 
-                    //TODO: send email
+                    
 
                     //get current user
                     User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
@@ -571,7 +573,13 @@ namespace PIW_SPAppWeb.Pages
                     helper.CreatePIWListHistory(clientContext, ListItemID, "Print Requisition Form Submitted",
                         FormStatus, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
 
-                    helper.RefreshPage(Page.Request, Page.Response);
+                    //TODO: send email
+                    var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+                    Email email = new Email();
+                    email.SendEmailForPrintRequisitionForm(clientContext, listItem, piwListInternalColumnNames, action, currentUser, tbComment.Text.Trim());
+
+
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -605,7 +613,7 @@ namespace PIW_SPAppWeb.Pages
         //            //create history list
         //            if ((!PrintJobCompleted) && (cbPrintJobCompleted.Checked))
         //            {
-        //                FormStatus = Constants.PIWList_FormStatus_PrintJobCompleted;
+        //                FormStatus = Constants.PIWList_FormStatus_PrintReqPrintJobCompleted;
         //                helper.CreatePIWListHistory(clientContext, ListItemID,
         //                    "Print Job marked as Completed on " + tbPrintJobCompletedDate.Text, FormStatus,
         //                    Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
@@ -624,7 +632,7 @@ namespace PIW_SPAppWeb.Pages
 
         //            if ((!MailJobCompleted) && (cbMailJobCompleted.Checked))
         //            {
-        //                FormStatus = Constants.PIWList_FormStatus_MailJobCompleted;
+        //                FormStatus = Constants.PIWList_FormStatus_PrintReqMailJobCompleted;
         //                helper.CreatePIWListHistory(clientContext, ListItemID,
         //                    "Mail Job marked as Completed on " + tbMailJobCompletedDate.Text, FormStatus,
         //                    Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
@@ -766,7 +774,12 @@ namespace PIW_SPAppWeb.Pages
                     helper.CreatePIWListHistory(clientContext, ListItemID, message,
                         piwFormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
-                    helper.RefreshPage(Page.Request, Page.Response);
+                    //TODO: send email to user in main form
+                    Email email = new Email();
+                    email.SendEmailForPrintRequisitionForm(clientContext, listItem, piwListInternalColumnNames, action, currentUser, tbComment.Text.Trim());
+
+
+                    helper.RedirectToSourcePage(Page.Request, Page.Response);
                 }
             }
             catch (Exception exc)
@@ -775,8 +788,6 @@ namespace PIW_SPAppWeb.Pages
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
-
-        #endregion
 
         protected void btnDeleteConfirm_Click(object sender, EventArgs e)
         {
@@ -796,6 +807,10 @@ namespace PIW_SPAppWeb.Pages
                     clientContext.Load(currentUser);
                     clientContext.ExecuteQuery();
 
+                    //history list 
+                    helper.CreatePIWListHistory(clientContext, ListItemID, "Print Requisition Form Deleted",
+                    FormStatus, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+
                     //Redirect
                     helper.RedirectToSourcePage(Page.Request, Page.Response);
                 }
@@ -806,6 +821,10 @@ namespace PIW_SPAppWeb.Pages
                 helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
             }
         }
+
+        #endregion
+
+        
 
 
 

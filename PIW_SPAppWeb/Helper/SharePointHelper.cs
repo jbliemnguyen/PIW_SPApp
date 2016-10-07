@@ -186,7 +186,7 @@ namespace PIW_SPAppWeb.Helper
             //comment
             if (!string.IsNullOrEmpty(comment))
             {
-                SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment,string.Empty);
+                SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment, string.Empty);
             }
 
             //clear accession number
@@ -227,7 +227,7 @@ namespace PIW_SPAppWeb.Helper
             //comment
             if (!string.IsNullOrEmpty(comment))
             {
-                SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment,string.Empty);
+                SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment, string.Empty);
             }
 
             listItem.Update();
@@ -247,7 +247,7 @@ namespace PIW_SPAppWeb.Helper
             //comment
             if (!string.IsNullOrEmpty(comment))
             {
-                SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment,string.Empty);
+                SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment, string.Empty);
             }
 
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_IsActive]] = false;
@@ -271,7 +271,7 @@ namespace PIW_SPAppWeb.Helper
             //comment
             if (!string.IsNullOrEmpty(comment))
             {
-                SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment,string.Empty);
+                SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment, string.Empty);
             }
 
             //publisher
@@ -297,7 +297,7 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public void GenerateAndSubmitPrintReqForm(ClientContext clientContext, ListItem listItem, string CurrentUserLogInID)
+        public bool GenerateAndSubmitPrintReqForm(ClientContext clientContext, ListItem listItem, string CurrentUserLogInID)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
@@ -329,7 +329,7 @@ namespace PIW_SPAppWeb.Helper
 
 
 
-            //create history list
+            //check if a print req is required to submit
             if ((numberOfSupplementalMailingListAddress + numberOfFOLAAddress) > 0)
             {
 
@@ -337,14 +337,20 @@ namespace PIW_SPAppWeb.Helper
                 int numberofCopies = numberOfFOLAAddress + numberOfSupplementalMailingListAddress;
                 DateTime dateRequested = DateTime.Now;
                 //update piw list
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] = numberOfFOLAAddress;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] =
+                    numberOfFOLAAddress;
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = numberofCopies;
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqStatus]] = Constants.PIWList_FormStatus_Submitted;
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequested]] = dateRequested.ToString();
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqStatus]] =
+                    Constants.PIWList_FormStatus_Submitted;
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequested]] =
+                    dateRequested.ToString();
 
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPrintPriority]] = printPriority;
 
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequired]] = getDateRequired(printPriority, dateRequested, numberofCopies * numberOfPublicPages);
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequired]] =
+                    getDateRequired(printPriority, dateRequested, numberofCopies * numberOfPublicPages);
+
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqFormURL]] = getPrintReqEditFormURL(listItem, piwListInternalColumnNames);
 
                 listItem.Update();
                 clientContext.ExecuteQuery();
@@ -361,20 +367,31 @@ namespace PIW_SPAppWeb.Helper
                 //Add history list for genereate print req form in both form: main form and print req form
                 string message = "Print Requisition Form Generated.";
                 CreatePIWListHistory(clientContext, listItemID, message,
-                        FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+                    FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
                 CreatePIWListHistory(clientContext, listItemID, message,
-                    Constants.PIWList_FormStatus_PrintReqGenerated, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+                    Constants.PIWList_FormStatus_PrintReqGenerated, Constants.PIWListHistory_FormTypeOption_PrintReq,
+                    currentUser);
 
                 //history list for submit print req in both forms
                 message = "Print Requisition Form Submitted.";
                 CreatePIWListHistory(clientContext, listItemID, message,
-                        FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+                    FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
                 CreatePIWListHistory(clientContext, listItemID, message,
-                    Constants.PIWList_FormStatus_Submitted, Constants.PIWListHistory_FormTypeOption_PrintReq, currentUser);
+                    Constants.PIWList_FormStatus_Submitted, Constants.PIWListHistory_FormTypeOption_PrintReq,
+                    currentUser);
 
-
+                //send submit email
+                Email email = new Email();
+                email.SendEmailForPrintRequisitionForm(clientContext, listItem, piwListInternalColumnNames,
+                    enumAction.Submit, clientContext.Web.CurrentUser, string.Empty);
+                
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
@@ -471,6 +488,31 @@ namespace PIW_SPAppWeb.Helper
 
             listItem.Update();
             clientContext.ExecuteQuery();
+        }
+
+        public string getPrintReqEditFormURL(ListItem listItem, Dictionary<string, string> piwListInternalColumnNames)
+        {
+            //return the url of the print req form based on the url of the main form
+            string formType = listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormType]] != null
+                ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormType]].ToString() : string.Empty;
+            string mainEditPageURL = listItem[piwListInternalColumnNames[Constants.PIWList_colName_EditFormURL]] != null
+                ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_EditFormURL]].ToString() : string.Empty;
+
+            string mainEditPageName = string.Empty;
+            if (formType.Equals(Constants.PIWList_FormType_StandardForm))
+            {
+                mainEditPageName = Constants.Page_EditStandardForm;
+            }
+            else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
+            {
+                mainEditPageName = Constants.Page_EditAgendaForm;
+            }
+            else if (formType.Equals(Constants.PIWList_FormType_DirectPublicationForm))
+            {
+                mainEditPageName = Constants.Page_EditDirectPublicationForm;
+            }
+
+            return mainEditPageURL.Replace(mainEditPageName, Constants.Page_EditPrintReqForm);
         }
 
         #endregion
@@ -1334,14 +1376,62 @@ namespace PIW_SPAppWeb.Helper
             }
         }
 
-        //public bool IsUserMemberOfGroup(ClientContext clientContext, User user, string groupName)
-        //{
-        //    //Load group
-        //    clientContext.Load(user.Groups);
-        //    clientContext.ExecuteQuery();
-        //    //user.Groups.Cast<Group>().Any()
-        //    return user.Groups.Cast<Group>().Any(g => g.Title == groupName);
-        //}
+        public void LogError(ClientContext clientContext, Exception exc, string listItemID, string pageName)
+        {
+            //This is expected exception after Page.Redirect --> ignore it??? TEst it
+            if (exc is System.Threading.ThreadAbortException)
+            {
+                return;
+            }
+            
+            List errorLogList = clientContext.Web.Lists.GetByTitle(Constants.ErrorLogListName);
+            var errorLogInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.ErrorLogListName);
+
+            ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
+            ListItem newItem = errorLogList.AddItem(itemCreateInfo);
+
+            //set current user name
+            clientContext.Load(clientContext.Web.CurrentUser);
+            clientContext.ExecuteQuery();
+            newItem[errorLogInternalNameList[Constants.ErrorLog_colName_User]] = clientContext.Web.CurrentUser;
+
+            newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorPageName]] = pageName;
+
+            string message = string.Empty;
+            if (exc.InnerException != null)
+            {
+                message = exc.Message + " - Inner Exception: " + exc.InnerException.Message;
+            }
+            else
+            {
+                message = exc.Message;
+            }
+
+            if (exc.StackTrace != null)
+            {
+                message = message + "Stack Trace: " + exc.StackTrace;
+            }
+
+            message = message + "Type: " + exc.GetType();
+
+            newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorMessage]] = message;
+
+            newItem.Update();
+            clientContext.ExecuteQuery();//we need to create item first before set lookup field.
+
+
+            if (!string.IsNullOrEmpty(listItemID))
+            {
+                //get piwListItem reference
+                FieldLookupValue lv = new FieldLookupValue { LookupId = int.Parse(listItemID) };
+                newItem[errorLogInternalNameList[Constants.ErrorLog_colName_PIWListItem]] = lv;
+                newItem.Update();
+                clientContext.ExecuteQuery();
+            }
+
+        }
+
+        
 
         public bool IsUserMemberOfGroup(ClientContext clientContext, string userLoginID, string[] groupNames)
         {
@@ -1557,6 +1647,9 @@ namespace PIW_SPAppWeb.Helper
                 case Constants.Page_EditDirectPublicationForm:
                     result = Constants.Page_DirectPublicationForms;
                     break;
+                case Constants.Page_EditPrintReqForm:
+                    result = Constants.Page_PrintReqForms;
+                    break;
             }
 
             return result;
@@ -1718,7 +1811,7 @@ namespace PIW_SPAppWeb.Helper
             return result.ToString();
         }
 
-        public void SetCommentHTML(ListItem listItem, Dictionary<string, string> piwListInternalColumnNames, string userName, string comment,string formType)
+        public void SetCommentHTML(ListItem listItem, Dictionary<string, string> piwListInternalColumnNames, string userName, string comment, string formType)
         {
             string commentField = string.Empty;
             //the print req form has different comment field

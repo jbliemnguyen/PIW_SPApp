@@ -125,8 +125,8 @@ namespace PIW_SPAppWeb
         //public const string PIWList_FormStatus_PrintReqCompleted = "Completed";//for print req only
         public const string PIWList_FormStatus_PrintReqAccepted = "Accepted";//for print req only
         public const string PIWList_FormStatus_PrintReqGenerated = "Print Req Generated";
-        public const string PIWList_FormStatus_PrintJobCompleted = "Print Job Completed";
-        public const string PIWList_FormStatus_MailJobCompleted = "Mail Job Completed";
+        public const string PIWList_FormStatus_PrintReqPrintJobCompleted = "Print Job Completed";
+        public const string PIWList_FormStatus_PrintReqMailJobCompleted = "Mail Job Completed";
         
         
 
@@ -329,6 +329,7 @@ namespace PIW_SPAppWeb
         public const string Page_StandardForms = "StandardForms.aspx";
         public const string Page_AgendaForms = "AgendaForms.aspx";
         public const string Page_DirectPublicationForms = "DirectPublicationForms.aspx";
+        public const string Page_PrintReqForms = "PrintReqForms.aspx";
         public const string Page_AccessDenied = "AccessDenied.aspx";
         public const string Page_ItemNotFound = "ItemNotFound.aspx";
 

@@ -18,32 +18,45 @@ namespace PIW_SPAppJob
         static void Main(string[] args)
         {
             string spHostUrl = ConfigurationManager.AppSettings["spHostUrl"];
-            
-            using (var clientContext = helper.getElevatedClientContext(spHostUrl))
+            try
             {
-                helper.CreateLog(clientContext, "Start Running Scheduler Job", string.Empty);
 
-                clientContext.Load(clientContext.Web.CurrentUser);
-                clientContext.ExecuteQuery();
-                string CurrentUserLogInID = clientContext.Web.CurrentUser.LoginName;
-                
-                var piwListInternalName = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
-                var piwListItemCol = getInitiatedPublishedPIWListItem(clientContext, piwListInternalName);
-
-                foreach (var piwListItem in piwListItemCol)
+                using (var clientContext = helper.getElevatedClientContext(spHostUrl))
                 {
-                    UpdateListItem(piwListItem, piwListInternalName);
-                    helper.GenerateAndSubmitPrintReqForm(clientContext, piwListItem, CurrentUserLogInID);
+                    helper.CreateLog(clientContext, "Start Running Scheduler Job", string.Empty);
+
+                    clientContext.Load(clientContext.Web.CurrentUser);
+                    clientContext.ExecuteQuery();
+                    string CurrentUserLogInID = clientContext.Web.CurrentUser.LoginName;
+
+                    var piwListInternalName = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
+                    var piwListItemCol = getInitiatedPublishedPIWListItem(clientContext, piwListInternalName);
+
+                    foreach (var piwListItem in piwListItemCol)
+                    {
+                        UpdateListItem(clientContext, piwListItem, piwListInternalName);
+                        if (helper.GenerateAndSubmitPrintReqForm(clientContext, piwListItem, CurrentUserLogInID))
+                        {
+                            //do nothign for now
+                        }
+                    }
+
+                    clientContext.ExecuteQuery();
+
+                    //throw new Exception();
+
                 }
-
-                clientContext.ExecuteQuery();
-
-                helper.CreateLog(clientContext,"Finish Running Scheduler Job", "update: " + piwListItemCol.Count + " items");
-
+            }
+            catch (Exception exc)
+            {
+                using (var clientContext = helper.getElevatedClientContext(spHostUrl))
+                {
+                    helper.LogError(clientContext, exc, string.Empty, String.Empty);
+                }
             }
         }
 
-        private static void UpdateListItem(ListItem listItem,Dictionary<string,string> piwListInternalName)
+        private static void UpdateListItem(ClientContext clientContext,ListItem listItem,Dictionary<string,string> piwListInternalName)
         {
             //todo: set the accession number and published status
 
@@ -51,6 +64,7 @@ namespace PIW_SPAppJob
             listItem[piwListInternalName[Constants.PIWList_colName_FormStatus]] =
                 Constants.PIWList_FormStatus_PublishedToeLibrary;
             listItem.Update();
+            clientContext.ExecuteQuery();
         }
 
         private static ListItemCollection getInitiatedPublishedPIWListItem(ClientContext clientContext, Dictionary<string, string> piwListInternalName)

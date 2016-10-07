@@ -369,7 +369,7 @@ namespace PIW_SPAppWeb.Pages
 
                         //email
                         Email emailHelper = new Email();
-                        emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
+                        emailHelper.SendEmailForRegularForms(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
                             currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
 
 
@@ -431,7 +431,7 @@ namespace PIW_SPAppWeb.Pages
 
                     //email
                     Email emailHelper = new Email();
-                    emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
+                    emailHelper.SendEmailForRegularForms(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
                         currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
 
                     //Create list history
@@ -512,7 +512,7 @@ namespace PIW_SPAppWeb.Pages
 
                     //email
                     Email emailHelper = new Email();
-                    emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
+                    emailHelper.SendEmailForRegularForms(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
                         currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
 
                     //Create list history
@@ -572,7 +572,7 @@ namespace PIW_SPAppWeb.Pages
 
                     //send email
                     Email emailHelper = new Email();
-                    emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
+                    emailHelper.SendEmailForRegularForms(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
                         currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
 
                     //Create list history
@@ -696,7 +696,7 @@ namespace PIW_SPAppWeb.Pages
 
                     //email
                     Email emailHelper = new Email();
-                    emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
+                    emailHelper.SendEmailForRegularForms(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
                         currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
 
                     //Create list history
@@ -740,7 +740,7 @@ namespace PIW_SPAppWeb.Pages
 
                     //email
                     Email emailHelper = new Email();
-                    emailHelper.SendEmail(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
+                    emailHelper.SendEmailForRegularForms(clientContext, listItem, action, currentStatusBeforeWFRun, previousStatusBeforeWFRun,
                         currentUser, Request.Url.ToString(), hdnWorkflowInitiator, hdnDocumentOwner, hdnNotificationRecipient, tbComment.Text);
 
                     //Create list history
@@ -1879,17 +1879,11 @@ namespace PIW_SPAppWeb.Pages
                             new string[] { Constants.Grp_PIWLegalResourcesReview });
 
 
-            //number of fola mailing list and supp mailing list address
-            int numberOfFOLAMailingListAddress = 0;
-            int numberOfSuppMailingListAddress = 0;
-            if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] != null)
+            //number of pritn req copies, used to determine if there is print req submitted
+            int numberOfPrintCopies = 0;
+            if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_PrintReqNumberofCopies]] != null)
             {
-                numberOfFOLAMailingListAddress = int.Parse(listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]].ToString());
-            }
-
-            if (listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
-            {
-                numberOfSuppMailingListAddress = int.Parse(listItem[piwlistInternalColumnName[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+                numberOfPrintCopies = int.Parse(listItem[piwlistInternalColumnName[Constants.PIWList_colName_PrintReqNumberofCopies]].ToString());
             }
 
             var currentUser = clientContext.Web.CurrentUser;
@@ -2119,7 +2113,7 @@ namespace PIW_SPAppWeb.Pages
 
 
                     //Mailed Room and Legal Resources and Review
-                    fieldsetMailedRoom.Visible = (numberOfFOLAMailingListAddress + numberOfSuppMailingListAddress) > 0;
+                    fieldsetMailedRoom.Visible = (numberOfPrintCopies > 0);
                     fieldsetLegalResourcesReview.Visible = true;
 
                     //buttons
@@ -2181,8 +2175,10 @@ namespace PIW_SPAppWeb.Pages
         {
             using (var clientContext = helper.getElevatedClientContext(Context, Request))
             {
-                helper.ReGenerateFOLAMailingList(clientContext,ListItemID,CurrentUserLogInID);
-                helper.RefreshPage(Request, Response);
+                ListItem listItem = helper.GetPiwListItemById(clientContext, ListItemID, true);
+                helper.GenerateAndSubmitPrintReqForm(clientContext, listItem, CurrentUserLogInID);
+                lbMainMessage.Visible = true;
+                lbMainMessage.Text = "ReGenerate Print Requisition Form";
             }
         }
 

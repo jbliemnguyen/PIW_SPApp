@@ -155,7 +155,7 @@
                     <asp:Button ID="btnInitiatePublication1" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                     <asp:Button ID="btnDelete1" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                     <asp:Button ID="btnReopen1" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
-                    <asp:Button ID="btnGenerateMailingList1" runat="server" Text="Generate Mailing List" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnGenerateMailingList1" runat="server" Text="ReGenerate Print Requisition" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 </div>
             </div>
 
@@ -541,7 +541,7 @@
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" OnClick="btnDeleteConfirm_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnReopen" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" OnClick="btnReopen_Click" ClientIDMode="Static" />
-                <asp:Button ID="btnGenerateMailingList" runat="server" Text="Generate Mailing List" CssClass="btn-sm btn-primary active" OnClick="btnGenerateMailingList_Click" ClientIDMode="Static" />
+                <asp:Button ID="btnGenerateMailingList" runat="server" Text="ReGenerate Print Requisition" CssClass="btn-sm btn-primary active" OnClick="btnGenerateMailingList_Click" ClientIDMode="Static" />
             </div>
         </div>
         <div class="form-group">

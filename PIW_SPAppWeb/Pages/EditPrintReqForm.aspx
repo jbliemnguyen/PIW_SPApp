@@ -6,9 +6,9 @@
     <script type="text/javascript">
         function PageClient() {
 
-            $(".historyhead").click(function () {
-                $(".historylist").slideToggle(100);
-            });
+            //$(".historyhead").click(function () {
+            //    $(".historylist").slideToggle(100);
+            //});
         }
     </script>
     <form id="mainForm" runat="server" class="form-horizontal">
@@ -100,12 +100,12 @@
         <div class="form-group">
             <div class="col-md-2"></div>
             <div class="col-md-6">
-                <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" OnClick="btnAccept_Click" />
-                <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" OnClick="btnReject_Click" />
-                <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary active" OnClick="btnSubmit_Click" />
-                <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary active" OnClick="btnSave_Click" />
-                <asp:Button ID="btnPrintJobComplete" runat="server" Text="Print Job Complete" CssClass="btn-sm btn-primary active" OnClick="btnPrintJobComplete_Click" />
-                <asp:Button ID="btnMailJobComplete" runat="server" Text="Mail Job Complete" CssClass="btn-sm btn-primary active" OnClick="btnMailJobComplete_Click" />
+                <asp:Button ID="btnAccept" runat="server" Text="Accept" CssClass="btn-sm btn-primary active" OnClick="btnAccept_Click" ClientIDMode="Static" />
+                <asp:Button ID="btnReject" runat="server" Text="Reject" CssClass="btn-sm btn-primary active" OnClick="btnReject_Click" ClientIDMode="Static" />
+                <asp:Button ID="btnSubmit" runat="server" Text="Submit" CssClass="btn-sm btn-primary active" OnClick="btnSubmit_Click" ClientIDMode="Static" />
+                <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn-sm btn-primary active" OnClick="btnSave_Click" ClientIDMode="Static" />
+                <asp:Button ID="btnPrintJobComplete" runat="server" Text="Print Job Complete" CssClass="btn-sm btn-primary active" OnClick="btnPrintJobComplete_Click" ClientIDMode="Static" />
+                <asp:Button ID="btnMailJobComplete" runat="server" Text="Mail Job Complete" CssClass="btn-sm btn-primary active" OnClick="btnMailJobComplete_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" OnClick="btnDeleteConfirm_Click" ClientIDMode="Static" />
             </div>
@@ -151,5 +151,9 @@
             </div>
         </div>
         <div id="deleteDialogConfirmation" title="Are you sure you wish to delete this print requisition form?"></div>
+        <div id="skm_LockBackground" class="LockOff"></div>
+        <div id="skm_LockPane" class="LockOff">
+            <div id="skm_LockPaneText">&nbsp;</div>
+        </div>
     </form>
 </asp:Content>

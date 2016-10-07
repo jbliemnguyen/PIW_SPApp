@@ -55,10 +55,8 @@
                     <a href="StandardForms.aspx" class="list-group-item" id="StandardFormsURL">Standard Forms</a>
                     <a href="AgendaForms.aspx" class="list-group-item" id="AgendaFormsURL">Agenda Forms</a>
                     <a href="DirectPublicationForms.aspx" class="list-group-item" id="DirectPublicationFormsURL">Direct Publication Forms</a>
+                    <a href="PrintReqForms.aspx" class="list-group-item" id="PrintReqFormsURL">Print Requisition Forms</a>
                     
-                    <%--<a href="EditStandardForm.aspx" class="list-group-item" id="EditStandardFormURL">New Standard Form</a>--%>
-                    <%--<a href="EditAgendaForm.aspx" class="list-group-item" id="EditAgendaFormURL">New Agenda Form</a>--%>
-                    <%--<a href="EditDirectPublicationForm.aspx" class="list-group-item" id="EditDirectPublicationFormURL">New Direct Publication Form</a>--%>
                     <a href="Admin.aspx" class="list-group-item" id="AdminURL">Admin</a>
                 </div>
             </div>
@@ -490,6 +488,16 @@
             $("#btnReopen").click(function (event) {
                 skm_LockScreen("ReOpening ... ");
             });
+
+
+            $("#btnPrintJobComplete").click(function (event) {
+                skm_LockScreen("Print Job Completed ... ");
+            });
+
+            $("#btnMailJobComplete").click(function (event) {
+                skm_LockScreen("Mail Job Completed ... ");
+            });
+
 
             //Note: accept ciation number and remove citation number can not used here 
             //becuase they are part of AJAX Panel. we handle them in ajax event
