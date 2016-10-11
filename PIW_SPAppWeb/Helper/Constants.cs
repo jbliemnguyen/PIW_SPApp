@@ -188,6 +188,7 @@ namespace PIW_SPAppWeb
         public const string ddProgramOfficeWorkflowInitiator_Option_OSEC = "OSEC";
         public const string ddDocumentCategory_Option_Notice = "Notice";
         public const string ddDocumentCategory_Option_NoticeErrata = "Notice Errata";
+        public const string ddDocumentCategory_Option_SunshineNotice = "Sunshine Notice";
 
         //ErrorLog list
         public const string ErrorLogListName = "ErrorLog";

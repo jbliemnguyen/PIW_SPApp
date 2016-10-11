@@ -319,7 +319,7 @@
             <div class="form-group">
                 <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)<span class='accentText'> *</span>" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
-                    <asp:DropDownList ID="ddProgramOfficeWorkflowInitiator" CssClass="form-control" runat="server" ClientIDMode="Static">
+                    <asp:DropDownList ID="ddProgramOfficeWorkflowInitiator" CssClass="form-control" runat="server" ClientIDMode="Static" Enabled="false">
                         <asp:ListItem Selected="true">OSEC</asp:ListItem>
                     </asp:DropDownList>
                 </div>
@@ -457,7 +457,7 @@
                     <div class="col-md-2">
                         <asp:HyperLink ID="hyperlinkPrintReq" runat="server" Text="Print Requisition Form" Target="_blank"></asp:HyperLink>
                     </div>
-                </div>co
+                </div>
                 <div class="form-group">
                     <asp:Label ID="lbPrintDate" runat="server" Text="Print Date" AssociatedControlID="tbPrintDate" CssClass="col-md-2 control-label"></asp:Label>
                     <div class="col-md-2">

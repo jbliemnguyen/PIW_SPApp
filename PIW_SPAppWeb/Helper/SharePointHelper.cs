@@ -327,14 +327,24 @@ namespace PIW_SPAppWeb.Helper
                 numberOfSupplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
             }
 
-
+            int numberofCopies;
+            //if sunshine notice --> print 100 copies
+            if (documentCategory.Equals(Constants.ddDocumentCategory_Option_SunshineNotice,
+                StringComparison.OrdinalIgnoreCase))
+            {
+                numberofCopies = 100;
+            }
+            else
+            {
+                numberofCopies = numberOfFOLAAddress + numberOfSupplementalMailingListAddress;
+            }
 
             //check if a print req is required to submit
-            if ((numberOfSupplementalMailingListAddress + numberOfFOLAAddress) > 0)
+            if (numberofCopies > 0)
             {
 
                 int printPriority = getPrintPriority(documentCategory);
-                int numberofCopies = numberOfFOLAAddress + numberOfSupplementalMailingListAddress;
+                
                 DateTime dateRequested = DateTime.Now;
                 //update piw list
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] =
@@ -1737,7 +1747,7 @@ namespace PIW_SPAppWeb.Helper
 
         /// <summary>
         /// this method prepare the html code to display the document list in report or in email.
-        /// If report, it display using bootstrap icon, if email it display using the html list item
+        /// If report, it display list of document in hyperlink, if email it display list of document in text only
         /// </summary>
         /// <param name="publicDocsURLs"></param>
         /// <param name="CEIIDocsURLs"></param>
@@ -1808,6 +1818,33 @@ namespace PIW_SPAppWeb.Helper
                 result.Insert(0, "<ul>");
                 result.Append("</ul>");
             }
+            return result.ToString();
+        }
+
+        public string getPublicDocumentList(string publicDocsURLs)
+        {
+            //build seperator array
+            StringBuilder result = new StringBuilder();
+            //string pattern = "<span class='glyphicon glyphicon-menu-right' style='font-size:0.7em; color:#337ab7'></span> <a href='{0}'>{1}</a>";
+            string pattern = "<li class='list-group-item'><a href='{0}'>{1}</a></li>";
+
+            string allowDownload = "?web=0";
+
+            //Public
+            var urlArray = publicDocsURLs.Split(new string[] { Constants.DocumentURLsSeparator }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var url in urlArray)
+            {
+                if (string.IsNullOrEmpty(result.ToString()))
+                {
+                    result.Append(string.Format(pattern, url + allowDownload, getFileNameFromURL(url)));
+                }
+                else
+                {
+                    result.Append(string.Format(pattern, url + allowDownload, getFileNameFromURL(url)));
+                }
+
+            }
+            
             return result.ToString();
         }
 

@@ -211,13 +211,13 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Label lbDocumenttobePrinted;
         
         /// <summary>
-        /// rpDocumentList control.
+        /// lbPublicDocumentList control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Repeater rpDocumentList;
+        protected global::System.Web.UI.WebControls.Label lbPublicDocumentList;
         
         /// <summary>
         /// lbComment control.

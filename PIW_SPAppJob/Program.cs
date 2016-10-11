@@ -41,10 +41,7 @@ namespace PIW_SPAppJob
                         }
                     }
 
-                    clientContext.ExecuteQuery();
-
-                    //throw new Exception();
-
+                    //clientContext.ExecuteQuery();
                 }
             }
             catch (Exception exc)

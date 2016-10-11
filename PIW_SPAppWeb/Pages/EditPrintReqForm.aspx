@@ -68,23 +68,12 @@
                 <asp:HyperLink runat="server" ID="hplSupplementalMailingList" CssClass="col-md-2">Supplemental Mailing List</asp:HyperLink>
             </div>
             <div class="form-group">
-                <asp:Label ID="lbDocumenttobePrinted" runat="server" Text="Printing Document(s)" CssClass="col-md-2 control-label" AssociatedControlID="rpDocumentList"></asp:Label>
+                <asp:Label ID="lbDocumenttobePrinted" runat="server" Text="Printing Document(s)" CssClass="col-md-2 control-label" AssociatedControlID="lbPublicDocumentList"></asp:Label>
                 <div class="col-md-6">
-                    <asp:Repeater ID="rpDocumentList" runat="server">
-                        <HeaderTemplate>
-                            <ol class="list-group">
-                        </HeaderTemplate>
-                        <ItemTemplate>
-                            <li class="list-group-item">
-                                <asp:HyperLink ID="hyperlinkFileURL" runat="server" Text='<%#DataBinder.Eval(Container.DataItem,"Name")%>'
-                                    NavigateUrl='<%#DataBinder.Eval(Container.DataItem,"URL")%>'>
-                                </asp:HyperLink>
-                            </li>
-                        </ItemTemplate>
-                        <FooterTemplate>
-                            </ol>
-                        </FooterTemplate>
-                    </asp:Repeater>
+                    <ul class="list-group">
+                        <asp:Label runat="server" ID="lbPublicDocumentList"></asp:Label>
+                    </ul>
+
                 </div>
             </div>
             <div class="form-group">

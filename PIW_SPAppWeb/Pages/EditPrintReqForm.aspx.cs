@@ -240,6 +240,16 @@ namespace PIW_SPAppWeb.Pages
                 //Total Print Pages (calculated field)
                 tbTotalPrintPages.Text = (numberOfCopies * numberOfPrintPages).ToString();
 
+                //Printing documents (public)
+                var PublicDocsURL = listItem[piwListInteralColumnNames[Constants.PIWList_colName_PublicDocumentURLs]] != null
+                ? listItem[piwListInteralColumnNames[Constants.PIWList_colName_PublicDocumentURLs]].ToString() : string.Empty;
+                if (!string.IsNullOrEmpty(PublicDocsURL))
+                {
+                    var docc = helper.getPublicDocumentList(PublicDocsURL);
+                    lbPublicDocumentList.Text = docc;
+                }
+
+
                 //Comment
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_PrintReqComment]] != null)
                 {
@@ -378,8 +388,8 @@ namespace PIW_SPAppWeb.Pages
 
                     break;
                 case Constants.PIWList_FormStatus_PrintReqMailJobCompleted:
-                    tbNumberofCopies.Enabled = true;
-                    tbNumberofPages.Enabled = true;
+                    tbNumberofCopies.Enabled = false;
+                    tbNumberofPages.Enabled = false;
 
                     //buttons
                     btnAccept.Visible = false;
@@ -444,14 +454,6 @@ namespace PIW_SPAppWeb.Pages
                                     helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_ItemNotFound);
                                     return;
                                 }
-
-
-
-                                string publicDocumentURLs;
-                                string cEiiDocumentUrLs;
-                                string privilegedDocumentURLs;
-                                helper.PopulateIssuanceDocumentList(clientContext, ListItemID, rpDocumentList,
-                                out publicDocumentURLs, out cEiiDocumentUrLs, out privilegedDocumentURLs);
 
                                 PopulateFOLAAndSupplementalMailingListURL(clientContext);
                                 PopulateFormProperties(clientContext, listItem);
