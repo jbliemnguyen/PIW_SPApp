@@ -134,6 +134,8 @@
                     <asp:Button ID="btnInitiatePublication1" runat="server" Text="Initiate Publication" ToolTip="Workflow item routed to eLibrary Data Entry Group" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                     <asp:Button ID="btnDelete1" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                     <asp:Button ID="btnReopen1" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnLegalReviewCompleted1" runat="server" Text="Legal Review Completed" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnLegalReviewCompletedWithComment1" runat="server" Text="Legal Review Completed with Comment" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                     <asp:Button ID="btnGenerateMailingList1" runat="server" Text="ReGenerate Print Requisition" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 </div>
             </div>
@@ -432,17 +434,11 @@
         <fieldset runat="server" id="fieldsetLegalResourcesReview" visible="false">
             <legend>Legal Resources And Review</legend>
             <div class="form-group">
-                <asp:Label ID="lbLegalResourcesReviewCompletionDate" runat="server" Text="Completion Date" AssociatedControlID="tbLegalResourcesReviewCompletionDate" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-4">
-                    <asp:TextBox ID="tbLegalResourcesReviewCompletionDate" ClientIDMode="Static" runat="server" CssClass="form-control"></asp:TextBox>
+                    <asp:Label ID="lbLegalResourcesReviewCompletionDate" runat="server" Text="Completion Date" AssociatedControlID="tbLegalResourcesReviewCompletionDateValue" CssClass="col-md-2 control-label"></asp:Label>
+                    <div class="col-md-2">
+                        <asp:TextBox runat="server" ID="tbLegalResourcesReviewCompletionDateValue" CssClass="form-control" Enabled="false"></asp:TextBox>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <asp:Label ID="lbLegalResourcesNote" runat="server" Text="Note" AssociatedControlID="tbLegalResourcesReviewNote" CssClass="col-md-2 control-label"></asp:Label>
-                <div class="col-md-4">
-                    <asp:TextBox ID="tbLegalResourcesReviewNote" TextMode="MultiLine" Rows="2" CssClass="form-control" runat="server"></asp:TextBox>
-                </div>
-            </div>
         </fieldset>
 
         <div class="form-group"></div>
@@ -457,6 +453,8 @@
                 <asp:Button ID="btnDelete" runat="server" Text="Delete" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 <asp:Button ID="btnDeleteConfirm" Text="DeleteConfirm" runat="server" Style="visibility: hidden; display: none;" ClientIDMode="Static" OnClick="btnDeleteConfirm_Click" />
                 <asp:Button ID="btnReopen" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" OnClick="btnReopen_Click" ClientIDMode="Static" />
+                <asp:Button ID="btnLegalReviewCompleted" runat="server" Text="Legal Review Completed" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnLegalReviewCompleted_Click" />
+                <asp:Button ID="btnLegalReviewCompletedWithComment" runat="server" Text="Legal Review Completed with Comment" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnLegalReviewCompleted_Click" />
                 <asp:Button ID="btnGenerateMailingList" runat="server" Text="ReGenerate Print Requisition" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnGenerateMailingList_Click" />
             </div>
         </div>

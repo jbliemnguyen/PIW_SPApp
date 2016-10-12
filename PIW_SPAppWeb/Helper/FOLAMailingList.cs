@@ -277,18 +277,21 @@ namespace PIW_SPAppWeb.Helper
                 foreach (string docket in dockets)
                 {
                     //remove sub-docket- P-12345-000 ---> P-12345
-                    var rootDocket = docket.Substring(0, docket.LastIndexOf("-"));
-                    if (!docketDictionary.ContainsKey(rootDocket))
+                    if (docket.IndexOf("-") > 0)
                     {
-                        docketDictionary.Add(rootDocket, 1);
-                        //append to rootDocket string for FOLA use
-                        if (string.IsNullOrEmpty(rootDocketNumbers))
+                        var rootDocket = docket.Substring(0, docket.LastIndexOf("-"));
+                        if (!docketDictionary.ContainsKey(rootDocket))
                         {
-                            rootDocketNumbers = rootDocket;
-                        }
-                        else
-                        {
-                            rootDocketNumbers = rootDocketNumbers + "," + rootDocket;
+                            docketDictionary.Add(rootDocket, 1);
+                            //append to rootDocket string for FOLA use
+                            if (string.IsNullOrEmpty(rootDocketNumbers))
+                            {
+                                rootDocketNumbers = rootDocket;
+                            }
+                            else
+                            {
+                                rootDocketNumbers = rootDocketNumbers + "," + rootDocket;
+                            }
                         }
                     }
                 }

@@ -39,7 +39,7 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_LegalResourcesAndReviewGroupCompleteDate =
             "Legal Resources And Review Group Complete Date";
 
-        public const string PIWList_colName_LegalResourcesAndReviewGroupNote = "Legal Resources And Review Group Note";
+        //public const string PIWList_colName_LegalResourcesAndReviewGroupNote = "Legal Resources And Review Group Note";
         public const string PIWList_colName_FormStatus = "Form Status";
         public const string PIWList_colName_FormType = "Form Type";
         
@@ -58,8 +58,6 @@ namespace PIW_SPAppWeb
         public const string PIWList_colName_PublishedDate = "Published Date";
         public const string PIWList_colName_PublishedError = "Published Error";
         public const string PIWList_colName_PublishedBy = "Published By";
-        //public const string PIWList_colName_SecReviewAction = "Sec Review Action";
-        //public const string PIWList_colName_SecReviewComment = "Sec Review Comment";
         public const string PIWList_colName_CitationNumber = "Citation Number";
         public const string PIWList_colName_Comment = "Comment";
         public const string PIWList_colName_RecallRejectComment = "Recall / Reject Comment";
@@ -379,6 +377,7 @@ namespace PIW_SPAppWeb
         ReOpen,
         Delete,
         PublishedToElibrary,
+        LegalReviewComplete,
         PrintJobComplete,
         MailJobComplete
     }

@@ -176,7 +176,7 @@ namespace PIW_SPAppWeb.Helper
                     }
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    if (action == enumAction.Save)
+                    if (action == enumAction.LegalReviewComplete)
                     {
                         nextStatus = Constants.PIWList_FormStatus_PublishedToeLibrary;
                     }
@@ -314,7 +314,7 @@ namespace PIW_SPAppWeb.Helper
                     }
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    if (action == enumAction.Save)
+                    if (action == enumAction.LegalReviewComplete)
                     {
                         nextStatus = Constants.PIWList_FormStatus_PublishedToeLibrary;
                     }
@@ -373,7 +373,7 @@ namespace PIW_SPAppWeb.Helper
                     }
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
-                    if (action == enumAction.Save)
+                    if (action == enumAction.LegalReviewComplete)
                     {
                         nextStatus = Constants.PIWList_FormStatus_PublishedToeLibrary;
                     }

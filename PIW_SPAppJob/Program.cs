@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
 using System.Configuration;
 using Microsoft.SharePoint.Client;
 using PIW_SPAppWeb;
@@ -13,7 +9,6 @@ namespace PIW_SPAppJob
 {
     class Program
     {
-        private static string SharePointPrincipal = "00000003-0000-0ff1-ce00-000000000000";
         static SharePointHelper helper = new SharePointHelper();
         static void Main(string[] args)
         {
@@ -42,6 +37,7 @@ namespace PIW_SPAppJob
                     }
 
                     //clientContext.ExecuteQuery();
+                    helper.CreateLog(clientContext, "Finish Running Scheduler Job", "update: " + piwListItemCol.Count + " items");
                 }
             }
             catch (Exception exc)

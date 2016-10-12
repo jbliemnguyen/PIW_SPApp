@@ -139,6 +139,24 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Button btnReopen1;
         
         /// <summary>
+        /// btnLegalReviewCompleted1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnLegalReviewCompleted1;
+        
+        /// <summary>
+        /// btnLegalReviewCompletedWithComment1 control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnLegalReviewCompletedWithComment1;
+        
+        /// <summary>
         /// btnGenerateMailingList1 control.
         /// </summary>
         /// <remarks>
@@ -751,31 +769,13 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.Label lbLegalResourcesReviewCompletionDate;
         
         /// <summary>
-        /// tbLegalResourcesReviewCompletionDate control.
+        /// tbLegalResourcesReviewCompletionDateValue control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox tbLegalResourcesReviewCompletionDate;
-        
-        /// <summary>
-        /// lbLegalResourcesNote control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbLegalResourcesNote;
-        
-        /// <summary>
-        /// tbLegalResourcesReviewNote control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox tbLegalResourcesReviewNote;
+        protected global::System.Web.UI.WebControls.TextBox tbLegalResourcesReviewCompletionDateValue;
         
         /// <summary>
         /// btnSave control.
@@ -884,6 +884,24 @@ namespace PIW_SPAppWeb.Pages {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnReopen;
+        
+        /// <summary>
+        /// btnLegalReviewCompleted control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnLegalReviewCompleted;
+        
+        /// <summary>
+        /// btnLegalReviewCompletedWithComment control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnLegalReviewCompletedWithComment;
         
         /// <summary>
         /// btnGenerateMailingList control.

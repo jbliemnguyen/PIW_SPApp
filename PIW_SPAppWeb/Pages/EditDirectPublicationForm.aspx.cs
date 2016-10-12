@@ -642,6 +642,45 @@ namespace PIW_SPAppWeb.Pages
                 lbMainMessage.Text = "ReGenerate Print Requisition Form";
             }
         }
+
+        protected void btnLegalReviewCompleted_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                const enumAction action = enumAction.LegalReviewComplete;
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    if (ValidFormData(action))
+                    {
+                        ListItem listItem = null;
+                        if (!SaveData(clientContext, action, ref listItem))
+                        {
+                            return;
+                        }
+
+                        //history list
+                        //get current user
+                        User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                        clientContext.Load(currentUser);
+                        clientContext.ExecuteQuery();
+
+                        //Create list history
+                        string message = "Legal Review Completed.";
+                        helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
+                            Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+
+                        //Redirect
+                        helper.RedirectToSourcePage(Request, Response);
+
+                    }
+                }
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, Request, exc, ListItemID, string.Empty);
+                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+            }
+        }
         #endregion
 
         #region Save Data
@@ -721,8 +760,7 @@ namespace PIW_SPAppWeb.Pages
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
                     if (PreviousFormStatus == Constants.PIWList_FormStatus_PublishedToeLibrary)
                     {
-                        helper.SaveLegalResourcesAndReviewAndStatus(clientContext, listItem, FormStatus, PreviousFormStatus,
-                            tbLegalResourcesReviewCompletionDate.Text, tbLegalResourcesReviewNote.Text);
+                        helper.SaveLegalResourcesAndReviewAndComment(clientContext, listItem, DateTime.Now, tbComment.Text.Trim(), CurrentUserLogInName);
                     }
                     else
                     {
@@ -850,7 +888,7 @@ namespace PIW_SPAppWeb.Pages
             //comment
             if (!string.IsNullOrEmpty(tbComment.Text.Trim()))
             {
-                helper.SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, tbComment.Text.Trim(),Constants.PIWList_FormType_DirectPublicationForm);
+                helper.SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, tbComment.Text.Trim(), Constants.PIWList_FormType_DirectPublicationForm);
             }
 
             //FOLA Service Required
@@ -1147,12 +1185,7 @@ namespace PIW_SPAppWeb.Pages
                 //Legal resources and review
                 if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]] != null)
                 {
-                    tbLegalResourcesReviewCompletionDate.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]].ToString()).ToShortDateString();
-                }
-
-                if (listItem[piwListInteralColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupNote]] != null)
-                {
-                    tbLegalResourcesReviewNote.Text = listItem[piwListInteralColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupNote]].ToString();
+                    tbLegalResourcesReviewCompletionDateValue.Text = DateTime.Parse(listItem[piwListInteralColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]].ToString()).ToShortDateString();
                 }
 
             }
@@ -1183,6 +1216,8 @@ namespace PIW_SPAppWeb.Pages
             btnInitiatePublication1.Visible = btnInitiatePublication.Visible;
             btnDelete1.Visible = btnDelete.Visible;
             btnReopen1.Visible = btnReopen.Visible;
+            btnLegalReviewCompleted1.Visible = btnLegalReviewCompleted.Visible;
+            btnLegalReviewCompletedWithComment1.Visible = btnLegalReviewCompletedWithComment.Visible;
             btnGenerateMailingList1.Visible = btnGenerateMailingList.Visible;
         }
         #endregion
@@ -1207,7 +1242,11 @@ namespace PIW_SPAppWeb.Pages
             {
                 numberOfPrintCopies = int.Parse(listItem[piwlistInternalColumnName[Constants.PIWList_colName_PrintReqNumberofCopies]].ToString());
             }
-            
+
+            //legal review date
+            string legalReviewCompletedDate = listItem[piwlistInternalColumnName[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]] != null ?
+                listItem[piwlistInternalColumnName[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]].ToString() : string.Empty;
+
             //SPUser checkoutUser = null;
             var currentUser = clientContext.Web.CurrentUser;
             clientContext.Load(currentUser);
@@ -1234,6 +1273,9 @@ namespace PIW_SPAppWeb.Pages
                     btnDelete.Visible = btnSave.Visible;
                     btnReopen.Visible = false;
                     btnGenerateMailingList.Visible = false;
+                    btnLegalReviewCompleted.Visible = false;
+                    btnLegalReviewCompletedWithComment.Visible = false;
+                    btnGenerateMailingList.Visible = false;
 
                     break;
 
@@ -1255,6 +1297,8 @@ namespace PIW_SPAppWeb.Pages
                     btnReopen.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                         new string[] { Constants.Grp_PIWAdmin, Constants.Grp_PIWSystemAdmin });
                     btnGenerateMailingList.Visible = false;
+                    btnLegalReviewCompleted.Visible = false;
+                    btnLegalReviewCompletedWithComment.Visible = false;
                     break;
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
                     EnableMainPanel(false, false);
@@ -1266,10 +1310,12 @@ namespace PIW_SPAppWeb.Pages
                     fieldsetLegalResourcesReview.Visible = true;
 
                     //buttons
-                    btnSave.Visible = isCurrentUserLegalResouceTeam;
+                    btnSave.Visible = false;
                     btnInitiatePublication.Visible = false;
                     btnDelete.Visible = false;
                     btnReopen.Visible = false;
+                    btnLegalReviewCompleted.Visible = isCurrentUserLegalResouceTeam && string.IsNullOrEmpty(legalReviewCompletedDate);
+                    btnLegalReviewCompletedWithComment.Visible = isCurrentUserLegalResouceTeam && string.IsNullOrEmpty(legalReviewCompletedDate);
                     btnGenerateMailingList.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
                         new string[] { Constants.Grp_PIWAdmin, Constants.Grp_PIWSystemAdmin });
                     break;
@@ -1289,6 +1335,8 @@ namespace PIW_SPAppWeb.Pages
                     btnInitiatePublication.Visible = false;
                     btnDelete.Visible = false;
                     btnReopen.Visible = false;
+                    btnLegalReviewCompleted.Visible = false;
+                    btnLegalReviewCompletedWithComment.Visible = false;
                     btnGenerateMailingList.Visible = false;
                     break;
                 default:

@@ -262,7 +262,7 @@
 
             //comment is required only when reject/recall button is clicked
             //ctl00$MainContentPlaceHolder$tbComment
-            $("#btnReject,#btnRecall").on("click", function () {
+            $("#btnReject,#btnRecall,#btnLegalReviewCompletedWithComment,#btnLegalReviewCompletedWithComment1").on("click", function () {
                 $("#tbComment").rules("add", {
                     required: true,
                 });
@@ -272,7 +272,7 @@
             $("[id^=btn]").on("click", function () {
                 //only reject and recall need the comment field required 
                 //so we remove the rule when other button clicked
-                if ((this.id != "btnReject") && (this.id != "btnRecall")) {
+                if ((this.id != "btnReject") && (this.id != "btnRecall") && (this.id != "btnLegalReviewCompletedWithComment") && (this.id != "btnLegalReviewCompletedWithComment1")) {
                     $("#tbComment").rules("remove");
                 }
 
@@ -437,6 +437,18 @@
                 event.preventDefault();
                 $("#btnGenerateMailingList").click();
             });
+
+            $("#btnLegalReviewCompleted1").click(function (event) {
+                event.preventDefault();
+                $("#btnLegalReviewCompleted").click();
+            });
+
+            $("#btnLegalReviewCompletedWithComment1").click(function (event) {
+                event.preventDefault();
+                $("#btnLegalReviewCompletedWithComment").click();
+            });
+
+            
             //end top buttons event
 
 
@@ -449,11 +461,6 @@
             $("#btnSubmit").click(function (event) {
                 skm_LockScreen("Submitting ... ");
             });
-
-            //$("#btnSubmit").click(function (event) {
-            //    skm_LockScreen("Submitting To Secretary Review ... ");
-            //});
-
 
             $("#btnOSECTakeOwnership,#btnSECReviewTakeOwnership").click(function (event) {
                 skm_LockScreen("Taking Ownership ... ");

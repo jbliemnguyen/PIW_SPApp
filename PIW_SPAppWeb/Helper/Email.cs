@@ -80,7 +80,7 @@ namespace PIW_SPAppWeb.Helper
                 //email to copy center, initiator and document owner
                 To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_CopyCenter));
                 To = AddEmailAddress(To, initiator);
-                To = AddEmailAddress(To, documentOwners);
+                //To = AddEmailAddress(To, documentOwners);
                 //To = AddEmailAddress(To, notificationRecipients);
                 SendEmail(clientContext, To, subject, htmlContent);
             }

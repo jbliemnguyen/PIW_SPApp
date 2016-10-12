@@ -282,16 +282,19 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public void SaveLegalResourcesAndReviewAndStatus(ClientContext clientContext, ListItem listItem, string formStatus, string previousFormStatus, string completionDate, string note)
+        public void SaveLegalResourcesAndReviewAndComment(ClientContext clientContext, ListItem listItem, DateTime completionDate, string comment, string CurrentUserLogInName)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] = formStatus;
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousFormStatus]] = previousFormStatus;
+            //legal resource completion date
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]] = completionDate.ToShortDateString();
 
-            //legal resource completion date and note
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]] = completionDate;
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupNote]] = note;
+            //comment
+            if (!string.IsNullOrEmpty(comment))
+            {
+                SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment, string.Empty);
+            }
+
 
             listItem.Update();
             clientContext.ExecuteQuery();
