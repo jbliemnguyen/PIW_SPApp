@@ -12,49 +12,12 @@
 
             //set active left navigation tab summ
             $("#sidebar a").removeClass("active");
-            //$("#EditAgendaFormURL").addClass("active");
 
             registerPeoplePicker(spHostUrl, spAppWebUrl, SPLanguage);
 
             //event to set description field to document category
             $("#ddDocumentCategory").change(function () {
                 $("#tbDescription").val($(this).val());
-            });
-
-            //register date picker
-            $("#tbDueDate").datepicker({ minDate: 0 });
-            //prevent user edit duedate and set value to past date
-            $("#tbDueDate").keydown(function (event) { event.preventDefault(); });
-            $("#tbLegalResourcesReviewCompletionDate").datepicker();
-
-            //disabled Docket Number and alternate identifier if IsNonDocket ischecked
-            if ($("#cbIsNonDocket").is(':checked')) {
-                $("#tbDocketNumber").prop("readonly", "readonly");
-
-            } else {
-                $("#tbAlternateIdentifier").prop("readonly", "readonly");
-            }
-
-            $("#cbIsNonDocket").change(function () {
-                if (this.checked) {
-                    //disable docket number
-                    $("#tbDocketNumber").prop("readonly", "readonly");
-                    $("#tbDocketNumber").prop("value", "Non-Docket"); //can combined with above, but this way is clearer
-
-                    //enable alternate identifier
-                    $("#tbAlternateIdentifier").removeProp("readonly");
-
-                } else {
-                    $("#tbDocketNumber").removeProp("readonly");
-                    $("#tbDocketNumber").prop("value", ""); //can combined with above, but this way is clearer
-
-                    //disable/clear value of alternate identifier 
-                    $("#tbAlternateIdentifier").prop("readonly", "readonly");
-                    $("#tbAlternateIdentifier").prop("value", "");
-
-                }
-
-                $("#tbDocketNumber").blur();//call blur event to validate the docket number and display message
             });
 
             //validate docket number when blur event
@@ -138,10 +101,6 @@
             if ($("#inputNotificationRecipient").prop("disabled")) {
                 $("#inputNotificationRecipient").parent().find("a").remove();
             }
-        }
-
-        function SetDescriptionToDocumentCategoryValue() {
-
         }
 
     </script>

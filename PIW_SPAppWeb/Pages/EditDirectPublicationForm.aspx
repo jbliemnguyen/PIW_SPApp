@@ -15,8 +15,6 @@
 
             registerPeoplePicker(spHostUrl, spAppWebUrl, SPLanguage);
 
-            $("#tbLegalResourcesReviewCompletionDate").datepicker();
-
             //disabled Docket Number textbox is IsNonDocket ischecked
             if ($("#cbIsNonDocket").is(':checked')) {
                 $("#tbDocketNumber").prop("readonly", "readonly");
