@@ -1490,6 +1490,8 @@ namespace PIW_SPAppWeb.Helper
 
             return result;
         }
+
+        
         /// <summary>
         /// Return the first docket number found in input
         /// If no docket found, return the whole input

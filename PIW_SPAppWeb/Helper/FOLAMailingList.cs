@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.ApplicationServices;
 using DocumentFormat.OpenXml;
@@ -318,7 +319,7 @@ namespace PIW_SPAppWeb.Helper
             return numberOfAddress;
         }
 
-        private bool getIncludeSenatorsParameter(string shortLabel)
+        public bool getIncludeSenatorsParameter(string shortLabel)
         {
             /*
             If "RM" and "P" docket --> True
@@ -331,12 +332,27 @@ namespace PIW_SPAppWeb.Helper
              * */
             //this code dertermine if includesenator is true, default is false
             bool includeSenator = false;
-            if ((shortLabel.IndexOf("RM", StringComparison.OrdinalIgnoreCase) > -1) ||
-                (shortLabel.IndexOf("P", StringComparison.OrdinalIgnoreCase) > -1))
+            const string Ppattern_start = "^P[0-9]";
+            const string Ppattern_middle = ",P[0-9]";
+
+            const string RMpattern = "RM[0-9]";
+            const string ELpattern = "EL[0-9]";
+            
+
+
+
+            //if ((shortLabel.StartsWith("RM", StringComparison.OrdinalIgnoreCase)) ||
+            //    (shortLabel.StartsWith("P", StringComparison.OrdinalIgnoreCase)))
+            if (Regex.IsMatch(shortLabel, RMpattern, RegexOptions.IgnoreCase))
             {
                 includeSenator = true;
             }
-            else if (shortLabel.IndexOf("EL", StringComparison.OrdinalIgnoreCase) > -1)
+            else if ((Regex.IsMatch(shortLabel, Ppattern_start, RegexOptions.IgnoreCase)) || 
+                (Regex.IsMatch(shortLabel, Ppattern_middle, RegexOptions.IgnoreCase)))
+            {
+                includeSenator = true;
+            }
+            else if (Regex.IsMatch(shortLabel, ELpattern, RegexOptions.IgnoreCase))
             {
                 int fiscalYear = DateTime.Now.Year;
                 if (DateTime.Now.Month >= 10)
@@ -355,7 +371,7 @@ namespace PIW_SPAppWeb.Helper
                 else
                 {
                     //if there is another docket, check comma ','
-                    if ((shortLabel.IndexOf(",")) > -1)
+                    if (shortLabel.IndexOf(",") > -1)
                     {
                         includeSenator = true;
                     }

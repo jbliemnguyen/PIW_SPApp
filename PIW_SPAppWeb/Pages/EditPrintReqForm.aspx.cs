@@ -441,7 +441,6 @@ namespace PIW_SPAppWeb.Pages
                             }
                             else
                             {
-
                                 var piwListInternalColumnNames = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
                                 int numberofCopies = 0;
                                 if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] != null)
@@ -462,9 +461,6 @@ namespace PIW_SPAppWeb.Pages
 
                                 //display form visiblility based on form status
                                 ControlsVisiblitilyBasedOnStatus(clientContext, FormStatus);
-
-
-
                             }
                         }
                     }
@@ -473,7 +469,15 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, ListItemID, Page.Request.Url.OriginalString);
-                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+
+                if (exc is ServerUnauthorizedAccessException)
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_AccessDenied);
+                }
+                else
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                }
             }
 
         }

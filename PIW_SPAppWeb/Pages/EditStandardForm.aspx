@@ -23,14 +23,33 @@
             $("#tbDueDate").keydown(function (event) { event.preventDefault(); });
             $("#tbLegalResourcesReviewCompletionDate").datepicker();
 
-            //disabled Docket Number textbox is IsNonDocket ischecked
+            //disabled Docket Number and alternate identifier if IsNonDocket ischecked
             if ($("#cbIsNonDocket").is(':checked')) {
                 $("#tbDocketNumber").prop("readonly", "readonly");
+                
+            } else {
+                $("#tbAlternateIdentifier").prop("readonly", "readonly");
+            }
+
+            //disable alternate identifier if CNF is checked
+            if ($("#cbIsCNF").is(':checked')) {
+
+            } else {
+                $("#tbAlternateIdentifier").prop("readonly", "readonly");
             }
 
             //Event for CNF checkbox
             $("#cbIsCNF").change(function () {
                 $("#tbDocketNumber").blur();//call blur event to validate the docket number and display message
+
+                if (this.checked) {
+                    //enable alternate identifier
+                    $("#tbAlternateIdentifier").removeProp("readonly");
+                } else {
+                    //disable/clear value of alternate identifier 
+                    $("#tbAlternateIdentifier").prop("readonly", "readonly");
+                    $("#tbAlternateIdentifier").prop("value", "");
+                }
             });
 
             //event for Non-Docketed checkbox
@@ -39,9 +58,18 @@
                     //disable docket number
                     $("#tbDocketNumber").prop("readonly", "readonly");
                     $("#tbDocketNumber").prop("value", "Non-Docket"); //can combined with above, but this way is clearer
+
+                    //enable alternate identifier
+                    $("#tbAlternateIdentifier").removeProp("readonly");
+
                 } else {
                     $("#tbDocketNumber").removeProp("readonly");
                     $("#tbDocketNumber").prop("value", ""); //can combined with above, but this way is clearer
+
+                    //disable/clear value of alternate identifier 
+                    $("#tbAlternateIdentifier").prop("readonly", "readonly");
+                    $("#tbAlternateIdentifier").prop("value", "");
+
                 }
 
                 $("#tbDocketNumber").blur();//call blur event to validate the docket number and display message
