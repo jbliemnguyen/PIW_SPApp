@@ -18,7 +18,7 @@ namespace PIW_SPAppJob
 
                 using (var clientContext = helper.getElevatedClientContext(spHostUrl))
                 {
-                    helper.CreateLog(clientContext, "Start Running Scheduler Job", string.Empty);
+                    
 
                     clientContext.Load(clientContext.Web.CurrentUser);
                     clientContext.ExecuteQuery();
@@ -34,10 +34,12 @@ namespace PIW_SPAppJob
                         {
                             //do nothign for now
                         }
+
+                        helper.CreateLog(clientContext, "Running Scheduler Job - update piwListItem ID: " + piwListItem["ID"], string.Empty);
                     }
 
                     //clientContext.ExecuteQuery();
-                    helper.CreateLog(clientContext, "Finish Running Scheduler Job", "update: " + piwListItemCol.Count + " items");
+                    //helper.CreateLog(clientContext, "Finish Running Scheduler Job", "update: " + piwListItemCol.Count + " items");
                 }
             }
             catch (Exception exc)
