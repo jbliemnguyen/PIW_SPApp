@@ -317,8 +317,7 @@ namespace PIW_SPAppWeb.Pages
                                 Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
 
-                        //TODO: create list history for Mailing Date and FERC Report Completed.
-
+                        
                         //Refresh or Redirect depends on Previous Status
                         if (PreviousFormStatus.Equals(Constants.PIWList_FormStatus_Pending) ||
                             PreviousFormStatus.Equals(Constants.PIWList_FormStatus_Recalled) ||

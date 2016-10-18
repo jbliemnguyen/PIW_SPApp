@@ -290,8 +290,9 @@ namespace PIW_SPAppWeb.Pages
                         {
                             return;
                         }
-
-                        //TODO: Change document and list permission
+                        
+                        //Change document and list permission
+                        helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
 
                         //get current user
                         User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
@@ -309,8 +310,6 @@ namespace PIW_SPAppWeb.Pages
                             helper.CreatePIWListHistory(clientContext, ListItemID, "Workflow Item saved.", FormStatus,
                                 Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
-
-                        //TODO: create list history for Mailing Date and FERC Report Completed.
 
                         //Redirect depends on Previous Status
                         helper.RedirectToSourcePage(Request, Response);

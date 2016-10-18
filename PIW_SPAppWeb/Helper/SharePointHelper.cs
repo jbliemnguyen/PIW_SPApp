@@ -347,7 +347,7 @@ namespace PIW_SPAppWeb.Helper
             {
 
                 int printPriority = getPrintPriority(documentCategory);
-                
+
                 DateTime dateRequested = DateTime.Now;
                 //update piw list
                 listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] =
@@ -399,7 +399,7 @@ namespace PIW_SPAppWeb.Helper
                 Email email = new Email();
                 email.SendEmailForPrintRequisitionForm(clientContext, listItem, piwListInternalColumnNames,
                     enumAction.Submit, clientContext.Web.CurrentUser, string.Empty);
-                
+
                 return true;
             }
             else
@@ -1391,60 +1391,89 @@ namespace PIW_SPAppWeb.Helper
 
         public void LogError(ClientContext clientContext, Exception exc, string listItemID, string pageName)
         {
-            //This is expected exception after Page.Redirect --> ignore it??? TEst it
-            if (exc is System.Threading.ThreadAbortException)
+            try
             {
-                return;
-            }
-            
-            List errorLogList = clientContext.Web.Lists.GetByTitle(Constants.ErrorLogListName);
-            var errorLogInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.ErrorLogListName);
+                //This is expected exception after Page.Redirect --> ignore it??? TEst it
+                if (exc is System.Threading.ThreadAbortException)
+                {
+                    return;
+                }
 
-            ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
-            ListItem newItem = errorLogList.AddItem(itemCreateInfo);
+                List errorLogList = clientContext.Web.Lists.GetByTitle(Constants.ErrorLogListName);
+                var errorLogInternalNameList = getInternalColumnNamesFromCache(clientContext, Constants.ErrorLogListName);
 
-            //set current user name
-            clientContext.Load(clientContext.Web.CurrentUser);
-            clientContext.ExecuteQuery();
-            newItem[errorLogInternalNameList[Constants.ErrorLog_colName_User]] = clientContext.Web.CurrentUser;
+                ListItemCreationInformation itemCreateInfo = new ListItemCreationInformation();
+                ListItem newItem = errorLogList.AddItem(itemCreateInfo);
 
-            newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorPageName]] = pageName;
-
-            string message = string.Empty;
-            if (exc.InnerException != null)
-            {
-                message = exc.Message + " - Inner Exception: " + exc.InnerException.Message;
-            }
-            else
-            {
-                message = exc.Message;
-            }
-
-            if (exc.StackTrace != null)
-            {
-                message = message + "Stack Trace: " + exc.StackTrace;
-            }
-
-            message = message + "Type: " + exc.GetType();
-
-            newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorMessage]] = message;
-
-            newItem.Update();
-            clientContext.ExecuteQuery();//we need to create item first before set lookup field.
-
-
-            if (!string.IsNullOrEmpty(listItemID))
-            {
-                //get piwListItem reference
-                FieldLookupValue lv = new FieldLookupValue { LookupId = int.Parse(listItemID) };
-                newItem[errorLogInternalNameList[Constants.ErrorLog_colName_PIWListItem]] = lv;
-                newItem.Update();
+                //set current user name
+                clientContext.Load(clientContext.Web.CurrentUser);
                 clientContext.ExecuteQuery();
+                newItem[errorLogInternalNameList[Constants.ErrorLog_colName_User]] = clientContext.Web.CurrentUser;
+
+                newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorPageName]] = pageName;
+
+                string message = string.Empty;
+                if (exc.InnerException != null)
+                {
+                    message = exc.Message + " - Inner Exception: " + exc.InnerException.Message;
+                }
+                else
+                {
+                    message = exc.Message;
+                }
+
+                if (exc.StackTrace != null)
+                {
+                    message = message + "Stack Trace: " + exc.StackTrace;
+                }
+
+                newItem[errorLogInternalNameList[Constants.ErrorLog_colName_ErrorMessage]] = message;
+
+                newItem.Update();
+                clientContext.ExecuteQuery(); //we need to create item first before set lookup field.
+
+
+                if (!string.IsNullOrEmpty(listItemID))
+                {
+                    //get piwListItem reference
+                    FieldLookupValue lv = new FieldLookupValue { LookupId = int.Parse(listItemID) };
+                    newItem[errorLogInternalNameList[Constants.ErrorLog_colName_PIWListItem]] = lv;
+                    newItem.Update();
+                    clientContext.ExecuteQuery();
+
+                }
             }
+            catch (Exception newExc)//this happens when log event to sharepoint site --> log to server event log
+            {
+                using (EventLog eventLog = new EventLog("Application"))
+                {
+                    string message = string.Empty;
+
+                    if (exc.InnerException != null)
+                    {
+                        message = exc.Message + " - Inner Exception: " + exc.InnerException.Message;
+                    }
+                    else
+                    {
+                        message = exc.Message;
+                    }
+
+                    if (exc.StackTrace != null)
+                    {
+                        message = message + "Stack Trace: " + exc.StackTrace;
+                    }
+
+
+                    eventLog.Source = "Application";
+                    eventLog.WriteEntry(message, EventLogEntryType.Information, 101, 1);
+                }
+
+            }
+
 
         }
 
-        
+
 
         public bool IsUserMemberOfGroup(ClientContext clientContext, string userLoginID, string[] groupNames)
         {
@@ -1491,7 +1520,7 @@ namespace PIW_SPAppWeb.Helper
             return result;
         }
 
-        
+
         /// <summary>
         /// Return the first docket number found in input
         /// If no docket found, return the whole input
@@ -1849,7 +1878,7 @@ namespace PIW_SPAppWeb.Helper
                 }
 
             }
-            
+
             return result.ToString();
         }
 
@@ -1951,21 +1980,25 @@ namespace PIW_SPAppWeb.Helper
                     if (formType.Equals(Constants.PIWList_FormType_StandardForm))
                     {
                         AssignUniqueRoles(clientContext, listitemID, Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete,
-                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read);
+                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read,
+                            Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete);
                     }
                     else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
                     {
                         AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_ContributeNoDelete,
-                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read);
+                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read,
+                            Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete);
                     }
                     else if (formType.Equals(Constants.PIWList_FormType_DirectPublicationForm))
                     {
                         AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_Read,
-                            Constants.Role_Read, Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete);
+                            Constants.Role_Read, Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete,
+                            Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete);
                     }
                     break;
                 case Constants.PIWList_FormStatus_Submitted:
                     AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_Read,
+                            Constants.Role_Read, Constants.Role_Read, Constants.Role_Read,
                             Constants.Role_Read, Constants.Role_Read, Constants.Role_Read);
                     break;
                 case Constants.PIWList_FormStatus_Edited://no change when form moved to Edit mode
@@ -1974,29 +2007,34 @@ namespace PIW_SPAppWeb.Helper
                 case Constants.PIWList_FormStatus_OSECVerification:
                 case Constants.PIWList_FormStatus_PrePublication:
                     AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_ContributeNoDelete,
-                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read);
+                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read,
+                            Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete, Constants.Role_Read);
                     break;
                 case Constants.PIWList_FormStatus_SecretaryReview:
                     AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_Read,
-                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read);
+                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read,
+                            Constants.Role_Read, Constants.Role_ContributeNoDelete, Constants.Role_Read);
                     break;
                 case Constants.PIWList_FormStatus_ReadyForPublishing:
                     if (formType.Equals(Constants.PIWList_FormType_StandardForm))
                     {
                         AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_ContributeNoDelete,
-                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read);
+                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read,
+                            Constants.Role_ContributeNoDelete, Constants.Role_ContributeNoDelete, Constants.Role_Read);
                     }
                     else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
                     {
                         AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_Read,
-                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read);
+                            Constants.Role_ContributeNoDelete, Constants.Role_Read, Constants.Role_Read,
+                            Constants.Role_Read, Constants.Role_ContributeNoDelete, Constants.Role_Read);
                     }
                     break;
                 case Constants.PIWList_FormStatus_PublishInitiated:
                 case Constants.PIWList_FormStatus_PublishedToeLibrary:
                 case Constants.PIWList_FormStatus_Deleted:
                     AssignUniqueRoles(clientContext, listitemID, Constants.Role_Read, Constants.Role_Read,
-                            Constants.Role_Read, Constants.Role_Read, Constants.Role_Read);
+                            Constants.Role_Read, Constants.Role_Read, Constants.Role_Read,
+                            Constants.Role_Read, Constants.Role_Read, string.Empty);
                     break;
                 default:
                     throw new Exception("UpdatePermissionBasedOnFormStatus method - UnKnown Form Status: " + formStatus);
@@ -2004,7 +2042,9 @@ namespace PIW_SPAppWeb.Helper
             }
         }
 
-        public void AssignUniqueRoles(ClientContext clientContext, string listitemID, string PIWUsersRole, string PIWOSECRole, string PIWSecReviewRole, string PIWDirectPublicationRole, string PIWDirectPublicationSubmissionOnlyRole)
+        public void AssignUniqueRoles(ClientContext clientContext, string listitemID, string PIWUsersRole, string PIWOSECRole, string PIWSecReviewRole,
+            string PIWDirectPublicationRole, string PIWDirectPublicationSubmissionOnlyRole, string PIWOSECRoleForNonPublic,
+            string PIWSecReviewRoleForNonPublic, string initiatorRoleForNonPublic)
         {
             var folderServerRelativeURL = getFolderServerRelativeURL(clientContext, listitemID);
             var folder = clientContext.Web.GetFolderByServerRelativeUrl(folderServerRelativeURL);
@@ -2051,7 +2091,7 @@ namespace PIW_SPAppWeb.Helper
                 AssignRoleForGroup(clientContext, group, PIWDirectPublicationSubmissionOnlyRole, folder);
             }
 
-            //CEII and Privileged
+            //CEII and Privileged - must be the last permission to set because it will remove permission set in above code (group)
             ListItem listItem = GetPiwListItemById(clientContext, listitemID, true);
             if (listItem != null)
             {
@@ -2061,8 +2101,14 @@ namespace PIW_SPAppWeb.Helper
                 string PrivilegedUrls = listItem[piwlistInternalNameList[Constants.PIWList_colName_PrivilegedDocumentURLs]] != null
                     ? listItem[piwlistInternalNameList[Constants.PIWList_colName_PrivilegedDocumentURLs]].ToString() : string.Empty;
 
-                //todo: get the library
-                AssignPermissionForCEIIAndPrivilegedDocument(clientContext, listitemID, CEIIUrls, PrivilegedUrls, "Gas");
+                FieldUserValue fuv = (FieldUserValue)listItem[piwlistInternalNameList[Constants.PIWList_colName_WorkflowInitiator]];
+                User initiator = clientContext.Web.GetUserById(fuv.LookupId);
+                clientContext.Load(initiator);
+                clientContext.ExecuteQuery();
+
+
+                AssignPermissionForCEIIAndPrivilegedDocument(clientContext, listitemID, CEIIUrls, PrivilegedUrls, PIWOSECRoleForNonPublic,
+                    PIWSecReviewRoleForNonPublic, initiatorRoleForNonPublic, initiator);
             }
 
 
@@ -2070,25 +2116,6 @@ namespace PIW_SPAppWeb.Helper
             folder.Update();
             clientContext.ExecuteQuery();
 
-        }
-
-        public void AssignPermissionForCEIIAndPrivilegedDocument(ClientContext clientContext, string listItemID, string fileURL, string securityControl)
-        {
-            Group group = null;
-
-            if (securityControl.Equals(Constants.ddlSecurityControl_Option_CEII))
-            {
-                group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_CEII_RO);
-            }
-            else if (securityControl.Equals(Constants.ddlSecurityControl_Option_Privileged))
-            {
-                group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIW_FOL_Submission_Privileged_ReadOnly);
-            }
-
-            if (group != null)
-            {
-                AssignRoleForDocument(clientContext, listItemID, group, Constants.Role_Read, fileURL);
-            }
         }
 
         /// <summary>
@@ -2100,67 +2127,84 @@ namespace PIW_SPAppWeb.Helper
         /// <param name="PrivilegedUrls"></param>
         /// <param name="library"></param>
         public void AssignPermissionForCEIIAndPrivilegedDocument(ClientContext clientContext, string listItemID,
-            string CEIIUrls, string PrivilegedUrls, string library)
+            string CEIIUrls, string PrivilegedUrls, string PIWOSECRoleForNonPublic,
+            string PIWSecReviewRoleForNonPublic, string initiatorRoleForNonPublic, User initiator)
         {
             Group group = null;
-
-            //CEII
+            string AllNonPublicURLs = string.Empty;
             if (!string.IsNullOrEmpty(CEIIUrls))
             {
-                string[] urls = CEIIUrls.Split(new string[] { Constants.DocumentURLsSeparator },
-                                        StringSplitOptions.RemoveEmptyEntries);
-                group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_CEII_RO);
-                foreach (string url in urls)
-                {
-                    if (group != null)
-                    {
-                        AssignRoleForDocument(clientContext, listItemID, group, Constants.Role_Read, url);
-                    }
-                }
+                AllNonPublicURLs = CEIIUrls + Constants.DocumentURLsSeparator;
             }
 
-            //Privileged
             if (!string.IsNullOrEmpty(PrivilegedUrls))
             {
-                string[] urls = PrivilegedUrls.Split(new string[] { Constants.DocumentURLsSeparator },
-                                        StringSplitOptions.RemoveEmptyEntries);
-                //get group
-                switch (library)
-                {
-                    case Constants.PrivilegedLibrary_General:
-                        group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_General_RO);
-                        break;
-                    case Constants.PrivilegedLibrary_Gas:
-                        group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_GAS_RO);
-                        break;
-                    case Constants.PrivilegedLibrary_Electric:
-                        group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_electric_RO);
-                        break;
-                    case Constants.PrivilegedLibrary_Hydro:
-                        group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_hydro_RO);
-                        break;
-                    case Constants.PrivilegedLibrary_Oil:
-                        group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_Oil_RO);
-                        break;
-                    case Constants.PrivilegedLibrary_RuleMaking:
-                        group = clientContext.Web.SiteGroups.GetByName(Constants.Grp_FAWSGG_elc_FERCStaff_Privileged_RuleMaking_RO);
-                        break;
-                    default:
-                        group = null;
-                        break;
-
-                }
-
-                foreach (string url in urls)
-                {
-                    if (group != null)
-                    {
-                        AssignRoleForDocument(clientContext, listItemID, group, Constants.Role_Read, url);
-                    }
-                }
+                AllNonPublicURLs = AllNonPublicURLs + PrivilegedUrls;
             }
 
-            //clientContext.ExecuteQuery();
+            string[] urls = AllNonPublicURLs.Split(new string[] { Constants.DocumentURLsSeparator },
+                                    StringSplitOptions.RemoveEmptyEntries);
+            var OSECGrp = clientContext.Web.SiteGroups.GetByName(Constants.Grp_OSEC);
+            var SecReviewGrp = clientContext.Web.SiteGroups.GetByName(Constants.Grp_SecReview);
+
+            foreach (string url in urls)
+            {
+                //AssignRoleForDocumentForGroup(clientContext, listItemID, group, Constants.Role_Read, url);
+
+                var web = clientContext.Web;
+                string documentServerRelativeUrlUrl = getDocumentServerRelativeURLFromURL(clientContext, listItemID, url);
+                File document = web.GetFileByServerRelativeUrl(documentServerRelativeUrlUrl);
+
+                //break inheritance, clear all role from parent, ready to set new permission based on status
+                document.ListItemAllFields.ResetRoleInheritance();
+                document.ListItemAllFields.BreakRoleInheritance(false, true);//clear all role from parent
+                
+
+
+                //OSEC role
+                if (!string.IsNullOrEmpty(PIWOSECRoleForNonPublic))
+                {
+                    var rolebindingCol = new RoleDefinitionBindingCollection(clientContext);
+                    rolebindingCol.Add(web.RoleDefinitions.GetByName(PIWOSECRoleForNonPublic));
+                    document.ListItemAllFields.RoleAssignments.Add(OSECGrp, rolebindingCol);
+                }
+
+
+                //Sec review role
+                if (!string.IsNullOrEmpty(PIWSecReviewRoleForNonPublic))
+                {
+                    var rolebindingColSecReview = new RoleDefinitionBindingCollection(clientContext);
+                    rolebindingColSecReview.Add(web.RoleDefinitions.GetByName(PIWSecReviewRoleForNonPublic));
+                    document.ListItemAllFields.RoleAssignments.Add(SecReviewGrp, rolebindingColSecReview);
+                }
+
+
+                //add permission for initiator
+                if (!string.IsNullOrEmpty(initiatorRoleForNonPublic))
+                {
+                    var rolebindingColInitiator = new RoleDefinitionBindingCollection(clientContext);
+                    rolebindingColInitiator.Add(web.RoleDefinitions.GetByName(initiatorRoleForNonPublic));
+                    document.ListItemAllFields.RoleAssignments.Add(initiator, rolebindingColInitiator);
+                }
+
+                //we dont need execute query becuase the caller method already has one for all.
+
+            }
+        }
+
+
+        public void AssignRoleForGroup(ClientContext clientContext, Group group, string role, Folder folder)
+        {
+            var web = clientContext.Web;
+
+            //remove existing group role
+            folder.ListItemAllFields.RoleAssignments.Groups.Remove(group);
+
+            var rolebindingCol = new RoleDefinitionBindingCollection(clientContext);
+            rolebindingCol.Add(web.RoleDefinitions.GetByName(role));
+
+            folder.ListItemAllFields.RoleAssignments.Add(group, rolebindingCol);
+
         }
 
         public Dictionary<string, string> getAllDocumentUrls(Repeater rpDocumentList)
@@ -2177,36 +2221,6 @@ namespace PIW_SPAppWeb.Helper
             }
 
             return issuanceDocuments;
-        }
-
-        public void AssignRoleForGroup(ClientContext clientContext, Group group, string role, Folder folder)
-        {
-            var web = clientContext.Web;
-
-            //remove existing group role
-            folder.ListItemAllFields.RoleAssignments.Groups.Remove(group);
-
-            var rolebindingCol = new RoleDefinitionBindingCollection(clientContext);
-            rolebindingCol.Add(web.RoleDefinitions.GetByName(role));
-
-            folder.ListItemAllFields.RoleAssignments.Add(group, rolebindingCol);
-
-        }
-
-        public void AssignRoleForDocument(ClientContext clientContext, string listItemID, Group group, string role, string fileURL)
-        {
-            var web = clientContext.Web;
-            string documentServerRelativeUrlUrl = getDocumentServerRelativeURLFromURL(clientContext, listItemID, fileURL);
-            File document = web.GetFileByServerRelativeUrl(documentServerRelativeUrlUrl);
-            //remove existing group role
-            //folder.ListItemAllFields.RoleAssignments.Groups.Remove(group);
-            document.ListItemAllFields.BreakRoleInheritance(false, true);//clear all permission from parent
-
-            var rolebindingCol = new RoleDefinitionBindingCollection(clientContext);
-            rolebindingCol.Add(web.RoleDefinitions.GetByName(role));
-
-            document.ListItemAllFields.RoleAssignments.Add(group, rolebindingCol);
-
         }
 
         #endregion

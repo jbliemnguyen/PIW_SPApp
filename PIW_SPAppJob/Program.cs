@@ -15,11 +15,8 @@ namespace PIW_SPAppJob
             string spHostUrl = ConfigurationManager.AppSettings["spHostUrl"];
             try
             {
-
                 using (var clientContext = helper.getElevatedClientContext(spHostUrl))
                 {
-                    
-
                     clientContext.Load(clientContext.Web.CurrentUser);
                     clientContext.ExecuteQuery();
                     string CurrentUserLogInID = clientContext.Web.CurrentUser.LoginName;
@@ -29,25 +26,26 @@ namespace PIW_SPAppJob
 
                     foreach (var piwListItem in piwListItemCol)
                     {
-                        UpdateListItem(clientContext, piwListItem, piwListInternalName);
+                        if (checkIfFormAvailableInELibrary(piwListItem))
+                        {
+                            UpdateListItem(clientContext, piwListItem, piwListInternalName);
+                            helper.CreateLog(clientContext, "Running Scheduler Job - update status eLib available piwListItem ID: " + piwListItem["ID"], string.Empty);
+                        }
+                        
                         if (helper.GenerateAndSubmitPrintReqForm(clientContext, piwListItem, CurrentUserLogInID))
                         {
-                            //do nothign for now
+                            helper.CreateLog(clientContext, "Running Scheduler Job - generate print req for piwListItem ID: " + piwListItem["ID"], string.Empty);
                         }
-
-                        helper.CreateLog(clientContext, "Running Scheduler Job - update piwListItem ID: " + piwListItem["ID"], string.Empty);
                     }
-
-                    //clientContext.ExecuteQuery();
-                    //helper.CreateLog(clientContext, "Finish Running Scheduler Job", "update: " + piwListItemCol.Count + " items");
                 }
             }
             catch (Exception exc)
             {
                 using (var clientContext = helper.getElevatedClientContext(spHostUrl))
-                {
-                    helper.LogError(clientContext, exc, string.Empty, String.Empty);
-                }
+                    {
+                        helper.LogError(clientContext, exc, string.Empty, String.Empty);
+                    }
+                
             }
         }
 
@@ -98,6 +96,14 @@ namespace PIW_SPAppJob
             clientContext.Load(piwListItems);
             clientContext.ExecuteQuery();
             return piwListItems;
+        }
+
+        private static bool checkIfFormAvailableInELibrary(ListItem piwListItem)
+        {
+            //todo: connect to eORacle database and check the status of the form
+            
+            //for now, it return true for all items
+            return true;
         }
     }
 }
