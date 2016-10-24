@@ -26,7 +26,14 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, string.Empty, Page.Request.Url.OriginalString);
-                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                if (exc is ServerUnauthorizedAccessException)
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_AccessDenied);
+                }
+                else
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                }
             }
         }
         private void RenderGridView(ClientContext clientContext)
@@ -97,7 +104,8 @@ namespace PIW_SPAppWeb.Pages
 
             string[] urls = new string[1] { "URL" };
             hyperlinkField = new HyperLinkField { HeaderText = "Docket Number", DataTextField = "Docket" };
-            hyperlinkField.ControlStyle.Width = new Unit(200, UnitType.Pixel);
+            hyperlinkField.HeaderStyle.CssClass = "col-xs-2";
+            hyperlinkField.ItemStyle.CssClass = "col-xs-2";
             hyperlinkField.DataNavigateUrlFields = urls;
             //hyperlinkField.Target = "_blank";
             gridView.Columns.Add(hyperlinkField);
@@ -107,18 +115,28 @@ namespace PIW_SPAppWeb.Pages
             gridView.Columns.Add(boundField);
             
             boundField = new BoundField { HeaderText = "Initiator Office", DataField = "InitiatorOffice" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Date Requested", DataField = "DateRequested" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Date Required", DataField = "DateRequired" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Number of Pages", DataField = "NumberOfPages" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Number of Copies", DataField = "NumberOfCopies" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             gridView.AutoGenerateColumns = false;

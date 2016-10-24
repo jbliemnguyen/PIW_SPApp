@@ -188,6 +188,7 @@
     <Content Include="Pages\EditStandardForm.aspx" />
     <Content Include="Pages\Error.aspx" />
     <Content Include="Pages\ItemNotFound.aspx" />
+    <Content Include="Pages\ItemsByPublishedDate.aspx" />
     <Content Include="Pages\PrintReqForms.aspx" />
     <Content Include="Pages\StandardForms.aspx" />
     <Content Include="Scripts\bootstrap.js" />
@@ -196,6 +197,7 @@
     <Content Include="Scripts\jquery-ui-1.11.4.min.js" />
     <Content Include="PIW_SPAppWebKey.snk" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
+    <Content Include="Scripts\jquery.stickytableheaders.min.js" />
     <Content Include="Scripts\jquery.validate.js" />
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\json2.js" />
@@ -383,6 +385,13 @@
     </Compile>
     <Compile Include="Pages\ItemNotFound.aspx.designer.cs">
       <DependentUpon>ItemNotFound.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\ItemsByPublishedDate.aspx.cs">
+      <DependentUpon>ItemsByPublishedDate.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\ItemsByPublishedDate.aspx.designer.cs">
+      <DependentUpon>ItemsByPublishedDate.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Main.Master.cs">
       <DependentUpon>Main.Master</DependentUpon>

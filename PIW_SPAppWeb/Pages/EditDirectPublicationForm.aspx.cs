@@ -410,7 +410,8 @@ namespace PIW_SPAppWeb.Pages
                         return;
                     }
 
-                    //TODO: Change document and list permission
+                    //Change document and list permission
+                    helper.UpdatePermissionBaseOnFormStatus(clientContext, ListItemID, FormStatus, FormType);
 
                     //get current user
                     User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);

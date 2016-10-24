@@ -21,6 +21,7 @@ namespace PIW_SPAppWeb
 
 
         public const string PIWList_colName_AccessionNumber = "Accession Number";
+        public const string PIWList_colName_PreviousAccessionNumber = "Previous Accession Number";
         public const string PIWList_colName_AlternateIdentifier = "Alternate Identifier";
         public const string PIWList_colName_WorkflowInitiator = "Workflow Initiator";
         public const string PIWList_colName_ProgramOfficeWFInitator = "Program Office (Workflow Initiator)";

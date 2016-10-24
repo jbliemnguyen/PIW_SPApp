@@ -189,6 +189,9 @@ namespace PIW_SPAppWeb.Helper
                 SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment, string.Empty);
             }
 
+            //previous accession number
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousAccessionNumber]] = listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]];
+
             //clear accession number
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
 

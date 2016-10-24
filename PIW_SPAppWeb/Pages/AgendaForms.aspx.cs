@@ -25,7 +25,14 @@ namespace PIW_SPAppWeb.Pages
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, string.Empty, Page.Request.Url.OriginalString);
-                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                if (exc is ServerUnauthorizedAccessException)
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_AccessDenied);
+                }
+                else
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                }
             }
 
         }
@@ -67,9 +74,9 @@ namespace PIW_SPAppWeb.Pages
                         : string.Empty;
 
                     //Form Type
-                    string formType = listItem[piwListInternalName[Constants.PIWList_colName_FormType]] != null
-                        ? listItem[piwListInternalName[Constants.PIWList_colName_FormType]].ToString()
-                        : string.Empty;
+                    //string formType = listItem[piwListInternalName[Constants.PIWList_colName_FormType]] != null
+                    //    ? listItem[piwListInternalName[Constants.PIWList_colName_FormType]].ToString()
+                    //    : string.Empty;
 
                     //dataRow["URL"] = helper.getEditFormURL(formType, listItemId, Page.Request,filename);
                     dataRow["URL"] = listItem[piwListInternalName[Constants.PIWList_colName_EditFormURL]] != null
@@ -138,7 +145,8 @@ namespace PIW_SPAppWeb.Pages
 
             string[] urls = new string[1] { "URL" };
             hyperlinkField = new HyperLinkField { HeaderText = "Docket Number", DataTextField = "Docket" };
-            hyperlinkField.ControlStyle.Width = new Unit(200, UnitType.Pixel);
+            hyperlinkField.HeaderStyle.CssClass = "col-xs-2";
+            hyperlinkField.ItemStyle.CssClass = "col-xs-2";
             hyperlinkField.DataNavigateUrlFields = urls;
             //hyperlinkField.Target = "_blank";
             gridView.Columns.Add(hyperlinkField);
@@ -150,10 +158,13 @@ namespace PIW_SPAppWeb.Pages
                 DataField = "DocumentURL",
                 HtmlEncode = false,
             };
-            boundField.ControlStyle.Width = new Unit(400,UnitType.Pixel);
+            boundField.HeaderStyle.CssClass = "col-xs-3";
+            boundField.ItemStyle.CssClass = "col-xs-3";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Document Category", DataField = "DocumentCategory" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Form Status", DataField = "Status", Visible = false };
@@ -161,18 +172,28 @@ namespace PIW_SPAppWeb.Pages
             
 
             boundField = new BoundField { HeaderText = "Initiator Office", DataField = "InitiatorOffice" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Citation Number", DataField = "CitationNumber" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
             
             boundField = new BoundField { HeaderText = "Due Date", DataField = "DueDate" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Created Date", DataField = "Created" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Recall/Reject Comment", DataField = "RecallRejectComment" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
             
             gridView.AutoGenerateColumns = false;
