@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Deployment.Internal;
+using System.Linq;
 using Microsoft.SharePoint.Client;
 using PIW_SPAppWeb;
 using PIW_SPAppWeb.Helper;
@@ -22,20 +24,31 @@ namespace PIW_SPAppJob
                     string CurrentUserLogInID = clientContext.Web.CurrentUser.LoginName;
 
                     var piwListInternalName = helper.getInternalColumnNames(clientContext, Constants.PIWListName);
-                    var piwListItemCol = getInitiatedPublishedPIWListItem(clientContext, piwListInternalName);
+                    
 
-                    foreach (var piwListItem in piwListItemCol)
+                    //todo: set accession number here, not in below code, use for testing only
+                    //setAccessionNumber(clientContext,piwListInternalName);
+
+
+                    var initiatedPublishedPiwListItem = getInitiatedPublishedPIWListItem(clientContext, piwListInternalName);
+                    foreach (var piwListItem in initiatedPublishedPiwListItem)
                     {
-                        if (checkIfFormAvailableInELibrary(piwListItem))
+                        //check elibrary availalbe
+                        if (checkIfFormAvailableInELibrary(piwListItem, piwListInternalName))
                         {
-                            UpdateListItem(clientContext, piwListItem, piwListInternalName);
+                            UpdateListItem(clientContext, piwListItem, piwListInternalName,Constants.PIWList_FormStatus_PublishedToeLibrary,string.Empty);
                             helper.CreateLog(clientContext, "Running Scheduler Job - update status eLib available piwListItem ID: " + piwListItem["ID"], string.Empty);
                         }
                         
+                        //generate print req
                         if (helper.GenerateAndSubmitPrintReqForm(clientContext, piwListItem, CurrentUserLogInID))
                         {
                             helper.CreateLog(clientContext, "Running Scheduler Job - generate print req for piwListItem ID: " + piwListItem["ID"], string.Empty);
                         }
+
+                        //todo: not set accession number here, but in above code, use for testing only
+                        string accessionNumber = RandomString(13);
+                        UpdateListItem(clientContext, piwListItem, piwListInternalName, string.Empty, accessionNumber);
                     }
                 }
             }
@@ -49,13 +62,21 @@ namespace PIW_SPAppJob
             }
         }
 
-        private static void UpdateListItem(ClientContext clientContext,ListItem listItem,Dictionary<string,string> piwListInternalName)
+        private static void UpdateListItem(ClientContext clientContext,ListItem listItem,Dictionary<string,string> piwListInternalName,
+            string FormStatus,string accessionNumber)
         {
-            //todo: set the accession number and published status
+            //accession number
+            if (!string.IsNullOrEmpty(accessionNumber))
+            {
+                listItem[piwListInternalName[Constants.PIWList_colName_AccessionNumber]] = accessionNumber;
+            }
 
             //set the status
-            listItem[piwListInternalName[Constants.PIWList_colName_FormStatus]] =
-                Constants.PIWList_FormStatus_PublishedToeLibrary;
+            if (!string.IsNullOrEmpty(FormStatus))
+            {
+                listItem[piwListInternalName[Constants.PIWList_colName_FormStatus]] = FormStatus;
+            }
+            
             listItem.Update();
             clientContext.ExecuteQuery();
         }
@@ -98,12 +119,45 @@ namespace PIW_SPAppJob
             return piwListItems;
         }
 
-        private static bool checkIfFormAvailableInELibrary(ListItem piwListItem)
+        private static bool checkIfFormAvailableInELibrary(ListItem piwListItem, Dictionary<string, string> piwListInternalName)
         {
             //todo: connect to eORacle database and check the status of the form
             
             //for now, it return true for all items
-            return true;
+            if (piwListItem[piwListInternalName[Constants.PIWList_colName_AccessionNumber]] != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            
+        }
+
+        private static void setAccessionNumber(ClientContext clientContext,Dictionary<string,string> piwListInternalName )
+        {
+            //todo: read the queue, find the piwlistItemID from the queue
+            //get the piwList, set the accession number
+
+            //For now, just query all published initiated item, and set accession number to 
+            string accessionNumber = string.Empty;
+            var initiatedPublishedPiwListItem = getInitiatedPublishedPIWListItem(clientContext, piwListInternalName);
+
+            foreach (var piwListItem in initiatedPublishedPiwListItem)
+            {
+                accessionNumber = RandomString(13);
+                UpdateListItem(clientContext,piwListItem,piwListInternalName,string.Empty,accessionNumber);
+            }
+
+        }
+
+        private static Random random = new Random();
+        public static string RandomString(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            return new string(Enumerable.Repeat(chars, length)
+              .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }
