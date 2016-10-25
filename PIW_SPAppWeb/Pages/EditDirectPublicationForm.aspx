@@ -207,6 +207,7 @@
                 <asp:Label ID="lbDocumentCategory" runat="server" Text="Document Category<span class='accentText'> *</span>" AssociatedControlID="ddDocumentCategory" CssClass="col-md-2 control-label"></asp:Label>
                 <div class="col-md-3">
                     <asp:DropDownList ID="ddDocumentCategory" CssClass="form-control" runat="server" ClientIDMode="Static">
+                        <%--Note:Update the Constants.cs if change this value--%>
                         <asp:ListItem Value="">Please Select</asp:ListItem>
                         <asp:ListItem>Chairman Statement</asp:ListItem>
                         <asp:ListItem>Commissioner Statement</asp:ListItem>

@@ -185,10 +185,95 @@ namespace PIW_SPAppWeb
 
 
         public const string ddProgramOfficeWorkflowInitiator_Option_OSEC = "OSEC";
+        
+        //document category option
+        //Delegated Letter
+        public const string ddDocumentCategory_Option_DelegatedLetter = "Delegated Letter";
+
+        //Delegated Notice
+        public const string ddDocumentCategory_Option_DelegatedNotice = "Delegated Notice";
+
+        //Delegated Order
+        public const string ddDocumentCategory_Option_DelegatedOrder = "Delegated Order";
+
+        //Delegated Errata
+        public const string ddDocumentCategory_Option_DelegatedErrata = "Delegated Errata";
+        
+        //OALJ
+        public const string ddDocumentCategory_Option_OALJ = "OALJ";
+
+        //OALJ Errata
+        public const string ddDocumentCategory_Option_OALJErrata = "OALJ Errata";
+
+        //Notice
         public const string ddDocumentCategory_Option_Notice = "Notice";
+        
+        //Notice Errata
         public const string ddDocumentCategory_Option_NoticeErrata = "Notice Errata";
+
+        //Agenda
+        //Notational Order
+        public const string ddDocumentCategory_Option_NotationalOrder = "Notational Order";
+
+        //Notational Notice
+        public const string ddDocumentCategory_Option_NotationalNotice = "Notational Notice";
+
+        //Commission Order
+        public const string ddDocumentCategory_Option_CommissionOrder = "Commission Order";
+
+        //Consent
+        public const string ddDocumentCategory_Option_Consent = "Consent";
+
+        //Errata
+        public const string ddDocumentCategory_Option_Errata = "Errata";
+        
+        //Tolling Order
+        public const string ddDocumentCategory_Option_TollingOrder = "Tolling Order";
+
+        //Sunshine Notice
         public const string ddDocumentCategory_Option_SunshineNotice = "Sunshine Notice";
 
+        //Notice of Action Taken
+        public const string ddDocumentCategory_Option_NoticeofActionTaken = "Notice of Action Taken";
+
+        //Direct Pub
+        //Chairman Statement
+        public const string ddDocumentCategory_Option_ChairmanStatement = "Chairman Statement";
+
+        //Commissioner Statement
+        public const string ddDocumentCategory_Option_CommissionerStatement = "Commissioner Statement";
+
+        //Delegated Letter - existing in Standard Form
+        //public const string ddDocumentCategory_Option_DelegatedLetter = "Delegated Letter";
+
+        //EA
+        public const string ddDocumentCategory_Option_EA = "EA";
+
+        //EIS
+        public const string ddDocumentCategory_Option_EIS = "EIS";
+
+        //Errata - existing in Agenda
+        //public const string ddDocumentCategory_Option_Errata = "Errata";
+
+        //Inspection Report
+        public const string ddDocumentCategory_Option_InspectionReport = "Inspection Report";
+
+        //Memo
+        public const string ddDocumentCategory_Option_Memo = "Memo";
+
+        //News Release
+        public const string ddDocumentCategory_Option_NewsRelease = "News Release";
+
+        //Notice of Action Taken - existing in Agenda
+        //public const string ddDocumentCategory_Option_NoticeofActionTaken = "Notice of Action Taken";
+
+        //Project Update
+        public const string ddDocumentCategory_Option_ProjectUpdate = "Project Update";
+
+        //Sunshine Act Meeting Notice
+        public const string ddDocumentCategory_Option_SunshineActMeetingNotice = "Sunshine Act Meeting Notice";
+        
+        
         //ErrorLog list
         public const string ErrorLogListName = "ErrorLog";
         public const string ErrorLog_colName_PIWListItem = "PIWListItem";
