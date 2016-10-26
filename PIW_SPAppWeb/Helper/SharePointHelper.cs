@@ -318,6 +318,8 @@ namespace PIW_SPAppWeb.Helper
             string documentCategory = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]] != null
                 ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]].ToString() : string.Empty;
 
+            string formType = listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormType]] != null
+                ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormType]].ToString() : string.Empty;
 
             FOLAMailingList folaMailingList = new FOLAMailingList();
             int numberOfFOLAAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemID);
@@ -346,7 +348,7 @@ namespace PIW_SPAppWeb.Helper
             if (numberofCopies > 0)
             {
 
-                int printPriority = getPrintPriority(documentCategory);
+                int printPriority = getPrintPriority(documentCategory,formType);
 
                 DateTime dateRequested = DateTime.Now;
                 //update piw list
@@ -443,19 +445,27 @@ namespace PIW_SPAppWeb.Helper
             return dateRequired;
         }
 
-        private int getPrintPriority(string documentCategory)
+        private int getPrintPriority(string documentCategory,string formType)
         {
-            int PrintPriority = 0;
+            int PrintPriority = 1;//default value, except below 
 
-            switch (documentCategory)
+            if (formType.Equals(Constants.PIWList_FormType_DirectPublicationForm))
             {
-                case Constants.PIWList_DocCat_DelegatedLetter:
-                case Constants.PIWList_DocCat_SunshineNotice:
+                PrintPriority = 2;
+            }
+            else if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
+            {
+                if (documentCategory.Equals(Constants.PIWList_DocCat_SunshineNotice))
+                {
                     PrintPriority = 2;
-                    break;
-                default:
-                    PrintPriority = 1;
-                    break;
+                }
+            }
+            else if (formType.Equals(Constants.PIWList_FormType_StandardForm))
+            {
+                if (documentCategory.Equals(Constants.PIWList_DocCat_DelegatedLetter))
+                {
+                    PrintPriority = 2;
+                }
             }
 
             return PrintPriority;
@@ -2146,6 +2156,7 @@ namespace PIW_SPAppWeb.Helper
                                     StringSplitOptions.RemoveEmptyEntries);
             var OSECGrp = clientContext.Web.SiteGroups.GetByName(Constants.Grp_OSEC);
             var SecReviewGrp = clientContext.Web.SiteGroups.GetByName(Constants.Grp_SecReview);
+            var PIWAdminGrp = clientContext.Web.SiteGroups.GetByName(Constants.Grp_PIWAdmin);
 
             foreach (string url in urls)
             {
@@ -2161,12 +2172,13 @@ namespace PIW_SPAppWeb.Helper
                 
 
 
-                //OSEC role
+                //OSEC role, piwadmin will have the same permission with osec
                 if (!string.IsNullOrEmpty(PIWOSECRoleForNonPublic))
                 {
                     var rolebindingCol = new RoleDefinitionBindingCollection(clientContext);
                     rolebindingCol.Add(web.RoleDefinitions.GetByName(PIWOSECRoleForNonPublic));
                     document.ListItemAllFields.RoleAssignments.Add(OSECGrp, rolebindingCol);
+                    document.ListItemAllFields.RoleAssignments.Add(PIWAdminGrp, rolebindingCol);
                 }
 
 
