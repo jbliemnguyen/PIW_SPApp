@@ -335,7 +335,7 @@ namespace PIW_SPAppWeb.Helper
 
             int numberofCopies;
             //if sunshine notice --> print 100 copies
-            if (documentCategory.Equals(Constants.ddDocumentCategory_Option_SunshineNotice,
+            if (documentCategory.Equals(Constants.PIWList_DocCat_SunshineNotice,
                 StringComparison.OrdinalIgnoreCase))
             {
                 numberofCopies = 100;

@@ -63,28 +63,28 @@ namespace PIW_SPAppWeb.Pages
                 cblDocumentCategory.Items.Add(allCheckBox);
 
                 //Delegated Letter                
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_DelegatedLetter, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_DelegatedLetter, "jqueryselector_CategoryCheckBox"));
 
                 //Delegated Notice
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_DelegatedNotice, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_DelegatedNotice, "jqueryselector_CategoryCheckBox"));
 
                 //Delegated Order
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_DelegatedOrder, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_DelegatedOrder, "jqueryselector_CategoryCheckBox"));
 
                 //Delegated Errata
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_DelegatedErrata, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_DelegatedErrata, "jqueryselector_CategoryCheckBox"));
 
                 //OALJ
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_OALJ, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_OALJ, "jqueryselector_CategoryCheckBox"));
 
                 //OALJ Errata
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_OALJErrata, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_OALJErrata, "jqueryselector_CategoryCheckBox"));
 
                 //Notice
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_Notice, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_Notice, "jqueryselector_CategoryCheckBox"));
 
                 //Notice Errata
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_NoticeErrata, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_NoticeErrata, "jqueryselector_CategoryCheckBox"));
             }
             else if (formTypeRadioButtonList.SelectedValue.Equals(Constants.PIWList_FormType_AgendaForm))
             {
@@ -93,35 +93,35 @@ namespace PIW_SPAppWeb.Pages
                 cblDocumentCategory.Items.Add(allCheckBox);
 
                 //Notational Order
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_NotationalOrder, 
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_NotationalOrder, 
                     "jqueryselector_CategoryCheckBox"));
 
                 //Notational Notice
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_NotationalNotice,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_NotationalNotice,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Commission Order
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_CommissionOrder,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_CommissionOrder,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Consent
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_Consent,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_Consent,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Errata
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_Errata,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_Errata,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Tolling Order
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_TollingOrder,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_TollingOrder,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Sunshine Notice
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_SunshineNotice,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_SunshineNotice,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Notice of Action Taken
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_NoticeofActionTaken,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_NoticeofActionTaken,
                     "jqueryselector_CategoryCheckBox"));
 
             }
@@ -132,51 +132,51 @@ namespace PIW_SPAppWeb.Pages
                 cblDocumentCategory.Items.Add(allCheckBox);
 
                 //Chairman Statement
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_ChairmanStatement,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_ChairmanStatement,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Commissioner Statement
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_CommissionerStatement,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_CommissionerStatement,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Delegated Letter - existing in Standard Form
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_DelegatedLetter,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_DelegatedLetter,
                     "jqueryselector_CategoryCheckBox"));
 
                 //EA
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_EA,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_EA,
                     "jqueryselector_CategoryCheckBox"));
 
                 //EIS
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_EIS,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_EIS,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Errata - existing in Agenda
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_Errata,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_Errata,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Inspection Report
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_InspectionReport,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_InspectionReport,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Memo
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_Memo,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_Memo,
                     "jqueryselector_CategoryCheckBox"));
 
                 //News Release
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_NewsRelease,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_NewsRelease,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Notice of Action Taken
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_NoticeofActionTaken,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_NoticeofActionTaken,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Project Update
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_ProjectUpdate,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_ProjectUpdate,
                     "jqueryselector_CategoryCheckBox"));
 
                 //Sunshine Act Meeting Notice
-                cblDocumentCategory.Items.Add(getCheckBox(Constants.ddDocumentCategory_Option_SunshineActMeetingNotice,
+                cblDocumentCategory.Items.Add(getCheckBox(Constants.PIWList_DocCat_SunshineActMeetingNotice,
                     "jqueryselector_CategoryCheckBox"));
             }
             else
