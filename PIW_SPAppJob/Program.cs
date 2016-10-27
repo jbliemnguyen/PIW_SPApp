@@ -46,9 +46,18 @@ namespace PIW_SPAppJob
                             helper.CreateLog(clientContext, "Running Scheduler Job - generate print req for piwListItem ID: " + piwListItem["ID"], string.Empty);
                         }
 
-                        //todo: not set accession number here, but in above code, use for testing only
-                        string accessionNumber = RandomString(13);
-                        UpdateListItem(clientContext, piwListItem, piwListInternalName, string.Empty, accessionNumber);
+                        //todo: not set accession number here, but in above code, use for testing purpose only, in real scenario, this is never happens
+                        string oldAccessionNumber =
+                            piwListItem[piwListInternalName[Constants.PIWList_colName_AccessionNumber]] != null
+                                ? piwListItem[piwListInternalName[Constants.PIWList_colName_AccessionNumber]].ToString()
+                                : string.Empty;
+                        if (string.IsNullOrEmpty(oldAccessionNumber))
+                        {
+                            string accessionNumber = RandomString(13);
+                            UpdateListItem(clientContext, piwListItem, piwListInternalName, string.Empty, accessionNumber);
+                            helper.CreateLog(clientContext, "Running Scheduler Job - assign accession number for piwListItem ID: " + piwListItem["ID"], string.Empty);
+                        }
+                        
                     }
                 }
             }
@@ -121,11 +130,10 @@ namespace PIW_SPAppJob
 
         private static bool checkIfFormAvailableInELibrary(ListItem piwListItem, Dictionary<string, string> piwListInternalName)
         {
-            //todo: connect to eORacle database and check the status of the form
-            
-            //for now, it return true for all items
+            //if no accession number, don't bother to go ahead, something wrong
             if (piwListItem[piwListInternalName[Constants.PIWList_colName_AccessionNumber]] != null)
             {
+                //todo: connect to eORacle database and check the status of the form
                 return true;
             }
             else

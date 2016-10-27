@@ -14,14 +14,17 @@ namespace PIW_SPAppWeb.Pages
 {
     public partial class PrintReqForms : System.Web.UI.Page
     {
-        private SharePointHelper helper;
+        private SharePointHelper helper = new SharePointHelper();
         private string previousRowFormStatus = string.Empty;
         int intSubTotalIndex = 1;
         protected void Page_Load(object sender, EventArgs e)
         {
             try
             {
-                displayData();
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    displayData(clientContext);
+                }
             }
             catch (Exception exc)
             {
@@ -56,8 +59,8 @@ namespace PIW_SPAppWeb.Pages
                 dataTable.Columns.Add("NumberOfPages", typeof(string));
                 dataTable.Columns.Add("NumberOfCopies", typeof(string));
                 dataTable.Columns.Add("GroupOrder", typeof(string));
-                
-                
+
+
 
                 foreach (var listItem in listItemCollection)
                 {
@@ -66,7 +69,7 @@ namespace PIW_SPAppWeb.Pages
                     dataRow["Docket"] = listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]] != null
                         ? listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]].ToString()
                         : string.Empty;
-                    
+
                     dataRow["URL"] = listItem[piwListInternalName[Constants.PIWList_colName_PrintReqFormURL]] != null
                         ? listItem[piwListInternalName[Constants.PIWList_colName_PrintReqFormURL]].ToString()
                         : string.Empty;
@@ -92,7 +95,7 @@ namespace PIW_SPAppWeb.Pages
                         : string.Empty;
 
                     dataRow["NumberOfPages"] = listItem[piwListInternalName[Constants.PIWList_colName_NumberOfPublicPages]] != null
-                        ? listItem[piwListInternalName[Constants.PIWList_colName_NumberOfPublicPages]].ToString(): string.Empty;
+                        ? listItem[piwListInternalName[Constants.PIWList_colName_NumberOfPublicPages]].ToString() : string.Empty;
 
                     dataRow["NumberOfCopies"] = listItem[piwListInternalName[Constants.PIWList_colName_PrintReqNumberofCopies]] != null
                         ? listItem[piwListInternalName[Constants.PIWList_colName_PrintReqNumberofCopies]].ToString() : string.Empty;
@@ -109,11 +112,11 @@ namespace PIW_SPAppWeb.Pages
             hyperlinkField.DataNavigateUrlFields = urls;
             //hyperlinkField.Target = "_blank";
             gridView.Columns.Add(hyperlinkField);
-            
+
 
             BoundField boundField = new BoundField { HeaderText = "Form Status", DataField = "Status", Visible = false };
             gridView.Columns.Add(boundField);
-            
+
             boundField = new BoundField { HeaderText = "Initiator Office", DataField = "InitiatorOffice" };
             boundField.HeaderStyle.CssClass = "col-xs-1";
             boundField.ItemStyle.CssClass = "col-xs-1";
@@ -253,7 +256,10 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                displayData();
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    displayData(clientContext);
+                }
             }
             catch (Exception exc)
             {
@@ -263,15 +269,12 @@ namespace PIW_SPAppWeb.Pages
 
         }
 
-        private void displayData()
+        private void displayData(ClientContext clientContext)
         {
-            helper = new SharePointHelper();
-            using (var clientContext = helper.getElevatedClientContext(Context, Request))
-            {
-                ResetField();
-                RenderGridView(clientContext);
-                lbLastUpdated.Text = "Last Updated: " + DateTime.Now.ToString("g");
-            }
+            ResetField();
+            RenderGridView(clientContext);
+            lbLastUpdated.Text = "Last Updated: " + DateTime.Now.ToString("g");
+
         }
 
         private void ResetField()

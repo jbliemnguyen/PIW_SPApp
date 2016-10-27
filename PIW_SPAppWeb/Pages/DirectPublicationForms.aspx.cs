@@ -13,14 +13,17 @@ namespace PIW_SPAppWeb.Pages
 {
     public partial class DirectPublicationForms : System.Web.UI.Page
     {
-        private SharePointHelper helper;
+        private SharePointHelper helper = new SharePointHelper();
         private string previousRowFormStatus = string.Empty;
         int intSubTotalIndex = 1;
         protected void Page_Load(object sender, EventArgs e)
         {
             try
             {
-                displayData();
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    displayData(clientContext);
+                }
             }
             catch (Exception exc)
             {
@@ -87,7 +90,7 @@ namespace PIW_SPAppWeb.Pages
                         listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] != null
                             ? listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeDocumentOwner]].ToString()
                             : string.Empty;
-                    
+
 
                     dataRow["DueDate"] = listItem[piwListInternalName[Constants.PIWList_colName_DueDate]] != null
                         ? DateTime.Parse(listItem[piwListInternalName[Constants.PIWList_colName_DueDate]].ToString()).ToShortDateString()
@@ -119,7 +122,7 @@ namespace PIW_SPAppWeb.Pages
             hyperlinkField.HeaderStyle.CssClass = "col-xs-2";
             hyperlinkField.ItemStyle.CssClass = "col-xs-2";
             hyperlinkField.DataNavigateUrlFields = urls;
-            
+
             gridView.Columns.Add(hyperlinkField);
 
 
@@ -261,13 +264,16 @@ namespace PIW_SPAppWeb.Pages
             return result;
         }
 
-        
+
 
         protected void tmrRefresh_Tick(object sender, EventArgs e)
         {
             try
             {
-                displayData();
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    displayData(clientContext);
+                }
 
             }
             catch (Exception exc)
@@ -278,15 +284,12 @@ namespace PIW_SPAppWeb.Pages
 
         }
 
-        private void displayData()
+        private void displayData(ClientContext clientContext)
         {
-            helper = new SharePointHelper();
-            using (var clientContext = helper.getElevatedClientContext(Context, Request))
-            {
-                ResetField();
-                RenderGridView(clientContext);
-                lbLastUpdated.Text = "Last Updated: " + DateTime.Now.ToString("g");
-            }
+            ResetField();
+            RenderGridView(clientContext);
+            lbLastUpdated.Text = "Last Updated: " + DateTime.Now.ToString("g");
+
         }
 
         private void ResetField()

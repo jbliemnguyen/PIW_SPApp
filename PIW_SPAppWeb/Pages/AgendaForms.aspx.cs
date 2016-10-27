@@ -13,14 +13,17 @@ namespace PIW_SPAppWeb.Pages
 {
     public partial class AgendaForms : System.Web.UI.Page
     {
-        private SharePointHelper helper;
+        private SharePointHelper helper = new SharePointHelper();
         private string previousRowFormStatus = string.Empty;
         int intSubTotalIndex = 1;
         protected void Page_Load(object sender, EventArgs e)
         {
             try
             {
-                displayData();
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    displayData(clientContext);
+                }
             }
             catch (Exception exc)
             {
@@ -99,7 +102,7 @@ namespace PIW_SPAppWeb.Pages
                         listItem[piwListInternalName[Constants.PIWList_colName_CitationNumber]] != null
                             ? listItem[piwListInternalName[Constants.PIWList_colName_CitationNumber]].ToString()
                             : string.Empty;
-                    
+
                     dataRow["DueDate"] = listItem[piwListInternalName[Constants.PIWList_colName_DueDate]] != null
                         ? DateTime.Parse(listItem[piwListInternalName[Constants.PIWList_colName_DueDate]].ToString()).ToShortDateString()
                         : string.Empty;
@@ -123,7 +126,7 @@ namespace PIW_SPAppWeb.Pages
                             : string.Empty;
 
                     dataRow["Created"] = System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Parse(listItem["Created"].ToString())).ToString();
-                    
+
                     if ((formStatus == Constants.PIWList_FormStatus_Rejected) || (formStatus == Constants.PIWList_FormStatus_Recalled))
                     {
                         dataRow["RecallRejectComment"] =
@@ -135,7 +138,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         dataRow["RecallRejectComment"] = string.Empty;
                     }
-                    
+
                 }
 
             }
@@ -169,7 +172,7 @@ namespace PIW_SPAppWeb.Pages
 
             boundField = new BoundField { HeaderText = "Form Status", DataField = "Status", Visible = false };
             gridView.Columns.Add(boundField);
-            
+
 
             boundField = new BoundField { HeaderText = "Initiator Office", DataField = "InitiatorOffice" };
             boundField.HeaderStyle.CssClass = "col-xs-1";
@@ -180,7 +183,7 @@ namespace PIW_SPAppWeb.Pages
             boundField.HeaderStyle.CssClass = "col-xs-1";
             boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
-            
+
             boundField = new BoundField { HeaderText = "Due Date", DataField = "DueDate" };
             boundField.HeaderStyle.CssClass = "col-xs-1";
             boundField.ItemStyle.CssClass = "col-xs-1";
@@ -195,7 +198,7 @@ namespace PIW_SPAppWeb.Pages
             boundField.HeaderStyle.CssClass = "col-xs-1";
             boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
-            
+
             gridView.AutoGenerateColumns = false;
             DataView view = dataTable.DefaultView;
             if (view.Count > 0) //without this check, exception happens if no row in the view
@@ -326,7 +329,10 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                displayData();
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    displayData(clientContext);
+                }
 
             }
             catch (Exception exc)
@@ -337,15 +343,11 @@ namespace PIW_SPAppWeb.Pages
 
         }
 
-        private void displayData()
+        private void displayData(ClientContext clientContext)
         {
-            helper = new SharePointHelper();
-            using (var clientContext = helper.getElevatedClientContext(Context, Request))
-            {
-                ResetField();
-                RenderGridView(clientContext);
-                lbLastUpdated.Text = "Last Updated: " + DateTime.Now.ToString("g");
-            }
+            ResetField();
+            RenderGridView(clientContext);
+            lbLastUpdated.Text = "Last Updated: " + DateTime.Now.ToString("g");
         }
 
         private void ResetField()

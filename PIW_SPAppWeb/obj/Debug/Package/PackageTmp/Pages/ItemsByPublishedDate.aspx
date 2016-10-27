@@ -12,12 +12,10 @@
 
             //date picker
             $("#tbFromDate").datepicker();
-            //$("#tbFromDate").datepicker('setDate', new Date());
             //prevent user edit manually
             $("#tbFromDate").keydown(function (event) { event.preventDefault(); });
 
             $("#tbToDate").datepicker();
-            //$("#tbToDate").datepicker('setDate', new Date());
             //prevent user edit manually
             $("#tbToDate").keydown(function (event) { event.preventDefault(); });
 
@@ -104,7 +102,7 @@
             <div class="form-group">
                 <div class="col-md-3"></div>
                 <div class="col-md-9">
-                    <asp:Button runat="server" ID="btnRun" Text="Run Report" CssClass="btn-sm btn-primary active" />
+                    <asp:Button runat="server" ID="btnRun" Text="Run Report" CssClass="btn-sm btn-primary active" OnClick="btnRun_OnClick" />
                 </div>
             </div>
 
@@ -130,7 +128,7 @@
 
                 <div class="form-group">
                     <div id="gridDiv" class="col-md-12" style="overflow-x: scroll; overflow-y: hidden">
-                        <asp:GridView runat="server" ID="standardFormsGridView" AutoGenerateColumns="false" CssClass="table table-hover table-condensed piw-borderless" ClientIDMode="Static">
+                        <asp:GridView runat="server" ID="gridView" AutoGenerateColumns="false" CssClass="table table-hover table-condensed piw-borderless" ClientIDMode="Static">
                         </asp:GridView>
                     </div>
                 </div>
