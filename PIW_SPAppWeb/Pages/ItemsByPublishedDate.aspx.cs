@@ -87,6 +87,22 @@ namespace PIW_SPAppWeb.Pages
 
             if (listItemCollection.Count > 0)
             {
+                //create dictionary of selected document category
+                Dictionary<string, int> dicDocumentCategory = new Dictionary<string, int>();
+                foreach (ListItem item in cblDocumentCategory.Items)
+                {
+                    if (item.Selected)
+                    {
+                        // If the item is selected, add the value to the dictionary
+                        if (!dicDocumentCategory.ContainsKey(item.Value))
+                        {
+                            dicDocumentCategory.Add(item.Value, 1);
+                        }
+                    }
+                }
+
+
+
                 dataTable.Columns.Add("Docket", typeof(string));
                 dataTable.Columns.Add("URL", typeof(string));
                 dataTable.Columns.Add("DocumentURL", typeof(string));
@@ -100,81 +116,108 @@ namespace PIW_SPAppWeb.Pages
                 dataTable.Columns.Add("MailedDate", typeof(string));
                 dataTable.Columns.Add("AccessionNumber", typeof(string));
                 dataTable.Columns.Add("PublishedError", typeof(string));
-                
-                
+
+
 
                 foreach (var listItem in listItemCollection)
                 {
-                    dataRow = dataTable.Rows.Add();
 
-                    dataRow["Docket"] = listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]] != null
-                        ? listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]].ToString()
-                        : string.Empty;
+                    if (isCount(listItem, piwListInternalName, dicDocumentCategory))
+                    {
+                        dataRow = dataTable.Rows.Add();
 
-                    dataRow["URL"] = listItem[piwListInternalName[Constants.PIWList_colName_EditFormURL]] != null
-                        ? listItem[piwListInternalName[Constants.PIWList_colName_EditFormURL]].ToString()
-                        : string.Empty;
-
-                    var publicDocsURL = listItem[piwListInternalName[Constants.PIWList_colName_PublicDocumentURLs]] != null
-                        ? listItem[piwListInternalName[Constants.PIWList_colName_PublicDocumentURLs]].ToString()
-                        : string.Empty;
-                    var CEIIDocsURL = listItem[piwListInternalName[Constants.PIWList_colName_CEIIDocumentURLs]] != null
-                        ? listItem[piwListInternalName[Constants.PIWList_colName_CEIIDocumentURLs]].ToString()
-                        : string.Empty;
-                    var privilegedDocsURL =
-                        listItem[piwListInternalName[Constants.PIWList_colName_PrivilegedDocumentURLs]] != null
-                            ? listItem[piwListInternalName[Constants.PIWList_colName_PrivilegedDocumentURLs]].ToString()
+                        dataRow["Docket"] = listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]] !=
+                                            null
+                            ? listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]].ToString()
                             : string.Empty;
 
-                    dataRow["DocumentURL"] = helper.getDocumentURLsHTML(publicDocsURL, CEIIDocsURL, privilegedDocsURL, false);
-
-
-                    dataRow["Initiator"] = listItem[piwListInternalName[Constants.PIWList_colName_WorkflowInitiator]] != null
-                            ? ((FieldUserValue)listItem[piwListInternalName[Constants.PIWList_colName_WorkflowInitiator]]).LookupValue
-                            : string.Empty;
-                    
-                    dataRow["InitiatorOffice"] =
-                        listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeWFInitator]] != null
-                            ? listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeWFInitator]].ToString()
+                        dataRow["URL"] = listItem[piwListInternalName[Constants.PIWList_colName_EditFormURL]] != null
+                            ? listItem[piwListInternalName[Constants.PIWList_colName_EditFormURL]].ToString()
                             : string.Empty;
 
-                    dataRow["DocumentOwner"] = listItem[piwListInternalName[Constants.PIWList_colName_DocumentOwner]] != null
-                            ? ((FieldUserValue)listItem[piwListInternalName[Constants.PIWList_colName_DocumentOwner]]).LookupValue
+                        var publicDocsURL =
+                            listItem[piwListInternalName[Constants.PIWList_colName_PublicDocumentURLs]] != null
+                                ? listItem[piwListInternalName[Constants.PIWList_colName_PublicDocumentURLs]].ToString()
+                                : string.Empty;
+                        var CEIIDocsURL = listItem[piwListInternalName[Constants.PIWList_colName_CEIIDocumentURLs]] !=
+                                          null
+                            ? listItem[piwListInternalName[Constants.PIWList_colName_CEIIDocumentURLs]].ToString()
+                            : string.Empty;
+                        var privilegedDocsURL =
+                            listItem[piwListInternalName[Constants.PIWList_colName_PrivilegedDocumentURLs]] != null
+                                ? listItem[piwListInternalName[Constants.PIWList_colName_PrivilegedDocumentURLs]]
+                                    .ToString()
+                                : string.Empty;
+
+                        dataRow["DocumentURL"] = helper.getDocumentURLsHTML(publicDocsURL, CEIIDocsURL,
+                            privilegedDocsURL, false);
+
+
+                        dataRow["Initiator"] =
+                            listItem[piwListInternalName[Constants.PIWList_colName_WorkflowInitiator]] != null
+                                ? ((FieldUserValue)
+                                    listItem[piwListInternalName[Constants.PIWList_colName_WorkflowInitiator]])
+                                    .LookupValue
+                                : string.Empty;
+
+                        dataRow["InitiatorOffice"] =
+                            listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeWFInitator]] != null
+                                ? listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeWFInitator]]
+                                    .ToString()
+                                : string.Empty;
+
+                        dataRow["DocumentOwner"] =
+                            listItem[piwListInternalName[Constants.PIWList_colName_DocumentOwner]] != null
+                                ? ((FieldUserValue)
+                                    listItem[piwListInternalName[Constants.PIWList_colName_DocumentOwner]]).LookupValue
+                                : string.Empty;
+
+                        dataRow["OwnerOffice"] =
+                            listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] != null
+                                ? listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeDocumentOwner]]
+                                    .ToString()
+                                : string.Empty;
+
+
+                        //Form Type
+                        dataRow["FormType"] = listItem[piwListInternalName[Constants.PIWList_colName_FormType]] != null
+                            ? listItem[piwListInternalName[Constants.PIWList_colName_FormType]].ToString()
                             : string.Empty;
 
-                    dataRow["OwnerOffice"] =
-                        listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] != null
-                            ? listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeDocumentOwner]].ToString()
-                            : string.Empty;
 
+                        dataRow["CreatedDate"] =
+                            System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Parse(listItem["Created"].ToString()))
+                                .ToString();
 
-                    //Form Type
-                    dataRow["FormType"] = listItem[piwListInternalName[Constants.PIWList_colName_FormType]] != null
-                        ? listItem[piwListInternalName[Constants.PIWList_colName_FormType]].ToString()
-                        : string.Empty;
+                        dataRow["PublishedDate"] =
+                            listItem[piwListInternalName[Constants.PIWList_colName_PublishedDate]] != null
+                                ? System.TimeZone.CurrentTimeZone.ToLocalTime(
+                                    DateTime.Parse(
+                                        listItem[piwListInternalName[Constants.PIWList_colName_PublishedDate]].ToString()))
+                                    .ToString()
+                                : string.Empty;
 
+                        dataRow["MailedDate"] =
+                            listItem[piwListInternalName[Constants.PIWList_colName_PrintReqMailJobCompleteDate]] != null
+                                ? System.TimeZone.CurrentTimeZone.ToLocalTime(
+                                    DateTime.Parse(
+                                        listItem[
+                                            piwListInternalName[Constants.PIWList_colName_PrintReqMailJobCompleteDate]]
+                                            .ToString())).ToShortDateString()
+                                : string.Empty;
 
-                    dataRow["CreatedDate"] = System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Parse(listItem["Created"].ToString())).ToString();
-                    
-                    dataRow["PublishedDate"] =
-                        listItem[piwListInternalName[Constants.PIWList_colName_PublishedDate]] != null
-                            ? System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Parse(listItem[piwListInternalName[Constants.PIWList_colName_PublishedDate]].ToString())).ToString()
-                            : string.Empty;
+                        dataRow["AccessionNumber"] = getAccessionNumberHtml(listItem, piwListInternalName);
 
-                    dataRow["MailedDate"] =
-                        listItem[piwListInternalName[Constants.PIWList_colName_PrintReqMailJobCompleteDate]] != null
-                            ? System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Parse(listItem[piwListInternalName[Constants.PIWList_colName_PrintReqMailJobCompleteDate]].ToString())).ToShortDateString()
-                            : string.Empty;
+                        dataRow["PublishedError"] =
+                            listItem[piwListInternalName[Constants.PIWList_colName_PublishedError]] != null
+                                ? listItem[piwListInternalName[Constants.PIWList_colName_PublishedError]].ToString()
+                                : string.Empty;
 
-                    dataRow["AccessionNumber"] = getAccessionNumberHtml(listItem, piwListInternalName);
-
-                    dataRow["PublishedError"] = listItem[piwListInternalName[Constants.PIWList_colName_PublishedError]] != null
-                        ? listItem[piwListInternalName[Constants.PIWList_colName_PublishedError]].ToString()
-                        : string.Empty;
-
-
+                    }
                 }
             }
+
+
 
             //Bound to gridview
             HyperLinkField hyperlinkField;
@@ -185,6 +228,7 @@ namespace PIW_SPAppWeb.Pages
             hyperlinkField.HeaderStyle.CssClass = "col-xs-2";
             hyperlinkField.ItemStyle.CssClass = "col-xs-2";
             hyperlinkField.DataNavigateUrlFields = urls;
+            hyperlinkField.Target = "_blank";
             gridView.Columns.Add(hyperlinkField);
 
 
@@ -201,45 +245,29 @@ namespace PIW_SPAppWeb.Pages
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Initiator", DataField = "Initiator" };
-            //boundField.HeaderStyle.CssClass = "col-xs-1";
-            //boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
-            
+
 
             boundField = new BoundField { HeaderText = "Initiator Office", DataField = "InitiatorOffice" };
-            //boundField.HeaderStyle.CssClass = "col-xs-1";
-            //boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Document Owner", DataField = "DocumentOwner" };
-            //boundField.HeaderStyle.CssClass = "col-xs-1";
-            //boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Owner Office", DataField = "OwnerOffice" };
-            //boundField.HeaderStyle.CssClass = "col-xs-1";
-            //boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
-            
+
             boundField = new BoundField { HeaderText = "Form Type", DataField = "FormType" };
-            //boundField.HeaderStyle.CssClass = "col-xs-1";
-            //boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Created Date", DataField = "CreatedDate" };
-            //boundField.HeaderStyle.CssClass = "col-xs-1";
-            //boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Published Date", DataField = "PublishedDate" };
-            //boundField.HeaderStyle.CssClass = "col-xs-1";
-            //boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Mailed Date", DataField = "MailedDate" };
-            //boundField.HeaderStyle.CssClass = "col-xs-1";
-            //boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField
@@ -250,14 +278,23 @@ namespace PIW_SPAppWeb.Pages
             };
             gridView.Columns.Add(boundField);
 
-            
+
             boundField = new BoundField { HeaderText = "PublishedError", DataField = "PublishedError" };
             gridView.Columns.Add(boundField);
 
 
             gridView.AutoGenerateColumns = false;
             DataView view = dataTable.DefaultView;
-            
+
+            if (tbToDate.Text.Equals(tbFromDate.Text))
+            {
+                gridView.AllowPaging = false;
+            }
+            else
+            {
+                gridView.AllowPaging = true;
+                gridView.PageSize = 25;
+            }
 
             gridView.DataSource = view;
             gridView.DataBind();
@@ -274,9 +311,21 @@ namespace PIW_SPAppWeb.Pages
                 ? listItem[piwListInternalName[Constants.PIWList_colName_PreviousAccessionNumber]].ToString()
                 : string.Empty;
 
+            string formStatus = listItem[piwListInternalName[Constants.PIWList_colName_FormStatus]] != null
+                ? listItem[piwListInternalName[Constants.PIWList_colName_FormStatus]].ToString()
+                : string.Empty;
+
             if (!string.IsNullOrEmpty(accessionNumber))
             {
-                html = accessionNumber;
+                if (formStatus.Equals(Constants.PIWList_FormStatus_PublishedToeLibrary))
+                {
+                    html = string.Format("<span style='color:green;font-weight: bold;' data-toggle='tooltip' title='Available in eLibrary'>{0}</span>", accessionNumber);
+                }
+                else
+                {
+                    html = string.Format("<span>{0}</span>", accessionNumber);
+                }
+                
             }
 
             if (!string.IsNullOrEmpty(previousAccessionNumber))
@@ -565,6 +614,48 @@ namespace PIW_SPAppWeb.Pages
                     helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
                 }
             }
+        }
+
+        private bool isCount(Microsoft.SharePoint.Client.ListItem listItem, Dictionary<string, string> piwListInternalName, Dictionary<string, int> dicDocumentCategory)
+        {
+            string formType = listItem[piwListInternalName[Constants.PIWList_colName_FormType]] != null
+                            ? listItem[piwListInternalName[Constants.PIWList_colName_FormType]].ToString()
+                            : string.Empty;;
+
+            string documentCategory = listItem[piwListInternalName[Constants.PIWList_colName_DocumentCategory]] != null
+                            ? listItem[piwListInternalName[Constants.PIWList_colName_DocumentCategory]].ToString()
+                            : string.Empty;
+
+            bool formTypeMatch = false;
+            bool documentCategoryMatch = false;
+
+            //Check the Form Type
+            if (formTypeRadioButtonList.SelectedIndex == 0)//All formtype, no need to check any else, because no document category can be selected
+            {
+                return true;
+            }
+            else
+            {
+                formTypeMatch = formTypeRadioButtonList.SelectedValue.Equals(formType);
+            }
+
+            //Check the document category
+            //Only check document category when form type is matched
+            if (formTypeMatch)
+            {
+                if (cblDocumentCategory.SelectedIndex == 0)//All document cateogry
+                {
+                    documentCategoryMatch = true;
+                }
+                else
+                {
+                    
+                    documentCategoryMatch = dicDocumentCategory.ContainsKey(documentCategory);
+                }
+            }
+
+
+            return (formTypeMatch && documentCategoryMatch);
         }
     }
 
