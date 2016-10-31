@@ -21,7 +21,6 @@ namespace PIW_SPAppWeb.Pages
                 {
                     tbToDate.Text = DateTime.Now.ToShortDateString();
                     tbFromDate.Text = tbToDate.Text;
-                    //tbFromDate.Text = DateTime.Now.AddDays(-10).ToShortDateString();
                     if (Page.Request.QueryString["Office"] != null)
                     {
                         ddProgramOfficeWorkflowInitiator.SelectedValue = Page.Request.QueryString["Office"].ToString();
@@ -452,6 +451,11 @@ namespace PIW_SPAppWeb.Pages
         {
             ListItem allCheckBox = new ListItem() { Selected = true, Text = "All", Value = "All" };
             allCheckBox.Attributes.Add("class", "jqueryselector_CategoryAllCheckBox");
+            PopulateDocumentCategory(allCheckBox);
+        }
+
+        private void PopulateDocumentCategory(ListItem allCheckBox)
+        {
             if (formTypeRadioButtonList.SelectedValue.Equals(Constants.PIWList_FormType_StandardForm))
             {
                 cblDocumentCategory.Items.Clear();
@@ -459,28 +463,35 @@ namespace PIW_SPAppWeb.Pages
                 cblDocumentCategory.Items.Add(allCheckBox);
 
                 //Delegated Letter                
-                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_DelegatedLetter, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_DelegatedLetter,
+                    "jqueryselector_CategoryCheckBox"));
 
                 //Delegated Notice
-                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_DelegatedNotice, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_DelegatedNotice,
+                    "jqueryselector_CategoryCheckBox"));
 
                 //Delegated Order
-                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_DelegatedOrder, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_DelegatedOrder,
+                    "jqueryselector_CategoryCheckBox"));
 
                 //Delegated Errata
-                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_DelegatedErrata, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_DelegatedErrata,
+                    "jqueryselector_CategoryCheckBox"));
 
                 //OALJ
                 cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_OALJ, "jqueryselector_CategoryCheckBox"));
 
                 //OALJ Errata
-                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_OALJErrata, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_OALJErrata,
+                    "jqueryselector_CategoryCheckBox"));
 
                 //Notice
-                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_Notice, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_Notice,
+                    "jqueryselector_CategoryCheckBox"));
 
                 //Notice Errata
-                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_NoticeErrata, "jqueryselector_CategoryCheckBox"));
+                cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_NoticeErrata,
+                    "jqueryselector_CategoryCheckBox"));
             }
             else if (formTypeRadioButtonList.SelectedValue.Equals(Constants.PIWList_FormType_AgendaForm))
             {
@@ -519,7 +530,6 @@ namespace PIW_SPAppWeb.Pages
                 //Notice of Action Taken
                 cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_NoticeofActionTaken,
                     "jqueryselector_CategoryCheckBox"));
-
             }
             else if (formTypeRadioButtonList.SelectedValue.Equals(Constants.PIWList_FormType_DirectPublicationForm))
             {
@@ -580,6 +590,7 @@ namespace PIW_SPAppWeb.Pages
                 cblDocumentCategory.Items.Clear();
             }
         }
+
         public ListItem createNewCheckBox(string value, string jqueryClass)
         {
             ListItem checkBox = new ListItem()

@@ -117,21 +117,30 @@ namespace PIW_SPAppJob
 
         private static bool checkIfFormAvailableInELibrary(ListItem piwListItem, Dictionary<string, string> piwListInternalName)
         {
-            //if no accession number, don't bother to go ahead, something wrong
-            if (piwListItem[piwListInternalName[Constants.PIWList_colName_AccessionNumber]] != null)
+            bool result = false;
+            //if no accession number or published date, don't bother to go ahead, something's wrong
+            if ((piwListItem[piwListInternalName[Constants.PIWList_colName_AccessionNumber]] != null) && 
+                (piwListItem[piwListInternalName[Constants.PIWList_colName_PublishedDate]] != null))
             {
                 //for testing purpose, check if the form is published more than 5 minutes ago, then set it status 
                 DateTime publishedDate = System.TimeZone.CurrentTimeZone.ToLocalTime(
                     DateTime.Parse(piwListItem[piwListInternalName[Constants.PIWList_colName_PublishedDate]].ToString()));
-                                    
-                
+
+                if (publishedDate.AddMinutes(5).CompareTo(DateTime.Now) < 0) //more than 5 minutes
+                {
+                    result = true;
+                }
+                else
+                {
+                    result = false;
+                }
+
                 //todo: connect to eORacle database and check the status of the form
-                return true;
+                
             }
-            else
-            {
-                return false;
-            }
+            
+
+            return result;
 
         }
 
