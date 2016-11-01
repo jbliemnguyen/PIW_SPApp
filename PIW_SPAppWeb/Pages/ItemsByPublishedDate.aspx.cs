@@ -13,6 +13,19 @@ namespace PIW_SPAppWeb.Pages
     public partial class ItemsByPublishedDate : System.Web.UI.Page
     {
         private SharePointHelper helper = new SharePointHelper();
+
+        public string SelectedDocumentCategory
+        {
+            get
+            {
+                return ViewState[Constants.SelectedDocumentCategory].ToString();
+            }
+
+            set
+            {
+                ViewState.Add(Constants.SelectedDocumentCategory, value);
+            }
+        }
         protected void Page_Load(object sender, EventArgs e)
         {
             try
@@ -324,7 +337,7 @@ namespace PIW_SPAppWeb.Pages
                 {
                     html = string.Format("<span>{0}</span>", accessionNumber);
                 }
-                
+
             }
 
             if (!string.IsNullOrEmpty(previousAccessionNumber))
@@ -449,16 +462,28 @@ namespace PIW_SPAppWeb.Pages
 
         protected void formTypeRadioButtonList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ListItem allCheckBox = new ListItem() { Selected = true, Text = "All", Value = "All" };
-            allCheckBox.Attributes.Add("class", "jqueryselector_CategoryAllCheckBox");
-            PopulateDocumentCategory(allCheckBox);
+
+            PopulateDocumentCategory();
         }
 
-        private void PopulateDocumentCategory(ListItem allCheckBox)
+        private void PopulateDocumentCategory()
         {
+            cblDocumentCategory.Items.Clear();
+            ListItem allCheckBox;
+            if (string.IsNullOrEmpty(SelectedDocumentCategory))//no saved value for document category --> select All by default
+            {
+                allCheckBox = new ListItem() {Selected = true, Text = "All", Value = "All"};
+            }
+            else//value will be populate later
+            {
+                allCheckBox = new ListItem() {Text = "All", Value = "All" };
+            }
+
+
+            allCheckBox.Attributes.Add("class", "jqueryselector_CategoryAllCheckBox");
+
             if (formTypeRadioButtonList.SelectedValue.Equals(Constants.PIWList_FormType_StandardForm))
             {
-                cblDocumentCategory.Items.Clear();
 
                 cblDocumentCategory.Items.Add(allCheckBox);
 
@@ -495,7 +520,6 @@ namespace PIW_SPAppWeb.Pages
             }
             else if (formTypeRadioButtonList.SelectedValue.Equals(Constants.PIWList_FormType_AgendaForm))
             {
-                cblDocumentCategory.Items.Clear();
 
                 cblDocumentCategory.Items.Add(allCheckBox);
 
@@ -533,7 +557,6 @@ namespace PIW_SPAppWeb.Pages
             }
             else if (formTypeRadioButtonList.SelectedValue.Equals(Constants.PIWList_FormType_DirectPublicationForm))
             {
-                cblDocumentCategory.Items.Clear();
 
                 cblDocumentCategory.Items.Add(allCheckBox);
 
@@ -585,10 +608,9 @@ namespace PIW_SPAppWeb.Pages
                 cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_SunshineActMeetingNotice,
                     "jqueryselector_CategoryCheckBox"));
             }
-            else
-            {
-                cblDocumentCategory.Items.Clear();
-            }
+            
+
+            loadSelectedDocumentCategory();
         }
 
         public ListItem createNewCheckBox(string value, string jqueryClass)
@@ -609,7 +631,9 @@ namespace PIW_SPAppWeb.Pages
             {
                 using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
+                    saveSelectedDocumentCategory();
                     displayData(clientContext);
+                    PopulateDocumentCategory();
                 }
 
             }
@@ -631,7 +655,7 @@ namespace PIW_SPAppWeb.Pages
         {
             string formType = listItem[piwListInternalName[Constants.PIWList_colName_FormType]] != null
                             ? listItem[piwListInternalName[Constants.PIWList_colName_FormType]].ToString()
-                            : string.Empty;;
+                            : string.Empty; ;
 
             string documentCategory = listItem[piwListInternalName[Constants.PIWList_colName_DocumentCategory]] != null
                             ? listItem[piwListInternalName[Constants.PIWList_colName_DocumentCategory]].ToString()
@@ -660,13 +684,57 @@ namespace PIW_SPAppWeb.Pages
                 }
                 else
                 {
-                    
+
                     documentCategoryMatch = dicDocumentCategory.ContainsKey(documentCategory);
                 }
             }
 
 
             return (formTypeMatch && documentCategoryMatch);
+        }
+
+        private void saveSelectedDocumentCategory()
+        {
+            string selectedDocumentCategory = string.Empty;
+
+            Dictionary<string, int> dicDocumentCategory = new Dictionary<string, int>();
+            foreach (ListItem item in cblDocumentCategory.Items)
+            {
+                if (item.Selected)
+                {
+                    if (string.IsNullOrEmpty(selectedDocumentCategory))
+                    {
+                        selectedDocumentCategory = item.Value;
+                    }
+                    else
+                    {
+                        selectedDocumentCategory = selectedDocumentCategory + Constants.DocumentURLsSeparator + item.Value;
+                    }
+                }
+            }
+
+            SelectedDocumentCategory = selectedDocumentCategory;//save value to viewstate
+        }
+
+        private void loadSelectedDocumentCategory()
+        {
+            //because the property class of listitem does not saved and reload after post back, 
+            //we need to manuall load it
+            var selectedDocumentsCatArr = SelectedDocumentCategory.Split(new string[] { Constants.DocumentURLsSeparator }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var selectedDocCat in selectedDocumentsCatArr)
+            {
+                foreach (ListItem item in cblDocumentCategory.Items)
+                {
+                    if (selectedDocCat.Equals(item.Value))
+                    {
+                        item.Selected = true;
+                        break;
+                    }
+                }
+            }
+
+            
         }
     }
 

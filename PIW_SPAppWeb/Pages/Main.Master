@@ -10,6 +10,8 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <link href="../Styles/peoplepickercontrol.css" rel="stylesheet" />
     <link href="../Content/bootstrap.css" rel="stylesheet" />
+    <link href="../Content/bootstrap.css" rel="stylesheet" media="print">
+
     <link href="../Styles/offcanvas.css" rel="stylesheet" />
     <link href="../Styles/piw.css?rev=3" rel="stylesheet" />
     <link href="../Styles/jquery-ui.css" rel="stylesheet" />

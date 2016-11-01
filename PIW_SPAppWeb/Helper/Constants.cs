@@ -294,6 +294,9 @@ namespace PIW_SPAppWeb
         //Previous Form Status
         public const string previousFormStatusViewStateKey = "PreviousFormStatusKey";
 
+        //SelectedDocumentCategory
+        public const string SelectedDocumentCategory = "SelectedDocumentCategory";
+
         //ModifiedDateTime key
         public const string ModifiedDateTimeKey = "ModifiedDateTimeKey";
 
