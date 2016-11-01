@@ -90,6 +90,11 @@ namespace PIW_SPAppWeb.Pages
 
         private void RenderGridView(ClientContext clientContext)
         {
+            int successfulIssuance = 0;
+            int failedIssuance = 0;
+            int pendingIssuance = 0;
+            int totalIssuance = 0;
+
             DataTable dataTable = new DataTable();
             DataRow dataRow;
             var piwListInternalName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
@@ -225,6 +230,30 @@ namespace PIW_SPAppWeb.Pages
                                 ? listItem[piwListInternalName[Constants.PIWList_colName_PublishedError]].ToString()
                                 : string.Empty;
 
+                        string accessionNumber = listItem[piwListInternalName[Constants.PIWList_colName_AccessionNumber]] != null
+                                ? listItem[piwListInternalName[Constants.PIWList_colName_AccessionNumber]].ToString()
+                                : string.Empty;
+
+                        //Count
+                        totalIssuance++;
+                        if (string.IsNullOrEmpty(dataRow["PublishedError"].ToString()))
+                        {
+                            //if no error, then check accession number
+                            //if no accession --> not process yet --> pending
+                            if (string.IsNullOrEmpty(accessionNumber))
+                            {
+                                pendingIssuance ++;
+                            }
+                            else
+                            {
+                                successfulIssuance ++;
+                            }
+                        }
+                        else
+                        {
+                            failedIssuance++;
+                        }
+
                     }
                 }
             }
@@ -310,6 +339,13 @@ namespace PIW_SPAppWeb.Pages
 
             gridView.DataSource = view;
             gridView.DataBind();
+
+            //display result
+            lbSucessfullValue.Text = successfulIssuance.ToString();
+            lbFailValue.Text = failedIssuance.ToString();
+            lbPendingValue.Text = pendingIssuance.ToString();
+            lbTotalValue.Text = totalIssuance.ToString();
+
         }
 
         private string getAccessionNumberHtml(Microsoft.SharePoint.Client.ListItem listItem, Dictionary<string, string> piwListInternalName)
@@ -472,11 +508,11 @@ namespace PIW_SPAppWeb.Pages
             ListItem allCheckBox;
             if (string.IsNullOrEmpty(SelectedDocumentCategory))//no saved value for document category --> select All by default
             {
-                allCheckBox = new ListItem() {Selected = true, Text = "All", Value = "All"};
+                allCheckBox = new ListItem() { Selected = true, Text = "All", Value = "All" };
             }
             else//value will be populate later
             {
-                allCheckBox = new ListItem() {Text = "All", Value = "All" };
+                allCheckBox = new ListItem() { Text = "All", Value = "All" };
             }
 
 
@@ -608,7 +644,7 @@ namespace PIW_SPAppWeb.Pages
                 cblDocumentCategory.Items.Add(createNewCheckBox(Constants.PIWList_DocCat_SunshineActMeetingNotice,
                     "jqueryselector_CategoryCheckBox"));
             }
-            
+
 
             loadSelectedDocumentCategory();
         }
@@ -734,7 +770,7 @@ namespace PIW_SPAppWeb.Pages
                 }
             }
 
-            
+
         }
     }
 

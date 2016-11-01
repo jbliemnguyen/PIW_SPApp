@@ -195,6 +195,9 @@ namespace PIW_SPAppWeb.Helper
             //clear accession number
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
 
+            //clear published error
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PublishedError]] = string.Empty;
+
             //Note: we should not clear the published date, leave published date will make item appear in items by published date
             //and it will display accession number with strike out, it help "docket elibrary" staff check the accession number
 

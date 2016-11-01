@@ -30,7 +30,7 @@
             $("span.jqueryselector_CategoryAllCheckBox input:checkbox").click(function (event) {
                 if ($(this).prop("checked")) {
                     $("span.jqueryselector_CategoryCheckBox input:checkbox").removeAttr('checked');
-                    
+
                 }
             });
         }
@@ -109,14 +109,14 @@
         </div>
 
         <div class="col-md-5">
-            <div id="divDocumentCategory" >
+            <div id="divDocumentCategory">
                 <asp:Label ID="Label3" runat="server" Text="Document Category" CssClass="col-md-3 control-label"></asp:Label>
                 <div class="checkbox checkboxlist col-sm-9">
                     <asp:CheckBoxList ID="cblDocumentCategory" runat="server" RepeatDirection="Horizontal" RepeatColumns="2">
                     </asp:CheckBoxList>
                 </div>
             </div>
-            
+
         </div>
 
         <asp:UpdatePanel runat="server">
@@ -131,6 +131,25 @@
                         <asp:GridView runat="server" ID="gridView" AutoGenerateColumns="false" CssClass="table table-hover table-condensed piw-borderless" ClientIDMode="Static">
                         </asp:GridView>
                     </div>
+                </div>
+
+                <div class="form-group">
+                    <asp:Label ID="lbSucessfull" runat="server" Text="Sucessful" CssClass="col-md-1 control-label" AssociatedControlID="lbSucessfullValue"></asp:Label>
+
+                    <asp:Label ID="lbSucessfullValue" runat="server" CssClass="control-label col-md-1"></asp:Label>
+
+                </div>
+                <div class="form-group">
+                    <asp:Label ID="lbFail" runat="server" Text="Fail" CssClass="col-xs-1 control-label" AssociatedControlID="lbFailValue"></asp:Label>
+                    <asp:Label ID="lbFailValue" runat="server" CssClass="col-xs-1 control-label"></asp:Label>
+                </div>
+                <div class="form-group">
+                    <asp:Label ID="lbPending" runat="server" Text="Pending" CssClass="col-xs-1 control-label" AssociatedControlID="lbPendingValue"></asp:Label>
+                    <asp:Label ID="lbPendingValue" runat="server" CssClass="col-xs-1 control-label"></asp:Label>
+                </div>
+                <div class="form-group">
+                    <asp:Label ID="lbTotal" runat="server" Text="Total Issuances" CssClass="col-xs-1 control-label" AssociatedControlID="lbTotalValue"></asp:Label>
+                    <asp:Label ID="lbTotalValue" runat="server" Text="Docket Number" CssClass="col-xs-1 control-label"></asp:Label>
                 </div>
             </ContentTemplate>
             <Triggers>
