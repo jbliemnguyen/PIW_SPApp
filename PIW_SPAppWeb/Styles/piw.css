@@ -1,4 +1,9 @@
-﻿/*override the dialog to have red font*/
+﻿@media print {
+  a[href]:after {
+    content: none !important;
+  }
+}
+/*override the dialog to have red font*/
 .ui-dialog-title {
     color: red;
 }

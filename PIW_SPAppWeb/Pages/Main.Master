@@ -9,17 +9,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <link href="../Styles/peoplepickercontrol.css" rel="stylesheet" />
-    <link href="../Content/bootstrap.css" rel="stylesheet" />
-    <link href="../Content/bootstrap.css" rel="stylesheet" media="print">
+    <link href="../Content/bootstrap.css" rel="stylesheet" media="all" />
+    <%--<link href="../Content/bootstrap.css" rel="stylesheet" media="print" />--%>
 
     <link href="../Styles/offcanvas.css" rel="stylesheet" />
-    <link href="../Styles/piw.css?rev=3" rel="stylesheet" />
+    <link href="../Styles/piw.css?rev=4" rel="stylesheet" />
     <link href="../Styles/jquery-ui.css" rel="stylesheet" />
     <asp:ContentPlaceHolder ID="head" runat="server">
     </asp:ContentPlaceHolder>
 </head>
 <body>
-    <nav class="navbar navbar-fixed-top navbar-inverse">
+    <nav class="navbar navbar-fixed-top navbar-inverse hidden-print">
         <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -52,7 +52,7 @@
     <!-- /.navbar -->
     <div class="container-fluid">
         <div class="row">
-            <div class="col-xs-5 col-sm-3 col-md-2 sidebar-offcanvas" id="sidebar">
+            <div class="col-md-2 sidebar-offcanvas hidden-print" id="sidebar">
                 <div class="list-group">
                     <a href="StandardForms.aspx" class="list-group-item" id="StandardFormsURL">Standard Forms</a>
                     <a href="AgendaForms.aspx" class="list-group-item" id="AgendaFormsURL">Agenda Forms</a>
@@ -67,7 +67,7 @@
             <!--/.sidebar-offcanvas-->
 
 
-            <div class="col-xs-7 col-sm-9 col-md-10">
+            <div class="col-md-10">
                 <asp:ContentPlaceHolder ID="MainContentPlaceHolder" runat="server">
                 </asp:ContentPlaceHolder>
             </div>

@@ -237,8 +237,8 @@ namespace PIW_SPAppWeb.Pages
 
             string[] urls = new string[1] { "URL" };
             hyperlinkField = new HyperLinkField { HeaderText = "Docket Number", DataTextField = "Docket", };
-            hyperlinkField.HeaderStyle.CssClass = "col-xs-2";
-            hyperlinkField.ItemStyle.CssClass = "col-xs-2";
+            hyperlinkField.HeaderStyle.CssClass = "col-md-2";
+            hyperlinkField.ItemStyle.CssClass = "col-md-2";
             hyperlinkField.DataNavigateUrlFields = urls;
             hyperlinkField.Target = "_blank";
             gridView.Columns.Add(hyperlinkField);
@@ -251,8 +251,8 @@ namespace PIW_SPAppWeb.Pages
                 HtmlEncode = false,
 
             };
-            boundField.HeaderStyle.CssClass = "col-xs-2";
-            boundField.ItemStyle.CssClass = "col-xs-2";
+            boundField.HeaderStyle.CssClass = "col-md-2";
+            boundField.ItemStyle.CssClass = "col-md-2";
 
             gridView.Columns.Add(boundField);
 

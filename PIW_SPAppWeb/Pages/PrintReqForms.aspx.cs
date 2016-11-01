@@ -107,8 +107,8 @@ namespace PIW_SPAppWeb.Pages
 
             string[] urls = new string[1] { "URL" };
             hyperlinkField = new HyperLinkField { HeaderText = "Docket Number", DataTextField = "Docket" };
-            hyperlinkField.HeaderStyle.CssClass = "col-xs-2";
-            hyperlinkField.ItemStyle.CssClass = "col-xs-2";
+            hyperlinkField.HeaderStyle.CssClass = "col-md-2";
+            hyperlinkField.ItemStyle.CssClass = "col-md-2";
             hyperlinkField.DataNavigateUrlFields = urls;
             //hyperlinkField.Target = "_blank";
             gridView.Columns.Add(hyperlinkField);
@@ -118,28 +118,28 @@ namespace PIW_SPAppWeb.Pages
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Initiator Office", DataField = "InitiatorOffice" };
-            boundField.HeaderStyle.CssClass = "col-xs-1";
-            boundField.ItemStyle.CssClass = "col-xs-1";
+            boundField.HeaderStyle.CssClass = "col-md-1";
+            boundField.ItemStyle.CssClass = "col-md-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Date Requested", DataField = "DateRequested" };
-            boundField.HeaderStyle.CssClass = "col-xs-1";
-            boundField.ItemStyle.CssClass = "col-xs-1";
+            boundField.HeaderStyle.CssClass = "col-md-1";
+            boundField.ItemStyle.CssClass = "col-md-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Date Required", DataField = "DateRequired" };
-            boundField.HeaderStyle.CssClass = "col-xs-1";
-            boundField.ItemStyle.CssClass = "col-xs-1";
+            boundField.HeaderStyle.CssClass = "col-md-1";
+            boundField.ItemStyle.CssClass = "col-md-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Number of Pages", DataField = "NumberOfPages" };
-            boundField.HeaderStyle.CssClass = "col-xs-1";
-            boundField.ItemStyle.CssClass = "col-xs-1";
+            boundField.HeaderStyle.CssClass = "col-md-1";
+            boundField.ItemStyle.CssClass = "col-md-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Number of Copies", DataField = "NumberOfCopies" };
-            boundField.HeaderStyle.CssClass = "col-xs-1";
-            boundField.ItemStyle.CssClass = "col-xs-1";
+            boundField.HeaderStyle.CssClass = "col-md-1";
+            boundField.ItemStyle.CssClass = "col-md-1";
             gridView.Columns.Add(boundField);
 
             gridView.AutoGenerateColumns = false;
