@@ -127,7 +127,7 @@
                     <asp:Button ID="btnReopen1" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                     <asp:Button ID="btnLegalReviewCompleted1" runat="server" Text="Legal Review Completed" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                     <asp:Button ID="btnLegalReviewCompletedWithComment1" runat="server" Text="Legal Review Completed with Comment" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
-                    <asp:Button ID="btnGenerateMailingList1" runat="server" Text="ReGenerate Print Requisition" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
+                    <asp:Button ID="btnGenerateMailingList1" runat="server" Text="Regenerate Print Requisition" CssClass="btn-sm btn-primary active" ClientIDMode="Static" />
                 </div>
             </div>
 
@@ -482,7 +482,7 @@
                 <asp:Button ID="btnReopen" runat="server" Text="Re-Open" CssClass="btn-sm btn-primary active" OnClick="btnReopen_Click" ClientIDMode="Static" />
                 <asp:Button ID="btnLegalReviewCompleted" runat="server" Text="Legal Review Completed" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnLegalReviewCompleted_Click" />
                 <asp:Button ID="btnLegalReviewCompletedWithComment" runat="server" Text="Legal Review Completed with Comment" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnLegalReviewCompleted_Click" />
-                <asp:Button ID="btnGenerateMailingList" runat="server" Text="ReGenerate Print Requisition" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnGenerateMailingList_Click" />
+                <asp:Button ID="btnGenerateMailingList" runat="server" Text="Regenerate Print Requisition" CssClass="btn-sm btn-primary active" ClientIDMode="Static" OnClick="btnGenerateMailingList_Click" />
             </div>
         </div>
         <div class="form-group">
