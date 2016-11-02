@@ -312,9 +312,22 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public bool GenerateAndSubmitPrintReqForm(ClientContext clientContext, ListItem listItem, string CurrentUserLogInID)
+        public bool GenerateAndSubmitPrintReqForm(ClientContext clientContext, ListItem listItem, string CurrentUserLogInID,bool isRegenerate)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            
+            if (!isRegenerate)
+            {
+                //normal run from schedule, not ReGenerate
+                //check if print req already generated, by check if PrintReqDateRequest is populated
+                //if generated, do nothing, return false
+                if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequested]] != null)
+                {
+                    return false;
+                }    
+            }
+            
 
             string listItemID = listItem["ID"].ToString();
 
@@ -379,8 +392,6 @@ namespace PIW_SPAppWeb.Helper
 
                 listItem.Update();
                 clientContext.ExecuteQuery();
-
-                //todo: send email
 
 
                 //history list for print req generate

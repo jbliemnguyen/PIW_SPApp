@@ -38,19 +38,19 @@
     <form id="mainForm" runat="server" class="form-horizontal">
         <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
         <div class="form-group">
-            <div class="col-md-8">
+            <div class="col-xs-8">
                 <span style="font-size: large">Items By Published Date</span>
             </div>
-            <div class="col-md-3">
+            <div class="col-xs-3">
                 <asp:Label runat="server" ID="lbLastUpdated" Font-Italic="True" Font-Bold="True"></asp:Label>
             </div>
         </div>
 
 
-        <div class="col-md-4">
+        <div class="col-xs-4">
             <div class="form-group">
-                <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-md-6 control-label"></asp:Label>
-                <div class="col-md-6">
+                <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-xs-6 control-label"></asp:Label>
+                <div class="col-xs-6">
                     <asp:DropDownList ID="ddProgramOfficeWorkflowInitiator" CssClass="form-control" runat="server" ClientIDMode="Static">
                         <asp:ListItem Selected="True">-- All Offices --</asp:ListItem>
                         <asp:ListItem>OAL</asp:ListItem>
@@ -69,15 +69,15 @@
             </div>
 
             <div class="form-group">
-                <asp:Label ID="Label1" runat="server" Text="From Publication Date" AssociatedControlID="tbFromDate" CssClass="col-md-6 control-label" ClientIDMode="Static"></asp:Label>
-                <div class="col-md-6">
+                <asp:Label ID="Label1" runat="server" Text="From Publication Date" AssociatedControlID="tbFromDate" CssClass="col-xs-6 control-label" ClientIDMode="Static"></asp:Label>
+                <div class="col-xs-6">
                     <asp:TextBox ID="tbFromDate" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
                 </div>
             </div>
 
             <div class="form-group">
-                <asp:Label ID="Label2" runat="server" Text="To Publication Date" AssociatedControlID="tbToDate" CssClass="col-md-6 control-label" ClientIDMode="Static"></asp:Label>
-                <div class="col-md-6">
+                <asp:Label ID="Label2" runat="server" Text="To Publication Date" AssociatedControlID="tbToDate" CssClass="col-xs-6 control-label" ClientIDMode="Static"></asp:Label>
+                <div class="col-xs-6">
                     <asp:TextBox ID="tbToDate" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
                 </div>
             </div>
@@ -85,10 +85,10 @@
         </div>
 
 
-        <div class="col-md-3">
+        <div class="col-xs-3">
             <%--Form Type filter--%>
             <div class="form-group">
-                <asp:Label ID="Label4" runat="server" Text="Form Type" CssClass="col-md-5 control-label"></asp:Label>
+                <asp:Label ID="Label4" runat="server" Text="Form Type" CssClass="col-xs-5 control-label"></asp:Label>
                 <div class="radio radiobuttonlist col-sm-7">
                     <asp:RadioButtonList ID="formTypeRadioButtonList" runat="server" RepeatDirection="Vertical" AutoPostBack="True" OnSelectedIndexChanged="formTypeRadioButtonList_SelectedIndexChanged">
                         <asp:ListItem Selected="True">All Forms</asp:ListItem>
@@ -100,17 +100,17 @@
             </div>
 
             <div class="form-group">
-                <div class="col-md-3"></div>
-                <div class="col-md-9">
+                <div class="col-xs-3"></div>
+                <div class="col-xs-9">
                     <asp:Button runat="server" ID="btnRun" Text="Run Report" CssClass="btn-sm btn-primary active" OnClick="btnRun_OnClick" />
                 </div>
             </div>
 
         </div>
 
-        <div class="col-md-5">
+        <div class="col-xs-5">
             <div id="divDocumentCategory">
-                <asp:Label ID="Label3" runat="server" Text="Document Category" CssClass="col-md-3 control-label"></asp:Label>
+                <asp:Label ID="Label3" runat="server" Text="Document Category" CssClass="col-xs-3 control-label"></asp:Label>
                 <div class="checkbox checkboxlist col-sm-9">
                     <asp:CheckBoxList ID="cblDocumentCategory" runat="server" RepeatDirection="Horizontal" RepeatColumns="2">
                     </asp:CheckBoxList>
@@ -127,29 +127,31 @@
 
 
                 <div class="form-group">
-                    <div id="gridDiv" class="col-md-12" style="overflow-x: scroll; overflow-y: hidden">
-                        <asp:GridView runat="server" ID="gridView" AutoGenerateColumns="false" CssClass="table table-hover table-condensed piw-borderless" ClientIDMode="Static">
+                    <%--<div id="gridDiv" class="col-xs-12" style="overflow-x: scroll; overflow-y: hidden">--%>
+                    <div id="gridDiv" class="col-xs-12" style="overflow-x: hidden; overflow-y: hidden">
+                        <asp:GridView runat="server" ID="gridView" AutoGenerateColumns="false" CssClass="table table-hover table-condensed piw-borderless"
+                            OnPageIndexChanging="gridView_OnPageIndexChanging" ClientIDMode="Static">
+                            <PagerStyle CssClass="pagination-piw" />
                         </asp:GridView>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <asp:Label ID="lbSucessfull" runat="server" Text="Sucessful" CssClass="col-md-1 control-label" AssociatedControlID="lbSucessfullValue"></asp:Label>
+                <div class="form-group col-xs-3">
+                    <hr style="width: 100%; color: #204d74; height: 2px; background-color: #204d74;" class="col-xs-12"></hr>
 
-                    <asp:Label ID="lbSucessfullValue" runat="server" CssClass="control-label col-md-1"></asp:Label>
+                    <asp:Label ID="lbSucessfull" runat="server" Text="Successful" CssClass="col-xs-6 control-label" AssociatedControlID="lbSucessfullValue"></asp:Label>
+                    <asp:Label ID="lbSucessfullValue" runat="server" CssClass="control-label col-xs-6"></asp:Label>
 
-                </div>
-                <div class="form-group">
-                    <asp:Label ID="lbFail" runat="server" Text="Fail" CssClass="col-xs-1 control-label" AssociatedControlID="lbFailValue"></asp:Label>
-                    <asp:Label ID="lbFailValue" runat="server" CssClass="col-xs-1 control-label"></asp:Label>
-                </div>
-                <div class="form-group">
-                    <asp:Label ID="lbPending" runat="server" Text="Pending" CssClass="col-xs-1 control-label" AssociatedControlID="lbPendingValue"></asp:Label>
-                    <asp:Label ID="lbPendingValue" runat="server" CssClass="col-xs-1 control-label"></asp:Label>
-                </div>
-                <div class="form-group">
-                    <asp:Label ID="lbTotal" runat="server" Text="Total Issuances" CssClass="col-xs-1 control-label" AssociatedControlID="lbTotalValue"></asp:Label>
-                    <asp:Label ID="lbTotalValue" runat="server" Text="Docket Number" CssClass="col-xs-1 control-label"></asp:Label>
+                    <asp:Label ID="lbFail" runat="server" Text="Failed" CssClass="col-xs-6 control-label" AssociatedControlID="lbFailValue"></asp:Label>
+                    <asp:Label ID="lbFailValue" runat="server" CssClass="col-xs-6 control-label"></asp:Label>
+
+                    <asp:Label ID="lbPending" runat="server" Text="Pending" CssClass="col-xs-6 control-label" AssociatedControlID="lbPendingValue"></asp:Label>
+                    <asp:Label ID="lbPendingValue" runat="server" CssClass="col-xs-6 control-label"></asp:Label>
+                    <hr style="width: 100%; color: #204d74; height: 2px; background-color: #204d74;" class="col-xs-12"></hr>
+                    <asp:Label ID="lbTotal" runat="server" Text="Total Issuances" CssClass="col-xs-6 control-label" AssociatedControlID="lbTotalValue"></asp:Label>
+                    <asp:Label ID="lbTotalValue" runat="server" CssClass="col-xs-6 control-label"></asp:Label>
+
+
                 </div>
             </ContentTemplate>
             <Triggers>

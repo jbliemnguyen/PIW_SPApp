@@ -847,9 +847,17 @@ namespace PIW_SPAppWeb.Pages
             using (var clientContext = helper.getElevatedClientContext(Context, Request))
             {
                 ListItem listItem = helper.GetPiwListItemById(clientContext, ListItemID, true);
-                helper.GenerateAndSubmitPrintReqForm(clientContext, listItem, CurrentUserLogInID);
+                bool regenerateResult = helper.GenerateAndSubmitPrintReqForm(clientContext, listItem, CurrentUserLogInID, true);
+
                 lbMainMessage.Visible = true;
-                lbMainMessage.Text = "ReGenerate Print Requisition Form";
+                if (regenerateResult)
+                {
+                    lbMainMessage.Text = "Print Requisition Form Regenerated";
+                }
+                else
+                {
+                    lbMainMessage.Text = "There is no FOLA mailing list or supplemental mailing to generate Print Requisition Form";
+                }
             }
         }
         protected void btnGenerateCitationNumber_Click(object sender, EventArgs e)

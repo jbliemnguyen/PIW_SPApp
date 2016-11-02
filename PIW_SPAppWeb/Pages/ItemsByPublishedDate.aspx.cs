@@ -772,6 +772,12 @@ namespace PIW_SPAppWeb.Pages
 
 
         }
+
+        protected void gridView_OnPageIndexChanging(object sender,  GridViewPageEventArgs e)
+        {
+            gridView.PageIndex = e.NewPageIndex;
+            btnRun_OnClick(null, null);
+        }
     }
 
 

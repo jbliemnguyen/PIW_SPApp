@@ -59,8 +59,8 @@
                     <a href="DirectPublicationForms.aspx" class="list-group-item" id="DirectPublicationFormsURL">Direct Publication Forms</a>
                     <a href="PrintReqForms.aspx" class="list-group-item" id="PrintReqFormsURL">Print Requisition Forms</a>
                     <a href="ItemsByPublishedDate.aspx" class="list-group-item" id="ItemsByPublishedDateURL">Items By Published Date</a>
-                    
-                    
+
+
                     <a href="Admin.aspx" class="list-group-item" id="AdminURL">Admin</a>
                 </div>
             </div>
@@ -84,8 +84,8 @@
     <script src="../Scripts/peoplepickercontrol.js?rev=5" type="text/javascript"></script>
     <%--<script src="../Scripts/spinner/jquery.spinner.js"></script>--%>
     <%--<script src="../Scripts/jquery.stickytableheaders.min.js"></script>--%>
-    
-    
+
+
     <%--no longer use--%>
 
     <script type="text/javascript">
@@ -249,7 +249,7 @@
                     ctl00$MainContentPlaceHolder$tbDueDate: "required",
                     ctl00$MainContentPlaceHolder$tbAlternateIdentifier: { requiredWhenNonDocketed: true, maxlength: 255 },
                     ctl00$MainContentPlaceHolder$tbInstruction: { maxlength: 255 },
-                    ctl00$MainContentPlaceHolder$ddProgramOfficeDocumentOwner: {requiredWhenDocumentOwnerProvided:true},
+                    ctl00$MainContentPlaceHolder$ddProgramOfficeDocumentOwner: { requiredWhenDocumentOwnerProvided: true },
                     ctl00$MainContentPlaceHolder$inputDocumentOwner: { requiredWhenProgramOfficeDocumentOwnerProvided: true },
                     //print req validation
                     ctl00$MainContentPlaceHolder$tbNumberofPages: {
@@ -307,7 +307,7 @@
             //prevent user edit duedate and set value to past date
             $("#tbDueDate").keydown(function (event) { event.preventDefault(); });
             $("#tbLegalResourcesReviewCompletionDate").datepicker();
-            
+
             jQueryValidation();
 
             //initialize docket and alternate identifier based on nondocket and cnf checkbox
@@ -334,8 +334,7 @@
                 //this code should used in edit standard and agenda form becuase the form has citation number
                 //it will fails when the code look for citation number textbox location in print req and direct pub
                 if ((document.URL.indexOf("EditStandardForm.aspx") > -1) ||
-                    (document.URL.indexOf("EditAgendaForm.aspx") > -1))
-                    {
+                    (document.URL.indexOf("EditAgendaForm.aspx") > -1)) {
                     var prm = Sys.WebForms.PageRequestManager.getInstance();
                     prm.add_endRequest(function () {
                         RemoveLockScreenForAjaxUpdate(); //ajax request completed, remove the lock screen
@@ -345,7 +344,7 @@
                         LockScreenForAjaxUpdate();
                     });
                 }
-                
+
             }
 
 
@@ -368,32 +367,34 @@
             $("#btnInitiatePublication").click(function (event) {
                 event.preventDefault();
 
-                //display warning if due date is future date
-                var modalHeight = 100;
-                //var dueDate = new Date($("#tbDueDate").attr('value'));
-                var dueDate = new Date($("#tbDueDate").val());
-                var today = new Date();
-                if (dueDate > today) {
-                    modalHeight = 250;
-                    $("#publishDialogConfirmation").html("<span style='color:red'>Warning: Due Date is a future date</span>");
-                }
-                else {
-                    $("#publishDialogConfirmation").html("");
-                }
-
-                //dialog
-                $("#publishDialogConfirmation").dialog({
-                    buttons: {
-                        "No": function (e) {
-                            $(this).dialog("close");
-
-                        },
-                        "Yes": function (e) {
-                            $("#btnPublishConfirm").click();
-                            $(this).dialog("close");
-                        }
+                if ($("#mainForm").valid()) // trigger the validation
+                {
+                    //display warning if due date is future date
+                    var modalHeight = 100;
+                    //var dueDate = new Date($("#tbDueDate").attr('value'));
+                    var dueDate = new Date($("#tbDueDate").val());
+                    var today = new Date();
+                    if (dueDate > today) {
+                        modalHeight = 250;
+                        $("#publishDialogConfirmation").html("<span style='color:red'>Warning: Due Date is a future date</span>");
+                    } else {
+                        $("#publishDialogConfirmation").html("");
                     }
-                }, { width: 600, height: modalHeight });
+
+                    //dialog
+                    $("#publishDialogConfirmation").dialog({
+                        buttons: {
+                            "No": function (e) {
+                                $(this).dialog("close");
+
+                            },
+                            "Yes": function (e) {
+                                $("#btnPublishConfirm").click();
+                                $(this).dialog("close");
+                            }
+                        }
+                    }, { width: 600, height: modalHeight });
+                }
             });
 
             $(".historyhead").click(function () {
@@ -424,7 +425,7 @@
                 $("#btnSECReviewTakeOwnership").click();
             });
 
-            
+
 
             $("#btnRecall1").click(function (event) {
                 event.preventDefault();
@@ -476,7 +477,7 @@
                 $("#btnLegalReviewCompletedWithComment").click();
             });
 
-            
+
             //end top buttons event
 
 
@@ -555,7 +556,7 @@
             $("#tbNumberofCopies").rules("remove");
             $("#ddProgramOfficeDocumentOwner").rules("remove");
             $("#inputDocumentOwner").rules("remove");
-            
+
         }
 
         ///http://www.4guysfromrolla.com/articles/121708-1.aspx
