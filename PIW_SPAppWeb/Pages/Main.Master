@@ -59,7 +59,7 @@
                     <a href="DirectPublicationForms.aspx" class="list-group-item" id="DirectPublicationFormsURL">Direct Publication Forms</a>
                     <a href="PrintReqForms.aspx" class="list-group-item" id="PrintReqFormsURL">Print Requisition Forms</a>
                     <a href="ItemsByPublishedDate.aspx" class="list-group-item" id="ItemsByPublishedDateURL">Items By Published Date</a>
-
+                    <a href="DocketNumberSearch.aspx" class="list-group-item" id="DocketNumberSearchURL">Docket Number Search</a>
 
                     <a href="Admin.aspx" class="list-group-item" id="AdminURL">Admin</a>
                 </div>

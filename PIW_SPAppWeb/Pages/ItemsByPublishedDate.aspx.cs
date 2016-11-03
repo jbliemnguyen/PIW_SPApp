@@ -65,23 +65,6 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        protected void tmrRefresh_Tick(object sender, EventArgs e)
-        {
-            try
-            {
-                using (var clientContext = helper.getElevatedClientContext(Context, Request))
-                {
-                    displayData(clientContext);
-                }
-            }
-            catch (Exception exc)
-            {
-                helper.LogError(Context, Request, exc, string.Empty, Page.Request.Url.OriginalString);
-                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
-            }
-
-        }
-
         private void displayData(ClientContext clientContext)
         {
             RenderGridView(clientContext);

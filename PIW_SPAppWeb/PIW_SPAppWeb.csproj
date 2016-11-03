@@ -179,6 +179,7 @@
     <Content Include="Pages\AccessDenied.aspx" />
     <Content Include="Pages\AgendaForms.aspx" />
     <Content Include="Pages\DirectPublicationForms.aspx" />
+    <Content Include="Pages\DocketNumberSearch.aspx" />
     <Content Include="Pages\EditAgendaForm.aspx" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="packages.config" />
@@ -316,6 +317,13 @@
     </Compile>
     <Compile Include="Pages\DirectPublicationForms.aspx.designer.cs">
       <DependentUpon>DirectPublicationForms.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\DocketNumberSearch.aspx.cs">
+      <DependentUpon>DocketNumberSearch.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\DocketNumberSearch.aspx.designer.cs">
+      <DependentUpon>DocketNumberSearch.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\EditAgendaForm.aspx.cs">
       <DependentUpon>EditAgendaForm.aspx</DependentUpon>

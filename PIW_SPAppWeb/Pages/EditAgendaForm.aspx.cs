@@ -317,7 +317,7 @@ namespace PIW_SPAppWeb.Pages
                                 Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
                         }
 
-                        
+
                         //Refresh or Redirect depends on Previous Status
                         if (PreviousFormStatus.Equals(Constants.PIWList_FormStatus_Pending) ||
                             PreviousFormStatus.Equals(Constants.PIWList_FormStatus_Recalled) ||
@@ -2229,9 +2229,18 @@ namespace PIW_SPAppWeb.Pages
         {
             using (var clientContext = helper.getElevatedClientContext(Context, Request))
             {
+                //supplemental mailing list - only 1 excel document
+                string supplementalMailingListFileName = string.Empty;
+                if (rpSupplementalMailingListDocumentList.Items.Count > 0)
+                {
+                    RepeaterItem row = rpSupplementalMailingListDocumentList.Items[0];
+                    var downloadedURL = helper.getFileNameFromURL(((HyperLink)row.FindControl("hyperlinkFileURL")).NavigateUrl);
+                    supplementalMailingListFileName = downloadedURL.Substring(0, downloadedURL.IndexOf("?web=0"));
+                }
+
                 ListItem listItem = helper.GetPiwListItemById(clientContext, ListItemID, true);
-                bool regenerateResult = helper.GenerateAndSubmitPrintReqForm(clientContext, listItem, CurrentUserLogInID,true);
-                
+                bool regenerateResult = helper.GenerateAndSubmitPrintReqForm(clientContext, listItem, CurrentUserLogInID, true, supplementalMailingListFileName);
+
                 lbMainMessage.Visible = true;
                 if (regenerateResult)
                 {
@@ -2241,7 +2250,7 @@ namespace PIW_SPAppWeb.Pages
                 {
                     lbMainMessage.Text = "There is no FOLA mailing list or supplemental mailing to generate Print Requisition Form";
                 }
-                
+
             }
         }
 

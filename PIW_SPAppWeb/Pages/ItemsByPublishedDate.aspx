@@ -36,7 +36,6 @@
         }
     </script>
     <form id="mainForm" runat="server" class="form-horizontal">
-        <asp:ScriptManager ID="ScriptManager1" runat="server" EnableCdn="True"></asp:ScriptManager>
         <div class="form-group">
             <div class="col-xs-8">
                 <span style="font-size: large">Items By Published Date</span>
@@ -119,45 +118,35 @@
 
         </div>
 
-        <asp:UpdatePanel runat="server">
-            <ContentTemplate>
-                <asp:Timer ID="tmrRefresh" runat="server" Interval="300000" Enabled="false" OnTick="tmrRefresh_Tick">
-                    <%--5 minutes delays--%>
-                </asp:Timer>
+
+        <div class="form-group">
+            <%--<div id="gridDiv" class="col-xs-12" style="overflow-x: scroll; overflow-y: hidden">--%>
+            <div id="gridDiv" class="col-xs-12" style="overflow-x: hidden; overflow-y: hidden">
+                <asp:GridView runat="server" ID="gridView" AutoGenerateColumns="false" CssClass="table table-hover table-condensed piw-borderless"
+                    OnPageIndexChanging="gridView_OnPageIndexChanging" ClientIDMode="Static">
+                    <PagerStyle CssClass="pagination-piw" />
+                </asp:GridView>
+            </div>
+        </div>
+
+        <div class="form-group col-xs-3">
+            <hr style="width: 100%; color: #204d74; height: 2px; background-color: #204d74;" class="col-xs-12"></hr>
+
+            <asp:Label ID="lbSucessfull" runat="server" Text="Successful" CssClass="col-xs-6 control-label" AssociatedControlID="lbSucessfullValue"></asp:Label>
+            <asp:Label ID="lbSucessfullValue" runat="server" CssClass="control-label col-xs-6"></asp:Label>
+
+            <asp:Label ID="lbFail" runat="server" Text="Failed" CssClass="col-xs-6 control-label" AssociatedControlID="lbFailValue"></asp:Label>
+            <asp:Label ID="lbFailValue" runat="server" CssClass="col-xs-6 control-label"></asp:Label>
+
+            <asp:Label ID="lbPending" runat="server" Text="Pending" CssClass="col-xs-6 control-label" AssociatedControlID="lbPendingValue"></asp:Label>
+            <asp:Label ID="lbPendingValue" runat="server" CssClass="col-xs-6 control-label"></asp:Label>
+            <hr style="width: 100%; color: #204d74; height: 2px; background-color: #204d74;" class="col-xs-12"></hr>
+            <asp:Label ID="lbTotal" runat="server" Text="Total Issuances" CssClass="col-xs-6 control-label" AssociatedControlID="lbTotalValue"></asp:Label>
+            <asp:Label ID="lbTotalValue" runat="server" CssClass="col-xs-6 control-label"></asp:Label>
 
 
-                <div class="form-group">
-                    <%--<div id="gridDiv" class="col-xs-12" style="overflow-x: scroll; overflow-y: hidden">--%>
-                    <div id="gridDiv" class="col-xs-12" style="overflow-x: hidden; overflow-y: hidden">
-                        <asp:GridView runat="server" ID="gridView" AutoGenerateColumns="false" CssClass="table table-hover table-condensed piw-borderless"
-                            OnPageIndexChanging="gridView_OnPageIndexChanging" ClientIDMode="Static">
-                            <PagerStyle CssClass="pagination-piw" />
-                        </asp:GridView>
-                    </div>
-                </div>
+        </div>
 
-                <div class="form-group col-xs-3">
-                    <hr style="width: 100%; color: #204d74; height: 2px; background-color: #204d74;" class="col-xs-12"></hr>
-
-                    <asp:Label ID="lbSucessfull" runat="server" Text="Successful" CssClass="col-xs-6 control-label" AssociatedControlID="lbSucessfullValue"></asp:Label>
-                    <asp:Label ID="lbSucessfullValue" runat="server" CssClass="control-label col-xs-6"></asp:Label>
-
-                    <asp:Label ID="lbFail" runat="server" Text="Failed" CssClass="col-xs-6 control-label" AssociatedControlID="lbFailValue"></asp:Label>
-                    <asp:Label ID="lbFailValue" runat="server" CssClass="col-xs-6 control-label"></asp:Label>
-
-                    <asp:Label ID="lbPending" runat="server" Text="Pending" CssClass="col-xs-6 control-label" AssociatedControlID="lbPendingValue"></asp:Label>
-                    <asp:Label ID="lbPendingValue" runat="server" CssClass="col-xs-6 control-label"></asp:Label>
-                    <hr style="width: 100%; color: #204d74; height: 2px; background-color: #204d74;" class="col-xs-12"></hr>
-                    <asp:Label ID="lbTotal" runat="server" Text="Total Issuances" CssClass="col-xs-6 control-label" AssociatedControlID="lbTotalValue"></asp:Label>
-                    <asp:Label ID="lbTotalValue" runat="server" CssClass="col-xs-6 control-label"></asp:Label>
-
-
-                </div>
-            </ContentTemplate>
-            <Triggers>
-                <asp:AsyncPostBackTrigger ControlID="tmrRefresh" EventName="Tick" />
-            </Triggers>
-        </asp:UpdatePanel>
     </form>
 </asp:Content>
 

@@ -846,8 +846,17 @@ namespace PIW_SPAppWeb.Pages
         {
             using (var clientContext = helper.getElevatedClientContext(Context, Request))
             {
+                //supplemental mailing list - only 1 excel document
+                string supplementalMailingListFileName = string.Empty;
+                if (rpSupplementalMailingListDocumentList.Items.Count > 0)
+                {
+                    RepeaterItem row = rpSupplementalMailingListDocumentList.Items[0];
+                    var downloadedURL = helper.getFileNameFromURL(((HyperLink)row.FindControl("hyperlinkFileURL")).NavigateUrl);
+                    supplementalMailingListFileName = downloadedURL.Substring(0, downloadedURL.IndexOf("?web=0"));
+                }
+
                 ListItem listItem = helper.GetPiwListItemById(clientContext, ListItemID, true);
-                bool regenerateResult = helper.GenerateAndSubmitPrintReqForm(clientContext, listItem, CurrentUserLogInID, true);
+                bool regenerateResult = helper.GenerateAndSubmitPrintReqForm(clientContext, listItem, CurrentUserLogInID, true, supplementalMailingListFileName);
 
                 lbMainMessage.Visible = true;
                 if (regenerateResult)

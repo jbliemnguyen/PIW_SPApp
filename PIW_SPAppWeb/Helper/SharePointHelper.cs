@@ -312,7 +312,7 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public bool GenerateAndSubmitPrintReqForm(ClientContext clientContext, ListItem listItem, string CurrentUserLogInID,bool isRegenerate)
+        public bool GenerateAndSubmitPrintReqForm(ClientContext clientContext, ListItem listItem, string CurrentUserLogInID, bool isRegenerate, string supplementalMailingListFileName)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
@@ -349,11 +349,32 @@ namespace PIW_SPAppWeb.Helper
 
 
             //number of supplemental mailing list address
+            //if regenereate, recalcualte the number of supplemental mailing address, admin may update the file and regenerate print req
+            //if not regenereate, the number already calculated when published, just get it from the list
+
             int numberOfSupplementalMailingListAddress = 0;
-            if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
+            if (isRegenerate)
             {
-                numberOfSupplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+                if (!string.IsNullOrEmpty(supplementalMailingListFileName))
+                {
+                    EPSPublicationHelper epsPublicationHelper = new EPSPublicationHelper();
+                    numberOfSupplementalMailingListAddress = epsPublicationHelper.getNumberOfRowsFromSupplementalMailingListExcelFile(clientContext,
+                        listItemID, supplementalMailingListFileName);
+                }    
             }
+            else
+            {
+                if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
+                {
+                    numberOfSupplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+                    //save the new number just recalculated
+                    SaveNumberOfSupplementalMailingListAddress(clientContext,listItem,piwListInternalColumnNames,numberOfSupplementalMailingListAddress);
+                }
+            }
+            
+
+
+
 
             int numberofCopies;
             //if sunshine notice --> print 100 copies
@@ -484,29 +505,29 @@ namespace PIW_SPAppWeb.Helper
             return PrintPriority;
         }
 
-        public void ReGenerateFOLAMailingList(ClientContext clientContext, string listItemID, string CurrentUserLogInID)
-        {
-            var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-            ListItem listItem = GetPiwListItemById(clientContext, listItemID, false);
-            string docketNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
+        //public void ReGenerateFOLAMailingList(ClientContext clientContext, string listItemID, string CurrentUserLogInID)
+        //{
+        //    var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+        //    ListItem listItem = GetPiwListItemById(clientContext, listItemID, false);
+        //    string docketNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
 
-            //number of supplemental mailing list address
-            int numberofSupplementalMailingListAddress = 0;
-            if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
-            {
-                numberofSupplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
-            }
+        //    //number of supplemental mailing list address
+        //    int numberofSupplementalMailingListAddress = 0;
+        //    if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
+        //    {
+        //        numberofSupplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+        //    }
 
-            FOLAMailingList folaMailingList = new FOLAMailingList();
-            int numberOfFOLAMailingListAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemID);
+        //    FOLAMailingList folaMailingList = new FOLAMailingList();
+        //    int numberOfFOLAMailingListAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemID);
 
 
-            //update number of fola address and number of copies to piwlist
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] = numberOfFOLAMailingListAddress;
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = numberOfFOLAMailingListAddress + numberofSupplementalMailingListAddress;
-            listItem.Update();
-            clientContext.ExecuteQuery();
-        }
+        //    //update number of fola address and number of copies to piwlist
+        //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] = numberOfFOLAMailingListAddress;
+        //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = numberOfFOLAMailingListAddress + numberofSupplementalMailingListAddress;
+        //    listItem.Update();
+        //    clientContext.ExecuteQuery();
+        //}
 
         public void SaveNumberOfPublicPagesAndSupplementalMailingListAddress(ClientContext clientContext, ListItem listItem, int numberOfPublicPages, int numberOfSupplementalMailingListAddress)
         {
@@ -525,6 +546,19 @@ namespace PIW_SPAppWeb.Helper
             listItem.Update();
             clientContext.ExecuteQuery();
         }
+
+        public void SaveNumberOfSupplementalMailingListAddress(ClientContext clientContext, ListItem listItem, Dictionary<string, string> piwListInternalColumnNames, int numberOfSupplementalMailingListAddress)
+        {
+            if (numberOfSupplementalMailingListAddress > 0)
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] = numberOfSupplementalMailingListAddress;
+            }
+
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
+
+
 
         public string getPrintReqEditFormURL(ListItem listItem, Dictionary<string, string> piwListInternalColumnNames)
         {
