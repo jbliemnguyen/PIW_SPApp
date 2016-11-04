@@ -41,7 +41,7 @@ namespace PIW_SPAppJob
                         }
 
                         //generate print req
-                        if (helper.GenerateAndSubmitPrintReqForm(clientContext, piwListItem, CurrentUserLogInID,false))
+                        if (helper.GenerateAndSubmitPrintReqForm(clientContext, piwListItem, CurrentUserLogInID,false,string.Empty))
                         {
                             helper.CreateLog(clientContext, "Running Scheduler Job - generate print req for piwListItem ID: " + piwListItem["ID"], string.Empty);
                         }

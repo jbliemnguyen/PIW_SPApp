@@ -26,6 +26,8 @@ namespace PIW_SPAppWeb.Pages
                 ViewState.Add(Constants.SelectedDocumentCategory, value);
             }
         }
+
+        #region Events
         protected void Page_Load(object sender, EventArgs e)
         {
             try
@@ -65,11 +67,47 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        private void displayData(ClientContext clientContext)
+        protected void btnRun_OnClick(object sender, EventArgs e)
         {
-            RenderGridView(clientContext);
-            lbLastUpdated.Text = "Last Updated: " + DateTime.Now.ToString("g");
+            try
+            {
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    saveSelectedDocumentCategory();
+                    RenderGridView(clientContext);
+                    PopulateDocumentCategory();
+                }
+
+            }
+            catch (Exception exc)
+            {
+                helper.LogError(Context, Request, exc, string.Empty, Page.Request.Url.OriginalString);
+                if (exc is ServerUnauthorizedAccessException)
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_AccessDenied);
+                }
+                else
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                }
+            }
         }
+
+        protected void gridView_OnPageIndexChanging(object sender, GridViewPageEventArgs e)
+        {
+            gridView.PageIndex = e.NewPageIndex;
+            btnRun_OnClick(null, null);
+        }
+
+        protected void formTypeRadioButtonList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+            PopulateDocumentCategory();
+        }
+
+        #endregion
+
+        #region Utils
 
         private void RenderGridView(ClientContext clientContext)
         {
@@ -329,6 +367,9 @@ namespace PIW_SPAppWeb.Pages
             lbPendingValue.Text = pendingIssuance.ToString();
             lbTotalValue.Text = totalIssuance.ToString();
 
+            //display updated time
+            lbLastUpdated.Text = "Last Updated: " + DateTime.Now.ToString("g");
+
         }
 
         private string getAccessionNumberHtml(Microsoft.SharePoint.Client.ListItem listItem, Dictionary<string, string> piwListInternalName)
@@ -478,13 +519,7 @@ namespace PIW_SPAppWeb.Pages
                 return piwListItems;
             }
         }
-
-        protected void formTypeRadioButtonList_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-            PopulateDocumentCategory();
-        }
-
+        
         private void PopulateDocumentCategory()
         {
             cblDocumentCategory.Items.Clear();
@@ -643,33 +678,7 @@ namespace PIW_SPAppWeb.Pages
 
             return checkBox;
         }
-
-        protected void btnRun_OnClick(object sender, EventArgs e)
-        {
-            try
-            {
-                using (var clientContext = helper.getElevatedClientContext(Context, Request))
-                {
-                    saveSelectedDocumentCategory();
-                    displayData(clientContext);
-                    PopulateDocumentCategory();
-                }
-
-            }
-            catch (Exception exc)
-            {
-                helper.LogError(Context, Request, exc, string.Empty, Page.Request.Url.OriginalString);
-                if (exc is ServerUnauthorizedAccessException)
-                {
-                    helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_AccessDenied);
-                }
-                else
-                {
-                    helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
-                }
-            }
-        }
-
+        
         private bool isCount(Microsoft.SharePoint.Client.ListItem listItem, Dictionary<string, string> piwListInternalName, Dictionary<string, int> dicDocumentCategory)
         {
             string formType = listItem[piwListInternalName[Constants.PIWList_colName_FormType]] != null
@@ -756,11 +765,8 @@ namespace PIW_SPAppWeb.Pages
 
         }
 
-        protected void gridView_OnPageIndexChanging(object sender,  GridViewPageEventArgs e)
-        {
-            gridView.PageIndex = e.NewPageIndex;
-            btnRun_OnClick(null, null);
-        }
+        #endregion
+
     }
 
 

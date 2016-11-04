@@ -42,7 +42,7 @@
             <div class="form-group">
                 <asp:Label ID="Label1" runat="server" Text="Docket Number" AssociatedControlID="tbDocketNumber" CssClass="col-xs-5 control-label"></asp:Label>
                 <div class="col-xs-7">
-                    <asp:TextBox ID="tbDocketNumber" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="3" ClientIDMode="Static"></asp:TextBox>
+                    <asp:TextBox ID="tbDocketNumber" runat="server" CssClass="form-control" TextMode="MultiLine" Rows="2" ClientIDMode="Static"></asp:TextBox>
                 </div>
             </div>
             <div class="form-group">
@@ -64,10 +64,7 @@
                             <asp:ListItem>OGC</asp:ListItem>
                             <asp:ListItem>OSEC</asp:ListItem>
                         </asp:DropDownList>
-
                         <asp:Button runat="server" ID="btnSearch" Text="Search" CssClass="btn-sm btn-primary active" OnClick="btnSearch_OnClick" />
-
-
                     </div>
                 </div>
             </div>
@@ -78,14 +75,6 @@
             <%--Form Type filter--%>
             <div class="form-group">
                 <asp:Label ID="Label4" runat="server" Text="Form Type" CssClass="col-xs-2 control-label"></asp:Label>
-                <%--<div class="radio radiobuttonlist col-sm-5">
-                    <asp:CheckBoxList ID="formTypeRadioButtonList" runat="server" RepeatDirection="Vertical">
-                        <asp:ListItem Selected="True">All Forms</asp:ListItem>
-                        <asp:ListItem>Standard Form</asp:ListItem>
-                        <asp:ListItem>Agenda Form</asp:ListItem>
-                        <asp:ListItem>Direct Publication Form</asp:ListItem>
-                    </asp:CheckBoxList>
-                </div>--%>
                 <div class="col-xs-5">
                     <div class="checkbox">
                         <asp:CheckBox ID="cbAll" runat="server" Checked="true" ClientIDMode="Static" CssClass="jqueryselector_FormTypeCheckBoxAll" Text="All Forms"></asp:CheckBox>
@@ -107,7 +96,6 @@
         </div>
 
         <div class="form-group">
-            <%--<div id="gridDiv" class="col-xs-12" style="overflow-x: scroll; overflow-y: hidden">--%>
             <div id="gridDiv" class="col-xs-12" style="overflow-x: hidden; overflow-y: hidden">
                 <asp:GridView runat="server" ID="gridView" AutoGenerateColumns="false" CssClass="table table-hover table-condensed piw-borderless"
                     OnPageIndexChanging="gridView_OnPageIndexChanging" ClientIDMode="Static">

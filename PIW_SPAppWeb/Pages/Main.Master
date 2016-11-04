@@ -38,10 +38,10 @@
                 </ul>
                 <form class="navbar-form navbar-right">
                     <div class="form-group">
-                        <input type="text" placeholder="Search Docket Number" class="form-control" />
+                        <input id="mptbDocketNumber" type="text" placeholder="Search Docket Number" class="form-control" />
                     </div>
                     <%--<button type="submit" class="btn btn-success" style="background-color: #337ab7">Search</button>--%>
-                    <a href="DocketSearch.aspx" class="btn btn-success" style="background-color: #337ab7">Search</a>
+                    <a id="mpbtnDocketNumberSearch" href="DocketNumberSearch.aspx" class="btn btn-success" style="background-color: #337ab7">Search</a>
                 </form>
             </div>
             <!-- /.nav-collapse -->
@@ -141,6 +141,11 @@
                 SharedEditPageClientCode();
             }
 
+            //register event for docket search
+            $("#mpbtnDocketNumberSearch").click(function (event) {
+                var newHref = $(this).prop("href") + "&Docket=" + $("#mptbDocketNumber").val();
+                $(this).attr("href", newHref);
+            });
 
             //Call to method in each page to do further client side programming
             //NOTE: each page must have this method in Main Content Place Holder
