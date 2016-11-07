@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -16,20 +17,43 @@ namespace PIW_SPAppWeb.Pages
     public partial class DocketNumberSearch : System.Web.UI.Page
     {
         private SharePointHelper helper = new SharePointHelper();
+        private bool myItems = false;
+        private bool hasDocket = false;
 
         #region Events
         protected void Page_Load(object sender, EventArgs e)
         {
             try
             {
-                if (!Page.IsPostBack)
+                string pageName = Path.GetFileName(Page.AppRelativeVirtualPath);
+
+                myItems = pageName.Equals(Constants.Page_MyItems);
+                if (myItems)
                 {
-                    if (Page.Request.QueryString["Docket"] != null)
+                    lbReportName.Text = "My Items";
+                }
+
+
+                if (Page.Request.QueryString["Docket"] != null)
+                {
+                    if (string.IsNullOrEmpty(tbDocketNumber.Text))
                     {
                         tbDocketNumber.Text = Page.Request.QueryString["Docket"].ToString();
-                        btnSearch_OnClick(null, null);
                     }
+
+                    hasDocket = true;
+
                 }
+
+                //only run the first time if there is docket number for searching or my items (transfer from top docket search box)
+                //otherwise, it will run very long to query everything
+                if ((myItems) || (hasDocket))
+                {
+                    btnSearch_OnClick(null, null);
+                }
+
+
+
             }
             catch (Exception exc)
             {
@@ -55,9 +79,18 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
+                string CurrentUserLogInID = string.Empty;
+                using (var clientContext = helper.getCurrentLoginClientContext(Context, Request))
+                {
+                    //current login user
+                    clientContext.Load(clientContext.Web.CurrentUser);
+                    clientContext.ExecuteQuery();
+                    CurrentUserLogInID = clientContext.Web.CurrentUser.Id.ToString();
+                }
+
                 using (var clientContext = helper.getElevatedClientContext(Context, Request))
                 {
-                    RenderGridView(clientContext);
+                    RenderGridView(clientContext, CurrentUserLogInID);
                 }
 
             }
@@ -78,17 +111,34 @@ namespace PIW_SPAppWeb.Pages
 
         #region Utils
 
-        private void RenderGridView(ClientContext clientContext)
+        private void RenderGridView(ClientContext clientContext, string currentLogInID)
         {
             DataTable dataTable = new DataTable();
             DataRow dataRow;
             var piwListInternalName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
             gridView.Columns.Clear();
 
-            var listItemCollection = getPIWListItem(clientContext);
+            var listItemCollection = getPIWListItem(clientContext, currentLogInID);
 
             if (listItemCollection.Count > 0)
             {
+                //create dictionary of formtype
+                Dictionary<string, int> dicFormType = new Dictionary<string, int>();
+                if (cbStandardForm.Checked)
+                {
+                    dicFormType.Add(cbStandardForm.Text, 1);
+                }
+                if (cbAgendaForm.Checked)
+                {
+                    dicFormType.Add(cbAgendaForm.Text, 1);
+                }
+                if (cbDirecPubForm.Checked)
+                {
+                    dicFormType.Add(cbDirecPubForm.Text, 1);
+                }
+
+
+
                 dataTable.Columns.Add("Docket", typeof(string));
                 dataTable.Columns.Add("URL", typeof(string));
                 dataTable.Columns.Add("DocumentURL", typeof(string));
@@ -101,57 +151,65 @@ namespace PIW_SPAppWeb.Pages
 
                 foreach (var listItem in listItemCollection)
                 {
-                    dataRow = dataTable.Rows.Add();
+                    if (isCount(listItem, piwListInternalName, dicFormType))
+                    {
+                        dataRow = dataTable.Rows.Add();
 
-                    dataRow["Docket"] = listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]] !=
-                                        null
-                        ? listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]].ToString()
-                        : string.Empty;
-
-                    dataRow["URL"] = listItem[piwListInternalName[Constants.PIWList_colName_EditFormURL]] != null
-                        ? listItem[piwListInternalName[Constants.PIWList_colName_EditFormURL]].ToString()
-                        : string.Empty;
-
-                    var publicDocsURL =
-                        listItem[piwListInternalName[Constants.PIWList_colName_PublicDocumentURLs]] != null
-                            ? listItem[piwListInternalName[Constants.PIWList_colName_PublicDocumentURLs]].ToString()
-                            : string.Empty;
-                    var CEIIDocsURL = listItem[piwListInternalName[Constants.PIWList_colName_CEIIDocumentURLs]] !=
-                                      null
-                        ? listItem[piwListInternalName[Constants.PIWList_colName_CEIIDocumentURLs]].ToString()
-                        : string.Empty;
-                    var privilegedDocsURL =
-                        listItem[piwListInternalName[Constants.PIWList_colName_PrivilegedDocumentURLs]] != null
-                            ? listItem[piwListInternalName[Constants.PIWList_colName_PrivilegedDocumentURLs]]
-                                .ToString()
+                        dataRow["Docket"] = listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]] !=
+                                            null
+                            ? listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]].ToString()
                             : string.Empty;
 
-                    dataRow["DocumentURL"] = helper.getDocumentURLsHTML(publicDocsURL, CEIIDocsURL,
-                        privilegedDocsURL, false);
-
-                    dataRow["DocumentCategory"] = listItem[piwListInternalName[Constants.PIWList_colName_DocumentCategory]] != null
-                            ? listItem[piwListInternalName[Constants.PIWList_colName_DocumentCategory]].ToString()
+                        dataRow["URL"] = listItem[piwListInternalName[Constants.PIWList_colName_EditFormURL]] != null
+                            ? listItem[piwListInternalName[Constants.PIWList_colName_EditFormURL]].ToString()
                             : string.Empty;
 
-                    dataRow["FormStatus"] = listItem[piwListInternalName[Constants.PIWList_colName_FormStatus]] != null
+                        var publicDocsURL =
+                            listItem[piwListInternalName[Constants.PIWList_colName_PublicDocumentURLs]] != null
+                                ? listItem[piwListInternalName[Constants.PIWList_colName_PublicDocumentURLs]].ToString()
+                                : string.Empty;
+                        var CEIIDocsURL = listItem[piwListInternalName[Constants.PIWList_colName_CEIIDocumentURLs]] !=
+                                          null
+                            ? listItem[piwListInternalName[Constants.PIWList_colName_CEIIDocumentURLs]].ToString()
+                            : string.Empty;
+                        var privilegedDocsURL =
+                            listItem[piwListInternalName[Constants.PIWList_colName_PrivilegedDocumentURLs]] != null
+                                ? listItem[piwListInternalName[Constants.PIWList_colName_PrivilegedDocumentURLs]]
+                                    .ToString()
+                                : string.Empty;
+
+                        dataRow["DocumentURL"] = helper.getDocumentURLsHTML(publicDocsURL, CEIIDocsURL,
+                            privilegedDocsURL, false);
+
+                        dataRow["DocumentCategory"] =
+                            listItem[piwListInternalName[Constants.PIWList_colName_DocumentCategory]] != null
+                                ? listItem[piwListInternalName[Constants.PIWList_colName_DocumentCategory]].ToString()
+                                : string.Empty;
+
+                        dataRow["FormStatus"] = listItem[piwListInternalName[Constants.PIWList_colName_FormStatus]] !=
+                                                null
                             ? listItem[piwListInternalName[Constants.PIWList_colName_FormStatus]].ToString()
                             : string.Empty;
 
 
-                    dataRow["InitiatorOffice"] = listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeWFInitator]] != null
-                                ? listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeWFInitator]].ToString() : string.Empty;
+                        dataRow["InitiatorOffice"] =
+                            listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeWFInitator]] != null
+                                ? listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeWFInitator]]
+                                    .ToString()
+                                : string.Empty;
 
-                    dataRow["FormType"] = listItem[piwListInternalName[Constants.PIWList_colName_FormType]] != null
+                        dataRow["FormType"] = listItem[piwListInternalName[Constants.PIWList_colName_FormType]] != null
                             ? listItem[piwListInternalName[Constants.PIWList_colName_FormType]].ToString()
                             : string.Empty;
 
-                    dataRow["CreatedDate"] = listItem["Created"] != null
-                            ? listItem["Created"].ToString()
+                        dataRow["CreatedDate"] = listItem["Created"] != null
+                            ? DateTime.Parse(listItem["Created"].ToString()).ToShortDateString()
                             : string.Empty;
 
-                    dataRow["DueDate"] = listItem[piwListInternalName[Constants.PIWList_colName_DueDate]] != null
-                            ? listItem[piwListInternalName[Constants.PIWList_colName_DueDate]].ToString()
+                        dataRow["DueDate"] = listItem[piwListInternalName[Constants.PIWList_colName_DueDate]] != null
+                            ? DateTime.Parse(listItem[piwListInternalName[Constants.PIWList_colName_DueDate]].ToString()).ToShortDateString()
                             : string.Empty;
+                    }
                 }
 
                 //Bound to gridview
@@ -203,185 +261,187 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        private ListItemCollection getPIWListItem(ClientContext clientContext)
+        private ListItemCollection getPIWListItem(ClientContext clientContext, string currentLogInID)
         {
+            CamlQuery query = new CamlQuery();
             List piwList = clientContext.Web.Lists.GetByTitle(Constants.PIWListName);
             var piwListInternalName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-
-            string office = ddProgramOfficeWorkflowInitiator.SelectedIndex > 0 ? ddProgramOfficeWorkflowInitiator.SelectedValue : string.Empty;
             string docket = tbDocketNumber.Text.Trim();
 
-            if (string.IsNullOrEmpty(office)) //All Office
+            if (string.IsNullOrEmpty(docket)) //No docket
             {
-                CamlQuery query = new CamlQuery();
-                var args = new string[]
+                if (myItems)
                 {
-                    piwListInternalName[Constants.PIWList_colName_IsActive],
-                    piwListInternalName[Constants.PIWList_colName_DocketNumber],
-                    docket,
-                    "Created"
-                };
+                    var args = new string[]
+                                    {
+                                        piwListInternalName[Constants.PIWList_colName_IsActive],
+                                        piwListInternalName[Constants.PIWList_colName_WorkflowInitiator],
+                                        currentLogInID,
+                                        "Created"
+                                    };
 
-                query.ViewXml = string.Format(@"<View>
-	                                            <Query>
-		                                            <Where>			                                            
-				                                        <And>
-					                                        <Eq>
-						                                        <FieldRef Name='{0}'/>
-						                                        <Value Type='Bool'>True</Value>
-					                                        </Eq>					                                        
-						                                    <Contains>
-					                                            <FieldRef Name='{1}'/>
-					                                            <Value Type='Text'>{2}</Value>
-				                                            </Contains>
-				                                        </And>
-		                                            </Where>
-		                                            <OrderBy>
-			                                            <FieldRef Name='{3}' Ascending='False'/>
-		                                            </OrderBy>
-	                                            </Query>
-                                            </View>", args);
+                    //No docket + my items
+                    query.ViewXml = string.Format(@"<View>
+	                                                    <Query>
+		                                                    <Where>			                                            
+				                                                <And>
+					                                                <Eq>
+						                                                <FieldRef Name='{0}'/>
+						                                                <Value Type='Bool'>True</Value>
+					                                                </Eq>					                                        
+						                                            <Eq>
+                                                                        <FieldRef Name='{1}' LookupId='True'/>
+                                                                        <Value Type='User'>{2}</Value>
+                                                                    </Eq>
+				                                                </And>
+		                                                    </Where>
+		                                                    <OrderBy>
+			                                                    <FieldRef Name='{3}' Ascending='False'/>
+		                                                    </OrderBy>
+	                                                    </Query>
+                                                    </View>", args);
 
-                var piwListItems = piwList.GetItems(query);
-                clientContext.Load(piwListItems);
-                clientContext.ExecuteQuery();
-                return piwListItems;
-            }
-            else
-            {
-                CamlQuery query = new CamlQuery();
-                var args = new string[]
+                }
+                else//no docket, no my item --> query all
                 {
-                    piwListInternalName[Constants.PIWList_colName_IsActive],
-                    piwListInternalName[Constants.PIWList_colName_DocketNumber],
-                    docket,
-                    piwListInternalName[Constants.PIWList_colName_ProgramOfficeWFInitator],
-                    office,
-                    "Created"
-                };
+                    var args = new string[]
+                                    {
+                                        piwListInternalName[Constants.PIWList_colName_IsActive],
+                                        "Created"
+                                    };
 
-                query.ViewXml = string.Format(@"<View>
-	                                            <Query>
-		                                            <Where>	
-                                                        <And>		                                            
-				                                            <And>
+                    //NO docket, No My Items -> query all active
+                    query.ViewXml = string.Format(@"<View>
+	                                                    <Query>
+		                                                    <Where>			                                            				                                                
 					                                            <Eq>
 						                                            <FieldRef Name='{0}'/>
 						                                            <Value Type='Bool'>True</Value>
-					                                            </Eq>					                                        
-						                                        <Contains>
-					                                                <FieldRef Name='{1}'/>
-					                                                <Value Type='Text'>{2}</Value>
-				                                                </Contains>
-				                                            </And>
-                                                            <Eq>
-						                                        <FieldRef Name='{3}'/>
-						                                        <Value Type='Text'>{4}</Value>
-					                                        </Eq>
-					                                    </And>
-		                                            </Where>
-		                                            <OrderBy>
-			                                            <FieldRef Name='{5}' Ascending='False'/>
-		                                            </OrderBy>
-	                                            </Query>
-                                            </View>", args);
-
-                var piwListItems = piwList.GetItems(query);
-                clientContext.Load(piwListItems);
-                clientContext.ExecuteQuery();
-                return piwListItems;
-
+					                                            </Eq>
+		                                                    </Where>
+		                                                    <OrderBy>
+			                                                    <FieldRef Name='{1}' Ascending='False'/>
+		                                                    </OrderBy>
+	                                                    </Query>
+                                                    </View>", args);
+                }
             }
+            else//there is docket
+            {
+                if (myItems) // there is docket + my items
+                {
+                    var args = new string[]
+                                    {
+                                        piwListInternalName[Constants.PIWList_colName_IsActive],
+                                        piwListInternalName[Constants.PIWList_colName_DocketNumber],
+                                        docket,
+                                        piwListInternalName[Constants.PIWList_colName_WorkflowInitiator],
+                                        currentLogInID,
+                                        "Created"
+                                    };
+
+                    //there is docket + my items
+                    query.ViewXml = string.Format(@"<View>
+	                                                    <Query>
+		                                                    <Where>	
+                                                                <And>		                                            
+				                                                    <And>
+					                                                    <Eq>
+						                                                    <FieldRef Name='{0}'/>
+						                                                    <Value Type='Bool'>True</Value>
+					                                                    </Eq>					                                        
+						                                                <Contains>
+					                                                        <FieldRef Name='{1}'/>
+					                                                        <Value Type='Text'>{2}</Value>
+				                                                        </Contains>
+				                                                    </And>
+                                                                    <Eq>
+                                                                        <FieldRef Name='{3}' LookupId='True'/>
+                                                                        <Value Type='User'>{4}</Value>
+                                                                    </Eq>
+                                                                </And>
+		                                                    </Where>
+		                                                    <OrderBy>
+			                                                    <FieldRef Name='{5}' Ascending='False'/>
+		                                                    </OrderBy>
+	                                                    </Query>
+                                                    </View>", args);
+                }
+                else//there is docket + NO my items
+                {
+                    var args = new string[]
+                                    {
+                                        piwListInternalName[Constants.PIWList_colName_IsActive],
+                                        piwListInternalName[Constants.PIWList_colName_DocketNumber],
+                                        docket,
+                                        "Created"
+                                    };
+
+                    query.ViewXml = string.Format(@"<View>
+	                                                    <Query>
+		                                                    <Where>			                                            
+				                                                <And>
+					                                                <Eq>
+						                                                <FieldRef Name='{0}'/>
+						                                                <Value Type='Bool'>True</Value>
+					                                                </Eq>					                                        
+						                                            <Contains>
+					                                                    <FieldRef Name='{1}'/>
+					                                                    <Value Type='Text'>{2}</Value>
+				                                                    </Contains>
+				                                                </And>
+		                                                    </Where>
+		                                                    <OrderBy>
+			                                                    <FieldRef Name='{3}' Ascending='False'/>
+		                                                    </OrderBy>
+	                                                    </Query>
+                                                    </View>", args);
+                }
+            }
+
+            var piwListItems = piwList.GetItems(query);
+            clientContext.Load(piwListItems);
+            clientContext.ExecuteQuery();
+            return piwListItems;
         }
 
-        //        private ListItemCollection getListItems(ClientContext clientContext, string office, string docket,
-        //            bool isMyItems,
-        //            Dictionary<string, string> piwListInternalName, List piwList)
-        //        {
-        //            if (string.IsNullOrEmpty(office)) //All Office
-        //            {
-        //                CamlQuery query = new CamlQuery();
-        //                var args = new string[]
-        //                {
-        //                    piwListInternalName[Constants.PIWList_colName_IsActive],
-        //                    piwListInternalName[Constants.PIWList_colName_DocketNumber],
-        //                    docket,
-        //                    "Created"
-        //                };
+        private bool isCount(Microsoft.SharePoint.Client.ListItem listItem, Dictionary<string, string> piwListInternalName, Dictionary<string, int> dicSelectedFormType)
+        {
+            string formType = listItem[piwListInternalName[Constants.PIWList_colName_FormType]] != null
+                            ? listItem[piwListInternalName[Constants.PIWList_colName_FormType]].ToString()
+                            : string.Empty; ;
 
-        //                query.ViewXml = string.Format(@"<View>
-        //	                                            <Query>
-        //		                                            <Where>			                                            
-        //				                                        <And>
-        //					                                        <Eq>
-        //						                                        <FieldRef Name='{0}'/>
-        //						                                        <Value Type='Bool'>True</Value>
-        //					                                        </Eq>					                                        
-        //						                                    <Contains>
-        //					                                            <FieldRef Name='{1}'/>
-        //					                                            <Value Type='Text'>{2}</Value>
-        //				                                            </Contains>
-        //				                                        </And>
-        //		                                            </Where>
-        //		                                            <OrderBy>
-        //			                                            <FieldRef Name='{3}' Ascending='False'/>
-        //		                                            </OrderBy>
-        //	                                            </Query>
-        //                                            </View>", args);
+            string ProgramOfficeWFInitiator = listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeWFInitator]] != null
+                            ? listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeWFInitator]].ToString()
+                            : string.Empty;
+            var formTypeMatch = false;
+            var ProgramOfficeWFInitiatorMatch = false;
 
-        //                var piwListItems = piwList.GetItems(query);
-        //                clientContext.Load(piwListItems);
-        //                clientContext.ExecuteQuery();
-        //                return piwListItems;
-        //            }
-        //            else
-        //            {
-        //                CamlQuery query = new CamlQuery();
-        //                var args = new string[]
-        //                {
-        //                    piwListInternalName[Constants.PIWList_colName_IsActive],
-        //                    piwListInternalName[Constants.PIWList_colName_DocketNumber],
-        //                    docket,
-        //                    piwListInternalName[Constants.PIWList_colName_ProgramOfficeWFInitator],
-        //                    office,
-        //                    "Created"
-        //                };
+            //Check the Form Type
+            if (cbAll.Checked)//All formtype, no need to check any else, because no document category can be selected
+            {
+                formTypeMatch = true;
+            }
+            else
+            {
+                formTypeMatch = dicSelectedFormType.ContainsKey(formType);
+            }
 
-        //                query.ViewXml = string.Format(@"<View>
-        //	                                            <Query>
-        //		                                            <Where>	
-        //                                                        <And>		                                            
-        //				                                            <And>
-        //					                                            <Eq>
-        //						                                            <FieldRef Name='{0}'/>
-        //						                                            <Value Type='Bool'>True</Value>
-        //					                                            </Eq>					                                        
-        //						                                        <Contains>
-        //					                                                <FieldRef Name='{1}'/>
-        //					                                                <Value Type='Text'>{2}</Value>
-        //				                                                </Contains>
-        //				                                            </And>
-        //                                                            <Eq>
-        //						                                        <FieldRef Name='{3}'/>
-        //						                                        <Value Type='Text'>{4}</Value>
-        //					                                        </Eq>
-        //					                                    </And>
-        //		                                            </Where>
-        //		                                            <OrderBy>
-        //			                                            <FieldRef Name='{5}' Ascending='False'/>
-        //		                                            </OrderBy>
-        //	                                            </Query>
-        //                                            </View>", args);
+            //check program office wf initiator
+            if (ddProgramOfficeWorkflowInitiator.SelectedIndex == 0)
+            {
+                ProgramOfficeWFInitiatorMatch = true;
+            }
+            else
+            {
+                ProgramOfficeWFInitiatorMatch =
+                    ddProgramOfficeWorkflowInitiator.SelectedValue.Equals(ProgramOfficeWFInitiator);
+            }
 
-        //                var piwListItems = piwList.GetItems(query);
-        //                clientContext.Load(piwListItems);
-        //                clientContext.ExecuteQuery();
-        //                return piwListItems;
-        //            }
-        //        }
+            return formTypeMatch && ProgramOfficeWFInitiatorMatch;
 
 
-
+        }
         #endregion
 
 

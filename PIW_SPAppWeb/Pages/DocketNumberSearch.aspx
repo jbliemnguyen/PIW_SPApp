@@ -30,7 +30,7 @@
     <form id="mainForm" runat="server" class="form-horizontal">
         <div class="form-group">
             <div class="col-xs-8">
-                <span style="font-size: large">Docket Number Search</span>
+                <asp:Label ID="lbReportName" style="font-size: large" runat="server" Text="Docket Number Search"></asp:Label>
             </div>
             <div class="col-xs-3">
                 <asp:Label runat="server" ID="lbLastUpdated" Font-Italic="True" Font-Bold="True"></asp:Label>

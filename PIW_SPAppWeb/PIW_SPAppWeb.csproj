@@ -190,6 +190,7 @@
     <Content Include="Pages\Error.aspx" />
     <Content Include="Pages\ItemNotFound.aspx" />
     <Content Include="Pages\ItemsByPublishedDate.aspx" />
+    <Content Include="Pages\MyItems.aspx" />
     <Content Include="Pages\PrintReqForms.aspx" />
     <Content Include="Pages\StandardForms.aspx" />
     <Content Include="Scripts\bootstrap.js" />
@@ -407,6 +408,13 @@
     </Compile>
     <Compile Include="Pages\Main.Master.designer.cs">
       <DependentUpon>Main.Master</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\MyItems.aspx.cs">
+      <DependentUpon>MyItems.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\MyItems.aspx.designer.cs">
+      <DependentUpon>MyItems.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\PrintReqForms.aspx.cs">
       <DependentUpon>PrintReqForms.aspx</DependentUpon>
