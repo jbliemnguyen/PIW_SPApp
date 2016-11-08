@@ -186,8 +186,7 @@ namespace PIW_SPAppWeb.Pages
                                 ? listItem[piwListInternalName[Constants.PIWList_colName_DocumentCategory]].ToString()
                                 : string.Empty;
 
-                        dataRow["FormStatus"] = listItem[piwListInternalName[Constants.PIWList_colName_FormStatus]] !=
-                                                null
+                        dataRow["FormStatus"] = listItem[piwListInternalName[Constants.PIWList_colName_FormStatus]] != null
                             ? listItem[piwListInternalName[Constants.PIWList_colName_FormStatus]].ToString()
                             : string.Empty;
 
@@ -443,7 +442,5 @@ namespace PIW_SPAppWeb.Pages
 
         }
         #endregion
-
-
     }
 }

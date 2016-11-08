@@ -61,7 +61,8 @@
                     <a href="ItemsByPublishedDate.aspx" class="list-group-item" id="ItemsByPublishedDateURL">Items By Published Date</a>
                     <a href="DocketNumberSearch.aspx" class="list-group-item" id="DocketNumberSearchURL">Docket Number Search</a>
                     <a href="MyItems.aspx" class="list-group-item" id="MyItemsURL">My Items</a>
-
+                    <a href="CitationNumberListing.aspx" class="list-group-item" id="CitationNumberListingURL">Citation Number Listing</a>
+                    
                     <a href="Admin.aspx" class="list-group-item" id="AdminURL">Admin</a>
                 </div>
             </div>
