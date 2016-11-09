@@ -164,8 +164,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         dataRow = dataTable.Rows.Add();
 
-                        dataRow["Docket"] = listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]] !=
-                                            null
+                        dataRow["Docket"] = listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]] != null
                             ? listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]].ToString()
                             : string.Empty;
 
@@ -303,7 +302,6 @@ namespace PIW_SPAppWeb.Pages
             };
             boundField.HeaderStyle.CssClass = "col-md-2";
             boundField.ItemStyle.CssClass = "col-md-2";
-
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Initiator", DataField = "Initiator" };

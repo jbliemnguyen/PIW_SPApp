@@ -33,18 +33,24 @@
                 }
             });
 
+            //action date textbox enable
+            setActionDateEnabled($("#cbAllDate"));
 
             //all date checkbox click event
             $("#cbAllDate").click(function (event) {
-                if ($(this).prop("checked")) {
-                    $("#tbActionDate").prop("value", "");
-                    $("#tbActionDate").prop("disabled", "disabled");
-                }
-                else {
-                    //enable the tbActionDate
-                    $("#tbActionDate").removeProp("disabled");
-                }
+                setActionDateEnabled($(this));
             });
+        }
+
+        function setActionDateEnabled(jqueryAllDateCheckBox) {
+            if (jqueryAllDateCheckBox.prop("checked")) {
+                $("#tbActionDate").prop("value", "");
+                $("#tbActionDate").prop("disabled", "disabled");
+            }
+            else {
+                //enable the tbActionDate
+                $("#tbActionDate").removeProp("disabled");
+            }
         }
     </script>
     <form id="mainForm" runat="server" class="form-horizontal">
@@ -78,7 +84,7 @@
             <div class="form-group">
                 <asp:Label ID="Label3" runat="server" Text="Action Date" AssociatedControlID="tbActionDate" CssClass="col-xs-5 control-label"></asp:Label>
                 <div class="col-xs-3">
-                    <asp:TextBox ID="tbActionDate" CssClass="form-control" runat="server" ClientIDMode="Static" Enabled="False"></asp:TextBox>
+                    <asp:TextBox ID="tbActionDate" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
                 </div>
                 <div class="col-xs-3">
                     <asp:CheckBox runat="server" ID="cbAllDate" Text="All Dates" CssClass="checkbox" ClientIDMode="Static" Checked="True" />
@@ -92,9 +98,10 @@
         </div>
         <div class="form-group">
             <%--<div id="gridDiv" class="col-xs-12" style="overflow-x: scroll; overflow-y: hidden">--%>
+            <asp:Label runat="server" ID="lbTest"></asp:Label>
             <div id="gridDiv" class="col-xs-12" style="overflow-x: hidden; overflow-y: hidden">
                 <asp:GridView runat="server" ID="gridView" AutoGenerateColumns="false" CssClass="table table-hover table-condensed piw-borderless"
-                    OnPageIndexChanging="gridView_OnPageIndexChanging" ClientIDMode="Static">
+                    OnRowDataBound="sPGridView_RowDataBound" ClientIDMode="Static">
                     <PagerStyle CssClass="pagination-piw" />
                 </asp:GridView>
             </div>
