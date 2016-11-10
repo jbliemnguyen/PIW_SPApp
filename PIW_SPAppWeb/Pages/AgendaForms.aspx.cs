@@ -13,19 +13,29 @@ namespace PIW_SPAppWeb.Pages
 {
     public partial class AgendaForms : System.Web.UI.Page
     {
-        private SharePointHelper helper;
+        private SharePointHelper helper = new SharePointHelper();
         private string previousRowFormStatus = string.Empty;
         int intSubTotalIndex = 1;
         protected void Page_Load(object sender, EventArgs e)
         {
             try
             {
-                displayData();
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    displayData(clientContext);
+                }
             }
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, string.Empty, Page.Request.Url.OriginalString);
-                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                if (exc is ServerUnauthorizedAccessException)
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_AccessDenied);
+                }
+                else
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                }
             }
 
         }
@@ -67,9 +77,9 @@ namespace PIW_SPAppWeb.Pages
                         : string.Empty;
 
                     //Form Type
-                    string formType = listItem[piwListInternalName[Constants.PIWList_colName_FormType]] != null
-                        ? listItem[piwListInternalName[Constants.PIWList_colName_FormType]].ToString()
-                        : string.Empty;
+                    //string formType = listItem[piwListInternalName[Constants.PIWList_colName_FormType]] != null
+                    //    ? listItem[piwListInternalName[Constants.PIWList_colName_FormType]].ToString()
+                    //    : string.Empty;
 
                     //dataRow["URL"] = helper.getEditFormURL(formType, listItemId, Page.Request,filename);
                     dataRow["URL"] = listItem[piwListInternalName[Constants.PIWList_colName_EditFormURL]] != null
@@ -92,7 +102,7 @@ namespace PIW_SPAppWeb.Pages
                         listItem[piwListInternalName[Constants.PIWList_colName_CitationNumber]] != null
                             ? listItem[piwListInternalName[Constants.PIWList_colName_CitationNumber]].ToString()
                             : string.Empty;
-                    
+
                     dataRow["DueDate"] = listItem[piwListInternalName[Constants.PIWList_colName_DueDate]] != null
                         ? DateTime.Parse(listItem[piwListInternalName[Constants.PIWList_colName_DueDate]].ToString()).ToShortDateString()
                         : string.Empty;
@@ -116,7 +126,7 @@ namespace PIW_SPAppWeb.Pages
                             : string.Empty;
 
                     dataRow["Created"] = System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Parse(listItem["Created"].ToString())).ToString();
-                    
+
                     if ((formStatus == Constants.PIWList_FormStatus_Rejected) || (formStatus == Constants.PIWList_FormStatus_Recalled))
                     {
                         dataRow["RecallRejectComment"] =
@@ -128,7 +138,7 @@ namespace PIW_SPAppWeb.Pages
                     {
                         dataRow["RecallRejectComment"] = string.Empty;
                     }
-                    
+
                 }
 
             }
@@ -138,7 +148,8 @@ namespace PIW_SPAppWeb.Pages
 
             string[] urls = new string[1] { "URL" };
             hyperlinkField = new HyperLinkField { HeaderText = "Docket Number", DataTextField = "Docket" };
-            hyperlinkField.ControlStyle.Width = new Unit(200, UnitType.Pixel);
+            hyperlinkField.HeaderStyle.CssClass = "col-xs-2";
+            hyperlinkField.ItemStyle.CssClass = "col-xs-2";
             hyperlinkField.DataNavigateUrlFields = urls;
             //hyperlinkField.Target = "_blank";
             gridView.Columns.Add(hyperlinkField);
@@ -150,31 +161,44 @@ namespace PIW_SPAppWeb.Pages
                 DataField = "DocumentURL",
                 HtmlEncode = false,
             };
-            boundField.ControlStyle.Width = new Unit(400,UnitType.Pixel);
+            boundField.HeaderStyle.CssClass = "col-xs-3";
+            boundField.ItemStyle.CssClass = "col-xs-3";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Document Category", DataField = "DocumentCategory" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Form Status", DataField = "Status", Visible = false };
             gridView.Columns.Add(boundField);
-            
+
 
             boundField = new BoundField { HeaderText = "Initiator Office", DataField = "InitiatorOffice" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Citation Number", DataField = "CitationNumber" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
-            
+
             boundField = new BoundField { HeaderText = "Due Date", DataField = "DueDate" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Created Date", DataField = "Created" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Recall/Reject Comment", DataField = "RecallRejectComment" };
+            boundField.HeaderStyle.CssClass = "col-xs-1";
+            boundField.ItemStyle.CssClass = "col-xs-1";
             gridView.Columns.Add(boundField);
-            
+
             gridView.AutoGenerateColumns = false;
             DataView view = dataTable.DefaultView;
             if (view.Count > 0) //without this check, exception happens if no row in the view
@@ -305,7 +329,10 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                displayData();
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    displayData(clientContext);
+                }
 
             }
             catch (Exception exc)
@@ -316,15 +343,11 @@ namespace PIW_SPAppWeb.Pages
 
         }
 
-        private void displayData()
+        private void displayData(ClientContext clientContext)
         {
-            helper = new SharePointHelper();
-            using (var clientContext = helper.getElevatedClientContext(Context, Request))
-            {
-                ResetField();
-                RenderGridView(clientContext);
-                lbLastUpdated.Text = "Last Updated: " + DateTime.Now.ToString("g");
-            }
+            ResetField();
+            RenderGridView(clientContext);
+            lbLastUpdated.Text = "Last Updated: " + DateTime.Now.ToString("g");
         }
 
         private void ResetField()

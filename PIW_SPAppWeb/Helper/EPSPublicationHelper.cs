@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
-using System.Web;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using FERC.Common.Queues;
@@ -68,7 +65,7 @@ namespace PIW_SPAppWeb.Helper
 
             //start publishing
             Publication publication = new Publication(EpsCallingApplication.PIW, EpsCatCode.ISSUANCE);
-            publication.HasFamily = (documentWithFullURLs.Count > 1);
+            //publication.HasFamily = (documentWithFullURLs.Count > 1);
             //if more than 1 document, set the HasFamily to true so parent/child relationship canbe set in EPS
             if (!docketNumber.Equals("non-docket", StringComparison.OrdinalIgnoreCase))
             {
@@ -143,11 +140,8 @@ namespace PIW_SPAppWeb.Helper
             {
                 supplementalMailingListNumberOfPages = getNumberOfRowsFromSupplementalMailingListExcelFile(clientContext, listItemId, supplementalMailingListFileName);
             }
-            helper.SaveNumberOfPublicPagesAndSupplementalMailingListAddress(clientContext,piwListItem,totalPublicDocPages,supplementalMailingListNumberOfPages);
 
-            //generate fola excel mailing list file
-            //FOLAMailingList folaMailingList = new FOLAMailingList();
-            //folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemId);
+            helper.SaveNumberOfPublicPagesAndSupplementalMailingListAddress(clientContext,piwListItem,totalPublicDocPages,supplementalMailingListNumberOfPages);
             
 
             return true;

@@ -78,22 +78,22 @@ namespace PIW_SPAppWeb.Helper
                 String To = string.Empty;
 
                 //email to copy center, initiator and document owner
+
                 string env = ConfigurationManager.AppSettings["Env"];
                 if (!env.ToLower().Equals("prod")) //if not prod, send email to all team member
                 {
                     To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_CopyCenter));
                 }
-                else//prod, send email to CopyCenter distribution list
+                else
                 {
                     var copyCenter = new List<string>();
                     copyCenter.Add("CopyCenter@ferc.gov");
                     To = AddEmailAddress(To, copyCenter);
                 }
-
-
-
-                To = AddEmailAddress(To, initiator);
                 
+                To = AddEmailAddress(To, initiator);
+                //To = AddEmailAddress(To, documentOwners);
+                //To = AddEmailAddress(To, notificationRecipients);
                 SendEmail(clientContext, To, subject, htmlContent);
             }
             else if (action == enumAction.Reject)
@@ -105,7 +105,7 @@ namespace PIW_SPAppWeb.Helper
                 string htmlContent = getRejectHTMLFullMessageContent(message, comment);
                 String To = string.Empty;
 
-                //email to initiator, document owner and notification recipient
+                //email to initiator, document owner and piw admin
                 To = AddEmailAddress(To, initiator);
                 To = AddEmailAddress(To, documentOwners);
                 To = AddEmailAddress(To, getEmailListFromGrp(clientContext,Constants.Grp_PIWAdmin));

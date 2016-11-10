@@ -39,6 +39,10 @@ namespace PIW_SPAppWeb.Helper
         }
         #endregion
 
+        public CitationNumber()
+        {
+        }
+
         public CitationNumber(int documentCategoryNumber, DateTime date)
         {
             _documentCategoryNumber = documentCategoryNumber;

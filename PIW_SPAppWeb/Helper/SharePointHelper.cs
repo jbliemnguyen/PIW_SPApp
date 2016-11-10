@@ -189,8 +189,17 @@ namespace PIW_SPAppWeb.Helper
                 SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment, string.Empty);
             }
 
+            //previous accession number
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousAccessionNumber]] = listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]];
+
             //clear accession number
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;
+
+            //clear published error
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PublishedError]] = string.Empty;
+
+            //Note: we should not clear the published date, leave published date will make item appear in items by published date
+            //and it will display accession number with strike out, it help "docket elibrary" staff check the accession number
 
             //set ReOpen flag
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_Re_Opened]] = true;
@@ -278,6 +287,9 @@ namespace PIW_SPAppWeb.Helper
             FieldUserValue publisher = new FieldUserValue { LookupId = clientContext.Web.CurrentUser.Id };
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_PublishedBy]] = publisher;
 
+            //published date
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PublishedDate]] = DateTime.Now;
+
             listItem.Update();
             clientContext.ExecuteQuery();
         }
@@ -300,9 +312,22 @@ namespace PIW_SPAppWeb.Helper
             clientContext.ExecuteQuery();
         }
 
-        public bool GenerateAndSubmitPrintReqForm(ClientContext clientContext, ListItem listItem, string CurrentUserLogInID)
+        public bool GenerateAndSubmitPrintReqForm(ClientContext clientContext, ListItem listItem, string CurrentUserLogInID, bool isRegenerate, string supplementalMailingListFileName)
         {
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+            
+            if (!isRegenerate)
+            {
+                //normal run from schedule, not ReGenerate
+                //check if print req already generated, by check if PrintReqDateRequest is populated
+                //if generated, do nothing, return false
+                if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequested]] != null)
+                {
+                    return false;
+                }    
+            }
+            
 
             string listItemID = listItem["ID"].ToString();
 
@@ -326,15 +351,36 @@ namespace PIW_SPAppWeb.Helper
 
 
             //number of supplemental mailing list address
+            //if regenereate, recalcualte the number of supplemental mailing address, admin may update the file and regenerate print req
+            //if not regenereate, the number already calculated when published, just get it from the list
+
             int numberOfSupplementalMailingListAddress = 0;
-            if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
+            if (isRegenerate)
             {
-                numberOfSupplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+                if (!string.IsNullOrEmpty(supplementalMailingListFileName))
+                {
+                    EPSPublicationHelper epsPublicationHelper = new EPSPublicationHelper();
+                    numberOfSupplementalMailingListAddress = epsPublicationHelper.getNumberOfRowsFromSupplementalMailingListExcelFile(clientContext,
+                        listItemID, supplementalMailingListFileName);
+                }    
             }
+            else
+            {
+                if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
+                {
+                    numberOfSupplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+                    //save the new number just recalculated
+                    SaveNumberOfSupplementalMailingListAddress(clientContext,listItem,piwListInternalColumnNames,numberOfSupplementalMailingListAddress);
+                }
+            }
+            
+
+
+
 
             int numberofCopies;
             //if sunshine notice --> print 100 copies
-            if (documentCategory.Equals(Constants.ddDocumentCategory_Option_SunshineNotice,
+            if (documentCategory.Equals(Constants.PIWList_DocCat_SunshineNotice,
                 StringComparison.OrdinalIgnoreCase))
             {
                 numberofCopies = 100;
@@ -369,8 +415,6 @@ namespace PIW_SPAppWeb.Helper
 
                 listItem.Update();
                 clientContext.ExecuteQuery();
-
-                //todo: send email
 
 
                 //history list for print req generate
@@ -471,29 +515,29 @@ namespace PIW_SPAppWeb.Helper
             return PrintPriority;
         }
 
-        public void ReGenerateFOLAMailingList(ClientContext clientContext, string listItemID, string CurrentUserLogInID)
-        {
-            var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-            ListItem listItem = GetPiwListItemById(clientContext, listItemID, false);
-            string docketNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
+        //public void ReGenerateFOLAMailingList(ClientContext clientContext, string listItemID, string CurrentUserLogInID)
+        //{
+        //    var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+        //    ListItem listItem = GetPiwListItemById(clientContext, listItemID, false);
+        //    string docketNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]].ToString();
 
-            //number of supplemental mailing list address
-            int numberofSupplementalMailingListAddress = 0;
-            if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
-            {
-                numberofSupplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
-            }
+        //    //number of supplemental mailing list address
+        //    int numberofSupplementalMailingListAddress = 0;
+        //    if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
+        //    {
+        //        numberofSupplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+        //    }
 
-            FOLAMailingList folaMailingList = new FOLAMailingList();
-            int numberOfFOLAMailingListAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemID);
+        //    FOLAMailingList folaMailingList = new FOLAMailingList();
+        //    int numberOfFOLAMailingListAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemID);
 
 
-            //update number of fola address and number of copies to piwlist
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] = numberOfFOLAMailingListAddress;
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = numberOfFOLAMailingListAddress + numberofSupplementalMailingListAddress;
-            listItem.Update();
-            clientContext.ExecuteQuery();
-        }
+        //    //update number of fola address and number of copies to piwlist
+        //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] = numberOfFOLAMailingListAddress;
+        //    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = numberOfFOLAMailingListAddress + numberofSupplementalMailingListAddress;
+        //    listItem.Update();
+        //    clientContext.ExecuteQuery();
+        //}
 
         public void SaveNumberOfPublicPagesAndSupplementalMailingListAddress(ClientContext clientContext, ListItem listItem, int numberOfPublicPages, int numberOfSupplementalMailingListAddress)
         {
@@ -512,6 +556,19 @@ namespace PIW_SPAppWeb.Helper
             listItem.Update();
             clientContext.ExecuteQuery();
         }
+
+        public void SaveNumberOfSupplementalMailingListAddress(ClientContext clientContext, ListItem listItem, Dictionary<string, string> piwListInternalColumnNames, int numberOfSupplementalMailingListAddress)
+        {
+            if (numberOfSupplementalMailingListAddress > 0)
+            {
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] = numberOfSupplementalMailingListAddress;
+            }
+
+            listItem.Update();
+            clientContext.ExecuteQuery();
+        }
+
+
 
         public string getPrintReqEditFormURL(ListItem listItem, Dictionary<string, string> piwListInternalColumnNames)
         {

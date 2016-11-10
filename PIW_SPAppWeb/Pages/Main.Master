@@ -9,15 +9,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <link href="../Styles/peoplepickercontrol.css" rel="stylesheet" />
-    <link href="../Content/bootstrap.css" rel="stylesheet" />
+    <link href="../Content/bootstrap.css" rel="stylesheet" media="all" />
+    <link href="../Content/bootstrap.css" rel="stylesheet" media="print" />
+
     <link href="../Styles/offcanvas.css" rel="stylesheet" />
-    <link href="../Styles/piw.css?rev=2" rel="stylesheet" />
+    <link href="../Styles/piw.css?rev=4" rel="stylesheet" />
     <link href="../Styles/jquery-ui.css" rel="stylesheet" />
     <asp:ContentPlaceHolder ID="head" runat="server">
     </asp:ContentPlaceHolder>
 </head>
 <body>
-    <nav class="navbar navbar-fixed-top navbar-inverse">
+    <nav class="navbar navbar-fixed-top navbar-inverse hidden-print">
         <div class="container-fluid">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -36,10 +38,10 @@
                 </ul>
                 <form class="navbar-form navbar-right">
                     <div class="form-group">
-                        <input type="text" placeholder="Search Docket Number" class="form-control" />
+                        <input id="mptbDocketNumber" type="text" placeholder="Search Docket Number" class="form-control" />
                     </div>
                     <%--<button type="submit" class="btn btn-success" style="background-color: #337ab7">Search</button>--%>
-                    <a href="DocketSearch.aspx" class="btn btn-success" style="background-color: #337ab7">Search</a>
+                    <a id="mpbtnDocketNumberSearch" href="DocketNumberSearch.aspx" class="btn btn-success" style="background-color: #337ab7">Search</a>
                 </form>
             </div>
             <!-- /.nav-collapse -->
@@ -50,20 +52,25 @@
     <!-- /.navbar -->
     <div class="container-fluid">
         <div class="row">
-            <div class="col-xs-5 col-sm-3 col-md-2 sidebar-offcanvas" id="sidebar">
+            <div class="col-md-2 sidebar-offcanvas hidden-print" id="sidebar">
                 <div class="list-group">
                     <a href="StandardForms.aspx" class="list-group-item" id="StandardFormsURL">Standard Forms</a>
                     <a href="AgendaForms.aspx" class="list-group-item" id="AgendaFormsURL">Agenda Forms</a>
                     <a href="DirectPublicationForms.aspx" class="list-group-item" id="DirectPublicationFormsURL">Direct Publication Forms</a>
                     <a href="PrintReqForms.aspx" class="list-group-item" id="PrintReqFormsURL">Print Requisition Forms</a>
-                    
+                    <a href="ItemsByPublishedDate.aspx" class="list-group-item" id="ItemsByPublishedDateURL">Items By Published Date</a>
+                    <a href="DocketNumberSearch.aspx" class="list-group-item" id="DocketNumberSearchURL">Docket Number Search</a>
+                    <a href="MyItems.aspx" class="list-group-item" id="MyItemsURL">My Items</a>
+                    <a href="CitationNumberListing.aspx" class="list-group-item" id="CitationNumberListingURL">Citation Number Listing</a>
+                    <a href="LegalResourceReviewPendingItems.aspx" class="list-group-item" id="LegalResourceReviewPendingItemsURL">Legal Resources and Review Group Pending</a>
+
                     <a href="Admin.aspx" class="list-group-item" id="AdminURL">Admin</a>
                 </div>
             </div>
             <!--/.sidebar-offcanvas-->
 
 
-            <div class="col-xs-7 col-sm-9 col-md-10">
+            <div class="col-md-10">
                 <asp:ContentPlaceHolder ID="MainContentPlaceHolder" runat="server">
                 </asp:ContentPlaceHolder>
             </div>
@@ -78,7 +85,10 @@
     <script src="../Scripts/json2.min.js" type="text/javascript"></script>
     <script src="../Scripts/jquery.validate.js"></script>
     <script src="../Scripts/peoplepickercontrol.js?rev=5" type="text/javascript"></script>
-    <script src="../Scripts/spinner/jquery.spinner.js"></script>
+    <%--<script src="../Scripts/spinner/jquery.spinner.js"></script>--%>
+    <%--<script src="../Scripts/jquery.stickytableheaders.min.js"></script>--%>
+
+
     <%--no longer use--%>
 
     <script type="text/javascript">
@@ -134,6 +144,10 @@
                 SharedEditPageClientCode();
             }
 
+            //register event for docket search nav bar
+            $("#mpbtnDocketNumberSearch").click(function (event) {
+                $(this).attr("href", $(this).prop("href") + "&Docket=" + $("#mptbDocketNumber").val());
+            });
 
             //Call to method in each page to do further client side programming
             //NOTE: each page must have this method in Main Content Place Holder
@@ -242,7 +256,7 @@
                     ctl00$MainContentPlaceHolder$tbDueDate: "required",
                     ctl00$MainContentPlaceHolder$tbAlternateIdentifier: { requiredWhenNonDocketed: true, maxlength: 255 },
                     ctl00$MainContentPlaceHolder$tbInstruction: { maxlength: 255 },
-                    ctl00$MainContentPlaceHolder$ddProgramOfficeDocumentOwner: {requiredWhenDocumentOwnerProvided:true},
+                    ctl00$MainContentPlaceHolder$ddProgramOfficeDocumentOwner: { requiredWhenDocumentOwnerProvided: true },
                     ctl00$MainContentPlaceHolder$inputDocumentOwner: { requiredWhenProgramOfficeDocumentOwnerProvided: true },
                     //print req validation
                     ctl00$MainContentPlaceHolder$tbNumberofPages: {
@@ -300,7 +314,7 @@
             //prevent user edit duedate and set value to past date
             $("#tbDueDate").keydown(function (event) { event.preventDefault(); });
             $("#tbLegalResourcesReviewCompletionDate").datepicker();
-            
+
             jQueryValidation();
 
             //initialize docket and alternate identifier based on nondocket and cnf checkbox
@@ -327,8 +341,7 @@
                 //this code should used in edit standard and agenda form becuase the form has citation number
                 //it will fails when the code look for citation number textbox location in print req and direct pub
                 if ((document.URL.indexOf("EditStandardForm.aspx") > -1) ||
-                    (document.URL.indexOf("EditAgendaForm.aspx") > -1))
-                    {
+                    (document.URL.indexOf("EditAgendaForm.aspx") > -1)) {
                     var prm = Sys.WebForms.PageRequestManager.getInstance();
                     prm.add_endRequest(function () {
                         RemoveLockScreenForAjaxUpdate(); //ajax request completed, remove the lock screen
@@ -338,7 +351,7 @@
                         LockScreenForAjaxUpdate();
                     });
                 }
-                
+
             }
 
 
@@ -361,32 +374,34 @@
             $("#btnInitiatePublication").click(function (event) {
                 event.preventDefault();
 
-                //display warning if due date is future date
-                var modalHeight = 100;
-                //var dueDate = new Date($("#tbDueDate").attr('value'));
-                var dueDate = new Date($("#tbDueDate").val());
-                var today = new Date();
-                if (dueDate > today) {
-                    modalHeight = 250;
-                    $("#publishDialogConfirmation").html("<span style='color:red'>Warning: Due Date is a future date</span>");
-                }
-                else {
-                    $("#publishDialogConfirmation").html("");
-                }
-
-                //dialog
-                $("#publishDialogConfirmation").dialog({
-                    buttons: {
-                        "No": function (e) {
-                            $(this).dialog("close");
-
-                        },
-                        "Yes": function (e) {
-                            $("#btnPublishConfirm").click();
-                            $(this).dialog("close");
-                        }
+                if ($("#mainForm").valid()) // trigger the validation
+                {
+                    //display warning if due date is future date
+                    var modalHeight = 100;
+                    //var dueDate = new Date($("#tbDueDate").attr('value'));
+                    var dueDate = new Date($("#tbDueDate").val());
+                    var today = new Date();
+                    if (dueDate > today) {
+                        modalHeight = 250;
+                        $("#publishDialogConfirmation").html("<span style='color:red'>Warning: Due Date is a future date</span>");
+                    } else {
+                        $("#publishDialogConfirmation").html("");
                     }
-                }, { width: 600, height: modalHeight });
+
+                    //dialog
+                    $("#publishDialogConfirmation").dialog({
+                        buttons: {
+                            "No": function (e) {
+                                $(this).dialog("close");
+
+                            },
+                            "Yes": function (e) {
+                                $("#btnPublishConfirm").click();
+                                $(this).dialog("close");
+                            }
+                        }
+                    }, { width: 600, height: modalHeight });
+                }
             });
 
             $(".historyhead").click(function () {
@@ -417,7 +432,7 @@
                 $("#btnSECReviewTakeOwnership").click();
             });
 
-            
+
 
             $("#btnRecall1").click(function (event) {
                 event.preventDefault();
@@ -469,7 +484,7 @@
                 $("#btnLegalReviewCompletedWithComment").click();
             });
 
-            
+
             //end top buttons event
 
 
@@ -548,7 +563,7 @@
             $("#tbNumberofCopies").rules("remove");
             $("#ddProgramOfficeDocumentOwner").rules("remove");
             $("#inputDocumentOwner").rules("remove");
-            
+
         }
 
         ///http://www.4guysfromrolla.com/articles/121708-1.aspx

@@ -1,0 +1,171 @@
+﻿/*override the dialog to have red font*/
+.ui-dialog-title {
+    color: red;
+}
+
+.btn-file {
+    position: relative;
+    overflow: hidden;
+}
+
+    .btn-file input[type=file] {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 100%;
+        min-height: 100%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        background: white;
+        cursor: inherit;
+        display: block;
+    }
+
+/* Lock Screen-related CSS Classes */
+.LockOff {
+    visibility: hidden;
+    display: none;
+    position: absolute;
+    top: -100px;
+    left: -100px;
+}
+
+.LockBackground {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    visibility: visible;
+    display: block;
+    width: 105%;
+    height: 105%;
+    background-color: #eee;
+    z-index: 999;
+    filter: alpha(opacity=75);
+    opacity: 0.75;
+    padding-top: 20%;
+}
+
+.LockPane {
+    z-index: 1000;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    padding-top: 25%;
+    visibility: visible;
+    display: block;
+    text-align: center;
+    width: 100%;
+}
+
+    .LockPane div {
+        width: 55%;
+        /*background-color: #969;*/
+        background-color: #337ab7;
+        /*background-color: #cde6f7;*/
+        color: White;
+        font-size: large;
+        border: dotted 1px White;
+        padding: 9px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+
+
+.radio.radiobuttonlist input[type="radio"],
+.checkbox.checkboxlist input[type="checkbox"] {
+    margin-left: 0;
+}
+
+.radio.radiobuttonlist label,
+.checkbox.checkboxlist label {
+    margin-bottom: 4px;
+    margin-left: 0;
+}
+
+/*fieldset legend
+{
+	border: 0;
+	font-size: inherit;
+	font-weight: 700;
+	margin-bottom: 0;
+}*/
+
+fieldset .radio,
+fieldset .checkbox {
+    margin-top: 4px;
+}
+
+.glyphicon-spin {
+    -webkit-animation: spin 1000ms infinite linear;
+    animation: spin 1000ms infinite linear;
+}
+
+body {
+}
+
+/*override form.less from bootstrap*/
+.radio input[type="radio"],
+.radio-inline input[type="radio"],
+.checkbox input[type="checkbox"],
+.checkbox-inline input[type="checkbox"] {
+    position: absolute;
+    margin-left: 0px;
+    margin-top: 4px \9;
+}
+
+/*jquery validation error*/
+label.error {
+    color: red;
+    font-size: 0.8em;
+}
+
+span.error {
+    color: red;
+    font-size: 1.2em;
+}
+
+/*used for accent textarea (*)*/
+.accentText {
+    color: #393;
+}
+
+.invisible {
+    display: none;
+}
+
+input[disabled] {
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: .65;
+}
+
+.historyhead {
+    padding: 5px 10px;
+    cursor: pointer;
+    position: relative;
+    /*background-color: #AFE01B;*/
+    background-color: #204d74;
+    color: #fff;
+    margin: 1px;
+}
+
+.historylist {
+    padding: 5px 10px 15px;
+}
+
+.GroupHeaderStyle {
+    border: solid 1px Black;
+    background-color: #337ab7;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.piw-borderless, .piw-borderless tbody tr td, .piw-borderless tbody tr th, .piw-borderless thead tr th, .piw-borderless tbody table {
+    border: none;
+}
+
+

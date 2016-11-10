@@ -14,19 +14,29 @@ namespace PIW_SPAppWeb.Pages
 {
     public partial class PrintReqForms : System.Web.UI.Page
     {
-        private SharePointHelper helper;
+        private SharePointHelper helper = new SharePointHelper();
         private string previousRowFormStatus = string.Empty;
         int intSubTotalIndex = 1;
         protected void Page_Load(object sender, EventArgs e)
         {
             try
             {
-                displayData();
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    displayData(clientContext);
+                }
             }
             catch (Exception exc)
             {
                 helper.LogError(Context, Request, exc, string.Empty, Page.Request.Url.OriginalString);
-                helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                if (exc is ServerUnauthorizedAccessException)
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, Constants.Page_AccessDenied);
+                }
+                else
+                {
+                    helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
+                }
             }
         }
         private void RenderGridView(ClientContext clientContext)
@@ -49,8 +59,8 @@ namespace PIW_SPAppWeb.Pages
                 dataTable.Columns.Add("NumberOfPages", typeof(string));
                 dataTable.Columns.Add("NumberOfCopies", typeof(string));
                 dataTable.Columns.Add("GroupOrder", typeof(string));
-                
-                
+
+
 
                 foreach (var listItem in listItemCollection)
                 {
@@ -59,7 +69,7 @@ namespace PIW_SPAppWeb.Pages
                     dataRow["Docket"] = listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]] != null
                         ? listItem[piwListInternalName[Constants.PIWList_colName_DocketNumber]].ToString()
                         : string.Empty;
-                    
+
                     dataRow["URL"] = listItem[piwListInternalName[Constants.PIWList_colName_PrintReqFormURL]] != null
                         ? listItem[piwListInternalName[Constants.PIWList_colName_PrintReqFormURL]].ToString()
                         : string.Empty;
@@ -85,7 +95,7 @@ namespace PIW_SPAppWeb.Pages
                         : string.Empty;
 
                     dataRow["NumberOfPages"] = listItem[piwListInternalName[Constants.PIWList_colName_NumberOfPublicPages]] != null
-                        ? listItem[piwListInternalName[Constants.PIWList_colName_NumberOfPublicPages]].ToString(): string.Empty;
+                        ? listItem[piwListInternalName[Constants.PIWList_colName_NumberOfPublicPages]].ToString() : string.Empty;
 
                     dataRow["NumberOfCopies"] = listItem[piwListInternalName[Constants.PIWList_colName_PrintReqNumberofCopies]] != null
                         ? listItem[piwListInternalName[Constants.PIWList_colName_PrintReqNumberofCopies]].ToString() : string.Empty;
@@ -97,28 +107,39 @@ namespace PIW_SPAppWeb.Pages
 
             string[] urls = new string[1] { "URL" };
             hyperlinkField = new HyperLinkField { HeaderText = "Docket Number", DataTextField = "Docket" };
-            hyperlinkField.ControlStyle.Width = new Unit(200, UnitType.Pixel);
+            hyperlinkField.HeaderStyle.CssClass = "col-md-2";
+            hyperlinkField.ItemStyle.CssClass = "col-md-2";
             hyperlinkField.DataNavigateUrlFields = urls;
             //hyperlinkField.Target = "_blank";
             gridView.Columns.Add(hyperlinkField);
-            
+
 
             BoundField boundField = new BoundField { HeaderText = "Form Status", DataField = "Status", Visible = false };
             gridView.Columns.Add(boundField);
-            
+
             boundField = new BoundField { HeaderText = "Initiator Office", DataField = "InitiatorOffice" };
+            boundField.HeaderStyle.CssClass = "col-md-1";
+            boundField.ItemStyle.CssClass = "col-md-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Date Requested", DataField = "DateRequested" };
+            boundField.HeaderStyle.CssClass = "col-md-1";
+            boundField.ItemStyle.CssClass = "col-md-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Date Required", DataField = "DateRequired" };
+            boundField.HeaderStyle.CssClass = "col-md-1";
+            boundField.ItemStyle.CssClass = "col-md-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Number of Pages", DataField = "NumberOfPages" };
+            boundField.HeaderStyle.CssClass = "col-md-1";
+            boundField.ItemStyle.CssClass = "col-md-1";
             gridView.Columns.Add(boundField);
 
             boundField = new BoundField { HeaderText = "Number of Copies", DataField = "NumberOfCopies" };
+            boundField.HeaderStyle.CssClass = "col-md-1";
+            boundField.ItemStyle.CssClass = "col-md-1";
             gridView.Columns.Add(boundField);
 
             gridView.AutoGenerateColumns = false;
@@ -235,7 +256,10 @@ namespace PIW_SPAppWeb.Pages
         {
             try
             {
-                displayData();
+                using (var clientContext = helper.getElevatedClientContext(Context, Request))
+                {
+                    displayData(clientContext);
+                }
             }
             catch (Exception exc)
             {
@@ -245,15 +269,12 @@ namespace PIW_SPAppWeb.Pages
 
         }
 
-        private void displayData()
+        private void displayData(ClientContext clientContext)
         {
-            helper = new SharePointHelper();
-            using (var clientContext = helper.getElevatedClientContext(Context, Request))
-            {
-                ResetField();
-                RenderGridView(clientContext);
-                lbLastUpdated.Text = "Last Updated: " + DateTime.Now.ToString("g");
-            }
+            ResetField();
+            RenderGridView(clientContext);
+            lbLastUpdated.Text = "Last Updated: " + DateTime.Now.ToString("g");
+
         }
 
         private void ResetField()

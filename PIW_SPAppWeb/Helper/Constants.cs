@@ -21,6 +21,7 @@ namespace PIW_SPAppWeb
 
 
         public const string PIWList_colName_AccessionNumber = "Accession Number";
+        public const string PIWList_colName_PreviousAccessionNumber = "Previous Accession Number";
         public const string PIWList_colName_AlternateIdentifier = "Alternate Identifier";
         public const string PIWList_colName_WorkflowInitiator = "Workflow Initiator";
         public const string PIWList_colName_ProgramOfficeWFInitator = "Program Office (Workflow Initiator)";
@@ -147,8 +148,19 @@ namespace PIW_SPAppWeb
         public const string PIWList_DocCat_SunshineNotice = "Sunshine Notice";
         public const string PIWList_DocCat_NoticeofActionTaken = "Notice of Action Taken";
 
-
-
+        //Direct Pub
+        public const string PIWList_DocCat_ChairmanStatement = "Chairman Statement";
+        public const string PIWList_DocCat_CommissionerStatement = "Commissioner Statement";
+        //Delegated Letter - existing in Standard Form
+        public const string PIWList_DocCat_EA = "EA";
+        public const string PIWList_DocCat_EIS = "EIS";
+        //Errata - existing in Agenda
+        public const string PIWList_DocCat_InspectionReport = "Inspection Report";
+        public const string PIWList_DocCat_Memo = "Memo";
+        public const string PIWList_DocCat_NewsRelease = "News Release";
+        //Notice of Action Taken - existing in Agenda
+        public const string PIWList_DocCat_ProjectUpdate = "Project Update";
+        public const string PIWList_DocCat_SunshineActMeetingNotice = "Sunshine Act Meeting Notice";
 
 
         public const string PIWList_FormType_StandardForm = "Standard Form";
@@ -184,10 +196,7 @@ namespace PIW_SPAppWeb
 
 
         public const string ddProgramOfficeWorkflowInitiator_Option_OSEC = "OSEC";
-        public const string ddDocumentCategory_Option_Notice = "Notice";
-        public const string ddDocumentCategory_Option_NoticeErrata = "Notice Errata";
-        public const string ddDocumentCategory_Option_SunshineNotice = "Sunshine Notice";
-
+        
         //ErrorLog list
         public const string ErrorLogListName = "ErrorLog";
         public const string ErrorLog_colName_PIWListItem = "PIWListItem";
@@ -285,6 +294,9 @@ namespace PIW_SPAppWeb
         //Previous Form Status
         public const string previousFormStatusViewStateKey = "PreviousFormStatusKey";
 
+        //SelectedDocumentCategory
+        public const string SelectedDocumentCategory = "SelectedDocumentCategory";
+
         //ModifiedDateTime key
         public const string ModifiedDateTimeKey = "ModifiedDateTimeKey";
 
@@ -331,6 +343,10 @@ namespace PIW_SPAppWeb
         public const string Page_PrintReqForms = "PrintReqForms.aspx";
         public const string Page_AccessDenied = "AccessDenied.aspx";
         public const string Page_ItemNotFound = "ItemNotFound.aspx";
+        public const string Page_MyItems = "MyItems.aspx";
+        public const string Page_LegalResourceReviewPendingItems = "LegalResourceReviewPendingItems.aspx";
+        public const string Page_LegalResourceReviewCompletedItems = "LegalResourceReviewCompletedItems.aspx";
+        
 
         #region Publishing
         public const string Affiliation_FirstName = "K";

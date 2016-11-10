@@ -9,6 +9,9 @@
             ////set active left navigation tab 
             $("#sidebar a").removeClass("active");
             $("#StandardFormsURL").addClass("active");
+
+            //sticky header plugin initialize
+            //$("#standardFormsGridView").stickyTableHeaders();
         }
     </script>
     <form id="mainForm" runat="server" class="form-horizontal">
@@ -26,9 +29,15 @@
                         <asp:Label runat="server" ID="lbLastUpdated" Font-Italic="True" Font-Bold="True"></asp:Label>
                     </div>
                 </div>
+                <%--<div class="form-group">
+                    <div id="gridDiv" class="col-md-12" style="overflow-x: scroll;overflow-y: hidden">
+                        <asp:GridView runat="server" ID="standardFormsGridView" AutoGenerateColumns="false" CssClass="table table-fixed table-striped table-hover table-condensed piw-borderless" OnRowCreated="standardFormsGridView_RowCreated">
+                        </asp:GridView>
+                    </div>
+                </div>--%>
                 <div class="form-group">
                     <div id="gridDiv" class="col-md-12" style="overflow-x: scroll;overflow-y: hidden">
-                        <asp:GridView runat="server" ID="standardFormsGridView" AutoGenerateColumns="false" CssClass="table-striped table-hover table-condensed piw-borderless" OnRowCreated="standardFormsGridView_RowCreated">
+                        <asp:GridView runat="server" ID="standardFormsGridView" AutoGenerateColumns="false" CssClass="table table-hover table-condensed piw-borderless" OnRowCreated="standardFormsGridView_RowCreated" ClientIDMode="Static">
                         </asp:GridView>
                     </div>
                 </div>
