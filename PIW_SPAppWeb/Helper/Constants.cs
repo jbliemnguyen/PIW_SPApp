@@ -344,6 +344,9 @@ namespace PIW_SPAppWeb
         public const string Page_AccessDenied = "AccessDenied.aspx";
         public const string Page_ItemNotFound = "ItemNotFound.aspx";
         public const string Page_MyItems = "MyItems.aspx";
+        public const string Page_LegalResourceReviewPendingItems = "LegalResourceReviewPendingItems.aspx";
+        public const string Page_LegalResourceReviewCompletedItems = "LegalResourceReviewCompletedItems.aspx";
+        
 
         #region Publishing
         public const string Affiliation_FirstName = "K";

@@ -191,6 +191,8 @@
     <Content Include="Pages\Error.aspx" />
     <Content Include="Pages\ItemNotFound.aspx" />
     <Content Include="Pages\ItemsByPublishedDate.aspx" />
+    <Content Include="Pages\LegalResourceReviewCompletedItems.aspx" />
+    <Content Include="Pages\LegalResourceReviewPendingItems.aspx" />
     <Content Include="Pages\MyItems.aspx" />
     <Content Include="Pages\PrintReqForms.aspx" />
     <Content Include="Pages\StandardForms.aspx" />
@@ -409,6 +411,20 @@
     </Compile>
     <Compile Include="Pages\ItemsByPublishedDate.aspx.designer.cs">
       <DependentUpon>ItemsByPublishedDate.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\LegalResourceReviewCompletedItems.aspx.cs">
+      <DependentUpon>LegalResourceReviewCompletedItems.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\LegalResourceReviewCompletedItems.aspx.designer.cs">
+      <DependentUpon>LegalResourceReviewCompletedItems.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\LegalResourceReviewPendingItems.aspx.cs">
+      <DependentUpon>LegalResourceReviewPendingItems.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\LegalResourceReviewPendingItems.aspx.designer.cs">
+      <DependentUpon>LegalResourceReviewPendingItems.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Main.Master.cs">
       <DependentUpon>Main.Master</DependentUpon>

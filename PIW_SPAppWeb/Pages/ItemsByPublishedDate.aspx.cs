@@ -203,11 +203,32 @@ namespace PIW_SPAppWeb.Pages
                                     .ToString()
                                 : string.Empty;
 
-                        dataRow["DocumentOwner"] =
-                            listItem[piwListInternalName[Constants.PIWList_colName_DocumentOwner]] != null
-                                ? ((FieldUserValue)
-                                    listItem[piwListInternalName[Constants.PIWList_colName_DocumentOwner]]).LookupValue
-                                : string.Empty;
+
+                        string documentOwnersStr = string.Empty;
+                        if (listItem[piwListInternalName[Constants.PIWList_colName_DocumentOwner]] != null)
+                        {
+                            var documentOwners = (FieldUserValue[])listItem[piwListInternalName[Constants.PIWList_colName_DocumentOwner]];
+
+                            foreach (var documentOwner in documentOwners)
+                            {
+                                if (string.IsNullOrEmpty(documentOwnersStr))
+                                {
+                                    documentOwnersStr = documentOwner.LookupValue;
+                                }
+                                else
+                                {
+                                    documentOwnersStr = documentOwnersStr + ", " + documentOwner.LookupValue;
+                                }
+                            }
+                        }
+
+                        dataRow["DocumentOwner"] = documentOwnersStr;
+
+                        //dataRow["DocumentOwner"] =
+                        //    listItem[piwListInternalName[Constants.PIWList_colName_DocumentOwner]] != null
+                        //        ? ((FieldUserValue)
+                        //            listItem[piwListInternalName[Constants.PIWList_colName_DocumentOwner]]).LookupValue
+                        //        : string.Empty;
 
                         dataRow["OwnerOffice"] =
                             listItem[piwListInternalName[Constants.PIWList_colName_ProgramOfficeDocumentOwner]] != null
@@ -343,9 +364,6 @@ namespace PIW_SPAppWeb.Pages
             gridView.Columns.Add(boundField);
 
 
-            gridView.AutoGenerateColumns = false;
-            DataView view = dataTable.DefaultView;
-
             if (tbToDate.Text.Equals(tbFromDate.Text))
             {
                 gridView.AllowPaging = false;
@@ -356,6 +374,8 @@ namespace PIW_SPAppWeb.Pages
                 gridView.PageSize = 25;
             }
 
+            gridView.AutoGenerateColumns = false;
+            DataView view = dataTable.DefaultView;
             gridView.DataSource = view;
             gridView.DataBind();
 
