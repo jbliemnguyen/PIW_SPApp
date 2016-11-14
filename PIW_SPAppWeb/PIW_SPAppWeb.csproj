@@ -191,10 +191,12 @@
     <Content Include="Pages\Error.aspx" />
     <Content Include="Pages\ItemNotFound.aspx" />
     <Content Include="Pages\ItemsByPublishedDate.aspx" />
+    <Content Include="Pages\ItemsByPublishedDateByOwnerOffice.aspx" />
     <Content Include="Pages\LegalResourceReviewCompletedItems.aspx" />
     <Content Include="Pages\LegalResourceReviewPendingItems.aspx" />
     <Content Include="Pages\MyItems.aspx" />
     <Content Include="Pages\PrintReqForms.aspx" />
+    <Content Include="Pages\PrintRequisitionReport.aspx" />
     <Content Include="Pages\StandardForms.aspx" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
@@ -412,6 +414,13 @@
     <Compile Include="Pages\ItemsByPublishedDate.aspx.designer.cs">
       <DependentUpon>ItemsByPublishedDate.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Pages\ItemsByPublishedDateByOwnerOffice.aspx.cs">
+      <DependentUpon>ItemsByPublishedDateByOwnerOffice.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\ItemsByPublishedDateByOwnerOffice.aspx.designer.cs">
+      <DependentUpon>ItemsByPublishedDateByOwnerOffice.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Pages\LegalResourceReviewCompletedItems.aspx.cs">
       <DependentUpon>LegalResourceReviewCompletedItems.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -446,6 +455,13 @@
     </Compile>
     <Compile Include="Pages\PrintReqForms.aspx.designer.cs">
       <DependentUpon>PrintReqForms.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\PrintRequisitionReport.aspx.cs">
+      <DependentUpon>PrintRequisitionReport.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Pages\PrintRequisitionReport.aspx.designer.cs">
+      <DependentUpon>PrintRequisitionReport.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\StandardForms.aspx.cs">
       <DependentUpon>StandardForms.aspx</DependentUpon>

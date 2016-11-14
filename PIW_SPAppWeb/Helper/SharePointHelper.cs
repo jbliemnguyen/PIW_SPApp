@@ -299,7 +299,7 @@ namespace PIW_SPAppWeb.Helper
             var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
             //legal resource completion date
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]] = completionDate.ToShortDateString();
+            listItem[piwListInternalColumnNames[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate]] = completionDate;
 
             //comment
             if (!string.IsNullOrEmpty(comment))

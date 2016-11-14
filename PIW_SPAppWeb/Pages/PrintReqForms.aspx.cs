@@ -43,7 +43,6 @@ namespace PIW_SPAppWeb.Pages
         {
             DataTable dataTable = new DataTable();
             DataRow dataRow;
-            //string filename = helper.getPageFileName(Page.Request);
             var piwListInternalName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
             gridView.Columns.Clear();
 

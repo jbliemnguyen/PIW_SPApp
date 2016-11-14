@@ -63,6 +63,9 @@
                     <a href="MyItems.aspx" class="list-group-item" id="MyItemsURL">My Items</a>
                     <a href="CitationNumberListing.aspx" class="list-group-item" id="CitationNumberListingURL">Citation Number Listing</a>
                     <a href="LegalResourceReviewPendingItems.aspx" class="list-group-item" id="LegalResourceReviewPendingItemsURL">Legal Resources and Review Group Pending</a>
+                    <a href="LegalResourceReviewCompletedItems.aspx" class="list-group-item" id="LegalResourceReviewCompletedItemsURL">Legal Resources and Review Group Completed</a>
+                    <a href="ItemsByPublishedDateByOwnerOffice.aspx" class="list-group-item" id="ItemsByPublishedDateByOwnerOfficeURL">Published Items By Owner Office</a>
+                    <a href="PrintRequisitionReport.aspx" class="list-group-item" id="PrintRequisitionReportURL">Print Requisition Report</a>
 
                     <a href="Admin.aspx" class="list-group-item" id="AdminURL">Admin</a>
                 </div>

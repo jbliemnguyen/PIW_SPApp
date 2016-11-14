@@ -1168,8 +1168,8 @@ namespace PIW_SPAppWeb.Pages
                         helper.CreatePIWListHistory(clientContext, ListItemID, message, FormStatus,
                             Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
 
-                        //Redirect
-                        helper.RedirectToSourcePage(Request, Response);
+                        //Refresh
+                        helper.RefreshPage(Request, Response);
 
                     }
                 }

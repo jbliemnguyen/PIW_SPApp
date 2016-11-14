@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -18,8 +19,6 @@ namespace PIW_SPAppWeb.Pages
         SharePointHelper helper = new SharePointHelper();
         private string previousRowFormStatus = string.Empty;
         int intSubTotalIndex = 1;
-        private bool isPendingPage = false;
-        private bool isCompletedPage = false;
 
         private const string col_Docket = "Docket";
         private const string col_EditFormURL = "EditFormURL";
@@ -31,31 +30,28 @@ namespace PIW_SPAppWeb.Pages
         private const string col_DocumentOwner = "Document Owner";
         private const string col_Description = "Description";
         private const string col_PublishedDate = "Published Date";
-        private const string col_CompletedDate = "Completed Date";
         private const string col_FormType = "Form Type";
-        #endregion 
+        #endregion
 
         #region Events
         protected void Page_Load(object sender, EventArgs e)
         {
             try
             {
-                isPendingPage = true;
-
-
+                
                 if (!Page.IsPostBack)
                 {
                     tbToDate.Text = DateTime.Now.ToShortDateString();
                     tbFromDate.Text = DateTime.Now.AddDays(-30).ToShortDateString();
 
-                    
+
                     //Run the report in the first time
                     btnRun_OnClick(null, null);
 
                 }
                 //displayData();
 
-                
+
             }
             catch (Exception exc)
             {
@@ -92,7 +88,31 @@ namespace PIW_SPAppWeb.Pages
                     helper.RedirectToAPage(Page.Request, Page.Response, "Error.aspx");
                 }
             }
-            
+
+        }
+
+        protected void gridView_OnRowCreated(object sender, GridViewRowEventArgs e)
+        {
+            if (DataBinder.Eval(e.Row.DataItem, col_FormType) != null)
+            {
+                string formType = DataBinder.Eval(e.Row.DataItem, col_FormType).ToString();
+                if (!previousRowFormStatus.Equals(formType))
+                {
+                    GridView StandardFormgrdView = (GridView)sender;
+                    GridViewRow row = new GridViewRow(0, 0, DataControlRowType.DataRow, DataControlRowState.Insert);
+                    TableCell cell = new TableCell
+                    {
+                        Text = "Form Type: " + formType,
+                        ColumnSpan = 10,
+                        CssClass = "GroupHeaderStyle"
+                    };
+                    row.Cells.Add(cell);
+                    StandardFormgrdView.Controls[0].Controls.AddAt(e.Row.RowIndex + intSubTotalIndex, row);
+                    intSubTotalIndex++;
+                }
+
+                previousRowFormStatus = formType;
+            }
         }
         #endregion
 
@@ -109,8 +129,8 @@ namespace PIW_SPAppWeb.Pages
 
             if (listItemCollection.Count > 0)
             {
-                dataTable.Columns.Add(col_Docket, typeof (string));
-                dataTable.Columns.Add(col_EditFormURL, typeof (string));
+                dataTable.Columns.Add(col_Docket, typeof(string));
+                dataTable.Columns.Add(col_EditFormURL, typeof(string));
                 dataTable.Columns.Add(col_DocumentURL, typeof(string));
                 dataTable.Columns.Add(col_CitationNumber, typeof(string));
                 dataTable.Columns.Add(col_Initiator, typeof(string));
@@ -118,7 +138,6 @@ namespace PIW_SPAppWeb.Pages
                 dataTable.Columns.Add(col_DocumentOwner, typeof(string));
                 dataTable.Columns.Add(col_Description, typeof(string));
                 dataTable.Columns.Add(col_PublishedDate, typeof(string));
-                dataTable.Columns.Add(col_CompletedDate, typeof(string));
                 dataTable.Columns.Add(col_FormType, typeof(string));
 
                 foreach (var listItem in listItemCollection)
@@ -173,7 +192,7 @@ namespace PIW_SPAppWeb.Pages
                         if (listItem[piwListInternalName[Constants.PIWList_colName_DocumentOwner]] != null)
                         {
                             var documentOwners = (FieldUserValue[])listItem[piwListInternalName[Constants.PIWList_colName_DocumentOwner]];
-                            
+
                             foreach (var documentOwner in documentOwners)
                             {
                                 if (string.IsNullOrEmpty(documentOwnersStr))
@@ -187,7 +206,7 @@ namespace PIW_SPAppWeb.Pages
                             }
                         }
                         dataRow[col_DocumentOwner] = documentOwnersStr;
-                            
+
 
                         dataRow[col_Description] = listItem[piwListInternalName[Constants.PIWList_colName_Description]] != null
                             ? listItem[piwListInternalName[Constants.PIWList_colName_Description]].ToString()
@@ -198,13 +217,9 @@ namespace PIW_SPAppWeb.Pages
                                 ? System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Parse(listItem[piwListInternalName[Constants.PIWList_colName_PublishedDate]].ToString())).ToString()
                                 : string.Empty;
 
-                        dataRow[col_CompletedDate] = listItem[piwListInternalName[Constants.PIWList_colName_PublishedDate]] != null
-                                ? System.TimeZone.CurrentTimeZone.ToLocalTime(DateTime.Parse(listItem[piwListInternalName[Constants.PIWList_colName_PublishedDate]].ToString())).ToString()
-                                : string.Empty;
-
                         //form type: OSEC Forms = Agenda Form, otherwise: Program Office Forms
                         string formType = listItem[piwListInternalName[Constants.PIWList_colName_FormType]] != null
-                                ? listItem[piwListInternalName[Constants.PIWList_colName_FormType]].ToString(): string.Empty;
+                                ? listItem[piwListInternalName[Constants.PIWList_colName_FormType]].ToString() : string.Empty;
                         if (formType.Equals(Constants.PIWList_FormType_AgendaForm))
                         {
                             dataRow[col_FormType] = "OSEC Forms";
@@ -213,8 +228,6 @@ namespace PIW_SPAppWeb.Pages
                         {
                             dataRow[col_FormType] = "Program Office Forms";
                         }
-
-
                     }
                 }
 
@@ -265,12 +278,6 @@ namespace PIW_SPAppWeb.Pages
                 boundField = new BoundField { HeaderText = col_PublishedDate, DataField = col_PublishedDate };
                 gridView.Columns.Add(boundField);
 
-                if (isCompletedPage)
-                {
-                    boundField = new BoundField { HeaderText = col_CompletedDate, DataField = col_CompletedDate };
-                    gridView.Columns.Add(boundField);
-                }
-
                 gridView.AutoGenerateColumns = false;
                 DataView view = dataTable.DefaultView;
                 gridView.DataSource = view;
@@ -292,15 +299,14 @@ namespace PIW_SPAppWeb.Pages
             List piwList = clientContext.Web.Lists.GetByTitle(Constants.PIWListName);
             var piwListInternalName = helper.getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
 
-            
+
             string fromPublishedDate = DateTime.Parse(tbFromDate.Text).ToString("yyyy-MM-ddTHH:mm:ssZ");
             string toPublishedDate = DateTime.Parse(tbToDate.Text).ToString("yyyy-MM-ddTHH:mm:ssZ");
 
             CamlQuery query = new CamlQuery();
-            if (isPendingPage)
-            {
-                
-                var args = new string[]
+
+
+            var args = new string[]
                 {
                     piwListInternalName[Constants.PIWList_colName_IsActive],
                     piwListInternalName[Constants.PIWList_colName_LegalResourcesAndReviewGroupCompleteDate],
@@ -311,7 +317,7 @@ namespace PIW_SPAppWeb.Pages
 
                 };
 
-                query.ViewXml = string.Format(@"<View>
+            query.ViewXml = string.Format(@"<View>
 	                                            <Query>
 		                                            <Where>			                                            
 				                                        <And>
@@ -343,16 +349,6 @@ namespace PIW_SPAppWeb.Pages
 	                                            </Query>
                                             </View>", args);
 
-                
-            }
-            else
-            {
-                if (isCompletedPage)
-                {
-                    throw new NotImplementedException();
-                }
-            }
-
             var piwListItems = piwList.GetItems(query);
             clientContext.Load(piwListItems);
             clientContext.ExecuteQuery();
@@ -360,30 +356,8 @@ namespace PIW_SPAppWeb.Pages
         }
         #endregion
 
-        protected void gridView_OnRowCreated(object sender, GridViewRowEventArgs e)
-        {
-            if (DataBinder.Eval(e.Row.DataItem, col_FormType) != null)
-            {
-                string formType = DataBinder.Eval(e.Row.DataItem, col_FormType).ToString();
-                if (!previousRowFormStatus.Equals(formType))
-                {
-                    GridView StandardFormgrdView = (GridView)sender;
-                    GridViewRow row = new GridViewRow(0, 0, DataControlRowType.DataRow, DataControlRowState.Insert);
-                    TableCell cell = new TableCell
-                    {
-                        Text = "Form Type: " + formType,
-                        ColumnSpan = 10,
-                        CssClass = "GroupHeaderStyle"
-                    };
-                    row.Cells.Add(cell);
-                    StandardFormgrdView.Controls[0].Controls.AddAt(e.Row.RowIndex + intSubTotalIndex, row);
-                    intSubTotalIndex++;
-                }
 
-                previousRowFormStatus = formType;
-            }
-        }
     }
 
-        
-    }
+
+}

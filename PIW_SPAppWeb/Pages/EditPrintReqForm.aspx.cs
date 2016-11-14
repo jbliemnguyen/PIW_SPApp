@@ -143,13 +143,13 @@ namespace PIW_SPAppWeb.Pages
             //Print Job Completed Date
             if (action == enumAction.PrintJobComplete)
             {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]] = DateTime.Now.ToShortDateString();
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPrintJobCompleteDate]] = DateTime.Now;
             }
 
             //Mail Job Completed Date
             if (action == enumAction.MailJobComplete)
             {
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]] = DateTime.Now.ToShortDateString();
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqMailJobCompleteDate]] = DateTime.Now;
             }
 
             //Print Req Comment
