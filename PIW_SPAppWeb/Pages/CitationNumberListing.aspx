@@ -62,49 +62,55 @@
                 <asp:Label runat="server" ID="lbLastUpdated" Font-Italic="True" Font-Bold="True"></asp:Label>
             </div>
         </div>
-        <div class="col-xs-6">
-            <div class="form-group">
-                <asp:Label ID="Label1" runat="server" Text="Document Category" AssociatedControlID="ddlCitationNumberCategory" CssClass="col-xs-5 control-label"></asp:Label>
-                <div class="col-xs-7">
-                    <asp:DropDownList ID="ddlCitationNumberCategory" CssClass="form-control" runat="server" ClientIDMode="Static">
-                        <asp:ListItem Value="">-- Please Select --</asp:ListItem>
-                        <asp:ListItem Value="61">Agenda / Notice (61)</asp:ListItem>
-                        <asp:ListItem Value="62">Delegated (62)</asp:ListItem>
-                        <asp:ListItem Value="63">OALJ (63)</asp:ListItem>
-                    </asp:DropDownList>
+        <fieldset class="fieldsetreport-border">
+            <legend class="legendreport-border">Report Filter</legend>
+            <div class="col-xs-6">
+                <div class="form-group">
+                    <asp:Label ID="Label1" runat="server" Text="Document Category" AssociatedControlID="ddlCitationNumberCategory" CssClass="col-xs-5 control-label"></asp:Label>
+                    <div class="col-xs-7">
+                        <asp:DropDownList ID="ddlCitationNumberCategory" CssClass="form-control" runat="server" ClientIDMode="Static">
+                            <asp:ListItem Value="">-- Please Select --</asp:ListItem>
+                            <asp:ListItem Value="61">Agenda / Notice (61)</asp:ListItem>
+                            <asp:ListItem Value="62">Delegated (62)</asp:ListItem>
+                            <asp:ListItem Value="63">OALJ (63)</asp:ListItem>
+                        </asp:DropDownList>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <asp:Label ID="Label2" runat="server" Text="Quarter" AssociatedControlID="ddlQuarter" CssClass="col-xs-5 control-label"></asp:Label>
+                    <div class="col-xs-7">
+                        <asp:DropDownList ID="ddlQuarter" CssClass="form-control" runat="server" ClientIDMode="Static">
+                        </asp:DropDownList>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <asp:Label ID="Label3" runat="server" Text="Action Date" AssociatedControlID="tbActionDate" CssClass="col-xs-5 control-label"></asp:Label>
+                    <div class="col-xs-3">
+                        <asp:TextBox ID="tbActionDate" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+                    </div>
+                    <div class="col-xs-3">
+                        <asp:CheckBox runat="server" ID="cbAllDate" Text="All Dates" CssClass="checkbox" ClientIDMode="Static" Checked="True" />
+                    </div>
                 </div>
             </div>
-            <div class="form-group">
-                <asp:Label ID="Label2" runat="server" Text="Quarter" AssociatedControlID="ddlQuarter" CssClass="col-xs-5 control-label"></asp:Label>
-                <div class="col-xs-7">
-                    <asp:DropDownList ID="ddlQuarter" CssClass="form-control" runat="server" ClientIDMode="Static">
-                    </asp:DropDownList>
+            <div class="col-xs-6">
+                <div class="form-group">
+                    <asp:Button runat="server" ID="btnRunReport" Text="Run Report" CssClass="btn-sm btn-primary active" OnClick="btnRunReport_OnClick" ClientIDMode="Static" />
                 </div>
             </div>
-            <div class="form-group">
-                <asp:Label ID="Label3" runat="server" Text="Action Date" AssociatedControlID="tbActionDate" CssClass="col-xs-5 control-label"></asp:Label>
-                <div class="col-xs-3">
-                    <asp:TextBox ID="tbActionDate" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
-                </div>
-                <div class="col-xs-3">
-                    <asp:CheckBox runat="server" ID="cbAllDate" Text="All Dates" CssClass="checkbox" ClientIDMode="Static" Checked="True" />
-                </div>
-            </div>
-        </div>
-        <div class="col-xs-6">
-            <div class="form-group">
-                <asp:Button runat="server" ID="btnRun" Text="Run Report" CssClass="btn-sm btn-primary active" OnClick="btnRun_OnClick" />
-            </div>
-        </div>
+        </fieldset>
         <div class="form-group">
             <%--<div id="gridDiv" class="col-xs-12" style="overflow-x: scroll; overflow-y: hidden">--%>
-            <asp:Label runat="server" ID="lbTest"></asp:Label>
             <div id="gridDiv" class="col-xs-12" style="overflow-x: hidden; overflow-y: hidden">
                 <asp:GridView runat="server" ID="gridView" AutoGenerateColumns="false" CssClass="table table-hover table-condensed piw-borderless"
                     OnRowDataBound="sPGridView_RowDataBound" ClientIDMode="Static">
                     <PagerStyle CssClass="pagination-piw" />
                 </asp:GridView>
             </div>
+        </div>
+        <div id="skm_LockBackground" class="LockOff"></div>
+        <div id="skm_LockPane" class="LockOff">
+            <div id="skm_LockPaneText">&nbsp;</div>
         </div>
     </form>
 </asp:Content>

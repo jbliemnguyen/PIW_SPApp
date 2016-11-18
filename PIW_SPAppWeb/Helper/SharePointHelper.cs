@@ -314,144 +314,161 @@ namespace PIW_SPAppWeb.Helper
 
         public bool GenerateAndSubmitPrintReqForm(ClientContext clientContext, ListItem listItem, string CurrentUserLogInID, bool isRegenerate, string supplementalMailingListFileName)
         {
-            var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
-
-            
-            if (!isRegenerate)
+            string docketNumber = string.Empty;
+            string editFormURL = string.Empty;
+            try
             {
-                //normal run from schedule, not ReGenerate
-                //check if print req already generated, by check if PrintReqDateRequest is populated
-                //if generated, do nothing, return false
-                if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequested]] != null)
+                var piwListInternalColumnNames = getInternalColumnNamesFromCache(clientContext, Constants.PIWListName);
+
+
+                if (!isRegenerate)
+                {
+                    //normal run from schedule, not ReGenerate
+                    //check if print req already generated, by check if PrintReqDateRequest is populated
+                    //if generated, do nothing, return false
+                    if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequested]] != null)
+                    {
+                        return false;
+                    }
+                }
+
+
+                string listItemID = listItem["ID"].ToString();
+
+                docketNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]] != null ?
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]].ToString() : string.Empty;
+
+                string FormStatus = listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] != null
+                    ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]].ToString() : string.Empty;
+
+                int numberOfPublicPages = listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]] != null
+                        ? int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]].ToString()) : 0;
+
+                string documentCategory = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]] != null
+                    ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]].ToString() : string.Empty;
+
+                string formType = listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormType]] != null
+                    ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormType]].ToString() : string.Empty;
+
+                editFormURL = listItem[piwListInternalColumnNames[Constants.PIWList_colName_EditFormURL]] != null
+                        ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_EditFormURL]].ToString() : string.Empty;
+
+
+                FOLAMailingList folaMailingList = new FOLAMailingList();
+                int numberOfFOLAAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemID);
+
+                //number of supplemental mailing list address
+                //if regenereate, recalcualte the number of supplemental mailing address, admin may update the file and regenerate print req
+                //if not regenereate, the number already calculated when published, just get it from the list
+
+                int numberOfSupplementalMailingListAddress = 0;
+                if (isRegenerate)
+                {
+                    if (!string.IsNullOrEmpty(supplementalMailingListFileName))
+                    {
+                        EPSPublicationHelper epsPublicationHelper = new EPSPublicationHelper();
+                        numberOfSupplementalMailingListAddress = epsPublicationHelper.getNumberOfRowsFromSupplementalMailingListExcelFile(clientContext,
+                            listItemID, supplementalMailingListFileName);
+                    }
+                }
+                else
+                {
+                    if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
+                    {
+                        numberOfSupplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
+                        //save the new number just recalculated
+                        SaveNumberOfSupplementalMailingListAddress(clientContext, listItem, piwListInternalColumnNames, numberOfSupplementalMailingListAddress);
+                    }
+                }
+
+
+
+
+
+                int numberofCopies;
+                //if sunshine notice --> print 100 copies
+                if (documentCategory.Equals(Constants.PIWList_DocCat_SunshineNotice,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    numberofCopies = 100;
+                }
+                else
+                {
+                    numberofCopies = numberOfFOLAAddress + numberOfSupplementalMailingListAddress;
+                }
+
+                //check if a print req is required to submit
+                if (numberofCopies > 0)
+                {
+
+                    int printPriority = getPrintPriority(documentCategory, formType);
+
+                    DateTime dateRequested = DateTime.Now;
+                    //update piw list
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] =
+                        numberOfFOLAAddress;
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = numberofCopies;
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqStatus]] =
+                        Constants.PIWList_FormStatus_Submitted;
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequested]] = dateRequested;
+
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPrintPriority]] = printPriority;
+
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequired]] =
+                        getDateRequired(printPriority, dateRequested, numberofCopies * numberOfPublicPages);
+
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqFormURL]] = getPrintReqEditFormURL(listItem, piwListInternalColumnNames);
+
+                    listItem.Update();
+                    clientContext.ExecuteQuery();
+
+
+                    //history list for print req generate
+                    //get current user
+                    User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
+                    clientContext.Load(currentUser);
+                    clientContext.ExecuteQuery();
+
+                    //Add history list for genereate print req form in both form: main form and print req form
+                    string message = "Print Requisition Form Generated.";
+                    CreatePIWListHistory(clientContext, listItemID, message,
+                        FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+
+                    CreatePIWListHistory(clientContext, listItemID, message,
+                        Constants.PIWList_FormStatus_PrintReqGenerated, Constants.PIWListHistory_FormTypeOption_PrintReq,
+                        currentUser);
+
+                    //history list for submit print req in both forms
+                    message = "Print Requisition Form Submitted.";
+                    CreatePIWListHistory(clientContext, listItemID, message,
+                        FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
+
+                    CreatePIWListHistory(clientContext, listItemID, message,
+                        Constants.PIWList_FormStatus_Submitted, Constants.PIWListHistory_FormTypeOption_PrintReq,
+                        currentUser);
+
+                    //send submit email
+                    Email email = new Email();
+                    email.SendEmailForPrintRequisitionForm(clientContext, listItem, piwListInternalColumnNames,
+                        enumAction.Submit, clientContext.Web.CurrentUser, string.Empty);
+
+                    return true;
+                }
+                else
                 {
                     return false;
-                }    
-            }
-            
-
-            string listItemID = listItem["ID"].ToString();
-
-            string docketNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]] != null ?
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocketNumber]].ToString() : string.Empty;
-
-            string FormStatus = listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]] != null
-                ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormStatus]].ToString() : string.Empty;
-
-            int numberOfPublicPages = listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]] != null
-                    ? int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfPublicPages]].ToString()) : 0;
-
-            string documentCategory = listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]] != null
-                ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_DocumentCategory]].ToString() : string.Empty;
-
-            string formType = listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormType]] != null
-                ? listItem[piwListInternalColumnNames[Constants.PIWList_colName_FormType]].ToString() : string.Empty;
-
-            FOLAMailingList folaMailingList = new FOLAMailingList();
-            int numberOfFOLAAddress = folaMailingList.GenerateFOLAMailingExcelFile(clientContext, docketNumber, listItemID);
-
-
-            //number of supplemental mailing list address
-            //if regenereate, recalcualte the number of supplemental mailing address, admin may update the file and regenerate print req
-            //if not regenereate, the number already calculated when published, just get it from the list
-
-            int numberOfSupplementalMailingListAddress = 0;
-            if (isRegenerate)
-            {
-                if (!string.IsNullOrEmpty(supplementalMailingListFileName))
-                {
-                    EPSPublicationHelper epsPublicationHelper = new EPSPublicationHelper();
-                    numberOfSupplementalMailingListAddress = epsPublicationHelper.getNumberOfRowsFromSupplementalMailingListExcelFile(clientContext,
-                        listItemID, supplementalMailingListFileName);
-                }    
-            }
-            else
-            {
-                if (listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]] != null)
-                {
-                    numberOfSupplementalMailingListAddress = int.Parse(listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfSupplementalMailingListAddress]].ToString());
-                    //save the new number just recalculated
-                    SaveNumberOfSupplementalMailingListAddress(clientContext,listItem,piwListInternalColumnNames,numberOfSupplementalMailingListAddress);
                 }
             }
-            
-
-
-
-
-            int numberofCopies;
-            //if sunshine notice --> print 100 copies
-            if (documentCategory.Equals(Constants.PIWList_DocCat_SunshineNotice,
-                StringComparison.OrdinalIgnoreCase))
+            catch (Exception exception)
             {
-                numberofCopies = 100;
-            }
-            else
-            {
-                numberofCopies = numberOfFOLAAddress + numberOfSupplementalMailingListAddress;
-            }
-
-            //check if a print req is required to submit
-            if (numberofCopies > 0)
-            {
-
-                int printPriority = getPrintPriority(documentCategory,formType);
-
-                DateTime dateRequested = DateTime.Now;
-                //update piw list
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_NumberOfFOLAMailingListAddress]] =
-                    numberOfFOLAAddress;
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqNumberofCopies]] = numberofCopies;
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqStatus]] =
-                    Constants.PIWList_FormStatus_Submitted;
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequested]] =
-                    dateRequested.ToString();
-
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqPrintPriority]] = printPriority;
-
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqDateRequired]] =
-                    getDateRequired(printPriority, dateRequested, numberofCopies * numberOfPublicPages);
-
-                listItem[piwListInternalColumnNames[Constants.PIWList_colName_PrintReqFormURL]] = getPrintReqEditFormURL(listItem, piwListInternalColumnNames);
-
-                listItem.Update();
-                clientContext.ExecuteQuery();
-
-
-                //history list for print req generate
-                //get current user
-                User currentUser = clientContext.Web.EnsureUser(CurrentUserLogInID);
-                clientContext.Load(currentUser);
-                clientContext.ExecuteQuery();
-
-                //Add history list for genereate print req form in both form: main form and print req form
-                string message = "Print Requisition Form Generated.";
-                CreatePIWListHistory(clientContext, listItemID, message,
-                    FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
-
-                CreatePIWListHistory(clientContext, listItemID, message,
-                    Constants.PIWList_FormStatus_PrintReqGenerated, Constants.PIWListHistory_FormTypeOption_PrintReq,
-                    currentUser);
-
-                //history list for submit print req in both forms
-                message = "Print Requisition Form Submitted.";
-                CreatePIWListHistory(clientContext, listItemID, message,
-                    FormStatus, Constants.PIWListHistory_FormTypeOption_EditForm, currentUser);
-
-                CreatePIWListHistory(clientContext, listItemID, message,
-                    Constants.PIWList_FormStatus_Submitted, Constants.PIWListHistory_FormTypeOption_PrintReq,
-                    currentUser);
-
-                //send submit email
+                //there is exception when generate fola mailing list, send email to copy center + piw admin + docket and registry
                 Email email = new Email();
-                email.SendEmailForPrintRequisitionForm(clientContext, listItem, piwListInternalColumnNames,
-                    enumAction.Submit, clientContext.Web.CurrentUser, string.Empty);
+                email.SendFOLAErrorEmail(clientContext, docketNumber, editFormURL, exception.InnerException.Message);
+                throw;
+            }
 
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+
+
         }
 
         private DateTime getDateRequired(int PrintPriority, DateTime dateRequested, int totalPrintPages)
@@ -489,7 +506,7 @@ namespace PIW_SPAppWeb.Helper
             return dateRequired;
         }
 
-        private int getPrintPriority(string documentCategory,string formType)
+        private int getPrintPriority(string documentCategory, string formType)
         {
             int PrintPriority = 1;//default value, except below 
 
@@ -2226,7 +2243,7 @@ namespace PIW_SPAppWeb.Helper
                 //break inheritance, clear all role from parent, ready to set new permission based on status
                 document.ListItemAllFields.ResetRoleInheritance();
                 document.ListItemAllFields.BreakRoleInheritance(false, true);//clear all role from parent
-                
+
 
 
                 //OSEC role, piwadmin will have the same permission with osec

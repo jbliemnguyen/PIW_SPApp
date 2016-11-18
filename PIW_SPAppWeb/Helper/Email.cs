@@ -18,7 +18,24 @@ namespace PIW_SPAppWeb.Helper
     public class Email
     {
         SharePointHelper helper = new SharePointHelper();
-        
+
+        public void SendFOLAErrorEmail(ClientContext clientContext, string docket, string editFormURL,string errorMessage)
+        {
+            string subject = "PIW – Error while generate FOLA mailing list";
+            string message = String.Format(@"Error while generate FOLA mailing list, Workflow Item <a href='{0}'>{1}</a> ",
+                editFormURL, docket);
+            
+            string htmlContent = string.Format(@"{0}<br/><br/>
+                                                            - Error Message: {1}.", message,errorMessage);
+            String To = string.Empty;
+
+            //email to copy center, docket and registry and piwadmin
+            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_DocketAndRegistry));
+            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_CopyCenter));
+            To = AddEmailAddress(To, getEmailListFromGrp(clientContext, Constants.Grp_PIWAdmin));
+            SendEmail(clientContext, To, subject, htmlContent);
+        }
+
         public void SendEmailForPrintRequisitionForm(ClientContext clientContext, ListItem listItem, Dictionary<string, string> piwListInteralColumnNames, enumAction action, User currentUser,
             string comment)
         {
@@ -167,8 +184,7 @@ namespace PIW_SPAppWeb.Helper
             }
             else if (formType.Equals(Constants.PIWList_FormType_DirectPublicationForm))
             {
-                SendEmailForDirectPublicationForm(clientContext, listItem, action, CurrentFormStatus, previousFormStatus,
-                    currentUser, formURL, comment, docket,initiatorEmails, documentOwnerEmails, notificationRecipientEmails);
+                SendEmailForDirectPublicationForm(clientContext, listItem, action, CurrentFormStatus,formURL, comment, docket,initiatorEmails, documentOwnerEmails, notificationRecipientEmails);
             }
 
         }
@@ -556,7 +572,7 @@ namespace PIW_SPAppWeb.Helper
         }
 
         private void SendEmailForDirectPublicationForm(ClientContext clientContext, ListItem listItem, enumAction action, string CurrentFormStatus,
-            string previousFormStatus, User currentUser, string formURL, string comment, string docket,
+            string formURL, string comment, string docket,
             IEnumerable<string> initiatorEmails, IEnumerable<string> documentOwnerEmails, IEnumerable<string> notificationRecipientEmails)
         {
             switch (CurrentFormStatus)

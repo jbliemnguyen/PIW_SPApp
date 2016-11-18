@@ -49,7 +49,7 @@ namespace PIW_SPAppWeb.Pages
                 //otherwise, it will run very long to query everything
                 if ((myItems) || (hasDocket))
                 {
-                    btnSearch_OnClick(null, null);
+                    btnRunReport_OnClick(null, null);
                 }
 
 
@@ -72,10 +72,10 @@ namespace PIW_SPAppWeb.Pages
         protected void gridView_OnPageIndexChanging(object sender, GridViewPageEventArgs e)
         {
             gridView.PageIndex = e.NewPageIndex;
-            btnSearch_OnClick(null, null);
+            btnRunReport_OnClick(null, null);
         }
 
-        protected void btnSearch_OnClick(object sender, EventArgs e)
+        protected void btnRunReport_OnClick(object sender, EventArgs e)
         {
             try
             {

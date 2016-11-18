@@ -194,7 +194,7 @@
     <Content Include="Pages\ItemsByPublishedDateByOwnerOffice.aspx" />
     <Content Include="Pages\LegalResourceReviewCompletedItems.aspx" />
     <Content Include="Pages\LegalResourceReviewPendingItems.aspx" />
-    <Content Include="Pages\MailingRequired.aspx" />
+    <Content Include="Pages\MailingReport.aspx" />
     <Content Include="Pages\MyItems.aspx" />
     <Content Include="Pages\PrintReqForms.aspx" />
     <Content Include="Pages\PrintRequisitionReport.aspx" />
@@ -436,12 +436,12 @@
     <Compile Include="Pages\LegalResourceReviewPendingItems.aspx.designer.cs">
       <DependentUpon>LegalResourceReviewPendingItems.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Pages\MailingRequired.aspx.cs">
-      <DependentUpon>MailingRequired.aspx</DependentUpon>
+    <Compile Include="Pages\MailingReport.aspx.cs">
+      <DependentUpon>MailingReport.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Pages\MailingRequired.aspx.designer.cs">
-      <DependentUpon>MailingRequired.aspx</DependentUpon>
+    <Compile Include="Pages\MailingReport.aspx.designer.cs">
+      <DependentUpon>MailingReport.aspx</DependentUpon>
     </Compile>
     <Compile Include="Pages\Main.Master.cs">
       <DependentUpon>Main.Master</DependentUpon>

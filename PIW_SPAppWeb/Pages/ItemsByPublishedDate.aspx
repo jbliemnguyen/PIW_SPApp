@@ -45,79 +45,79 @@
             </div>
         </div>
 
-
-        <div class="col-xs-4">
-            <div class="form-group">
-                <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-xs-6 control-label"></asp:Label>
-                <div class="col-xs-6">
-                    <asp:DropDownList ID="ddProgramOfficeWorkflowInitiator" CssClass="form-control" runat="server" ClientIDMode="Static">
-                        <asp:ListItem Selected="True">-- All Offices --</asp:ListItem>
-                        <asp:ListItem>OAL</asp:ListItem>
-                        <asp:ListItem>OALJ</asp:ListItem>
-                        <asp:ListItem>OE</asp:ListItem>
-                        <asp:ListItem>OEA</asp:ListItem>
-                        <asp:ListItem>OED</asp:ListItem>
-                        <asp:ListItem>OEMR</asp:ListItem>
-                        <asp:ListItem>OEP</asp:ListItem>
-                        <asp:ListItem>OEPI</asp:ListItem>
-                        <asp:ListItem>OER</asp:ListItem>
-                        <asp:ListItem>OGC</asp:ListItem>
-                        <asp:ListItem>OSEC</asp:ListItem>
-                    </asp:DropDownList>
+        <fieldset class="fieldsetreport-border">
+            <legend class="legendreport-border">Report Filter</legend>
+            <div class="col-xs-4">
+                <div class="form-group">
+                    <asp:Label ID="lbProgramOfficeWorkflowInitiator" runat="server" Text="Program Office (Workflow Initiator)" AssociatedControlID="ddProgramOfficeWorkflowInitiator" CssClass="col-xs-6 control-label"></asp:Label>
+                    <div class="col-xs-6">
+                        <asp:DropDownList ID="ddProgramOfficeWorkflowInitiator" CssClass="form-control" runat="server" ClientIDMode="Static">
+                            <asp:ListItem Selected="True">-- All Offices --</asp:ListItem>
+                            <asp:ListItem>OAL</asp:ListItem>
+                            <asp:ListItem>OALJ</asp:ListItem>
+                            <asp:ListItem>OE</asp:ListItem>
+                            <asp:ListItem>OEA</asp:ListItem>
+                            <asp:ListItem>OED</asp:ListItem>
+                            <asp:ListItem>OEMR</asp:ListItem>
+                            <asp:ListItem>OEP</asp:ListItem>
+                            <asp:ListItem>OEPI</asp:ListItem>
+                            <asp:ListItem>OER</asp:ListItem>
+                            <asp:ListItem>OGC</asp:ListItem>
+                            <asp:ListItem>OSEC</asp:ListItem>
+                        </asp:DropDownList>
+                    </div>
                 </div>
+
+                <div class="form-group">
+                    <asp:Label ID="Label1" runat="server" Text="From Publication Date" AssociatedControlID="tbFromDate" CssClass="col-xs-6 control-label" ClientIDMode="Static"></asp:Label>
+                    <div class="col-xs-6">
+                        <asp:TextBox ID="tbFromDate" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <asp:Label ID="Label2" runat="server" Text="To Publication Date" AssociatedControlID="tbToDate" CssClass="col-xs-6 control-label" ClientIDMode="Static"></asp:Label>
+                    <div class="col-xs-6">
+                        <asp:TextBox ID="tbToDate" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+                    </div>
+                </div>
+
             </div>
 
-            <div class="form-group">
-                <asp:Label ID="Label1" runat="server" Text="From Publication Date" AssociatedControlID="tbFromDate" CssClass="col-xs-6 control-label" ClientIDMode="Static"></asp:Label>
-                <div class="col-xs-6">
-                    <asp:TextBox ID="tbFromDate" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+
+            <div class="col-xs-3">
+                <%--Form Type filter--%>
+                <div class="form-group">
+                    <asp:Label ID="Label4" runat="server" Text="Form Type" CssClass="col-xs-5 control-label"></asp:Label>
+                    <div class="radio radiobuttonlist col-sm-7">
+                        <asp:RadioButtonList ID="formTypeRadioButtonList" runat="server" RepeatDirection="Vertical" AutoPostBack="True" OnSelectedIndexChanged="formTypeRadioButtonList_SelectedIndexChanged">
+                            <asp:ListItem Selected="True">All Forms</asp:ListItem>
+                            <asp:ListItem>Standard Form</asp:ListItem>
+                            <asp:ListItem>Agenda Form</asp:ListItem>
+                            <asp:ListItem>Direct Publication Form</asp:ListItem>
+                        </asp:RadioButtonList>
+                    </div>
                 </div>
+
+                <div class="form-group">
+                    <div class="col-xs-3"></div>
+                    <div class="col-xs-9">
+                        <asp:Button runat="server" ID="btnRunReport" Text="Run Report" CssClass="btn-sm btn-primary active" OnClick="btnRunReport_OnClick" ClientIDMode="Static" />
+                    </div>
+                </div>
+
             </div>
 
-            <div class="form-group">
-                <asp:Label ID="Label2" runat="server" Text="To Publication Date" AssociatedControlID="tbToDate" CssClass="col-xs-6 control-label" ClientIDMode="Static"></asp:Label>
-                <div class="col-xs-6">
-                    <asp:TextBox ID="tbToDate" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+            <div class="col-xs-5">
+                <div id="divDocumentCategory">
+                    <asp:Label ID="Label3" runat="server" Text="Document Category" CssClass="col-xs-3 control-label"></asp:Label>
+                    <div class="checkbox checkboxlist col-sm-9">
+                        <asp:CheckBoxList ID="cblDocumentCategory" runat="server" RepeatDirection="Horizontal" RepeatColumns="2">
+                        </asp:CheckBoxList>
+                    </div>
                 </div>
             </div>
-
-        </div>
-
-
-        <div class="col-xs-3">
-            <%--Form Type filter--%>
-            <div class="form-group">
-                <asp:Label ID="Label4" runat="server" Text="Form Type" CssClass="col-xs-5 control-label"></asp:Label>
-                <div class="radio radiobuttonlist col-sm-7">
-                    <asp:RadioButtonList ID="formTypeRadioButtonList" runat="server" RepeatDirection="Vertical" AutoPostBack="True" OnSelectedIndexChanged="formTypeRadioButtonList_SelectedIndexChanged">
-                        <asp:ListItem Selected="True">All Forms</asp:ListItem>
-                        <asp:ListItem>Standard Form</asp:ListItem>
-                        <asp:ListItem>Agenda Form</asp:ListItem>
-                        <asp:ListItem>Direct Publication Form</asp:ListItem>
-                    </asp:RadioButtonList>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="col-xs-3"></div>
-                <div class="col-xs-9">
-                    <asp:Button runat="server" ID="btnRun" Text="Run Report" CssClass="btn-sm btn-primary active" OnClick="btnRun_OnClick" />
-                </div>
-            </div>
-
-        </div>
-
-        <div class="col-xs-5">
-            <div id="divDocumentCategory">
-                <asp:Label ID="Label3" runat="server" Text="Document Category" CssClass="col-xs-3 control-label"></asp:Label>
-                <div class="checkbox checkboxlist col-sm-9">
-                    <asp:CheckBoxList ID="cblDocumentCategory" runat="server" RepeatDirection="Horizontal" RepeatColumns="2">
-                    </asp:CheckBoxList>
-                </div>
-            </div>
-
-        </div>
-
+        </fieldset>
 
         <div class="form-group">
             <%--<div id="gridDiv" class="col-xs-12" style="overflow-x: scroll; overflow-y: hidden">--%>
@@ -145,6 +145,10 @@
             <asp:Label ID="lbTotalValue" runat="server" CssClass="col-xs-6 control-label"></asp:Label>
 
 
+        </div>
+        <div id="skm_LockBackground" class="LockOff"></div>
+        <div id="skm_LockPane" class="LockOff">
+            <div id="skm_LockPaneText">&nbsp;</div>
         </div>
 
     </form>

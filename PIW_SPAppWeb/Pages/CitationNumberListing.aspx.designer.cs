@@ -94,22 +94,13 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.CheckBox cbAllDate;
         
         /// <summary>
-        /// btnRun control.
+        /// btnRunReport control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnRun;
-        
-        /// <summary>
-        /// lbTest control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lbTest;
+        protected global::System.Web.UI.WebControls.Button btnRunReport;
         
         /// <summary>
         /// gridView control.

@@ -2405,7 +2405,7 @@ namespace PIW_SPAppWeb.Pages
                     btnLegalReviewCompleted.Visible = isCurrentUserLegalResouceTeam && string.IsNullOrEmpty(legalReviewCompletedDate);
                     btnLegalReviewCompletedWithComment.Visible = isCurrentUserLegalResouceTeam && string.IsNullOrEmpty(legalReviewCompletedDate);
                     btnGenerateMailingList.Visible = helper.IsUserMemberOfGroup(clientContext, CurrentUserLogInID,
-                        new string[] { Constants.Grp_PIWAdmin, Constants.Grp_PIWSystemAdmin });
+                        new string[] { Constants.Grp_PIWAdmin, Constants.Grp_PIWSystemAdmin,Constants.Grp_DocketAndRegistry });
                     
                     break;
                 case Constants.PIWList_FormStatus_ReOpen:

@@ -63,7 +63,7 @@ namespace PIW_SPAppWeb.Pages
 
         }
 
-        protected void btnRun_OnClick(object sender, EventArgs e)
+        protected void btnRunReport_OnClick(object sender, EventArgs e)
         {
             try
             {
@@ -276,13 +276,6 @@ namespace PIW_SPAppWeb.Pages
 
             clientContext.Load(citationListItems);
             clientContext.ExecuteQuery();
-
-            lbTest.Text = "Number of items: " + citationListItems.Count;
-            foreach (ListItem oListItem in citationListItems)
-            {
-                //    var quarter = oListItem["PIWTitle"].ToString();
-            }
-
             return citationListItems;
 
         }

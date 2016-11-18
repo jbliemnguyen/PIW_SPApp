@@ -30,25 +30,27 @@
                 <asp:Label runat="server" ID="lbLastUpdated" Font-Italic="True" Font-Bold="True"></asp:Label>
             </div>
         </div>
-        <div class="col-xs-4">
-            <div class="form-group">
-                <asp:Label ID="Label1" runat="server" Text="From Publication Date" AssociatedControlID="tbFromDate" CssClass="col-xs-6 control-label" ClientIDMode="Static"></asp:Label>
-                <div class="col-xs-6">
-                    <asp:TextBox ID="tbFromDate" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+        <fieldset class="fieldsetreport-border">
+            <legend class="legendreport-border">Report Filter</legend>
+            <div class="col-xs-4">
+                <div class="form-group">
+                    <asp:Label ID="Label1" runat="server" Text="From Publication Date" AssociatedControlID="tbFromDate" CssClass="col-xs-6 control-label" ClientIDMode="Static"></asp:Label>
+                    <div class="col-xs-6">
+                        <asp:TextBox ID="tbFromDate" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+                    </div>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <asp:Label ID="Label2" runat="server" Text="To Publication Date" AssociatedControlID="tbToDate" CssClass="col-xs-6 control-label" ClientIDMode="Static"></asp:Label>
-                <div class="col-xs-6">
-                    <asp:TextBox ID="tbToDate" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+                <div class="form-group">
+                    <asp:Label ID="Label2" runat="server" Text="To Publication Date" AssociatedControlID="tbToDate" CssClass="col-xs-6 control-label" ClientIDMode="Static"></asp:Label>
+                    <div class="col-xs-6">
+                        <asp:TextBox ID="tbToDate" CssClass="form-control" runat="server" ClientIDMode="Static"></asp:TextBox>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-xs-4">
-            <asp:Button runat="server" ID="btnRun" Text="Run Report" CssClass="btn-sm btn-primary active" OnClick="btnRun_OnClick" />
-        </div>
-        
+            <div class="col-xs-4">
+                <asp:Button runat="server" ID="btnRunReport" Text="Run Report" CssClass="btn-sm btn-primary active" OnClick="btnRunReport_OnClick" ClientIDMode="Static"/>
+            </div>
+        </fieldset>
         <div class="form-group">
             <%--<div id="gridDiv" class="col-xs-12" style="overflow-x: scroll; overflow-y: hidden">--%>
             <div id="gridDiv" class="col-xs-12" style="overflow-x: hidden; overflow-y: hidden">
@@ -58,6 +60,9 @@
                 </asp:GridView>
             </div>
         </div>
-
+        <div id="skm_LockBackground" class="LockOff"></div>
+        <div id="skm_LockPane" class="LockOff">
+            <div id="skm_LockPaneText">&nbsp;</div>
+        </div>
     </form>
 </asp:Content>

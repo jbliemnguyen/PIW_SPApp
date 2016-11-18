@@ -48,7 +48,7 @@ namespace PIW_SPAppWeb.Pages
                     }
 
                     //Run the report in the first time
-                    btnRun_OnClick(null, null);
+                    btnRunReport_OnClick(null, null);
 
                 }
                 //displayData();
@@ -67,7 +67,7 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        protected void btnRun_OnClick(object sender, EventArgs e)
+        protected void btnRunReport_OnClick(object sender, EventArgs e)
         {
             try
             {
@@ -95,8 +95,10 @@ namespace PIW_SPAppWeb.Pages
 
         protected void gridView_OnPageIndexChanging(object sender, GridViewPageEventArgs e)
         {
+            //Page.ClientScript.RegisterStartupScript(GetType(), "lockScreen", 
+            //    String.Format("<script>alert('helllo workd');</script>"));
             gridView.PageIndex = e.NewPageIndex;
-            btnRun_OnClick(null, null);
+            btnRunReport_OnClick(null, null);
         }
 
         protected void formTypeRadioButtonList_SelectedIndexChanged(object sender, EventArgs e)

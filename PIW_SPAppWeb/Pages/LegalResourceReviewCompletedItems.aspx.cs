@@ -45,7 +45,7 @@ namespace PIW_SPAppWeb.Pages
 
 
                     //Run the report in the first time
-                    btnRun_OnClick(null, null);
+                    btnRunReport_OnClick(null, null);
 
                 }
                 //displayData();
@@ -66,7 +66,7 @@ namespace PIW_SPAppWeb.Pages
             }
         }
 
-        protected void btnRun_OnClick(object sender, EventArgs e)
+        protected void btnRunReport_OnClick(object sender, EventArgs e)
         {
             try
             {

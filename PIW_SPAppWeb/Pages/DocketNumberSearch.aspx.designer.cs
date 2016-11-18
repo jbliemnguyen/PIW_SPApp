@@ -76,13 +76,13 @@ namespace PIW_SPAppWeb.Pages {
         protected global::System.Web.UI.WebControls.DropDownList ddProgramOfficeWorkflowInitiator;
         
         /// <summary>
-        /// btnSearch control.
+        /// btnRunReport control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSearch;
+        protected global::System.Web.UI.WebControls.Button btnRunReport;
         
         /// <summary>
         /// Label4 control.

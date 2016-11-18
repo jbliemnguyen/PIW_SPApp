@@ -38,7 +38,7 @@
                 </ul>
                 <form class="navbar-form navbar-right">
                     <div class="form-group">
-                        <input id="mptbDocketNumber" type="text" placeholder="Search Docket Number" class="form-control" />
+                        <input id="mptbDocketNumber" type="text" placeholder="Search Docket Number" class="form-control" onkeydown="return (event.keyCode!=13);"/>
                     </div>
                     <%--<button type="submit" class="btn btn-success" style="background-color: #337ab7">Search</button>--%>
                     <a id="mpbtnDocketNumberSearch" href="DocketNumberSearch.aspx" class="btn btn-success" style="background-color: #337ab7">Search</a>
@@ -66,7 +66,7 @@
                     <a href="LegalResourceReviewCompletedItems.aspx" class="list-group-item" id="LegalResourceReviewCompletedItemsURL">Legal Resources and Review Group Completed</a>
                     <a href="ItemsByPublishedDateByOwnerOffice.aspx" class="list-group-item" id="ItemsByPublishedDateByOwnerOfficeURL">Published Items By Owner Office</a>
                     <a href="PrintRequisitionReport.aspx" class="list-group-item" id="PrintRequisitionReportURL">Print Requisition Report</a>
-                    <a href="MailingRequired.aspx" class="list-group-item" id="OEPMailingRequiredURL">OEP Mailing Required</a>
+                    <a href="MailingReport.aspx" class="list-group-item" id="OEPMailingReportURL">OEP Mailing Report</a>
                     
                     <a href="Admin.aspx" class="list-group-item" id="AdminURL">Admin</a>
                 </div>
@@ -148,10 +148,29 @@
                 SharedEditPageClientCode();
             }
 
+            //register lock screen events for report
+            RegisterLockScreenEventsForReport();
+            
             //register event for docket search nav bar
             $("#mpbtnDocketNumberSearch").click(function (event) {
                 $(this).attr("href", $(this).prop("href") + "&Docket=" + $("#mptbDocketNumber").val());
             });
+
+            //event when user enter docket and hit Enter key from the docket number search nav bar textbox in the right
+            //DOes not work
+            //$("#mptbDocketNumber").keypress(function (event) {
+            //    if (event.keyCode == 13) {
+            //        event.preventDefault();
+            //        $("#mpbtnDocketNumberSearch").click(); //call the click event on the button
+            //        //$("#mpbtnDocketNumberSearch").trigger("click");
+            //    }
+            //});
+
+
+
+
+
+
 
             //Call to method in each page to do further client side programming
             //NOTE: each page must have this method in Main Content Place Holder
@@ -545,10 +564,21 @@
                 skm_LockScreen("Mail Job Completed ... ");
             });
 
-
+            
             //Note: accept ciation number and remove citation number can not used here 
             //becuase they are part of AJAX Panel. we handle them in ajax event
 
+        }
+
+        function RegisterLockScreenEventsForReport() {
+
+            $("#btnRunReport").click(function (event) {
+                skm_LockScreen("Please wait ... ");
+            });
+
+            $(".pagination-piw a").click(function (event) {
+                skm_LockScreen("Please wait ... ");
+            });
         }
 
         //used when delete button clicked or upload
