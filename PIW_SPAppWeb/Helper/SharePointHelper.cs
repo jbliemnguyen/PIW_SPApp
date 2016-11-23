@@ -189,8 +189,23 @@ namespace PIW_SPAppWeb.Helper
                 SetCommentHTML(listItem, piwListInternalColumnNames, CurrentUserLogInName, comment, string.Empty);
             }
 
-            //previous accession number
-            listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousAccessionNumber]] = listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]];
+            //previous accession number - save if there is one
+            var accessionNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] != null ?
+                listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]].ToString() : string.Empty;
+            if (!string.IsNullOrEmpty(accessionNumber))
+            {
+                var previousAccessionNumber = listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousAccessionNumber]] != null ?
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousAccessionNumber]].ToString() : string.Empty;
+                if (string.IsNullOrEmpty(previousAccessionNumber))
+                {
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousAccessionNumber]] = accessionNumber;
+                }
+                else//concatenate accession number into existing previous accession number
+                {
+                    listItem[piwListInternalColumnNames[Constants.PIWList_colName_PreviousAccessionNumber]] = previousAccessionNumber + ", " + accessionNumber;
+                }
+            }
+            
 
             //clear accession number
             listItem[piwListInternalColumnNames[Constants.PIWList_colName_AccessionNumber]] = string.Empty;

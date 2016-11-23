@@ -362,7 +362,7 @@ namespace PIW_SPAppWeb.Pages
             gridView.Columns.Add(boundField);
 
 
-            boundField = new BoundField { HeaderText = "PublishedError", DataField = "PublishedError" };
+            boundField = new BoundField { HeaderText = "Published Error", DataField = "PublishedError" };
             gridView.Columns.Add(boundField);
 
 
